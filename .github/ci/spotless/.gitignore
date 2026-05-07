@@ -1,0 +1,11 @@
+/.idea
+.DS_Store
+dbname*
+Thumbs.db
+
+# Gradle
+/.gradle
+/gradle
+gradlew
+gradlew.bat
+build

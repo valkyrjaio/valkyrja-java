@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [ 'master', '*.x' ]
+  pull_request:
+    branches: [ 'master', '*.x' ]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  commit-message-check:
+    name: Commit Message Check
+    if: github.event_name == 'pull_request'
+    uses: valkyrjaio/.github/.github/workflows/_commit-message-check.yml@b1c6653267b6e79699045287066aa936788e8973
+    secrets: inherit
+
+  trailing-newline-check:
+    name: Trailing Newline Check
+    if: github.event_name == 'pull_request'
+    uses: valkyrjaio/.github/.github/workflows/_trailing-newline-check.yml@b1c6653267b6e79699045287066aa936788e8973
+    permissions:
+      pull-requests: write
+      contents: read
+    secrets: inherit
+
+  spotless:
+    name: Spotless
+    uses: valkyrjaio/.github/.github/workflows/_spotless-java.yml@b1c6653267b6e79699045287066aa936788e8973
+    with:
+      ci-directory: .github/ci/spotless
+      paths: |
+        ci:
+          - '.github/ci/spotless/**'
+          - '.github/workflows/ci.yml'
+        files:
+          - '.github/ci/spotless/**'
+          - '.github/workflows/ci.yml'
+          - 'src/**/*.java'
+    secrets: inherit
+
+  archunit:
+    name: ArchUnit
+    uses: valkyrjaio/.github/.github/workflows/_archunit-java.yml@b1c6653267b6e79699045287066aa936788e8973
+    with:
+      ci-directory: .github/ci/archunit
+      paths: |
+        ci:
+          - '.github/ci/archunit/**'
+          - '.github/workflows/ci.yml'
+        files:
+          - '.github/ci/archunit/**'
+          - '.github/workflows/ci.yml'
+          - 'src/**/*.java'
+    secrets: inherit
+
+  errorprone:
+    name: ErrorProne
+    uses: valkyrjaio/.github/.github/workflows/_errorprone-java.yml@b1c6653267b6e79699045287066aa936788e8973
+    with:
+      ci-directory: .github/ci/errorprone
+      paths: |
+        ci:
+          - '.github/ci/errorprone/**'
+          - '.github/workflows/ci.yml'
+        files:
+          - '.github/ci/errorprone/**'
+          - '.github/workflows/ci.yml'
+          - 'src/**/*.java'
+    secrets: inherit
+
+  spotbugs:
+    name: SpotBugs
+    uses: valkyrjaio/.github/.github/workflows/_spotbugs-java.yml@b1c6653267b6e79699045287066aa936788e8973
+    with:
+      ci-directory: .github/ci/spotbugs
+      paths: |
+        ci:
+          - '.github/ci/spotbugs/**'
+          - '.github/workflows/ci.yml'
+        files:
+          - '.github/ci/spotbugs/**'
+          - '.github/workflows/ci.yml'
+          - 'src/**/*.java'
+    secrets: inherit
+
+  junit:
+    name: JUnit
+    uses: valkyrjaio/.github/.github/workflows/_junit-java.yml@b1c6653267b6e79699045287066aa936788e8973
+    with:
+      ci-directory: .github/ci/junit
+      paths: |
+        ci:
+          - '.github/ci/junit/**'
+          - '.github/workflows/ci.yml'
+        files:
+          - '.github/ci/junit/**'
+          - '.github/workflows/ci.yml'
+          - 'src/**/*.java'
+    secrets: inherit

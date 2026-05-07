@@ -1,0 +1,19 @@
+name: Create Major Release Version Branch
+
+on: workflow_dispatch
+
+run-name: Create new version for upcoming major release
+
+jobs:
+  create:
+    uses: valkyrjaio/.github/.github/workflows/_create-java-version-branch.yml@b1c6653267b6e79699045287066aa936788e8973
+    secrets: inherit
+    with:
+      dependencies: |
+        [
+          {"name": "Spotless",    "directory": ".github/ci/spotless"},
+          {"name": "ArchUnit",    "directory": ".github/ci/archunit"},
+          {"name": "ErrorProne",  "directory": ".github/ci/errorprone"},
+          {"name": "SpotBugs",   "directory": ".github/ci/spotbugs"},
+          {"name": "JUnit",      "directory": ".github/ci/junit"}
+        ]
