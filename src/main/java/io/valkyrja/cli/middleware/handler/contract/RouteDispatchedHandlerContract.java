@@ -7,16 +7,13 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.cli.server.handler.contract;
+package io.valkyrja.cli.middleware.handler.contract;
 
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
+import io.valkyrja.cli.routing.data.contract.RouteContract;
 
-public interface InputHandlerContract {
+public interface RouteDispatchedHandlerContract extends HandlerContract {
 
-    OutputContract handle(InputContract input);
-
-    void exit(InputContract input, OutputContract output);
-
-    void run(InputContract input);
+    OutputContract routeDispatched(InputContract input, OutputContract output, RouteContract route);
 }

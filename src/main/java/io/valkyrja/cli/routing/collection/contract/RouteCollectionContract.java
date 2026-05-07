@@ -7,14 +7,18 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.cli.routing.provider.contract;
+package io.valkyrja.cli.routing.collection.contract;
 
 import io.valkyrja.cli.routing.data.contract.RouteContract;
-import java.util.List;
+import java.util.Map;
 
-public interface CliRouteProviderContract {
+public interface RouteCollectionContract {
 
-    List<Class<?>> getControllerClasses();
+    RouteCollectionContract add(RouteContract... routes);
 
-    List<RouteContract> getRoutes();
+    RouteContract get(String name);
+
+    boolean has(String name);
+
+    Map<String, RouteContract> all();
 }

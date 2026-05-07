@@ -9,4 +9,21 @@
 
 package io.valkyrja.cli.interaction.input.contract;
 
-public interface InputContract {}
+import io.valkyrja.cli.interaction.argument.contract.ArgumentContract;
+import io.valkyrja.cli.interaction.option.contract.OptionContract;
+import java.util.List;
+
+public interface InputContract {
+
+    String getApplicationName();
+
+    String getCommandName();
+
+    List<ArgumentContract> getArguments();
+
+    boolean hasOption(String name);
+
+    OptionContract getOption(String name);
+
+    List<OptionContract> getOptions();
+}

@@ -7,16 +7,14 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.cli.server.handler.contract;
+package io.valkyrja.cli.interaction.writer.contract;
 
-import io.valkyrja.cli.interaction.input.contract.InputContract;
+import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 
-public interface InputHandlerContract {
+public interface WriterContract {
 
-    OutputContract handle(InputContract input);
+    boolean shouldWriteMessage(MessageContract message);
 
-    void exit(InputContract input, OutputContract output);
-
-    void run(InputContract input);
+    OutputContract write(OutputContract output, MessageContract message);
 }

@@ -13,6 +13,12 @@ import io.valkyrja.application.data.contract.CliConfigContract;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.ApplicationComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
+import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.InputReceivedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.RouteMatchedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.RouteNotMatchedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ThrowableCaughtMiddlewareContract;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -30,6 +36,12 @@ import java.util.function.Consumer;
  * @param dataNamespace the application data namespace
  * @param applicationName the application name
  * @param defaultCommandName the default command name
+ * @param inputReceivedMiddleware middleware run when input is received
+ * @param routeMatchedMiddleware middleware run when a route is matched
+ * @param routeNotMatchedMiddleware middleware run when no route is matched
+ * @param routeDispatchedMiddleware middleware run after a route is dispatched
+ * @param throwableCaughtMiddleware middleware run when a throwable is caught
+ * @param exitedMiddleware middleware run when the application exits
  * @param providers registered component application providers
  * @param callbacks custom initialization callbacks invoked during bootstrapping
  */
@@ -45,12 +57,24 @@ public record CliConfig(
         String dataNamespace,
         String applicationName,
         String defaultCommandName,
+        List<Class<? extends InputReceivedMiddlewareContract>> inputReceivedMiddleware,
+        List<Class<? extends RouteMatchedMiddlewareContract>> routeMatchedMiddleware,
+        List<Class<? extends RouteNotMatchedMiddlewareContract>> routeNotMatchedMiddleware,
+        List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
+        List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
+        List<Class<? extends ExitedMiddlewareContract>> exitedMiddleware,
         List<Class<? extends ComponentProviderContract>> providers,
         List<Consumer<ApplicationContract>> callbacks)
         implements CliConfigContract {
 
     // Compact constructor for defensive copying
     public CliConfig {
+        inputReceivedMiddleware = List.copyOf(inputReceivedMiddleware);
+        routeMatchedMiddleware = List.copyOf(routeMatchedMiddleware);
+        routeNotMatchedMiddleware = List.copyOf(routeNotMatchedMiddleware);
+        routeDispatchedMiddleware = List.copyOf(routeDispatchedMiddleware);
+        throwableCaughtMiddleware = List.copyOf(throwableCaughtMiddleware);
+        exitedMiddleware = List.copyOf(exitedMiddleware);
         providers = List.copyOf(providers);
         callbacks = List.copyOf(callbacks);
     }
@@ -68,6 +92,12 @@ public record CliConfig(
                 "app.cli.provider.data",
                 "valkyrja",
                 "list",
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
                 List.of(ApplicationComponentProvider.class),
                 List.of());
     }

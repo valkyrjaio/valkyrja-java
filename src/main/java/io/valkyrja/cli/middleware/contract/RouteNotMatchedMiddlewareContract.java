@@ -7,16 +7,14 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.cli.server.handler.contract;
+package io.valkyrja.cli.middleware.contract;
 
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
+import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
 
-public interface InputHandlerContract {
+public interface RouteNotMatchedMiddlewareContract {
 
-    OutputContract handle(InputContract input);
-
-    void exit(InputContract input, OutputContract output);
-
-    void run(InputContract input);
+    OutputContract routeNotMatched(
+            InputContract input, OutputContract output, RouteNotMatchedHandlerContract handler);
 }
