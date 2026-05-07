@@ -15,15 +15,35 @@ import java.util.List;
 
 public interface InputContract {
 
-    String getApplicationName();
+    String getCaller();
+
+    InputContract withCaller(String caller);
 
     String getCommandName();
 
+    InputContract withCommandName(String commandName);
+
     List<ArgumentContract> getArguments();
+
+    InputContract withArguments(ArgumentContract... arguments);
+
+    InputContract withAddedArgument(ArgumentContract argument);
+
+    InputContract withoutArgument(String value);
+
+    InputContract withoutArguments();
+
+    List<OptionContract> getOptions();
+
+    List<OptionContract> getOption(String name);
 
     boolean hasOption(String name);
 
-    OptionContract getOption(String name);
+    InputContract withOptions(OptionContract... options);
 
-    List<OptionContract> getOptions();
+    InputContract withAddedOption(OptionContract option);
+
+    InputContract withoutOption(String name);
+
+    InputContract withoutOptions();
 }

@@ -14,9 +14,12 @@ import io.valkyrja.cli.interaction.data.contract.CliInteractionConfigContract;
 import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
+import io.valkyrja.cli.interaction.output.FileOutput;
 import io.valkyrja.cli.interaction.output.Output;
 import io.valkyrja.cli.interaction.output.PlainOutput;
+import io.valkyrja.cli.interaction.output.StreamOutput;
 import io.valkyrja.cli.interaction.output.contract.EmptyOutputContract;
+import io.valkyrja.cli.interaction.output.contract.FileOutputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.contract.PlainOutputContract;
 import io.valkyrja.cli.interaction.output.contract.StreamOutputContract;
@@ -42,30 +45,21 @@ public class OutputFactory implements OutputFactoryContract {
 
     @Override
     public EmptyOutputContract createEmptyOutput(ExitCode exitCode, MessageContract... messages) {
-        EmptyOutput out = new EmptyOutput();
-        applyConfig(out, exitCode, messages);
-        return out;
+        return new EmptyOutput(config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
     }
 
     @Override
     public PlainOutputContract createPlainOutput(ExitCode exitCode, MessageContract... messages) {
-        PlainOutput out = new PlainOutput();
-        applyConfig(out, exitCode, messages);
-        return out;
+        return new PlainOutput(config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
+    }
+
+    @Override
+    public FileOutputContract createFileOutput(String filepath, ExitCode exitCode, MessageContract... messages) {
+        return new FileOutput(filepath, config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
     }
 
     @Override
     public StreamOutputContract createStreamOutput(OutputStream stream, ExitCode exitCode, MessageContract... messages) {
-        throw new UnsupportedOperationException("StreamOutput not yet implemented");
-    }
-
-    protected void applyConfig(Output out, ExitCode exitCode, MessageContract[] messages) {
-        out.isInteractive = config.isInteractive();
-        out.isQuiet = config.isQuiet();
-        out.isSilent = config.isSilent();
-        out.exitCode = exitCode;
-        for (MessageContract m : messages) {
-            out.unwrittenMessages.add(m);
-        }
+        return new StreamOutput(stream, config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
     }
 }

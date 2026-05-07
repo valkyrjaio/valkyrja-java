@@ -10,7 +10,7 @@
 package io.valkyrja.dispatch.data;
 
 import io.valkyrja.dispatch.data.contract.MethodDispatchContract;
-import io.valkyrja.dispatch.throwable.exception.InvalidArgumentException;
+import io.valkyrja.throwable.exception.InvalidArgumentException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

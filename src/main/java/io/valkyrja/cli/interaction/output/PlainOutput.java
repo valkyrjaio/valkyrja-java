@@ -9,10 +9,24 @@
 
 package io.valkyrja.cli.interaction.output;
 
+import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.PlainOutputContract;
 
 public class PlainOutput extends Output implements PlainOutputContract {
+
+    public PlainOutput() {
+        super();
+    }
+
+    public PlainOutput(
+            boolean isInteractive,
+            boolean isQuiet,
+            boolean isSilent,
+            ExitCode exitCode,
+            MessageContract... messages) {
+        super(isInteractive, isQuiet, isSilent, exitCode, messages);
+    }
 
     @Override
     protected void outputMessage(MessageContract message) {

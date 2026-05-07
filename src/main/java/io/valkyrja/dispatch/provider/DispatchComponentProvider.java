@@ -20,6 +20,12 @@ import java.util.List;
 public class DispatchComponentProvider implements ComponentProviderContract {
 
     @Override
+    public List<Class<? extends ComponentProviderContract>> getComponentProviders(
+            ApplicationContract app) {
+        return List.of();
+    }
+
+    @Override
     public List<Class<? extends ServiceProviderContract>> getContainerProviders(
             ApplicationContract app) {
         return List.of();

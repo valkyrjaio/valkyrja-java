@@ -9,7 +9,14 @@
 
 package io.valkyrja.cli.interaction.formatter.contract;
 
+import io.valkyrja.cli.interaction.format.contract.FormatContract;
+import java.util.List;
+
 public interface FormatterContract {
 
-    String format(String text);
+    List<FormatContract> getFormats();
+
+    FormatterContract withFormats(FormatContract... formats);
+
+    String formatText(String text);
 }

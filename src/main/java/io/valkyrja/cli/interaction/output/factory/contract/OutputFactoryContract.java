@@ -12,6 +12,7 @@ package io.valkyrja.cli.interaction.output.factory.contract;
 import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.EmptyOutputContract;
+import io.valkyrja.cli.interaction.output.contract.FileOutputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.contract.PlainOutputContract;
 import io.valkyrja.cli.interaction.output.contract.StreamOutputContract;
@@ -35,6 +36,12 @@ public interface OutputFactoryContract {
 
     default PlainOutputContract createPlainOutput(MessageContract... messages) {
         return createPlainOutput(ExitCode.SUCCESS, messages);
+    }
+
+    FileOutputContract createFileOutput(String filepath, ExitCode exitCode, MessageContract... messages);
+
+    default FileOutputContract createFileOutput(String filepath, MessageContract... messages) {
+        return createFileOutput(filepath, ExitCode.SUCCESS, messages);
     }
 
     StreamOutputContract createStreamOutput(OutputStream stream, ExitCode exitCode, MessageContract... messages);
