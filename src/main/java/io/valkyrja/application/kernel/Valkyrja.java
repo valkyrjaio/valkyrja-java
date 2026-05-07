@@ -1,0 +1,161 @@
+/*
+ * This file is part of the Valkyrja Framework package.
+ *
+ * (c) Melech Mizrachi <melechmizrachi@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+package io.valkyrja.application.kernel;
+
+import io.valkyrja.application.data.Config;
+import io.valkyrja.application.data.contract.ConfigContract;
+import io.valkyrja.application.kernel.contract.ApplicationContract;
+import io.valkyrja.application.provider.contract.ComponentProviderContract;
+import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
+import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.provider.contract.ServiceProviderContract;
+import io.valkyrja.event.provider.contract.ListenerProviderContract;
+import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
+import io.valkyrja.reflection.support.Reflection;
+import java.util.*;
+
+public class Valkyrja implements ApplicationContract {
+
+    protected final ContainerContract container;
+    protected final ConfigContract config;
+
+    protected List<Class<? extends ComponentProviderContract>> providers = List.of();
+    protected List<Class<? extends ServiceProviderContract>> serviceProviders = List.of();
+    protected List<Class<? extends ListenerProviderContract>> eventProviders = List.of();
+    protected List<Class<? extends CliRouteProviderContract>> cliRouteProviders = List.of();
+    protected List<Class<? extends HttpRouteProviderContract>> httpRouteProviders = List.of();
+
+    public Valkyrja(ContainerContract container) {
+        this(container, new Config());
+    }
+
+    public Valkyrja(ContainerContract container, ConfigContract config) {
+        this.container = container;
+        this.config = config;
+        bootstrapTimezone();
+    }
+
+    @Override
+    public ContainerContract getContainer() {
+        return container;
+    }
+
+    @Override
+    public void publishProviderCallbacks() {
+        for (var callback : config.callbacks()) {
+            callback.accept(this);
+        }
+    }
+
+    @Override
+    public List<Class<? extends ComponentProviderContract>> getProviders() {
+        if (!providers.isEmpty()) {
+            return providers;
+        }
+
+        LinkedHashSet<Class<? extends ComponentProviderContract>> seen = new LinkedHashSet<>();
+
+        for (Class<? extends ComponentProviderContract> providerClass : config.providers()) {
+            ComponentProviderContract provider = Reflection.instantiate(providerClass);
+            seen.addAll(provider.getComponentProviders(this));
+            seen.add(providerClass);
+        }
+
+        providers = new ArrayList<>(seen);
+        return providers;
+    }
+
+    @Override
+    public List<Class<? extends ServiceProviderContract>> getContainerProviders() {
+        if (!serviceProviders.isEmpty()) {
+            return serviceProviders;
+        }
+
+        LinkedHashSet<Class<? extends ServiceProviderContract>> seen = new LinkedHashSet<>();
+
+        for (Class<? extends ComponentProviderContract> providerClass : getProviders()) {
+            ComponentProviderContract provider = Reflection.instantiate(providerClass);
+            seen.addAll(provider.getContainerProviders(this));
+        }
+
+        serviceProviders = new ArrayList<>(seen);
+        return serviceProviders;
+    }
+
+    @Override
+    public List<Class<? extends ListenerProviderContract>> getEventProviders() {
+        if (!eventProviders.isEmpty()) {
+            return eventProviders;
+        }
+
+        LinkedHashSet<Class<? extends ListenerProviderContract>> seen = new LinkedHashSet<>();
+
+        for (Class<? extends ComponentProviderContract> providerClass : getProviders()) {
+            ComponentProviderContract provider = Reflection.instantiate(providerClass);
+            seen.addAll(provider.getEventProviders(this));
+        }
+
+        eventProviders = new ArrayList<>(seen);
+        return eventProviders;
+    }
+
+    @Override
+    public List<Class<? extends CliRouteProviderContract>> getCliProviders() {
+        if (!cliRouteProviders.isEmpty()) {
+            return cliRouteProviders;
+        }
+
+        LinkedHashSet<Class<? extends CliRouteProviderContract>> seen = new LinkedHashSet<>();
+
+        for (Class<? extends ComponentProviderContract> providerClass : getProviders()) {
+            ComponentProviderContract provider = Reflection.instantiate(providerClass);
+            seen.addAll(provider.getCliProviders(this));
+        }
+
+        cliRouteProviders = new ArrayList<>(seen);
+        return cliRouteProviders;
+    }
+
+    @Override
+    public List<Class<? extends HttpRouteProviderContract>> getHttpProviders() {
+        if (!httpRouteProviders.isEmpty()) {
+            return httpRouteProviders;
+        }
+
+        LinkedHashSet<Class<? extends HttpRouteProviderContract>> seen = new LinkedHashSet<>();
+
+        for (Class<? extends ComponentProviderContract> providerClass : getProviders()) {
+            ComponentProviderContract provider = Reflection.instantiate(providerClass);
+            seen.addAll(provider.getHttpProviders(this));
+        }
+
+        httpRouteProviders = new ArrayList<>(seen);
+        return httpRouteProviders;
+    }
+
+    @Override
+    public boolean getDebugMode() {
+        return config.debugMode();
+    }
+
+    @Override
+    public String getEnvironment() {
+        return config.environment();
+    }
+
+    @Override
+    public String getVersion() {
+        return config.version();
+    }
+
+    protected void bootstrapTimezone() {
+        TimeZone.setDefault(TimeZone.getTimeZone(config.timezone()));
+    }
+}
