@@ -9,4 +9,17 @@
 
 package io.valkyrja.http.routing.provider.contract;
 
-public interface HttpRouteProviderContract {}
+import io.valkyrja.http.routing.data.contract.RouteContract;
+
+import java.util.List;
+
+public interface HttpRouteProviderContract {
+
+    static List<String> getControllerClasses() {
+        throw new UnsupportedOperationException("getControllerClasses must be implemented by the concrete class");
+    }
+
+    static List<RouteContract> getRoutes() {
+        throw new UnsupportedOperationException("getRoutes must be implemented by the concrete class");
+    }
+}

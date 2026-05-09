@@ -10,8 +10,15 @@
 package io.valkyrja.http.server.handler.contract;
 
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
+import io.valkyrja.http.message.response.contract.ResponseContract;
 
 public interface RequestHandlerContract {
+
+    ResponseContract handle(ServerRequestContract request);
+
+    RequestHandlerContract send(ResponseContract response);
+
+    void terminate(ServerRequestContract request, ResponseContract response);
 
     void run(ServerRequestContract request);
 }

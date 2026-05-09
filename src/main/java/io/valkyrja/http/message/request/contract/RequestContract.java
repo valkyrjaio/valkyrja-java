@@ -9,4 +9,21 @@
 
 package io.valkyrja.http.message.request.contract;
 
-public interface RequestContract {}
+import io.valkyrja.http.message.contract.MessageContract;
+import io.valkyrja.http.message.enum_.RequestMethod;
+import io.valkyrja.http.message.uri.contract.UriContract;
+
+public interface RequestContract extends MessageContract {
+
+    String getRequestTarget();
+
+    RequestContract withRequestTarget(String requestTarget);
+
+    RequestMethod getMethod();
+
+    RequestContract withMethod(RequestMethod method);
+
+    UriContract getUri();
+
+    RequestContract withUri(UriContract uri, boolean preserveHost);
+}
