@@ -6,7 +6,7 @@ on:
 
 jobs:
   check:
-    uses: valkyrjaio/.github/.github/workflows/_check-outdated-java-dependencies.yml@b1c6653267b6e79699045287066aa936788e8973
+    uses: valkyrjaio/.github/.github/workflows/_check-outdated-java-dependencies.yml@a377bb5bc151aa160a65143b688f383fd085455f
     secrets: inherit
     with:
       dependencies: |
