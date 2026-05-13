@@ -10,14 +10,38 @@
 package io.valkyrja.cli.server.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.application.provider.abstract_.ComponentProvider;
+import io.valkyrja.application.provider.contract.ComponentProviderContract;
+import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
+import io.valkyrja.event.provider.contract.ListenerProviderContract;
+import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
+
 import java.util.List;
 
-public class CliServerComponentProvider extends ComponentProvider {
+public class CliServerComponentProvider implements ComponentProviderContract {
+
+    @Override
+    public List<Class<? extends ComponentProviderContract>> getComponentProviders(ApplicationContract app) {
+        return List.of();
+    }
 
     @Override
     public List<Class<? extends ServiceProviderContract>> getContainerProviders(ApplicationContract app) {
         return List.of(CliServerServiceProvider.class);
+    }
+
+    @Override
+    public List<Class<? extends ListenerProviderContract>> getEventProviders(ApplicationContract app) {
+        return List.of();
+    }
+
+    @Override
+    public List<Class<? extends CliRouteProviderContract>> getCliProviders(ApplicationContract app) {
+        return List.of();
+    }
+
+    @Override
+    public List<Class<? extends HttpRouteProviderContract>> getHttpProviders(ApplicationContract app) {
+        return List.of();
     }
 }
