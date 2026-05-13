@@ -11,29 +11,35 @@ package io.valkyrja.cli.middleware.handler.abstract_;
 
 import io.valkyrja.cli.middleware.handler.contract.HandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class Handler implements HandlerContract {
+public abstract class Handler<M> implements HandlerContract<M> {
 
     protected final ContainerContract container;
-    protected final List<Class<?>> middleware = new ArrayList<>();
-    protected Class<?> next = null;
+    protected final List<Class<? extends M>> middleware = new ArrayList<>();
+    protected Class<? extends M> next = null;
     protected int index = 0;
 
-    protected Handler(ContainerContract container) {
+    @SafeVarargs
+    protected Handler(ContainerContract container, Class<? extends M>... middleware) {
         this.container = container;
-    }
-
-    @Override
-    public void add(Class<?>... middleware) {
         this.middleware.addAll(Arrays.asList(middleware));
         updateNext();
     }
 
-    protected Object getMiddleware(Class<?> middlewareClass) {
-        Object item = container.get(middlewareClass);
+    @Override
+    @SafeVarargs
+    public final void add(Class<? extends M>... middleware) {
+        this.middleware.addAll(Arrays.asList(middleware));
+        updateNext();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected M getMiddleware(Class<? extends M> className) {
+        M item = (M) container.getSingleton(className);
         index++;
         updateNext();
         return item;

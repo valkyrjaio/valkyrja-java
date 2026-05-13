@@ -15,5 +15,5 @@ import java.util.List;
 
 public interface RouteCollectorContract {
 
-    List<RouteContract> getRoutes(String... classes);
+    List<RouteContract> getRoutes(Class<?>... classes);
 }

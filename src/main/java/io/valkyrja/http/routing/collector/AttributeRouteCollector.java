@@ -52,17 +52,13 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     @Override
-    public List<RouteContract> getRoutes(String... classes) {
+    public List<RouteContract> getRoutes(Class<?>... classes) {
         List<RouteContract> routes = new ArrayList<>();
 
-        for (String className : classes) {
-            try {
-                Class<?> clazz = Class.forName(className);
-                for (Method method : clazz.getDeclaredMethods()) {
-                    routes.addAll(collectRoutesFromMethod(clazz, method));
-                    routes.addAll(collectDynamicRoutesFromMethod(clazz, method));
-                }
-            } catch (ClassNotFoundException ignored) {
+        for (Class<?> clazz : classes) {
+            for (Method method : clazz.getDeclaredMethods()) {
+                routes.addAll(collectRoutesFromMethod(clazz, method));
+                routes.addAll(collectDynamicRoutesFromMethod(clazz, method));
             }
         }
 
@@ -164,19 +160,19 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         };
     }
 
-    protected RequestStructContract buildRequestStruct(Class<?> structClass) {
-        if (structClass == Object.class) return null;
+    protected RequestStructContract buildRequestStruct(Class<? extends RequestStructContract> structClass) {
+        if (structClass == RequestStructContract.class) return null;
         try {
-            return (RequestStructContract) structClass.getDeclaredConstructor().newInstance();
+            return structClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             return null;
         }
     }
 
-    protected ResponseStructContract buildResponseStruct(Class<?> structClass) {
-        if (structClass == Object.class) return null;
+    protected ResponseStructContract buildResponseStruct(Class<? extends ResponseStructContract> structClass) {
+        if (structClass == ResponseStructContract.class) return null;
         try {
-            return (ResponseStructContract) structClass.getDeclaredConstructor().newInstance();
+            return structClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             return null;
         }
@@ -210,6 +206,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         return route;
     }
 
+    @SuppressWarnings("unchecked")
     protected RouteContract updateMiddleware(RouteContract route, Class<?> clazz, Method method) {
         List<Middleware> middlewareList = new ArrayList<>();
         if (method.isAnnotationPresent(Middlewares.class)) {
@@ -220,22 +217,21 @@ public class AttributeRouteCollector implements RouteCollectorContract {
 
         for (Middleware mw : middlewareList) {
             Class<?> middlewareClass = mw.name();
-            String middlewareName = middlewareClass.getName();
 
             if (RouteMatchedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedRouteMatchedMiddleware(middlewareName);
+                route = route.withAddedRouteMatchedMiddleware((Class<? extends RouteMatchedMiddlewareContract>) middlewareClass);
             }
             if (RouteDispatchedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedRouteDispatchedMiddleware(middlewareName);
+                route = route.withAddedRouteDispatchedMiddleware((Class<? extends RouteDispatchedMiddlewareContract>) middlewareClass);
             }
             if (ThrowableCaughtMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedThrowableCaughtMiddleware(middlewareName);
+                route = route.withAddedThrowableCaughtMiddleware((Class<? extends ThrowableCaughtMiddlewareContract>) middlewareClass);
             }
             if (SendingResponseMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedSendingResponseMiddleware(middlewareName);
+                route = route.withAddedSendingResponseMiddleware((Class<? extends SendingResponseMiddlewareContract>) middlewareClass);
             }
             if (TerminatedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedTerminatedMiddleware(middlewareName);
+                route = route.withAddedTerminatedMiddleware((Class<? extends TerminatedMiddlewareContract>) middlewareClass);
             }
         }
 

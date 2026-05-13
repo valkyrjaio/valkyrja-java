@@ -16,17 +16,18 @@ import io.valkyrja.cli.middleware.handler.abstract_.Handler;
 import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
-public class ExitedHandler extends Handler implements ExitedHandlerContract {
+public class ExitedHandler extends Handler<ExitedMiddlewareContract> implements ExitedHandlerContract {
 
-    public ExitedHandler(ContainerContract container) {
-        super(container);
+    @SafeVarargs
+    public ExitedHandler(ContainerContract container, Class<? extends ExitedMiddlewareContract>... middleware) {
+        super(container, middleware);
     }
 
     @Override
     public void exited(InputContract input, OutputContract output) {
-        Class<?> next = this.next;
+        Class<? extends ExitedMiddlewareContract> next = this.next;
         if (next != null) {
-            ((ExitedMiddlewareContract) getMiddleware(next)).exited(input, output, this);
+            getMiddleware(next).exited(input, output, this);
         }
     }
 }

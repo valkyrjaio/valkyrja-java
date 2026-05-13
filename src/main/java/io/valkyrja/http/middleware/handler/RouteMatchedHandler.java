@@ -9,6 +9,7 @@
 
 package io.valkyrja.http.middleware.handler;
 
+import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.data.RouteMatchedResult;
@@ -18,13 +19,14 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 
 public class RouteMatchedHandler extends Handler<RouteMatchedMiddlewareContract> implements RouteMatchedHandlerContract {
 
-    public RouteMatchedHandler(String... middleware) {
-        super(middleware);
+    @SafeVarargs
+    public RouteMatchedHandler(ContainerContract container, Class<? extends RouteMatchedMiddlewareContract>... middleware) {
+        super(container, middleware);
     }
 
     @Override
     public RouteMatchedResult routeMatched(ServerRequestContract request, RouteContract route) {
-        String next = this.next;
+        Class<? extends RouteMatchedMiddlewareContract> next = this.next;
         return next != null
                 ? getMiddleware(next).routeMatched(request, route, this)
                 : new RouteMatchedResult(route, null);

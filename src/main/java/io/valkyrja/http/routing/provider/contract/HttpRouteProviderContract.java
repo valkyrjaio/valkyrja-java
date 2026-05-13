@@ -15,11 +15,7 @@ import java.util.List;
 
 public interface HttpRouteProviderContract {
 
-    static List<String> getControllerClasses() {
-        throw new UnsupportedOperationException("getControllerClasses must be implemented by the concrete class");
-    }
+    List<Class<?>> getControllerClasses();
 
-    static List<RouteContract> getRoutes() {
-        throw new UnsupportedOperationException("getRoutes must be implemented by the concrete class");
-    }
+    List<RouteContract> getRoutes();
 }

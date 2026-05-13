@@ -9,7 +9,9 @@
 
 package io.valkyrja.http.routing.cli.command.constant;
 
-public abstract class CommandName {
+public final class HttpCommandName {
 
     public static final String LIST = "http:list";
+
+    private HttpCommandName() {}
 }

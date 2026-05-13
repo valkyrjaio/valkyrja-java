@@ -41,8 +41,12 @@ public class RequestHandler implements RequestHandlerContract {
     protected boolean debug;
 
     public RequestHandler() {
-        this(new Container(), new Router(), new RequestReceivedHandler(),
-            new ThrowableCaughtHandler(), new SendingResponseHandler(), new TerminatedHandler(), false);
+        this(new Container());
+    }
+
+    public RequestHandler(ContainerContract container) {
+        this(container, new Router(container), new RequestReceivedHandler(container),
+            new ThrowableCaughtHandler(container), new SendingResponseHandler(container), new TerminatedHandler(container), false);
     }
 
     public RequestHandler(

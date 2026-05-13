@@ -15,17 +15,18 @@ import io.valkyrja.cli.middleware.handler.abstract_.Handler;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
-public class InputReceivedHandler extends Handler implements InputReceivedHandlerContract {
+public class InputReceivedHandler extends Handler<InputReceivedMiddlewareContract> implements InputReceivedHandlerContract {
 
-    public InputReceivedHandler(ContainerContract container) {
-        super(container);
+    @SafeVarargs
+    public InputReceivedHandler(ContainerContract container, Class<? extends InputReceivedMiddlewareContract>... middleware) {
+        super(container, middleware);
     }
 
     @Override
     public Object inputReceived(InputContract input) {
-        Class<?> next = this.next;
+        Class<? extends InputReceivedMiddlewareContract> next = this.next;
         return next != null
-                ? ((InputReceivedMiddlewareContract) getMiddleware(next)).inputReceived(input, this)
+                ? getMiddleware(next).inputReceived(input, this)
                 : input;
     }
 }

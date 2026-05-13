@@ -9,7 +9,7 @@
 
 package io.valkyrja.cli.middleware.handler.contract;
 
-public interface HandlerContract {
+public interface HandlerContract<M> {
 
-    void add(Class<?>... middleware);
+    void add(Class<? extends M>... middleware);
 }

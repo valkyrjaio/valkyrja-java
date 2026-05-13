@@ -9,6 +9,7 @@
 
 package io.valkyrja.http.middleware.handler;
 
+import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
@@ -18,13 +19,14 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 
 public class RouteDispatchedHandler extends Handler<RouteDispatchedMiddlewareContract> implements RouteDispatchedHandlerContract {
 
-    public RouteDispatchedHandler(String... middleware) {
-        super(middleware);
+    @SafeVarargs
+    public RouteDispatchedHandler(ContainerContract container, Class<? extends RouteDispatchedMiddlewareContract>... middleware) {
+        super(container, middleware);
     }
 
     @Override
     public ResponseContract routeDispatched(ServerRequestContract request, ResponseContract response, RouteContract route) {
-        String next = this.next;
+        Class<? extends RouteDispatchedMiddlewareContract> next = this.next;
         return next != null
                 ? getMiddleware(next).routeDispatched(request, response, route, this)
                 : response;
