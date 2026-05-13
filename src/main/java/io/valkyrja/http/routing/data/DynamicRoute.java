@@ -12,6 +12,11 @@ package io.valkyrja.http.routing.data;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
+import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.ParameterContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
@@ -36,11 +41,11 @@ public class DynamicRoute extends Route implements DynamicRouteContract {
             List<ParameterContract> parameters,
             BiFunction<ContainerContract, RouteContract, ResponseContract> handler,
             List<RequestMethod> requestMethods,
-            List<String> routeMatchedMiddleware,
-            List<String> routeDispatchedMiddleware,
-            List<String> throwableCaughtMiddleware,
-            List<String> sendingResponseMiddleware,
-            List<String> terminatedMiddleware,
+            List<Class<? extends RouteMatchedMiddlewareContract>> routeMatchedMiddleware,
+            List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
+            List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
+            List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware,
+            List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware,
             RequestStructContract requestStruct,
             ResponseStructContract responseStruct
     ) {

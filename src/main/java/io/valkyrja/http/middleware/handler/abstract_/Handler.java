@@ -9,6 +9,7 @@
 
 package io.valkyrja.http.middleware.handler.abstract_;
 
+import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.middleware.handler.contract.HandlerContract;
 
 import java.util.ArrayList;
@@ -17,33 +18,31 @@ import java.util.List;
 
 public abstract class Handler<M> implements HandlerContract<M> {
 
-    protected List<String> middleware = new ArrayList<>();
-    protected String next = null;
+    protected ContainerContract container;
+    protected List<Class<? extends M>> middleware = new ArrayList<>();
+    protected Class<? extends M> next = null;
     protected int index = 0;
 
     @SafeVarargs
-    public Handler(String... middleware) {
+    public Handler(ContainerContract container, Class<? extends M>... middleware) {
+        this.container = container;
         this.middleware.addAll(Arrays.asList(middleware));
         updateNext();
     }
 
     @Override
-    public void add(String... middleware) {
+    @SafeVarargs
+    public final void add(Class<? extends M>... middleware) {
         this.middleware.addAll(Arrays.asList(middleware));
         updateNext();
     }
 
     @SuppressWarnings("unchecked")
-    protected M getMiddleware(String className) {
-        try {
-            Class<?> clazz = Class.forName(className);
-            M instance = (M) clazz.getDeclaredConstructor().newInstance();
-            index++;
-            updateNext();
-            return instance;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to instantiate middleware: " + className, e);
-        }
+    protected M getMiddleware(Class<? extends M> className) {
+        M instance = (M) container.getSingleton(className);
+        index++;
+        updateNext();
+        return instance;
     }
 
     protected void updateNext() {

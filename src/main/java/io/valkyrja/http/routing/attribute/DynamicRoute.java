@@ -10,6 +10,13 @@
 package io.valkyrja.http.routing.attribute;
 
 import io.valkyrja.http.message.enum_.RequestMethod;
+import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
+import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
+import io.valkyrja.http.struct.request.contract.RequestStructContract;
+import io.valkyrja.http.struct.response.contract.ResponseStructContract;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -30,17 +37,17 @@ public @interface DynamicRoute {
 
     RequestMethod[] requestMethods() default {RequestMethod.HEAD, RequestMethod.GET};
 
-    String[] routeMatchedMiddleware() default {};
+    Class<? extends RouteMatchedMiddlewareContract>[] routeMatchedMiddleware() default {};
 
-    String[] routeDispatchedMiddleware() default {};
+    Class<? extends RouteDispatchedMiddlewareContract>[] routeDispatchedMiddleware() default {};
 
-    String[] throwableCaughtMiddleware() default {};
+    Class<? extends ThrowableCaughtMiddlewareContract>[] throwableCaughtMiddleware() default {};
 
-    String[] sendingResponseMiddleware() default {};
+    Class<? extends SendingResponseMiddlewareContract>[] sendingResponseMiddleware() default {};
 
-    String[] terminatedMiddleware() default {};
+    Class<? extends TerminatedMiddlewareContract>[] terminatedMiddleware() default {};
 
-    Class<?> requestStruct() default Object.class;
+    Class<? extends RequestStructContract> requestStruct() default RequestStructContract.class;
 
-    Class<?> responseStruct() default Object.class;
+    Class<? extends ResponseStructContract> responseStruct() default ResponseStructContract.class;
 }

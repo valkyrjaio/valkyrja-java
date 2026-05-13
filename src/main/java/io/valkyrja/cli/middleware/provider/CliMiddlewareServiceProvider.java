@@ -24,10 +24,10 @@ import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContrac
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class CliMiddlewareServiceProvider implements ServiceProviderContract {
 
     @Override
@@ -43,43 +43,37 @@ public class CliMiddlewareServiceProvider implements ServiceProviderContract {
 
     public static void publishInputReceivedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        InputReceivedHandler handler = new InputReceivedHandler(container);
-        container.setSingleton(InputReceivedHandlerContract.class, handler);
-        handler.add(config.inputReceivedMiddleware().toArray(new Class[0]));
+        container.setSingleton(InputReceivedHandlerContract.class,
+                new InputReceivedHandler(container, config.inputReceivedMiddleware().toArray(new Class[0])));
     }
 
     public static void publishThrowableCaughtHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        ThrowableCaughtHandler handler = new ThrowableCaughtHandler(container);
-        container.setSingleton(ThrowableCaughtHandlerContract.class, handler);
-        handler.add(config.throwableCaughtMiddleware().toArray(new Class[0]));
+        container.setSingleton(ThrowableCaughtHandlerContract.class,
+                new ThrowableCaughtHandler(container, config.throwableCaughtMiddleware().toArray(new Class[0])));
     }
 
     public static void publishRouteMatchedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        RouteMatchedHandler handler = new RouteMatchedHandler(container);
-        container.setSingleton(RouteMatchedHandlerContract.class, handler);
-        handler.add(config.routeMatchedMiddleware().toArray(new Class[0]));
+        container.setSingleton(RouteMatchedHandlerContract.class,
+                new RouteMatchedHandler(container, config.routeMatchedMiddleware().toArray(new Class[0])));
     }
 
     public static void publishRouteNotMatchedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        RouteNotMatchedHandler handler = new RouteNotMatchedHandler(container);
-        container.setSingleton(RouteNotMatchedHandlerContract.class, handler);
-        handler.add(config.routeNotMatchedMiddleware().toArray(new Class[0]));
+        container.setSingleton(RouteNotMatchedHandlerContract.class,
+                new RouteNotMatchedHandler(container, config.routeNotMatchedMiddleware().toArray(new Class[0])));
     }
 
     public static void publishRouteDispatchedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        RouteDispatchedHandler handler = new RouteDispatchedHandler(container);
-        container.setSingleton(RouteDispatchedHandlerContract.class, handler);
-        handler.add(config.routeDispatchedMiddleware().toArray(new Class[0]));
+        container.setSingleton(RouteDispatchedHandlerContract.class,
+                new RouteDispatchedHandler(container, config.routeDispatchedMiddleware().toArray(new Class[0])));
     }
 
     public static void publishExitedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        ExitedHandler handler = new ExitedHandler(container);
-        container.setSingleton(ExitedHandlerContract.class, handler);
-        handler.add(config.exitedMiddleware().toArray(new Class[0]));
+        container.setSingleton(ExitedHandlerContract.class,
+                new ExitedHandler(container, config.exitedMiddleware().toArray(new Class[0])));
     }
 }

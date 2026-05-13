@@ -9,6 +9,7 @@
 
 package io.valkyrja.http.middleware.handler;
 
+import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
@@ -17,13 +18,14 @@ import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 
 public class TerminatedHandler extends Handler<TerminatedMiddlewareContract> implements TerminatedHandlerContract {
 
-    public TerminatedHandler(String... middleware) {
-        super(middleware);
+    @SafeVarargs
+    public TerminatedHandler(ContainerContract container, Class<? extends TerminatedMiddlewareContract>... middleware) {
+        super(container, middleware);
     }
 
     @Override
     public void terminated(ServerRequestContract request, ResponseContract response) {
-        String next = this.next;
+        Class<? extends TerminatedMiddlewareContract> next = this.next;
         if (next != null) {
             getMiddleware(next).terminated(request, response, this);
         }

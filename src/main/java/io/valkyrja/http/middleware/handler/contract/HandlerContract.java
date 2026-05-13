@@ -11,5 +11,5 @@ package io.valkyrja.http.middleware.handler.contract;
 
 public interface HandlerContract<M> {
 
-    void add(String... middleware);
+    void add(Class<? extends M>... middleware);
 }

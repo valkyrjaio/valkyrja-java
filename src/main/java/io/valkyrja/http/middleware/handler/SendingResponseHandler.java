@@ -9,6 +9,7 @@
 
 package io.valkyrja.http.middleware.handler;
 
+import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
@@ -17,13 +18,14 @@ import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContra
 
 public class SendingResponseHandler extends Handler<SendingResponseMiddlewareContract> implements SendingResponseHandlerContract {
 
-    public SendingResponseHandler(String... middleware) {
-        super(middleware);
+    @SafeVarargs
+    public SendingResponseHandler(ContainerContract container, Class<? extends SendingResponseMiddlewareContract>... middleware) {
+        super(container, middleware);
     }
 
     @Override
     public ResponseContract sendingResponse(ServerRequestContract request, ResponseContract response) {
-        String next = this.next;
+        Class<? extends SendingResponseMiddlewareContract> next = this.next;
         return next != null
                 ? getMiddleware(next).sendingResponse(request, response, this)
                 : response;

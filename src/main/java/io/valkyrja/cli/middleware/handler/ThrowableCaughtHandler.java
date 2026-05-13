@@ -16,18 +16,18 @@ import io.valkyrja.cli.middleware.handler.abstract_.Handler;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
-public class ThrowableCaughtHandler extends Handler implements ThrowableCaughtHandlerContract {
+public class ThrowableCaughtHandler extends Handler<ThrowableCaughtMiddlewareContract> implements ThrowableCaughtHandlerContract {
 
-    public ThrowableCaughtHandler(ContainerContract container) {
-        super(container);
+    @SafeVarargs
+    public ThrowableCaughtHandler(ContainerContract container, Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
+        super(container, middleware);
     }
 
     @Override
     public OutputContract throwableCaught(InputContract input, OutputContract output, Throwable throwable) {
-        Class<?> next = this.next;
+        Class<? extends ThrowableCaughtMiddlewareContract> next = this.next;
         return next != null
-                ? ((ThrowableCaughtMiddlewareContract) getMiddleware(next))
-                        .throwableCaught(input, output, throwable, this)
+                ? getMiddleware(next).throwableCaught(input, output, throwable, this)
                 : output;
     }
 }

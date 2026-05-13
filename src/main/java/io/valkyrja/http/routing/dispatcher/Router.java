@@ -51,9 +51,13 @@ public class Router implements RouterContract {
     protected TerminatedHandlerContract terminatedHandler;
 
     public Router() {
-        this(new Container(), new Matcher(), new ResponseFactory(),
-            new ThrowableCaughtHandler(), new RouteMatchedHandler(), new RouteNotMatchedHandler(),
-            new RouteDispatchedHandler(), new SendingResponseHandler(), new TerminatedHandler());
+        this(new Container());
+    }
+
+    public Router(ContainerContract container) {
+        this(container, new Matcher(), new ResponseFactory(),
+            new ThrowableCaughtHandler(container), new RouteMatchedHandler(container), new RouteNotMatchedHandler(container),
+            new RouteDispatchedHandler(container), new SendingResponseHandler(container), new TerminatedHandler(container));
     }
 
     public Router(
@@ -124,12 +128,13 @@ public class Router implements RouterContract {
         return responseFactory.createResponse(null, StatusCode.NOT_FOUND, null);
     }
 
+    @SuppressWarnings("unchecked")
     protected void routeMatched(RouteContract route) {
-        routeMatchedHandler.add(route.getRouteMatchedMiddleware().toArray(new String[0]));
-        routeDispatchedHandler.add(route.getRouteDispatchedMiddleware().toArray(new String[0]));
-        throwableCaughtHandler.add(route.getThrowableCaughtMiddleware().toArray(new String[0]));
-        sendingResponseHandler.add(route.getSendingResponseMiddleware().toArray(new String[0]));
-        terminatedHandler.add(route.getTerminatedMiddleware().toArray(new String[0]));
+        routeMatchedHandler.add(route.getRouteMatchedMiddleware().toArray(new Class[0]));
+        routeDispatchedHandler.add(route.getRouteDispatchedMiddleware().toArray(new Class[0]));
+        throwableCaughtHandler.add(route.getThrowableCaughtMiddleware().toArray(new Class[0]));
+        sendingResponseHandler.add(route.getSendingResponseMiddleware().toArray(new Class[0]));
+        terminatedHandler.add(route.getTerminatedMiddleware().toArray(new Class[0]));
 
         container.setSingleton(RouteContract.class, route);
     }

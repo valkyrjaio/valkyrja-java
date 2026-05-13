@@ -7,27 +7,41 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.cli.server.provider;
+package io.valkyrja.application.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
+import io.valkyrja.cli.interaction.provider.CliInteractionComponentProvider;
+import io.valkyrja.cli.middleware.provider.CliMiddlewareComponentProvider;
+import io.valkyrja.cli.routing.provider.CliRoutingComponentProvider;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
+import io.valkyrja.cli.server.provider.CliServerComponentProvider;
+import io.valkyrja.container.provider.ContainerComponentProvider;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
+import io.valkyrja.dispatch.provider.DispatchComponentProvider;
+import io.valkyrja.event.provider.EventComponentProvider;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 
 import java.util.List;
 
-public class CliServerComponentProvider implements ComponentProviderContract {
+public class CliApplicationComponentProvider implements ComponentProviderContract {
 
     @Override
     public List<Class<? extends ComponentProviderContract>> getComponentProviders(ApplicationContract app) {
-        return List.of();
+        return List.of(
+                ContainerComponentProvider.class,
+                DispatchComponentProvider.class,
+                CliInteractionComponentProvider.class,
+                CliMiddlewareComponentProvider.class,
+                CliRoutingComponentProvider.class,
+                CliServerComponentProvider.class,
+                EventComponentProvider.class);
     }
 
     @Override
     public List<Class<? extends ServiceProviderContract>> getContainerProviders(ApplicationContract app) {
-        return List.of(CliServerServiceProvider.class);
+        return List.of();
     }
 
     @Override
