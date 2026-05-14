@@ -11,9 +11,9 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
-import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A per-request child container that interacts with the parent exclusively through
@@ -28,7 +28,7 @@ import java.util.function.Consumer;
  * <ul>
  *   <li>{@code singletons} — singleton registrations. Used to create singleton instances in the
  *       child's own context when the parent has a binding but no cached instance yet.
- *   <li>{@code deferredCallbacks} — lazy provider callbacks. Enables the child to publish deferred
+ *   <li>{@code callbacks} — lazy provider callbacks. Enables the child to publish deferred
  *       providers into its own context on first access, independently of the parent.
  * </ul>
  *
@@ -55,7 +55,7 @@ public class ChildContainer extends Container {
         // All other resolution delegates to the parent via contract.
         // parentData is immutable (record with Map.copyOf) — safe to reuse across requests.
         this.singletons.putAll(parentData.singletons());
-        this.deferredCallbacks.putAll(parentData.deferredCallbacks());
+        this.callbacks.putAll(parentData.callbacks());
         // instances stays empty — child builds its own per request
     }
 
@@ -65,7 +65,7 @@ public class ChildContainer extends Container {
      * by the base {@link Container#getSingletonWithoutChecks} using the child's own maps.
      */
     @Override
-    protected <T> T getSingletonWithoutChecks(Class<T> id) {
+    protected @Nullable <T> T getSingletonWithoutChecks(Class<T> id) {
         // Parent has a resolved instance and child does not — reuse it (frozen, safe)
         if (!super.isSingletonInstance(id) && parent.isSingletonInstance(id)) {
             return parent.getSingleton(id);
@@ -76,7 +76,7 @@ public class ChildContainer extends Container {
     }
 
     @Override
-    protected <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
+    protected @Nullable <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
         if (!super.isService(id) && parent.isService(id)) {
             return parent.getService(id, arguments);
         }
@@ -84,7 +84,7 @@ public class ChildContainer extends Container {
     }
 
     @Override
-    protected <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
+    protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
         if (!super.isAlias(id) && parent.isAlias(id)) {
             return parent.getAliased(id, arguments);
         }
@@ -92,14 +92,13 @@ public class ChildContainer extends Container {
     }
 
     /**
-     * Publish a deferred service using the child's copied deferredCallbacks. Skips the
-     * {@code deferred} map check from the base implementation since only {@code deferredCallbacks}
-     * is copied — the callback's presence is sufficient guard. Runs with the child as the
-     * container so bindings register into the child's own maps.
+     * Publish a deferred service using the child's copied callbacks. The callback's presence
+     * is sufficient guard. Runs with the child as the container so bindings register into the
+     * child's own maps.
      */
     @Override
     public void publish(Class<?> id) {
-        Consumer<ContainerContract> callback = deferredCallbacks.get(id);
+        Consumer<ContainerContract> callback = callbacks.get(id);
         if (callback == null) {
             return;
         }
@@ -125,24 +124,14 @@ public class ChildContainer extends Container {
     // isSingletonBinding is NOT overridden — child's copied singletons map is checked by
     // Container.isSingletonBinding (super) via this.singletons, which is sufficient.
 
-    @Override
-    public boolean isDeferred(Class<?> id) {
-        return super.isDeferred(id) || parent.isDeferred(id);
-    }
-
     /**
      * Parent check must come first. If the parent already published a provider at bootstrap,
      * the child must not republish it — doing so would re-run the callback and re-register
      * bindings. The child's own published map (super.isPublished) tracks only what the child
-     * itself has lazily published via its copied deferredCallbacks.
+     * itself has lazily published via its copied callbacks.
      */
     @Override
     public boolean isPublished(Class<?> id) {
         return super.isPublished(id) || parent.isPublished(id);
-    }
-
-    @Override
-    public boolean isRegistered(Class<? extends ServiceProviderContract> provider) {
-        return super.isRegistered(provider) || parent.isRegistered(provider);
     }
 }

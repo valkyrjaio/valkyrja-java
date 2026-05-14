@@ -17,6 +17,7 @@ import io.valkyrja.http.message.header.contract.HeaderContract;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.RedirectResponseContract;
 import io.valkyrja.http.message.response.throwable.exception.HttpRequestInvalidRedirectStatusCodeException;
+import org.jspecify.annotations.Nullable;
 import io.valkyrja.http.message.uri.Uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
 import io.valkyrja.http.message.uri.enum_.Scheme;
@@ -35,7 +36,7 @@ public class RedirectResponse extends Response implements RedirectResponseContra
         this.uri = uri;
     }
 
-    public static RedirectResponse createFromUri(UriContract uri, StatusCode statusCode, HeaderCollectionContract headers) {
+    public static RedirectResponse createFromUri(@Nullable UriContract uri, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         UriContract resolvedUri = uri != null ? uri : new Uri("/");
         return new RedirectResponse(
                 resolvedUri,

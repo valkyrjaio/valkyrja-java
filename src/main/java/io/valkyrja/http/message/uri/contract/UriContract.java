@@ -10,6 +10,7 @@
 package io.valkyrja.http.message.uri.contract;
 
 import io.valkyrja.http.message.uri.enum_.Scheme;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @see <a href="http://tools.ietf.org/html/rfc3986">RFC 3986 — URI specification</a>
@@ -50,7 +51,7 @@ public interface UriContract {
 
     UriContract withPassword(String password);
 
-    UriContract withUserInfo(String user, String password);
+    UriContract withUserInfo(String user, @Nullable String password);
 
     UriContract withHost(String host);
 

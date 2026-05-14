@@ -18,6 +18,7 @@ import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidDynamicRou
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRouteNameException;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRoutePathException;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRouteRegexException;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -138,7 +139,7 @@ public class RouteCollection implements RouteCollectionContract {
         return result;
     }
 
-    protected RouteContract internalGetByPath(String path, RequestMethod method) {
+    protected @Nullable RouteContract internalGetByPath(String path, RequestMethod method) {
         if (method != RequestMethod.ANY) {
             String type = method.getValue();
             String name = null;
@@ -159,7 +160,7 @@ public class RouteCollection implements RouteCollectionContract {
         return null;
     }
 
-    protected DynamicRouteContract internalGetByRegex(String regex, RequestMethod method) {
+    protected @Nullable DynamicRouteContract internalGetByRegex(String regex, RequestMethod method) {
         if (method != RequestMethod.ANY) {
             String type = method.getValue();
             if (regexes.containsKey(type)) {

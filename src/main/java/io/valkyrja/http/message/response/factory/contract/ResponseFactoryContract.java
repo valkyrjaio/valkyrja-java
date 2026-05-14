@@ -15,18 +15,19 @@ import io.valkyrja.http.message.response.contract.JsonResponseContract;
 import io.valkyrja.http.message.response.contract.RedirectResponseContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.message.response.contract.TextResponseContract;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
 public interface ResponseFactoryContract {
 
-    ResponseContract createResponse(String content, StatusCode statusCode, HeaderCollectionContract headers);
+    ResponseContract createResponse(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
 
-    TextResponseContract createTextResponse(String content, StatusCode statusCode, HeaderCollectionContract headers);
+    TextResponseContract createTextResponse(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
 
-    JsonResponseContract createJsonResponse(Map<String, Object> data, StatusCode statusCode, HeaderCollectionContract headers);
+    JsonResponseContract createJsonResponse(@Nullable Map<String, Object> data, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
 
-    JsonResponseContract createJsonpResponse(String callback, Map<String, Object> data, StatusCode statusCode, HeaderCollectionContract headers);
+    JsonResponseContract createJsonpResponse(String callback, @Nullable Map<String, Object> data, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
 
-    RedirectResponseContract createRedirectResponse(String uri, StatusCode statusCode, HeaderCollectionContract headers);
+    RedirectResponseContract createRedirectResponse(@Nullable String uri, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
 }

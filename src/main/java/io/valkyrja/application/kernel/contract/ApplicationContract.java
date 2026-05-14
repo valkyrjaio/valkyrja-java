@@ -15,6 +15,7 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
+
 import java.util.List;
 
 public interface ApplicationContract {
@@ -32,37 +33,37 @@ public interface ApplicationContract {
     /**
      * Get all component-level application providers.
      *
-     * @return list of application providers
+     * @return list of component provider instances
      */
-    List<Class<? extends ComponentProviderContract>> getProviders();
+    List<ComponentProviderContract> getProviders();
 
     /**
      * Aggregate all container service providers from all registered components.
      *
-     * @return flat list of container providers
+     * @return flat list of container provider instances
      */
-    List<Class<? extends ServiceProviderContract>> getContainerProviders();
+    List<ServiceProviderContract> getContainerProviders();
 
     /**
      * Aggregate all event listener providers from all registered components.
      *
-     * @return flat list of event providers
+     * @return flat list of event provider instances
      */
-    List<Class<? extends ListenerProviderContract>> getEventProviders();
+    List<ListenerProviderContract> getEventProviders();
 
     /**
      * Aggregate all CLI route providers from all registered components.
      *
-     * @return flat list of CLI providers
+     * @return flat list of CLI provider instances
      */
-    List<Class<? extends CliRouteProviderContract>> getCliProviders();
+    List<CliRouteProviderContract> getCliProviders();
 
     /**
      * Aggregate all HTTP route providers from all registered components.
      *
-     * @return flat list of HTTP providers
+     * @return flat list of HTTP provider instances
      */
-    List<Class<? extends HttpRouteProviderContract>> getHttpProviders();
+    List<HttpRouteProviderContract> getHttpProviders();
 
     /**
      * Whether the application is running in debug mode.

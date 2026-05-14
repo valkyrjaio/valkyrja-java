@@ -11,6 +11,7 @@ package io.valkyrja.dispatch.dispatcher.contract;
 
 import io.valkyrja.dispatch.data.contract.DispatchContract;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /** Contract for the dispatch dispatcher. */
 public interface DispatcherContract {
@@ -21,7 +22,7 @@ public interface DispatcherContract {
      * @param dispatch the dispatch to execute
      * @return the result of the dispatch
      */
-    Object dispatch(DispatchContract dispatch);
+    @Nullable Object dispatch(DispatchContract dispatch);
 
     /**
      * Dispatch a dispatch contract with extra arguments.
@@ -30,5 +31,5 @@ public interface DispatcherContract {
      * @param arguments extra arguments to pass (merged with dispatch's own arguments)
      * @return the result of the dispatch
      */
-    Object dispatch(DispatchContract dispatch, Map<String, Object> arguments);
+    @Nullable Object dispatch(DispatchContract dispatch, Map<String, Object> arguments);
 }

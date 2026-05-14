@@ -80,10 +80,7 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
         List<Class<?>> controllers = new ArrayList<>();
         List<RouteContract> routes = new ArrayList<>();
 
-        for (HttpRouteProviderContract provider :
-                app.getHttpProviders().stream()
-                        .map(c -> (HttpRouteProviderContract) container.get(c))
-                        .toList()) {
+        for (HttpRouteProviderContract provider : app.getHttpProviders()) {
             controllers.addAll(provider.getControllerClasses());
             routes.addAll(provider.getRoutes());
         }

@@ -21,27 +21,27 @@ import java.util.List;
 public class HttpMiddlewareComponentProvider implements ComponentProviderContract {
 
     @Override
-    public List<Class<? extends ComponentProviderContract>> getComponentProviders(ApplicationContract app) {
+    public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends ServiceProviderContract>> getContainerProviders(ApplicationContract app) {
-        return List.of(HttpMiddlewareServiceProvider.class);
+    public List<ServiceProviderContract> getContainerProviders(ApplicationContract app) {
+        return List.of(new HttpMiddlewareServiceProvider());
     }
 
     @Override
-    public List<Class<? extends ListenerProviderContract>> getEventProviders(ApplicationContract app) {
+    public List<ListenerProviderContract> getEventProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends CliRouteProviderContract>> getCliProviders(ApplicationContract app) {
+    public List<CliRouteProviderContract> getCliProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends HttpRouteProviderContract>> getHttpProviders(ApplicationContract app) {
+    public List<HttpRouteProviderContract> getHttpProviders(ApplicationContract app) {
         return List.of();
     }
 }

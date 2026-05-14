@@ -18,6 +18,7 @@ import io.valkyrja.http.message.header.value.contract.CookieContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.stream.contract.StreamContract;
+import org.jspecify.annotations.Nullable;
 
 public class Response extends Message implements ResponseContract {
 
@@ -35,7 +36,7 @@ public class Response extends Message implements ResponseContract {
         setBody(body);
     }
 
-    public static Response create(String content, StatusCode statusCode, HeaderCollectionContract headers) {
+    public static Response create(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         Stream stream = new Stream();
         stream.write(content != null ? content : "");
         stream.rewind();

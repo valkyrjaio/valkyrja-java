@@ -17,6 +17,7 @@ import io.valkyrja.http.message.header.collection.HeaderCollection;
 import io.valkyrja.http.message.header.collection.contract.HeaderCollectionContract;
 import io.valkyrja.http.message.response.contract.TextResponseContract;
 import io.valkyrja.http.message.stream.Stream;
+import org.jspecify.annotations.Nullable;
 
 public class TextResponse extends Response implements TextResponseContract {
 
@@ -28,7 +29,7 @@ public class TextResponse extends Response implements TextResponseContract {
         super(createBody(text), statusCode, injectContentType(headers));
     }
 
-    public static TextResponse create(String content, StatusCode statusCode, HeaderCollectionContract headers) {
+    public static TextResponse create(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         return new TextResponse(
                 content != null ? content : "",
                 statusCode != null ? statusCode : StatusCode.OK,

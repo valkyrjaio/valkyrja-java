@@ -15,12 +15,13 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 public abstract class Handler<M> implements HandlerContract<M> {
 
     protected final ContainerContract container;
     protected final List<Class<? extends M>> middleware = new ArrayList<>();
-    protected Class<? extends M> next = null;
+    protected @Nullable Class<? extends M> next = null;
     protected int index = 0;
 
     @SafeVarargs

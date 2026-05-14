@@ -12,22 +12,23 @@ package io.valkyrja.http.routing.data;
 import io.valkyrja.http.routing.data.contract.ParameterContract;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingNoCastException;
 import io.valkyrja.type.data.Cast;
+import org.jspecify.annotations.Nullable;
 
 public class Parameter implements ParameterContract {
 
     protected String name;
     protected String regex;
-    protected Cast cast;
+    protected @Nullable Cast cast;
     protected boolean isOptional;
     protected boolean shouldCapture;
-    protected Object defaultValue;
-    protected Object value;
+    protected @Nullable Object defaultValue;
+    protected @Nullable Object value;
 
     public Parameter(String name, String regex) {
         this(name, regex, null, false, true, null, null);
     }
 
-    public Parameter(String name, String regex, Cast cast, boolean isOptional, boolean shouldCapture, Object defaultValue, Object value) {
+    public Parameter(String name, String regex, @Nullable Cast cast, boolean isOptional, boolean shouldCapture, @Nullable Object defaultValue, @Nullable Object value) {
         this.name = name;
         this.regex = regex;
         this.cast = cast;
@@ -106,24 +107,24 @@ public class Parameter implements ParameterContract {
     }
 
     @Override
-    public Object getDefault() {
+    public @Nullable Object getDefault() {
         return defaultValue;
     }
 
     @Override
-    public ParameterContract withDefault(Object defaultValue) {
+    public ParameterContract withDefault(@Nullable Object defaultValue) {
         Parameter copy = copy();
         copy.defaultValue = defaultValue;
         return copy;
     }
 
     @Override
-    public Object getValue() {
+    public @Nullable Object getValue() {
         return value;
     }
 
     @Override
-    public ParameterContract withValue(Object value) {
+    public ParameterContract withValue(@Nullable Object value) {
         Parameter copy = copy();
         copy.value = value;
         return copy;

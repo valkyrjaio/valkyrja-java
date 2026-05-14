@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default dispatcher implementation.
@@ -46,12 +47,12 @@ public class Dispatcher implements DispatcherContract {
     }
 
     @Override
-    public Object dispatch(DispatchContract dispatch) {
+    public @Nullable Object dispatch(DispatchContract dispatch) {
         return dispatch(dispatch, Map.of());
     }
 
     @Override
-    public Object dispatch(DispatchContract dispatch, Map<String, Object> arguments) {
+    public @Nullable Object dispatch(DispatchContract dispatch, Map<String, Object> arguments) {
         return switch (dispatch) {
             case MethodDispatch d -> dispatchClassMethod(d, arguments);
             case PropertyDispatch d -> dispatchClassProperty(d);
@@ -65,7 +66,7 @@ public class Dispatcher implements DispatcherContract {
     }
 
     /** Dispatch a class method. */
-    protected Object dispatchClassMethod(MethodDispatch dispatch, Map<String, Object> arguments) {
+    protected @Nullable Object dispatchClassMethod(MethodDispatch dispatch, Map<String, Object> arguments) {
         Class<?> clazz = dispatch.getClassName();
         String methodName = dispatch.getMethod();
         Object[] args = resolveArguments(dispatch, arguments);
@@ -85,7 +86,7 @@ public class Dispatcher implements DispatcherContract {
     }
 
     /** Dispatch a class field access. */
-    protected Object dispatchClassProperty(PropertyDispatch dispatch) {
+    protected @Nullable Object dispatchClassProperty(PropertyDispatch dispatch) {
         Class<?> clazz = dispatch.getClassName();
         String fieldName = dispatch.getProperty();
 
@@ -99,7 +100,7 @@ public class Dispatcher implements DispatcherContract {
     }
 
     /** Dispatch a static final field constant. */
-    protected Object dispatchConstant(ConstantDispatch dispatch) {
+    protected @Nullable Object dispatchConstant(ConstantDispatch dispatch) {
         String constantName = dispatch.getConstant();
 
         try {
@@ -125,7 +126,7 @@ public class Dispatcher implements DispatcherContract {
     }
 
     /** Dispatch a callable. */
-    protected Object dispatchCallable(CallableDispatch dispatch, Map<String, Object> arguments) {
+    protected @Nullable Object dispatchCallable(CallableDispatch dispatch, Map<String, Object> arguments) {
         Object[] args = resolveArguments(dispatch, arguments);
         return dispatch.getCallable().apply(args);
     }
@@ -174,7 +175,7 @@ public class Dispatcher implements DispatcherContract {
     }
 
     /** Resolve a single argument value — if it is itself a dispatch, recurse. */
-    protected Object resolveArgumentValue(Object argument) {
+    protected @Nullable Object resolveArgumentValue(Object argument) {
         if (argument instanceof DispatchContract nested) {
             return dispatch(nested);
         }

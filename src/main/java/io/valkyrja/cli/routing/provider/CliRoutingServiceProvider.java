@@ -62,10 +62,7 @@ public class CliRoutingServiceProvider implements ServiceProviderContract {
         List<Class<?>> controllers = new ArrayList<>();
         List<RouteContract> routes = new ArrayList<>();
 
-        for (CliRouteProviderContract provider :
-                app.getCliProviders().stream()
-                        .map(c -> (CliRouteProviderContract) container.get(c))
-                        .toList()) {
+        for (CliRouteProviderContract provider : app.getCliProviders()) {
             controllers.addAll(provider.getControllerClasses());
             routes.addAll(provider.getRoutes());
         }

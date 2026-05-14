@@ -14,18 +14,19 @@ import io.valkyrja.dispatch.data.contract.ConstantDispatchContract;
 import io.valkyrja.dispatch.throwable.exception.DispatchNoClassException;
 import java.util.HashMap;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /** Dispatch targeting a Java static final field constant. */
 public class ConstantDispatch extends Dispatch implements ConstantDispatchContract {
 
     protected String constant;
-    protected Class<?> className;
+    protected @Nullable Class<?> className;
 
     public ConstantDispatch(String constant) {
         this(constant, null);
     }
 
-    public ConstantDispatch(String constant, Class<?> className) {
+    public ConstantDispatch(String constant, @Nullable Class<?> className) {
         this.constant = constant;
         this.className = className;
     }

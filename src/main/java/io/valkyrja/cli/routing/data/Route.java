@@ -27,12 +27,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import org.jspecify.annotations.Nullable;
 
 public class Route implements RouteContract {
 
     protected String name;
     protected String description;
-    protected Supplier<MessageContract> helpText;
+    protected @Nullable Supplier<MessageContract> helpText;
     protected BiFunction<ContainerContract, RouteContract, OutputContract> handler;
     protected List<Class<? extends RouteMatchedMiddlewareContract>> routeMatchedMiddleware;
     protected List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware;
@@ -52,7 +53,7 @@ public class Route implements RouteContract {
             String name,
             String description,
             BiFunction<ContainerContract, RouteContract, OutputContract> handler,
-            Supplier<MessageContract> helpText,
+            @Nullable Supplier<MessageContract> helpText,
             List<Class<? extends RouteMatchedMiddlewareContract>> routeMatchedMiddleware,
             List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
             List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,

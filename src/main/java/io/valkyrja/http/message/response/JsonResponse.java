@@ -21,6 +21,7 @@ import io.valkyrja.http.message.header.collection.contract.HeaderCollectionContr
 import io.valkyrja.http.message.response.contract.JsonResponseContract;
 import io.valkyrja.http.message.response.throwable.exception.HttpRequestInvalidJsonCallbackException;
 import io.valkyrja.http.message.stream.Stream;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -41,7 +42,7 @@ public class JsonResponse extends Response implements JsonResponseContract {
         this.data = data;
     }
 
-    public static JsonResponse createFromData(Map<String, Object> data, StatusCode statusCode, HeaderCollectionContract headers) {
+    public static JsonResponse createFromData(@Nullable Map<String, Object> data, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         return new JsonResponse(
                 data != null ? data : Map.of(),
                 statusCode != null ? statusCode : StatusCode.OK,

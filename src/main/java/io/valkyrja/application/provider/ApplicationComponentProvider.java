@@ -14,46 +14,39 @@ import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.ContainerComponentProvider;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
-import io.valkyrja.dispatch.provider.DispatchComponentProvider;
 import io.valkyrja.event.provider.EventComponentProvider;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
-import io.valkyrja.reflection.provider.ReflectionComponentProvider;
+
 import java.util.List;
 
 public class ApplicationComponentProvider implements ComponentProviderContract {
 
     @Override
-    public List<Class<? extends ComponentProviderContract>> getComponentProviders(
-            ApplicationContract app) {
+    public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {
         return List.of(
-                ContainerComponentProvider.class,
-                DispatchComponentProvider.class,
-                EventComponentProvider.class,
-                ReflectionComponentProvider.class);
+                new ContainerComponentProvider(),
+                new EventComponentProvider()
+        );
     }
 
     @Override
-    public List<Class<? extends ServiceProviderContract>> getContainerProviders(
-            ApplicationContract app) {
+    public List<ServiceProviderContract> getContainerProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends ListenerProviderContract>> getEventProviders(
-            ApplicationContract app) {
+    public List<ListenerProviderContract> getEventProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends CliRouteProviderContract>> getCliProviders(
-            ApplicationContract app) {
+    public List<CliRouteProviderContract> getCliProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends HttpRouteProviderContract>> getHttpProviders(
-            ApplicationContract app) {
+    public List<HttpRouteProviderContract> getHttpProviders(ApplicationContract app) {
         return List.of();
     }
 }

@@ -13,10 +13,11 @@ import io.valkyrja.http.message.contract.MessageContract;
 import io.valkyrja.http.message.enum_.StatusCode;
 import io.valkyrja.http.message.header.collection.contract.HeaderCollectionContract;
 import io.valkyrja.http.message.header.value.contract.CookieContract;
+import org.jspecify.annotations.Nullable;
 
 public interface ResponseContract extends MessageContract {
 
-    static ResponseContract create(String content, StatusCode statusCode, HeaderCollectionContract headers) {
+    static ResponseContract create(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         throw new UnsupportedOperationException("create must be implemented by the concrete class");
     }
 

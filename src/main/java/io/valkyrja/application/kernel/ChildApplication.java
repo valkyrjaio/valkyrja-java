@@ -16,6 +16,7 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
+
 import java.util.List;
 
 /**
@@ -49,27 +50,27 @@ public class ChildApplication implements ApplicationContract {
     }
 
     @Override
-    public List<Class<? extends ComponentProviderContract>> getProviders() {
+    public List<ComponentProviderContract> getProviders() {
         return parent.getProviders();
     }
 
     @Override
-    public List<Class<? extends ServiceProviderContract>> getContainerProviders() {
+    public List<ServiceProviderContract> getContainerProviders() {
         return parent.getContainerProviders();
     }
 
     @Override
-    public List<Class<? extends ListenerProviderContract>> getEventProviders() {
+    public List<ListenerProviderContract> getEventProviders() {
         return parent.getEventProviders();
     }
 
     @Override
-    public List<Class<? extends CliRouteProviderContract>> getCliProviders() {
+    public List<CliRouteProviderContract> getCliProviders() {
         return parent.getCliProviders();
     }
 
     @Override
-    public List<Class<? extends HttpRouteProviderContract>> getHttpProviders() {
+    public List<HttpRouteProviderContract> getHttpProviders() {
         return parent.getHttpProviders();
     }
 
