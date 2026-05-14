@@ -21,33 +21,34 @@ import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.message.response.contract.TextResponseContract;
 import io.valkyrja.http.message.response.factory.contract.ResponseFactoryContract;
 import io.valkyrja.http.message.uri.factory.UriFactory;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
 public class ResponseFactory implements ResponseFactoryContract {
 
     @Override
-    public ResponseContract createResponse(String content, StatusCode statusCode, HeaderCollectionContract headers) {
+    public ResponseContract createResponse(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         return Response.create(content, statusCode, headers);
     }
 
     @Override
-    public TextResponseContract createTextResponse(String content, StatusCode statusCode, HeaderCollectionContract headers) {
+    public TextResponseContract createTextResponse(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         return TextResponse.create(content, statusCode, headers);
     }
 
     @Override
-    public JsonResponseContract createJsonResponse(Map<String, Object> data, StatusCode statusCode, HeaderCollectionContract headers) {
+    public JsonResponseContract createJsonResponse(@Nullable Map<String, Object> data, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         return JsonResponse.createFromData(data, statusCode, headers);
     }
 
     @Override
-    public JsonResponseContract createJsonpResponse(String callback, Map<String, Object> data, StatusCode statusCode, HeaderCollectionContract headers) {
+    public JsonResponseContract createJsonpResponse(String callback, @Nullable Map<String, Object> data, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         return createJsonResponse(data, statusCode, headers).withCallback(callback);
     }
 
     @Override
-    public RedirectResponseContract createRedirectResponse(String uri, StatusCode statusCode, HeaderCollectionContract headers) {
+    public RedirectResponseContract createRedirectResponse(@Nullable String uri, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
         return RedirectResponse.createFromUri(UriFactory.fromString(uri != null ? uri : "/"), statusCode, headers);
     }
 }

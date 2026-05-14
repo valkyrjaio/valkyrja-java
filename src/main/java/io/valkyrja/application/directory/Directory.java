@@ -10,6 +10,7 @@
 package io.valkyrja.application.directory;
 
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 public class Directory {
 
@@ -33,47 +34,47 @@ public class Directory {
         basePath = path;
     }
 
-    public static String appPath(String path) {
+    public static String appPath(@Nullable String path) {
         return basePath(APP_PATH + path(path));
     }
 
-    public static String basePath(String path) {
+    public static String basePath(@Nullable String path) {
         return basePath + path(path);
     }
 
-    public static String dataPath(String path) {
+    public static String dataPath(@Nullable String path) {
         return basePath(DATA_PATH + path(path));
     }
 
-    public static String publicPath(String path) {
+    public static String publicPath(@Nullable String path) {
         return basePath(PUBLIC_PATH + path(path));
     }
 
-    public static String resourcesPath(String path) {
+    public static String resourcesPath(@Nullable String path) {
         return basePath(RESOURCES_PATH + path(path));
     }
 
-    public static String srcPath(String path) {
+    public static String srcPath(@Nullable String path) {
         return basePath(SRC_PATH + path(path));
     }
 
-    public static String storagePath(String path) {
+    public static String storagePath(@Nullable String path) {
         return basePath(STORAGE_PATH + path(path));
     }
 
-    public static String frameworkStoragePath(String path) {
+    public static String frameworkStoragePath(@Nullable String path) {
         return storagePath(FRAMEWORK_STORAGE_PATH + path(path));
     }
 
-    public static String logsStoragePath(String path) {
+    public static String logsStoragePath(@Nullable String path) {
         return storagePath(LOGS_STORAGE_PATH + path(path));
     }
 
-    public static String frameworkStorageCachePath(String path) {
+    public static String frameworkStorageCachePath(@Nullable String path) {
         return frameworkStoragePath(CACHE_STORAGE_PATH + path(path));
     }
 
-    public static String path(String path) {
+    public static String path(@Nullable String path) {
         path = Objects.requireNonNullElse(path, "");
 
         return !path.isEmpty() && !path.startsWith("/") ? "/" + path : path;

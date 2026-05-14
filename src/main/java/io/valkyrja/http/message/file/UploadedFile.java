@@ -17,6 +17,7 @@ import io.valkyrja.http.message.file.throwable.exception.UploadedFileMoveFailure
 import io.valkyrja.http.message.file.throwable.exception.UploadedFileUnableToWriteFileException;
 import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.stream.contract.StreamContract;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,13 +30,13 @@ public class UploadedFile implements UploadedFileContract {
 
     protected boolean hasBeenMoved = false;
 
-    protected String file;
-    protected StreamContract stream;
+    protected @Nullable String file;
+    protected @Nullable StreamContract stream;
     protected int size;
     protected String fileName;
     protected String mediaType;
 
-    public UploadedFile(String file, StreamContract stream, int size, String fileName, String mediaType) {
+    public UploadedFile(@Nullable String file, @Nullable StreamContract stream, int size, @Nullable String fileName, @Nullable String mediaType) {
         if (file == null && stream == null) {
             throw new UploadedFileInvalidUploadedFileException("One of file or stream are required");
         }

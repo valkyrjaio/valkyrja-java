@@ -16,10 +16,10 @@ import io.valkyrja.container.manager.abstract_.ProvidersAware;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default dependency injection container implementation.
@@ -54,8 +54,7 @@ public class Container extends ProvidersAware {
 
     public Container(ContainerDataContract data) {
         aliases.putAll(data.aliases());
-        deferred.putAll(data.deferred());
-        deferredCallbacks.putAll(data.deferredCallbacks());
+        callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
     }
@@ -64,25 +63,22 @@ public class Container extends ProvidersAware {
     public ContainerDataContract getData() {
         return new ContainerData(
                 Map.copyOf(aliases),
-                Map.copyOf(deferred),
-                Map.copyOf(deferredCallbacks),
+                Map.copyOf(callbacks),
                 Map.copyOf(services),
-                Map.copyOf(singletons),
-                List.copyOf(providers));
+                Map.copyOf(singletons));
     }
 
     @Override
     public void setFromData(ContainerDataContract data) {
         aliases.putAll(data.aliases());
-        deferred.putAll(data.deferred());
-        deferredCallbacks.putAll(data.deferredCallbacks());
+        callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
     }
 
     @Override
     public boolean has(Class<?> id) {
-        return isDeferred(id) || isSingleton(id) || isService(id) || isAlias(id);
+        return callbacks.containsKey(id) || isSingleton(id) || isService(id) || isAlias(id);
     }
 
     @Override
@@ -203,7 +199,7 @@ public class Container extends ProvidersAware {
 
     /** Resolve an aliased service without ensuring publication. */
     @SuppressWarnings("unchecked")
-    protected <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
+    protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
         Class<?> aliased = aliases.get(id);
         if (aliased == null) {
             return null;
@@ -218,7 +214,7 @@ public class Container extends ProvidersAware {
      * registered as a singleton.
      */
     @SuppressWarnings("unchecked")
-    protected <T> T getSingletonWithoutChecks(Class<T> id) {
+    protected @Nullable <T> T getSingletonWithoutChecks(Class<T> id) {
         Object cached = instances.get(id);
         if (cached != null) {
             return (T) cached;
@@ -237,7 +233,7 @@ public class Container extends ProvidersAware {
 
     /** Resolve a service via its registered callable without ensuring publication. */
     @SuppressWarnings("unchecked")
-    protected <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
+    protected @Nullable <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
         BiFunction<ContainerContract, Map<String, Object>, Object> callable = services.get(id);
         if (callable == null) {
             return null;
@@ -267,16 +263,16 @@ public class Container extends ProvidersAware {
     }
 
     /**
-     * Package-private accessor for ChildContainer — exposes the deferred callback for a given id
-     * without putting it on the public contract.
+     * Package-private accessor for NativeChildContainer — exposes the deferred callback for a
+     * given id without putting it on the public contract.
      */
-    Consumer<ContainerContract> getDeferredCallback(Class<?> id) {
-        return deferredCallbacks.get(id);
+    @Nullable Consumer<ContainerContract> getCallback(Class<?> id) {
+        return callbacks.get(id);
     }
 
     /** Publish a deferred service if it has not been published yet. */
     protected void publishUnpublishedDeferred(Class<?> id) {
-        if (isDeferred(id) && !isPublished(id)) {
+        if (callbacks.containsKey(id) && !isPublished(id)) {
             publish(id);
         }
     }

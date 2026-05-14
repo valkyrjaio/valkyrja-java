@@ -18,19 +18,21 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
-import io.valkyrja.reflection.support.Reflection;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
 
 public class Valkyrja implements ApplicationContract {
 
     protected final ContainerContract container;
     protected final ConfigContract config;
 
-    protected List<Class<? extends ComponentProviderContract>> providers = List.of();
-    protected List<Class<? extends ServiceProviderContract>> serviceProviders = List.of();
-    protected List<Class<? extends ListenerProviderContract>> eventProviders = List.of();
-    protected List<Class<? extends CliRouteProviderContract>> cliRouteProviders = List.of();
-    protected List<Class<? extends HttpRouteProviderContract>> httpRouteProviders = List.of();
+    protected List<ComponentProviderContract> providers = List.of();
+    protected List<ServiceProviderContract> serviceProviders = List.of();
+    protected List<ListenerProviderContract> eventProviders = List.of();
+    protected List<CliRouteProviderContract> cliRouteProviders = List.of();
+    protected List<HttpRouteProviderContract> httpRouteProviders = List.of();
 
     public Valkyrja(ContainerContract container) {
         this(container, new Config());
@@ -55,88 +57,83 @@ public class Valkyrja implements ApplicationContract {
     }
 
     @Override
-    public List<Class<? extends ComponentProviderContract>> getProviders() {
+    public List<ComponentProviderContract> getProviders() {
         if (!providers.isEmpty()) {
             return providers;
         }
 
-        LinkedHashSet<Class<? extends ComponentProviderContract>> seen = new LinkedHashSet<>();
+        List<ComponentProviderContract> result = new ArrayList<>();
 
-        for (Class<? extends ComponentProviderContract> providerClass : config.providers()) {
-            ComponentProviderContract provider = Reflection.instantiate(providerClass);
-            seen.addAll(provider.getComponentProviders(this));
-            seen.add(providerClass);
+        for (ComponentProviderContract provider : config.providers()) {
+            result.addAll(provider.getComponentProviders(this));
+            result.add(provider);
         }
 
-        providers = new ArrayList<>(seen);
+        providers = result;
         return providers;
     }
 
     @Override
-    public List<Class<? extends ServiceProviderContract>> getContainerProviders() {
+    public List<ServiceProviderContract> getContainerProviders() {
         if (!serviceProviders.isEmpty()) {
             return serviceProviders;
         }
 
-        LinkedHashSet<Class<? extends ServiceProviderContract>> seen = new LinkedHashSet<>();
+        List<ServiceProviderContract> result = new ArrayList<>();
 
-        for (Class<? extends ComponentProviderContract> providerClass : getProviders()) {
-            ComponentProviderContract provider = Reflection.instantiate(providerClass);
-            seen.addAll(provider.getContainerProviders(this));
+        for (ComponentProviderContract provider : getProviders()) {
+            result.addAll(provider.getContainerProviders(this));
         }
 
-        serviceProviders = new ArrayList<>(seen);
+        serviceProviders = result;
         return serviceProviders;
     }
 
     @Override
-    public List<Class<? extends ListenerProviderContract>> getEventProviders() {
+    public List<ListenerProviderContract> getEventProviders() {
         if (!eventProviders.isEmpty()) {
             return eventProviders;
         }
 
-        LinkedHashSet<Class<? extends ListenerProviderContract>> seen = new LinkedHashSet<>();
+        List<ListenerProviderContract> result = new ArrayList<>();
 
-        for (Class<? extends ComponentProviderContract> providerClass : getProviders()) {
-            ComponentProviderContract provider = Reflection.instantiate(providerClass);
-            seen.addAll(provider.getEventProviders(this));
+        for (ComponentProviderContract provider : getProviders()) {
+            result.addAll(provider.getEventProviders(this));
         }
 
-        eventProviders = new ArrayList<>(seen);
+        eventProviders = result;
         return eventProviders;
     }
 
     @Override
-    public List<Class<? extends CliRouteProviderContract>> getCliProviders() {
+    public List<CliRouteProviderContract> getCliProviders() {
         if (!cliRouteProviders.isEmpty()) {
             return cliRouteProviders;
         }
 
-        LinkedHashSet<Class<? extends CliRouteProviderContract>> seen = new LinkedHashSet<>();
+        List<CliRouteProviderContract> result = new ArrayList<>();
 
-        for (Class<? extends ComponentProviderContract> providerClass : getProviders()) {
-            ComponentProviderContract provider = Reflection.instantiate(providerClass);
-            seen.addAll(provider.getCliProviders(this));
+        for (ComponentProviderContract provider : getProviders()) {
+            result.addAll(provider.getCliProviders(this));
         }
 
-        cliRouteProviders = new ArrayList<>(seen);
+        cliRouteProviders = result;
         return cliRouteProviders;
     }
 
     @Override
-    public List<Class<? extends HttpRouteProviderContract>> getHttpProviders() {
+    public List<HttpRouteProviderContract> getHttpProviders() {
         if (!httpRouteProviders.isEmpty()) {
             return httpRouteProviders;
         }
 
-        LinkedHashSet<Class<? extends HttpRouteProviderContract>> seen = new LinkedHashSet<>();
+        List<HttpRouteProviderContract> result = new ArrayList<>();
 
-        for (Class<? extends ComponentProviderContract> providerClass : getProviders()) {
-            ComponentProviderContract provider = Reflection.instantiate(providerClass);
-            seen.addAll(provider.getHttpProviders(this));
+        for (ComponentProviderContract provider : getProviders()) {
+            result.addAll(provider.getHttpProviders(this));
         }
 
-        httpRouteProviders = new ArrayList<>(seen);
+        httpRouteProviders = result;
         return httpRouteProviders;
     }
 

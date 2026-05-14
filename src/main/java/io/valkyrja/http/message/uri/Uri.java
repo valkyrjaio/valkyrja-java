@@ -12,6 +12,7 @@ package io.valkyrja.http.message.uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
 import io.valkyrja.http.message.uri.enum_.Scheme;
 import io.valkyrja.http.message.uri.factory.UriFactory;
+import org.jspecify.annotations.Nullable;
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPathException;
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPortException;
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidQueryException;
@@ -190,7 +191,7 @@ public class Uri implements UriContract {
     }
 
     @Override
-    public UriContract withUserInfo(String user, String password) {
+    public UriContract withUserInfo(String user, @Nullable String password) {
         String info = user;
 
         if (user.isEmpty()) {

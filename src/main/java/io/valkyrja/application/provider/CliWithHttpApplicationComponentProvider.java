@@ -11,15 +11,8 @@ package io.valkyrja.application.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
-import io.valkyrja.cli.interaction.provider.CliInteractionComponentProvider;
-import io.valkyrja.cli.middleware.provider.CliMiddlewareComponentProvider;
-import io.valkyrja.cli.routing.provider.CliRoutingComponentProvider;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
-import io.valkyrja.cli.server.provider.CliServerComponentProvider;
-import io.valkyrja.container.provider.ContainerComponentProvider;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
-import io.valkyrja.dispatch.provider.DispatchComponentProvider;
-import io.valkyrja.event.provider.EventComponentProvider;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.message.provider.HttpMessageComponentProvider;
 import io.valkyrja.http.middleware.provider.HttpMiddlewareComponentProvider;
@@ -33,39 +26,33 @@ import java.util.List;
 public class CliWithHttpApplicationComponentProvider implements ComponentProviderContract {
 
     @Override
-    public List<Class<? extends ComponentProviderContract>> getComponentProviders(ApplicationContract app) {
+    public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {
         return List.of(
-                ContainerComponentProvider.class,
-                DispatchComponentProvider.class,
-                CliInteractionComponentProvider.class,
-                CliMiddlewareComponentProvider.class,
-                CliRoutingComponentProvider.class,
-                CliServerComponentProvider.class,
-                EventComponentProvider.class,
-                HttpMessageComponentProvider.class,
-                HttpMiddlewareComponentProvider.class,
-                HttpRoutingComponentProvider.class,
-                HttpRoutingCliComponentProvider.class,
-                HttpServerComponentProvider.class);
+                new CliApplicationComponentProvider(),
+                new HttpMessageComponentProvider(),
+                new HttpMiddlewareComponentProvider(),
+                new HttpRoutingComponentProvider(),
+                new HttpRoutingCliComponentProvider(),
+                new HttpServerComponentProvider());
     }
 
     @Override
-    public List<Class<? extends ServiceProviderContract>> getContainerProviders(ApplicationContract app) {
+    public List<ServiceProviderContract> getContainerProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends ListenerProviderContract>> getEventProviders(ApplicationContract app) {
+    public List<ListenerProviderContract> getEventProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends CliRouteProviderContract>> getCliProviders(ApplicationContract app) {
+    public List<CliRouteProviderContract> getCliProviders(ApplicationContract app) {
         return List.of();
     }
 
     @Override
-    public List<Class<? extends HttpRouteProviderContract>> getHttpProviders(ApplicationContract app) {
+    public List<HttpRouteProviderContract> getHttpProviders(ApplicationContract app) {
         return List.of();
     }
 }

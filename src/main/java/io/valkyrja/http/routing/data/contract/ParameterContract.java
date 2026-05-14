@@ -10,6 +10,7 @@
 package io.valkyrja.http.routing.data.contract;
 
 import io.valkyrja.type.data.Cast;
+import org.jspecify.annotations.Nullable;
 
 public interface ParameterContract {
 
@@ -35,11 +36,11 @@ public interface ParameterContract {
 
     ParameterContract withShouldCapture(boolean shouldCapture);
 
-    Object getDefault();
+    @Nullable Object getDefault();
 
-    ParameterContract withDefault(Object defaultValue);
+    ParameterContract withDefault(@Nullable Object defaultValue);
 
-    Object getValue();
+    @Nullable Object getValue();
 
-    ParameterContract withValue(Object value);
+    ParameterContract withValue(@Nullable Object value);
 }

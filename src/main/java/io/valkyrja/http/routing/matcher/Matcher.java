@@ -18,6 +18,7 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.matcher.contract.MatcherContract;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRoutePathException;
 import io.valkyrja.type.data.Cast;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,14 +39,14 @@ public class Matcher implements MatcherContract {
     }
 
     @Override
-    public RouteContract match(String path, RequestMethod requestMethod) {
+    public @Nullable RouteContract match(String path, RequestMethod requestMethod) {
         path = "/" + path.replaceAll("^/+|/+$", "");
         RouteContract route = matchStatic(path, requestMethod);
         return route != null ? route : matchDynamic(path, requestMethod);
     }
 
     @Override
-    public RouteContract matchStatic(String path, RequestMethod requestMethod) {
+    public @Nullable RouteContract matchStatic(String path, RequestMethod requestMethod) {
         if (collection.hasPath(path, requestMethod)) {
             return collection.getByPath(path, requestMethod);
         }
@@ -53,7 +54,7 @@ public class Matcher implements MatcherContract {
     }
 
     @Override
-    public RouteContract matchDynamic(String path, RequestMethod requestMethod) {
+    public @Nullable RouteContract matchDynamic(String path, RequestMethod requestMethod) {
         Map<String, String> regexMap = collection.getRegexes(requestMethod);
 
         for (Map.Entry<String, String> entry : regexMap.entrySet()) {

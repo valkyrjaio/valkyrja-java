@@ -12,17 +12,18 @@ package io.valkyrja.cli.interaction.message;
 import io.valkyrja.cli.interaction.formatter.contract.FormatterContract;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.throwable.exception.CliInteractionNoFormatterException;
+import org.jspecify.annotations.Nullable;
 
 public class Message implements MessageContract {
 
     protected String text;
-    protected FormatterContract formatter;
+    protected @Nullable FormatterContract formatter;
 
     public Message(String text) {
         this(text, null);
     }
 
-    public Message(String text, FormatterContract formatter) {
+    public Message(String text, @Nullable FormatterContract formatter) {
         this.text = text;
         this.formatter = formatter;
     }

@@ -28,7 +28,7 @@ public class ServiceProvider implements ServiceProviderContract {
     public static void publishData(ContainerContract container) {
         ApplicationContract app = container.getSingleton(ApplicationContract.class);
 
-        for (Class<? extends ServiceProviderContract> provider : app.getContainerProviders()) {
+        for (var provider : app.getContainerProviders()) {
             container.register(provider);
         }
 

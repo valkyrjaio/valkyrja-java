@@ -63,7 +63,7 @@ public record CliConfig(
         List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
         List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
         List<Class<? extends ExitedMiddlewareContract>> exitedMiddleware,
-        List<Class<? extends ComponentProviderContract>> providers,
+        List<ComponentProviderContract> providers,
         List<Consumer<ApplicationContract>> callbacks)
         implements CliConfigContract {
 
@@ -98,7 +98,7 @@ public record CliConfig(
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of(ApplicationComponentProvider.class),
+                List.of(new ApplicationComponentProvider()),
                 List.of());
     }
 }

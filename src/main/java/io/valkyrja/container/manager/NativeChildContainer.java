@@ -10,10 +10,10 @@
 package io.valkyrja.container.manager;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
-import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A per-request child container that accesses parent state via direct protected field reads.
@@ -44,7 +44,7 @@ public class NativeChildContainer extends Container {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected <T> T getSingletonWithoutChecks(Class<T> id) {
+    protected @Nullable <T> T getSingletonWithoutChecks(Class<T> id) {
         // 1. Child's own cached instance
         Object cached = instances.get(id);
         if (cached != null) {
@@ -72,7 +72,7 @@ public class NativeChildContainer extends Container {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
+    protected @Nullable <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
         BiFunction<ContainerContract, Map<String, Object>, Object> callable = services.get(id);
         if (callable == null) {
             callable = parent.services.get(id);
@@ -85,7 +85,7 @@ public class NativeChildContainer extends Container {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
+    protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
         Class<?> aliased = aliases.get(id);
         if (aliased == null) {
             aliased = parent.aliases.get(id);
@@ -98,15 +98,14 @@ public class NativeChildContainer extends Container {
 
     /**
      * Publish a deferred service using child or parent callbacks. Consults parent via the
-     * package-private {@link Container#getDeferredCallback} accessor when the child has no
-     * callback of its own. Runs with the child as the container so bindings register into
-     * the child's own maps.
+     * package-private {@link Container#getCallback} accessor when the child has no callback of its
+     * own. Runs with the child as the container so bindings register into the child's own maps.
      */
     @Override
     public void publish(Class<?> id) {
-        Consumer<ContainerContract> callback = deferredCallbacks.get(id);
+        Consumer<ContainerContract> callback = callbacks.get(id);
         if (callback == null) {
-            callback = parent.getDeferredCallback(id);
+            callback = parent.getCallback(id);
         }
         if (callback == null) {
             return;
@@ -138,20 +137,8 @@ public class NativeChildContainer extends Container {
     }
 
     @Override
-    public boolean isDeferred(Class<?> id) {
-        // deferred/deferredCallbacks are in ProvidersAware (different sub-package) — use contract
-        return super.isDeferred(id) || parent.isDeferred(id);
-    }
-
-    @Override
     public boolean isPublished(Class<?> id) {
         // published is in ProvidersAware (different sub-package) — use contract
         return super.isPublished(id) || parent.isPublished(id);
-    }
-
-    @Override
-    public boolean isRegistered(Class<? extends ServiceProviderContract> provider) {
-        // registeredProviders is in ProvidersAware (different sub-package) — use contract
-        return super.isRegistered(provider) || parent.isRegistered(provider);
     }
 }

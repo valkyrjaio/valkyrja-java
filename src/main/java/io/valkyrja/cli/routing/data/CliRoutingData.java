@@ -9,20 +9,20 @@
 
 package io.valkyrja.cli.routing.data;
 
+import io.valkyrja.cli.routing.data.contract.CliRoutingDataContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
-import java.util.HashMap;
+
 import java.util.Map;
 import java.util.function.Supplier;
 
-public final class CliRoutingData {
+public record CliRoutingData(Map<String, Supplier<RouteContract>> routes)
+        implements CliRoutingDataContract {
 
-    public final Map<String, Supplier<RouteContract>> routes;
-
-    public CliRoutingData() {
-        this(new HashMap<>());
+    public CliRoutingData {
+        routes = Map.copyOf(routes);
     }
 
-    public CliRoutingData(Map<String, Supplier<RouteContract>> routes) {
-        this.routes = Map.copyOf(routes);
+    public CliRoutingData() {
+        this(Map.of());
     }
 }

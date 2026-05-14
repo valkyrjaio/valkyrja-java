@@ -17,17 +17,9 @@ public interface ProvidersAwareContract {
     /**
      * Register a provider.
      *
-     * @param providerClass the provider class to register
+     * @param provider the provider instance to register
      */
-    void register(Class<? extends ServiceProviderContract> providerClass);
-
-    /**
-     * Determine whether a given service is deferred and not yet published.
-     *
-     * @param id the service type
-     * @return true if the service is deferred
-     */
-    boolean isDeferred(Class<?> id);
+    void register(ServiceProviderContract provider);
 
     /**
      * Determine whether a given service has been published.
@@ -36,14 +28,6 @@ public interface ProvidersAwareContract {
      * @return true if the service is published
      */
     boolean isPublished(Class<?> id);
-
-    /**
-     * Determine whether a provider has been registered.
-     *
-     * @param providerClass the provider class
-     * @return true if already registered
-     */
-    boolean isRegistered(Class<? extends ServiceProviderContract> providerClass);
 
     /**
      * Publish a deferred service by invoking its provider's publish callback.

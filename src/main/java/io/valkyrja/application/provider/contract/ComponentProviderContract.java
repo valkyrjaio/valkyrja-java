@@ -14,6 +14,7 @@ import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
+
 import java.util.List;
 
 public interface ComponentProviderContract {
@@ -22,39 +23,39 @@ public interface ComponentProviderContract {
      * Get the component providers this component depends on.
      *
      * @param app the application
-     * @return list of component providers
+     * @return list of component provider instances
      */
-    List<Class<? extends ComponentProviderContract>> getComponentProviders(ApplicationContract app);
+    List<ComponentProviderContract> getComponentProviders(ApplicationContract app);
 
     /**
      * Get the component's container service providers.
      *
      * @param app the application
-     * @return list of container providers
+     * @return list of container provider instances
      */
-    List<Class<? extends ServiceProviderContract>> getContainerProviders(ApplicationContract app);
+    List<ServiceProviderContract> getContainerProviders(ApplicationContract app);
 
     /**
      * Get the component's event listener providers.
      *
      * @param app the application
-     * @return list of event providers
+     * @return list of event provider instances
      */
-    List<Class<? extends ListenerProviderContract>> getEventProviders(ApplicationContract app);
+    List<ListenerProviderContract> getEventProviders(ApplicationContract app);
 
     /**
      * Get the component's CLI route providers.
      *
      * @param app the application
-     * @return list of cli route provider instances
+     * @return list of CLI route provider instances
      */
-    List<Class<? extends CliRouteProviderContract>> getCliProviders(ApplicationContract app);
+    List<CliRouteProviderContract> getCliProviders(ApplicationContract app);
 
     /**
      * Get the component's HTTP route providers.
      *
      * @param app the application
-     * @return list of http route provider instances
+     * @return list of HTTP route provider instances
      */
-    List<Class<? extends HttpRouteProviderContract>> getHttpProviders(ApplicationContract app);
+    List<HttpRouteProviderContract> getHttpProviders(ApplicationContract app);
 }

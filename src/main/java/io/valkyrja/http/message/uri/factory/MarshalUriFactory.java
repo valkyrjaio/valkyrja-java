@@ -18,6 +18,8 @@ import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPathExcept
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPortException;
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidQueryException;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -118,7 +120,7 @@ public abstract class MarshalUriFactory {
         return path;
     }
 
-    protected static String marshalRequestUriFromUnencodedUrl(Map<String, String> server) {
+    protected static @Nullable String marshalRequestUriFromUnencodedUrl(Map<String, String> server) {
         String iisUrlRewritten = server.get("IIS_WasUrlRewritten");
         String unencodedUrl    = server.getOrDefault("UNENCODED_URL", "");
 
@@ -129,7 +131,7 @@ public abstract class MarshalUriFactory {
         return null;
     }
 
-    protected static String marshalRequestUriFromHttpXRewriteUrl(Map<String, String> server) {
+    protected static @Nullable String marshalRequestUriFromHttpXRewriteUrl(Map<String, String> server) {
         String httpXRewriteUrl = server.get("HTTP_X_REWRITE_URL");
 
         if (isValidRequestUri(httpXRewriteUrl)) {
@@ -139,7 +141,7 @@ public abstract class MarshalUriFactory {
         return null;
     }
 
-    protected static String marshalRequestUriFromHttpXOriginalUrl(Map<String, String> server) {
+    protected static @Nullable String marshalRequestUriFromHttpXOriginalUrl(Map<String, String> server) {
         String httpXOriginalUrl = server.get("HTTP_X_ORIGINAL_URL");
 
         if (isValidRequestUri(httpXOriginalUrl)) {
@@ -149,7 +151,7 @@ public abstract class MarshalUriFactory {
         return null;
     }
 
-    protected static String marshalRequestUriFromOrigPathInfo(Map<String, String> server) {
+    protected static @Nullable String marshalRequestUriFromOrigPathInfo(Map<String, String> server) {
         String origPathInfo = server.get("ORIG_PATH_INFO");
 
         if (isValidRequestUri(origPathInfo)) {
@@ -159,7 +161,7 @@ public abstract class MarshalUriFactory {
         return null;
     }
 
-    protected static boolean isValidRequestUri(String subject) {
+    protected static boolean isValidRequestUri(@Nullable String subject) {
         return subject != null && !subject.isEmpty();
     }
 

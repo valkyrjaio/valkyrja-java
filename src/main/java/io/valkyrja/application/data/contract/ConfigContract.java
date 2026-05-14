@@ -11,6 +11,7 @@ package io.valkyrja.application.data.contract;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
+
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -33,7 +34,7 @@ public interface ConfigContract {
 
     String dataNamespace();
 
-    List<Class<? extends ComponentProviderContract>> providers();
+    List<ComponentProviderContract> providers();
 
     List<Consumer<ApplicationContract>> callbacks();
 }

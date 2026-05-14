@@ -16,21 +16,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import org.jspecify.annotations.Nullable;
 
 public class Answer extends Message implements AnswerContract {
 
     protected String defaultResponse;
     protected String userResponse;
     protected List<String> allowedResponses;
-    protected Predicate<String> validationCallable;
+    protected @Nullable Predicate<String> validationCallable;
     protected boolean hasBeenAnswered;
 
     public Answer(
             String defaultResponse,
-            Predicate<String> validationCallable,
+            @Nullable Predicate<String> validationCallable,
             boolean hasBeenAnswered,
             String text,
-            FormatterContract formatter,
+            @Nullable FormatterContract formatter,
             List<String> allowedResponses) {
         super(text, formatter);
 

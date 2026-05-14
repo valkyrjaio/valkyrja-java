@@ -23,6 +23,7 @@ import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 
 public class CheckCommandForTypoMiddleware implements RouteNotMatchedMiddlewareContract {
 
@@ -93,7 +94,7 @@ public class CheckCommandForTypoMiddleware implements RouteNotMatchedMiddlewareC
         return output;
     }
 
-    protected RouteContract getMatchedRoute(List<RouteContract> commands, String response) {
+    protected @Nullable RouteContract getMatchedRoute(List<RouteContract> commands, String response) {
         return commands.stream()
             .filter(c -> c.getName().equals(response))
             .findFirst()
