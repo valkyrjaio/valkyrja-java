@@ -12,10 +12,8 @@ package io.valkyrja.http.message.uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
 import io.valkyrja.http.message.uri.enum_.Scheme;
 import io.valkyrja.http.message.uri.factory.UriFactory;
+import java.util.Locale;
 import org.jspecify.annotations.Nullable;
-import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPathException;
-import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPortException;
-import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidQueryException;
 
 public class Uri implements UriContract {
 
@@ -24,12 +22,12 @@ public class Uri implements UriContract {
     protected String password;
     protected String userInfo;
     protected String host;
-    protected int    port;
+    protected int port;
     protected String path;
     protected String query;
     protected String fragment;
 
-    private String uriString = null;
+    private @Nullable String uriString = null;
 
     public Uri() {
         this(Scheme.EMPTY, "", "", "", 0, "", "", "");
@@ -40,15 +38,14 @@ public class Uri implements UriContract {
     }
 
     public Uri(
-        Scheme scheme,
-        String username,
-        String password,
-        String host,
-        int port,
-        String path,
-        String query,
-        String fragment
-    ) {
+            Scheme scheme,
+            String username,
+            String password,
+            String host,
+            int port,
+            String path,
+            String query,
+            String fragment) {
         String userInfo = username;
 
         if (!password.isEmpty()) {
@@ -61,14 +58,14 @@ public class Uri implements UriContract {
             UriFactory.validatePort(port);
         }
 
-        this.scheme   = scheme;
+        this.scheme = scheme;
         this.username = username;
         this.password = password;
-        this.port     = port;
+        this.port = port;
         this.userInfo = UriFactory.filterUserInfo(userInfo);
-        this.host     = host.toLowerCase();
-        this.path     = UriFactory.filterPath(path);
-        this.query    = UriFactory.filterQuery(query);
+        this.host = host.toLowerCase(Locale.ROOT);
+        this.path = UriFactory.filterPath(path);
+        this.query = UriFactory.filterQuery(query);
         this.fragment = UriFactory.filterFragment(fragment);
     }
 
@@ -133,8 +130,8 @@ public class Uri implements UriContract {
 
     @Override
     public String getHostPort() {
-        String h    = host;
-        int    p    = getPort();
+        String h = host;
+        int p = getPort();
 
         if (!h.isEmpty() && p != 0) {
             h += ":" + p;
@@ -148,8 +145,8 @@ public class Uri implements UriContract {
         String hostPort = getHostPort();
 
         return !hostPort.isEmpty() && scheme != Scheme.EMPTY
-            ? scheme.getValue() + "://" + hostPort
-            : hostPort;
+                ? scheme.getValue() + "://" + hostPort
+                : hostPort;
     }
 
     @Override
@@ -192,21 +189,22 @@ public class Uri implements UriContract {
 
     @Override
     public UriContract withUserInfo(String user, @Nullable String password) {
+        String pass = password != null ? password : "";
         String info = user;
 
         if (user.isEmpty()) {
-            password = "";
+            pass = "";
         }
 
-        if (!password.isEmpty()) {
-            info += ":" + password;
+        if (!pass.isEmpty()) {
+            info += ":" + pass;
         }
 
         Uri newUri = copy();
 
         newUri.userInfo = info;
         newUri.username = user;
-        newUri.password = password;
+        newUri.password = pass;
 
         return newUri;
     }
@@ -288,14 +286,14 @@ public class Uri implements UriContract {
     private Uri copy() {
         Uri newUri = new Uri();
 
-        newUri.scheme   = this.scheme;
+        newUri.scheme = this.scheme;
         newUri.username = this.username;
         newUri.password = this.password;
         newUri.userInfo = this.userInfo;
-        newUri.host     = this.host;
-        newUri.port     = this.port;
-        newUri.path     = this.path;
-        newUri.query    = this.query;
+        newUri.host = this.host;
+        newUri.port = this.port;
+        newUri.path = this.path;
+        newUri.query = this.query;
         newUri.fragment = this.fragment;
         newUri.uriString = null;
 

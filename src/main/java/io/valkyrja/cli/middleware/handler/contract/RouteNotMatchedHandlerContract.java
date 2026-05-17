@@ -13,7 +13,8 @@ import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.middleware.contract.RouteNotMatchedMiddlewareContract;
 
-public interface RouteNotMatchedHandlerContract extends HandlerContract<RouteNotMatchedMiddlewareContract> {
+public interface RouteNotMatchedHandlerContract
+        extends HandlerContract<RouteNotMatchedMiddlewareContract> {
 
     OutputContract routeNotMatched(InputContract input, OutputContract output);
 }

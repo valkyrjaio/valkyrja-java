@@ -20,6 +20,15 @@ import java.util.List;
 public class VersionOptionParameter extends OptionParameter {
 
     public VersionOptionParameter() {
-        super(OptionName.VERSION, "Application version.", "", "", List.of(OptionShortName.VERSION), List.of(), new ArrayList<>(), OptionMode.OPTIONAL, OptionValueMode.NONE);
+        super(
+                OptionName.VERSION,
+                "Application version.",
+                "",
+                "",
+                List.of(OptionShortName.VERSION),
+                List.of(),
+                new ArrayList<>(),
+                OptionMode.OPTIONAL,
+                OptionValueMode.NONE);
     }
 }

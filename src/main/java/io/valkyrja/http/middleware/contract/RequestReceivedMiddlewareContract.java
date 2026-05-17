@@ -15,5 +15,6 @@ import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContra
 
 public interface RequestReceivedMiddlewareContract {
 
-    RequestReceivedResult requestReceived(ServerRequestContract request, RequestReceivedHandlerContract handler);
+    RequestReceivedResult requestReceived(
+            ServerRequestContract request, RequestReceivedHandlerContract handler);
 }

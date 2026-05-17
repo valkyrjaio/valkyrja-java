@@ -55,26 +55,31 @@ public class ListCommand {
 
     public OutputContract run() {
         String namespace = "";
-        List<RouteContract> routes = collection.all().values().stream().collect(Collectors.toList());
+        List<RouteContract> routes =
+                collection.all().values().stream().collect(Collectors.toList());
 
         if (route.hasOption("namespace")) {
             namespace = route.getOption("namespace").getFirstValue();
             final String ns = namespace;
-            routes = routes.stream()
-                .filter(r -> r.getName().startsWith(ns))
-                .collect(Collectors.toList());
+            routes =
+                    routes.stream()
+                            .filter(r -> r.getName().startsWith(ns))
+                            .collect(Collectors.toList());
         }
 
         if (routes.isEmpty()) {
             return getNoRoutesErrorOutput(namespace);
         }
 
-        routes = routes.stream()
-            .sorted(Comparator.comparing(RouteContract::getName))
-            .collect(Collectors.toList());
+        routes =
+                routes.stream()
+                        .sorted(Comparator.comparing(RouteContract::getName))
+                        .collect(Collectors.toList());
 
-        OutputContract output = outputFactory.createOutput()
-            .withMessages(new Header(appNamespace, appVersion, route));
+        OutputContract output =
+                outputFactory
+                        .createOutput()
+                        .withMessages(new Header(appNamespace, appVersion, route));
 
         output = addHeaderMessages(output, namespace);
         output = addRoutesMessages(output, routes);
@@ -83,19 +88,22 @@ public class ListCommand {
     }
 
     protected OutputContract getNoRoutesErrorOutput(String namespace) {
-        String errorMessage = namespace.isEmpty()
-            ? "No routes found."
-            : "Namespace `" + namespace + "` was not found.";
-        return outputFactory.createOutput()
-            .withExitCode(ExitCode.ERROR)
-            .withAddedMessages(new Banner(new ErrorMessage(errorMessage)));
+        String errorMessage =
+                namespace.isEmpty()
+                        ? "No routes found."
+                        : "Namespace `" + namespace + "` was not found.";
+        return outputFactory
+                .createOutput()
+                .withExitCode(ExitCode.ERROR)
+                .withAddedMessages(new Banner(new ErrorMessage(errorMessage)));
     }
 
     protected OutputContract addHeaderMessages(OutputContract output, String namespace) {
         return output.withAddedMessages(
-            new Message("Commands" + (namespace.isEmpty() ? ":" : " [" + namespace + "]:"), new HighlightedTextFormatter()),
-            new NewLine()
-        );
+                new Message(
+                        "Commands" + (namespace.isEmpty() ? ":" : " [" + namespace + "]:"),
+                        new HighlightedTextFormatter()),
+                new NewLine());
     }
 
     protected OutputContract addRoutesMessages(OutputContract output, List<RouteContract> routes) {
@@ -107,12 +115,11 @@ public class ListCommand {
 
     protected OutputContract addRouteMessages(OutputContract output, RouteContract route) {
         return output.withAddedMessages(
-            new Message("  "),
-            new Message(route.getName(), new Formatter(new TextColorFormat(TextColor.MAGENTA))),
-            new NewLine(),
-            new Message("    - "),
-            new Message(route.getDescription(), new HighlightedTextFormatter()),
-            new NewLine()
-        );
+                new Message("  "),
+                new Message(route.getName(), new Formatter(new TextColorFormat(TextColor.MAGENTA))),
+                new NewLine(),
+                new Message("    - "),
+                new Message(route.getDescription(), new HighlightedTextFormatter()),
+                new NewLine());
     }
 }

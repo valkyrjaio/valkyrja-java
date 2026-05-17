@@ -14,22 +14,16 @@ import io.valkyrja.http.message.uri.Uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
 import io.valkyrja.http.message.uri.data.HostPortAccumulator;
 import io.valkyrja.http.message.uri.enum_.Scheme;
-import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPathException;
-import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPortException;
-import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidQueryException;
-
-import org.jspecify.annotations.Nullable;
-
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 public abstract class MarshalUriFactory {
 
     public static UriContract marshalUriFromServer(
-        Map<String, String> server,
-        Map<String, HeaderContract> headers
-    ) {
+            Map<String, String> server, Map<String, HeaderContract> headers) {
         UriContract uri = new Uri();
 
         uri = addSchemeToUri(uri, server, headers);
@@ -39,12 +33,12 @@ public abstract class MarshalUriFactory {
     }
 
     public static String getHeader(String headerName, Map<String, HeaderContract> headers) {
-        headerName = headerName.toLowerCase();
+        headerName = headerName.toLowerCase(Locale.ROOT);
 
         HeaderContract header = null;
 
         for (Map.Entry<String, HeaderContract> entry : headers.entrySet()) {
-            if (entry.getKey().toLowerCase().equals(headerName)) {
+            if (entry.getKey().toLowerCase(Locale.ROOT).equals(headerName)) {
                 header = entry.getValue();
                 break;
             }
@@ -54,10 +48,9 @@ public abstract class MarshalUriFactory {
     }
 
     public static void marshalHostAndPortFromHeaders(
-        HostPortAccumulator accumulator,
-        Map<String, String> server,
-        Map<String, HeaderContract> headers
-    ) {
+            HostPortAccumulator accumulator,
+            Map<String, String> server,
+            Map<String, HeaderContract> headers) {
         if (!getHeader("host", headers).isEmpty()) {
             marshalHostAndPortFromHeader(accumulator, getHeader("host", headers));
             return;
@@ -100,7 +93,7 @@ public abstract class MarshalUriFactory {
 
         boolean isRequestUriValid = isValidRequestUri(requestUri);
 
-        if (isRequestUriValid) {
+        if (isRequestUriValid && requestUri != null) {
             String result = requestUri.replaceAll("^[^/:]+://[^/]+", "");
             return result != null ? result : requestUri;
         }
@@ -120,9 +113,10 @@ public abstract class MarshalUriFactory {
         return path;
     }
 
-    protected static @Nullable String marshalRequestUriFromUnencodedUrl(Map<String, String> server) {
+    protected static @Nullable String marshalRequestUriFromUnencodedUrl(
+            Map<String, String> server) {
         String iisUrlRewritten = server.get("IIS_WasUrlRewritten");
-        String unencodedUrl    = server.getOrDefault("UNENCODED_URL", "");
+        String unencodedUrl = server.getOrDefault("UNENCODED_URL", "");
 
         if ("1".equals(iisUrlRewritten) && !unencodedUrl.isEmpty()) {
             return unencodedUrl;
@@ -131,7 +125,8 @@ public abstract class MarshalUriFactory {
         return null;
     }
 
-    protected static @Nullable String marshalRequestUriFromHttpXRewriteUrl(Map<String, String> server) {
+    protected static @Nullable String marshalRequestUriFromHttpXRewriteUrl(
+            Map<String, String> server) {
         String httpXRewriteUrl = server.get("HTTP_X_REWRITE_URL");
 
         if (isValidRequestUri(httpXRewriteUrl)) {
@@ -141,7 +136,8 @@ public abstract class MarshalUriFactory {
         return null;
     }
 
-    protected static @Nullable String marshalRequestUriFromHttpXOriginalUrl(Map<String, String> server) {
+    protected static @Nullable String marshalRequestUriFromHttpXOriginalUrl(
+            Map<String, String> server) {
         String httpXOriginalUrl = server.get("HTTP_X_ORIGINAL_URL");
 
         if (isValidRequestUri(httpXOriginalUrl)) {
@@ -151,7 +147,8 @@ public abstract class MarshalUriFactory {
         return null;
     }
 
-    protected static @Nullable String marshalRequestUriFromOrigPathInfo(Map<String, String> server) {
+    protected static @Nullable String marshalRequestUriFromOrigPathInfo(
+            Map<String, String> server) {
         String origPathInfo = server.get("ORIG_PATH_INFO");
 
         if (isValidRequestUri(origPathInfo)) {
@@ -166,10 +163,7 @@ public abstract class MarshalUriFactory {
     }
 
     protected static UriContract addSchemeToUri(
-        UriContract uri,
-        Map<String, String> server,
-        Map<String, HeaderContract> headers
-    ) {
+            UriContract uri, Map<String, String> server, Map<String, HeaderContract> headers) {
         Scheme scheme = Scheme.HTTP;
 
         if (shouldSchemeBeSetToHttps(server, headers)) {
@@ -180,9 +174,7 @@ public abstract class MarshalUriFactory {
     }
 
     protected static UriContract addPathQueryAndFragmentToUri(
-        UriContract uri,
-        Map<String, String> server
-    ) {
+            UriContract uri, Map<String, String> server) {
         String path = marshalRequestUri(server);
         path = stripQueryString(path);
 
@@ -200,26 +192,20 @@ public abstract class MarshalUriFactory {
         if (path.contains("#")) {
             int hashPos = path.indexOf('#');
             fragment = path.substring(hashPos + 1);
-            path     = path.substring(0, hashPos);
+            path = path.substring(0, hashPos);
         }
 
-        return uri
-            .withPath(path)
-            .withQuery(query)
-            .withFragment(fragment);
+        return uri.withPath(path).withQuery(query).withFragment(fragment);
     }
 
     protected static UriContract addHostAndPortToUri(
-        UriContract uri,
-        Map<String, String> server,
-        Map<String, HeaderContract> headers
-    ) {
+            UriContract uri, Map<String, String> server, Map<String, HeaderContract> headers) {
         HostPortAccumulator accumulator = new HostPortAccumulator();
 
         marshalHostAndPortFromHeaders(accumulator, server, headers);
 
         String host = accumulator.host;
-        int    port = accumulator.port;
+        int port = accumulator.port;
 
         if (!host.isEmpty()) {
             uri = uri.withHost(host);
@@ -233,16 +219,15 @@ public abstract class MarshalUriFactory {
     }
 
     protected static boolean shouldSchemeBeSetToHttps(
-        Map<String, String> server,
-        Map<String, HeaderContract> headers
-    ) {
+            Map<String, String> server, Map<String, HeaderContract> headers) {
         String https = server.get("HTTPS");
 
         return (https != null && !https.equals("off"))
-            || getHeader("x-forwarded-proto", headers).equals(Scheme.HTTPS.getValue());
+                || getHeader("x-forwarded-proto", headers).equals(Scheme.HTTPS.getValue());
     }
 
-    protected static void marshalHostAndPortFromHeader(HostPortAccumulator accumulator, String host) {
+    protected static void marshalHostAndPortFromHeader(
+            HostPortAccumulator accumulator, String host) {
         accumulator.host = host;
         accumulator.port = 0;
 
@@ -251,12 +236,14 @@ public abstract class MarshalUriFactory {
 
         if (matcher.find()) {
             String portStr = matcher.group(1);
-            accumulator.host = accumulator.host.substring(0, accumulator.host.length() - portStr.length() - 1);
+            accumulator.host =
+                    accumulator.host.substring(0, accumulator.host.length() - portStr.length() - 1);
             accumulator.port = Integer.parseInt(portStr);
         }
     }
 
-    protected static void marshalIpv6HostAndPort(HostPortAccumulator accumulator, Map<String, String> server) {
+    protected static void marshalIpv6HostAndPort(
+            HostPortAccumulator accumulator, Map<String, String> server) {
         accumulator.host = "[" + server.get("SERVER_ADDR") + "]";
         accumulator.port = accumulator.port > 0 ? accumulator.port : 80;
 

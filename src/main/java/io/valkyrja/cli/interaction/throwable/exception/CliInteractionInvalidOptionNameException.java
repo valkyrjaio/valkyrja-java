@@ -11,7 +11,8 @@ package io.valkyrja.cli.interaction.throwable.exception;
 
 import io.valkyrja.cli.interaction.throwable.exception.abstract_.CliInteractionInvalidArgumentException;
 
-public class CliInteractionInvalidOptionNameException extends CliInteractionInvalidArgumentException {
+public class CliInteractionInvalidOptionNameException
+        extends CliInteractionInvalidArgumentException {
 
     public CliInteractionInvalidOptionNameException(String message) {
         super(message);

@@ -11,16 +11,16 @@ package io.valkyrja.http.middleware.handler.abstract_;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.middleware.handler.contract.HandlerContract;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 public abstract class Handler<M> implements HandlerContract<M> {
 
     protected ContainerContract container;
     protected List<Class<? extends M>> middleware = new ArrayList<>();
-    protected Class<? extends M> next = null;
+    protected @Nullable Class<? extends M> next = null;
     protected int index = 0;
 
     @SafeVarargs

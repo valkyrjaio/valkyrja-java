@@ -42,7 +42,8 @@ public abstract class OptionFactory {
 
     protected static void validateArgIsOption(String arg) {
         if (!arg.startsWith("-")) {
-            throw new CliInteractionInvalidOptionNameException("Options must begin with either a `-` or `--`");
+            throw new CliInteractionInvalidOptionNameException(
+                    "Options must begin with either a `-` or `--`");
         }
     }
 
@@ -58,7 +59,8 @@ public abstract class OptionFactory {
 
     protected static void validateValueIsEmpty(String value) {
         if (!value.isEmpty()) {
-            throw new CliInteractionInvalidEmptyValueException("Cannot combine multiple options and include a value");
+            throw new CliInteractionInvalidEmptyValueException(
+                    "Cannot combine multiple options and include a value");
         }
     }
 

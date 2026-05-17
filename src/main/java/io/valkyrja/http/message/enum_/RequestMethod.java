@@ -12,32 +12,49 @@ package io.valkyrja.http.message.enum_;
 import java.util.List;
 
 /**
- * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-method-definitions">RFC 9110 Method Definitions</a>
+ * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-method-definitions">RFC 9110
+ *     Method Definitions</a>
  */
 public enum RequestMethod {
 
-    /** @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-get">RFC 9110 GET</a> */
+    /**
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-get">RFC 9110 GET</a>
+     */
     GET("GET"),
 
-    /** @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-head">RFC 9110 HEAD</a> */
+    /**
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-head">RFC 9110 HEAD</a>
+     */
     HEAD("HEAD"),
 
-    /** @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-post">RFC 9110 POST</a> */
+    /**
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-post">RFC 9110 POST</a>
+     */
     POST("POST"),
 
-    /** @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-put">RFC 9110 PUT</a> */
+    /**
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-put">RFC 9110 PUT</a>
+     */
     PUT("PUT"),
 
-    /** @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-delete">RFC 9110 DELETE</a> */
+    /**
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-delete">RFC 9110 DELETE</a>
+     */
     DELETE("DELETE"),
 
-    /** @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-connect">RFC 9110 CONNECT</a> */
+    /**
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-connect">RFC 9110 CONNECT</a>
+     */
     CONNECT("CONNECT"),
 
-    /** @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-options">RFC 9110 OPTIONS</a> */
+    /**
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-options">RFC 9110 OPTIONS</a>
+     */
     OPTIONS("OPTIONS"),
 
-    /** @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-trace">RFC 9110 TRACE</a> */
+    /**
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-trace">RFC 9110 TRACE</a>
+     */
     TRACE("TRACE"),
 
     /**

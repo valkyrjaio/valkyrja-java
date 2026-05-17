@@ -20,6 +20,15 @@ import java.util.List;
 public class NoInteractionOptionParameter extends OptionParameter {
 
     public NoInteractionOptionParameter() {
-        super(OptionName.NO_INTERACTION, "No interactive questions are asked.", "", "", List.of(OptionShortName.NO_INTERACTION), List.of(), new ArrayList<>(), OptionMode.OPTIONAL, OptionValueMode.NONE);
+        super(
+                OptionName.NO_INTERACTION,
+                "No interactive questions are asked.",
+                "",
+                "",
+                List.of(OptionShortName.NO_INTERACTION),
+                List.of(),
+                new ArrayList<>(),
+                OptionMode.OPTIONAL,
+                OptionValueMode.NONE);
     }
 }

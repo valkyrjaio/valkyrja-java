@@ -20,6 +20,15 @@ import java.util.List;
 public class QuietOptionParameter extends OptionParameter {
 
     public QuietOptionParameter() {
-        super(OptionName.QUIET, "Output is suppressed, except for errors.", "", "", List.of(OptionShortName.QUIET), List.of(), new ArrayList<>(), OptionMode.OPTIONAL, OptionValueMode.NONE);
+        super(
+                OptionName.QUIET,
+                "Output is suppressed, except for errors.",
+                "",
+                "",
+                List.of(OptionShortName.QUIET),
+                List.of(),
+                new ArrayList<>(),
+                OptionMode.OPTIONAL,
+                OptionValueMode.NONE);
     }
 }

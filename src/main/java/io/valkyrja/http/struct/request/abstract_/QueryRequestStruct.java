@@ -10,18 +10,19 @@
 package io.valkyrja.http.struct.request.abstract_;
 
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
-
 import java.util.Map;
 
 public abstract class QueryRequestStruct extends RequestStruct {
 
     @Override
-    protected Map<String, Object> getOnlyParamsFromRequest(ServerRequestContract request, String... values) {
+    protected Map<String, Object> getOnlyParamsFromRequest(
+            ServerRequestContract request, String... values) {
         return request.getQueryParams().getOnly(values);
     }
 
     @Override
-    protected Map<String, Object> getExceptParamsFromRequest(ServerRequestContract request, String... values) {
+    protected Map<String, Object> getExceptParamsFromRequest(
+            ServerRequestContract request, String... values) {
         return request.getQueryParams().getAllExcept(values);
     }
 }

@@ -36,6 +36,7 @@ public class HtmlResponse extends Response implements HtmlResponseContract {
     }
 
     private static HeaderCollectionContract injectContentType(HeaderCollectionContract headers) {
-        return headers.withHeader(new Header(HeaderName.CONTENT_TYPE, ContentTypeValue.TEXT_HTML_UTF8));
+        return headers.withHeader(
+                new Header(HeaderName.CONTENT_TYPE, ContentTypeValue.TEXT_HTML_UTF8));
     }
 }

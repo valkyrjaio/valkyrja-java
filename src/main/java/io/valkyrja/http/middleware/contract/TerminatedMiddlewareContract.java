@@ -15,5 +15,8 @@ import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 
 public interface TerminatedMiddlewareContract {
 
-    void terminated(ServerRequestContract request, ResponseContract response, TerminatedHandlerContract handler);
+    void terminated(
+            ServerRequestContract request,
+            ResponseContract response,
+            TerminatedHandlerContract handler);
 }

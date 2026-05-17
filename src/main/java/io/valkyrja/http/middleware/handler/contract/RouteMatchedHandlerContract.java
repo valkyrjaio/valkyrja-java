@@ -14,7 +14,8 @@ import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.data.RouteMatchedResult;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
-public interface RouteMatchedHandlerContract extends HandlerContract<RouteMatchedMiddlewareContract> {
+public interface RouteMatchedHandlerContract
+        extends HandlerContract<RouteMatchedMiddlewareContract> {
 
     RouteMatchedResult routeMatched(ServerRequestContract request, RouteContract route);
 }

@@ -16,18 +16,19 @@ import io.valkyrja.cli.middleware.handler.abstract_.Handler;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
-public class RouteNotMatchedHandler extends Handler<RouteNotMatchedMiddlewareContract> implements RouteNotMatchedHandlerContract {
+public class RouteNotMatchedHandler extends Handler<RouteNotMatchedMiddlewareContract>
+        implements RouteNotMatchedHandlerContract {
 
     @SafeVarargs
-    public RouteNotMatchedHandler(ContainerContract container, Class<? extends RouteNotMatchedMiddlewareContract>... middleware) {
+    public RouteNotMatchedHandler(
+            ContainerContract container,
+            Class<? extends RouteNotMatchedMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 
     @Override
     public OutputContract routeNotMatched(InputContract input, OutputContract output) {
         Class<? extends RouteNotMatchedMiddlewareContract> next = this.next;
-        return next != null
-                ? getMiddleware(next).routeNotMatched(input, output, this)
-                : output;
+        return next != null ? getMiddleware(next).routeNotMatched(input, output, this) : output;
     }
 }

@@ -13,7 +13,8 @@ import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.RouteNotMatchedMiddlewareContract;
 
-public interface RouteNotMatchedHandlerContract extends HandlerContract<RouteNotMatchedMiddlewareContract> {
+public interface RouteNotMatchedHandlerContract
+        extends HandlerContract<RouteNotMatchedMiddlewareContract> {
 
     ResponseContract routeNotMatched(ServerRequestContract request, ResponseContract response);
 }

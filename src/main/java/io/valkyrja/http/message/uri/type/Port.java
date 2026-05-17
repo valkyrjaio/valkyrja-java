@@ -27,8 +27,9 @@ public class Port {
     public static Port fromValue(Object value) {
         if (!(value instanceof Integer)) {
             throw new HttpUriInvalidPortException(
-                "Int expected value of type `" + (value == null ? "null" : value.getClass().getSimpleName()) + "` provided"
-            );
+                    "Int expected value of type `"
+                            + (value == null ? "null" : value.getClass().getSimpleName())
+                            + "` provided");
         }
 
         return new Port((Integer) value);

@@ -31,7 +31,8 @@ public class QuestionWriter implements WriterContract {
     @Override
     public OutputContract write(OutputContract output, MessageContract message) {
         if (!(message instanceof QuestionContract question)) {
-            throw new CliInteractionExpectedQuestionOutputException("This writer expects only questions");
+            throw new CliInteractionExpectedQuestionOutputException(
+                    "This writer expects only questions");
         }
         return askQuestion(output, question);
     }
@@ -63,15 +64,18 @@ public class QuestionWriter implements WriterContract {
 
         if (!validResponses.isEmpty()) {
             output = output.writeMessage(new Message(" ("));
-            String joined = validResponses.stream()
-                .map(v -> "`" + v + "`")
-                .collect(Collectors.joining(" or "));
+            String joined =
+                    validResponses.stream()
+                            .map(v -> "`" + v + "`")
+                            .collect(Collectors.joining(" or "));
             output = output.writeMessage(new Message(joined));
             output = output.writeMessage(new Message(")"));
         }
 
         output = output.writeMessage(new Message(" [default: \""));
-        output = output.writeMessage(new Message(answer.getDefaultResponse(), new HighlightedTextFormatter()));
+        output =
+                output.writeMessage(
+                        new Message(answer.getDefaultResponse(), new HighlightedTextFormatter()));
         output = output.writeMessage(new Message("\"]"));
 
         output = output.writeMessage(new Message(":"));
@@ -81,7 +85,8 @@ public class QuestionWriter implements WriterContract {
         return output;
     }
 
-    protected OutputContract writeAnswerAfterResponse(OutputContract output, AnswerContract answer) {
+    protected OutputContract writeAnswerAfterResponse(
+            OutputContract output, AnswerContract answer) {
         output = output.writeMessage(answer);
         output = output.writeMessage(new NewLine());
         return output;

@@ -13,6 +13,7 @@ import io.valkyrja.application.constant.ApplicationInfo;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Header extends Message {
@@ -28,14 +29,17 @@ public class Header extends Message {
     protected String commandName;
 
     public Header(String appName, String appVersion, RouteContract route) {
-        this(appName, appVersion, route,
-            ApplicationInfo.ASCII,
-            ApplicationInfo.VERSION,
-            ApplicationInfo.VERSION_BUILD_DATE_TIME,
-            System.getProperty("java.version"),
-            "",
-            "",
-            "");
+        this(
+                appName,
+                appVersion,
+                route,
+                ApplicationInfo.ASCII,
+                ApplicationInfo.VERSION,
+                ApplicationInfo.VERSION_BUILD_DATE_TIME,
+                Objects.requireNonNullElse(System.getProperty("java.version"), ""),
+                "",
+                "",
+                "");
     }
 
     public Header(
@@ -56,8 +60,10 @@ public class Header extends Message {
         this.valkyrjaVersion = valkyrjaVersion;
         this.valkyrjaBuildDate = valkyrjaBuildDate;
         this.javaVersion = javaVersion;
-        this.projectRoot = projectRoot.isEmpty() ? Paths.get("").toAbsolutePath().toString() : projectRoot;
-        this.actionDescription = actionDescription.isEmpty() ? route.getDescription() : actionDescription;
+        this.projectRoot =
+                projectRoot.isEmpty() ? Paths.get("").toAbsolutePath().toString() : projectRoot;
+        this.actionDescription =
+                actionDescription.isEmpty() ? route.getDescription() : actionDescription;
         this.commandName = commandName.isEmpty() ? route.getName() : commandName;
     }
 
@@ -117,22 +123,28 @@ public class Header extends Message {
 
     @Override
     public String getText() {
-        String[] iconLines = Arrays.stream(icon.split("\n"))
-            .map(line -> "│   " + line)
-            .toArray(String[]::new);
+        String[] iconLines =
+                Arrays.stream(icon.split("\n")).map(line -> "│   " + line).toArray(String[]::new);
 
-        String[] lines = new String[]{
-            "╭── " + appName + " v" + appVersion,
-            "│",
-        };
+        String[] lines =
+                new String[] {
+                    "╭── " + appName + " v" + appVersion, "│",
+                };
         lines = concat(lines, iconLines);
-        lines = concat(lines, new String[]{
-            "│",
-            "│   Built on Valkyrja v" + valkyrjaVersion + " (date: " + valkyrjaBuildDate + ")",
-            "│   Running on Java " + javaVersion,
-            "│   " + projectRoot,
-            "╰── " + actionDescription + " · " + commandName,
-        });
+        lines =
+                concat(
+                        lines,
+                        new String[] {
+                            "│",
+                            "│   Built on Valkyrja v"
+                                    + valkyrjaVersion
+                                    + " (date: "
+                                    + valkyrjaBuildDate
+                                    + ")",
+                            "│   Running on Java " + javaVersion,
+                            "│   " + projectRoot,
+                            "╰── " + actionDescription + " · " + commandName,
+                        });
 
         return Arrays.stream(lines).collect(Collectors.joining("\n"));
     }
@@ -153,6 +165,15 @@ public class Header extends Message {
 
     private Header(String placeholder) {
         super("");
+        this.appName = "";
+        this.appVersion = "";
+        this.icon = "";
+        this.valkyrjaVersion = "";
+        this.valkyrjaBuildDate = "";
+        this.javaVersion = "";
+        this.projectRoot = "";
+        this.actionDescription = "";
+        this.commandName = "";
     }
 
     private static String[] concat(String[] a, String[] b) {

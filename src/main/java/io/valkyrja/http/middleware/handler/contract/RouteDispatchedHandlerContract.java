@@ -14,7 +14,9 @@ import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
-public interface RouteDispatchedHandlerContract extends HandlerContract<RouteDispatchedMiddlewareContract> {
+public interface RouteDispatchedHandlerContract
+        extends HandlerContract<RouteDispatchedMiddlewareContract> {
 
-    ResponseContract routeDispatched(ServerRequestContract request, ResponseContract response, RouteContract route);
+    ResponseContract routeDispatched(
+            ServerRequestContract request, ResponseContract response, RouteContract route);
 }

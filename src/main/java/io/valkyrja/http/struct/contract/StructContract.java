@@ -11,5 +11,4 @@ package io.valkyrja.http.struct.contract;
 
 import io.valkyrja.type.enum_.contract.ArrayableContract;
 
-public interface StructContract extends ArrayableContract {
-}
+public interface StructContract extends ArrayableContract {}

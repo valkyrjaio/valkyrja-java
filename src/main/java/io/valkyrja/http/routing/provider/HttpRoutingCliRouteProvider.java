@@ -14,7 +14,6 @@ import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.routing.cli.command.ListCommand;
-
 import java.util.List;
 
 public class HttpRoutingCliRouteProvider implements CliRouteProviderContract {

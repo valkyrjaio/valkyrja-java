@@ -11,7 +11,8 @@ package io.valkyrja.http.message.response.throwable.exception;
 
 import io.valkyrja.http.message.response.throwable.exception.abstract_.HttpResponseInvalidArgumentException;
 
-public class HttpRequestInvalidRedirectStatusCodeException extends HttpResponseInvalidArgumentException {
+public class HttpRequestInvalidRedirectStatusCodeException
+        extends HttpResponseInvalidArgumentException {
 
     public HttpRequestInvalidRedirectStatusCodeException(String message) {
         super(message);

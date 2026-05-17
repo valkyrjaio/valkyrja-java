@@ -13,9 +13,9 @@ import io.valkyrja.http.message.header.collection.contract.HeaderCollectionContr
 import io.valkyrja.http.message.header.contract.HeaderContract;
 import io.valkyrja.http.message.header.throwable.exception.HttpHeaderInvalidHeaderNameException;
 import io.valkyrja.http.message.header.throwable.exception.HttpHeaderInvalidHeaderParamException;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,12 +50,12 @@ public class HeaderCollection implements HeaderCollectionContract {
 
     @Override
     public boolean has(String name) {
-        return headers.containsKey(name.toLowerCase());
+        return headers.containsKey(name.toLowerCase(Locale.ROOT));
     }
 
     @Override
     public HeaderContract get(String name) {
-        HeaderContract header = headers.get(name.toLowerCase());
+        HeaderContract header = headers.get(name.toLowerCase(Locale.ROOT));
 
         if (header == null) {
             throw new HttpHeaderInvalidHeaderNameException("Header " + name + " does not exist");
@@ -83,13 +83,13 @@ public class HeaderCollection implements HeaderCollectionContract {
         Set<String> nameSet = Arrays.stream(names).collect(Collectors.toSet());
 
         return headers.entrySet().stream()
-            .filter(entry -> nameSet.contains(entry.getKey()))
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (a, b) -> a,
-                LinkedHashMap::new
-            ));
+                .filter(entry -> nameSet.contains(entry.getKey()))
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (a, b) -> a,
+                                LinkedHashMap::new));
     }
 
     @Override
@@ -97,13 +97,13 @@ public class HeaderCollection implements HeaderCollectionContract {
         Set<String> nameSet = Arrays.stream(names).collect(Collectors.toSet());
 
         return headers.entrySet().stream()
-            .filter(entry -> !nameSet.contains(entry.getKey()))
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (a, b) -> a,
-                LinkedHashMap::new
-            ));
+                .filter(entry -> !nameSet.contains(entry.getKey()))
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (a, b) -> a,
+                                LinkedHashMap::new));
     }
 
     @Override
@@ -119,7 +119,7 @@ public class HeaderCollection implements HeaderCollectionContract {
             return copy();
         }
 
-        String headerName = name.toLowerCase();
+        String headerName = name.toLowerCase(Locale.ROOT);
         HeaderCollection newCollection = copy();
         newCollection.headers.remove(headerName);
         return newCollection;
@@ -159,7 +159,7 @@ public class HeaderCollection implements HeaderCollectionContract {
             return;
         }
 
-        headers.remove(name.toLowerCase());
+        headers.remove(name.toLowerCase(Locale.ROOT));
     }
 
     protected void overrideHeader(HeaderContract header) {

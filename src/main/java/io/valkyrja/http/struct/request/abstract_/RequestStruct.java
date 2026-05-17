@@ -13,7 +13,6 @@ import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
 import io.valkyrja.validation.rule.contract.RuleContract;
 import io.valkyrja.validation.validator.contract.ValidatorContract;
-
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +43,9 @@ public abstract class RequestStruct implements RequestStructContract {
         return true;
     }
 
-    protected abstract Map<String, Object> getOnlyParamsFromRequest(ServerRequestContract request, String... values);
+    protected abstract Map<String, Object> getOnlyParamsFromRequest(
+            ServerRequestContract request, String... values);
 
-    protected abstract Map<String, Object> getExceptParamsFromRequest(ServerRequestContract request, String... values);
+    protected abstract Map<String, Object> getExceptParamsFromRequest(
+            ServerRequestContract request, String... values);
 }

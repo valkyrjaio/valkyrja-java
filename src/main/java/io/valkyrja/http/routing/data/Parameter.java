@@ -28,7 +28,14 @@ public class Parameter implements ParameterContract {
         this(name, regex, null, false, true, null, null);
     }
 
-    public Parameter(String name, String regex, @Nullable Cast cast, boolean isOptional, boolean shouldCapture, @Nullable Object defaultValue, @Nullable Object value) {
+    public Parameter(
+            String name,
+            String regex,
+            @Nullable Cast cast,
+            boolean isOptional,
+            boolean shouldCapture,
+            @Nullable Object defaultValue,
+            @Nullable Object value) {
         this.name = name;
         this.regex = regex;
         this.cast = cast;

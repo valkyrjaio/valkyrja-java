@@ -17,17 +17,13 @@ import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.EventComponentProvider;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
-
 import java.util.List;
 
 public class ApplicationComponentProvider implements ComponentProviderContract {
 
     @Override
     public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {
-        return List.of(
-                new ContainerComponentProvider(),
-                new EventComponentProvider()
-        );
+        return List.of(new ContainerComponentProvider(), new EventComponentProvider());
     }
 
     @Override

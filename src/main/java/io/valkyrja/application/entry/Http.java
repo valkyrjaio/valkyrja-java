@@ -20,11 +20,10 @@ import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
 /**
  * HTTP entry point for traditional CGI / single-request runtimes.
  *
- * <p>Bootstraps the application from scratch on every request — suitable for
- * conventional servlet containers or raw CGI where no persistent process state
- * survives between requests. For persistent worker runtimes (Sun HTTP, Netty,
- * Tomcat, Jetty, etc.) use {@link io.valkyrja.application.entry.abstract_.WorkerHttp}
- * or one of its concrete subclasses instead.
+ * <p>Bootstraps the application from scratch on every request — suitable for conventional servlet
+ * containers or raw CGI where no persistent process state survives between requests. For persistent
+ * worker runtimes (Sun HTTP, Netty, Tomcat, Jetty, etc.) use {@link
+ * io.valkyrja.application.entry.abstract_.WorkerHttp} or one of its concrete subclasses instead.
  */
 public class Http extends App {
 
@@ -34,13 +33,13 @@ public class Http extends App {
      * @param config the HTTP configuration
      */
     public static void run(HttpConfigContract config) {
-        ApplicationContract    app       = start(config);
-        ContainerContract      container = app.getContainer();
+        ApplicationContract app = start(config);
+        ContainerContract container = app.getContainer();
 
         bootstrapThrowableHandler(app, container);
 
         RequestHandlerContract handler = container.getSingleton(RequestHandlerContract.class);
-        ServerRequestContract  request = getRequest();
+        ServerRequestContract request = getRequest();
         handler.run(request);
     }
 

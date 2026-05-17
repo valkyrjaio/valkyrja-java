@@ -20,7 +20,11 @@ import io.valkyrja.http.struct.response.contract.ResponseStructContract;
 public class ResponseStructMiddleware implements RouteDispatchedMiddlewareContract {
 
     @Override
-    public ResponseContract routeDispatched(ServerRequestContract request, ResponseContract response, RouteContract route, RouteDispatchedHandlerContract handler) {
+    public ResponseContract routeDispatched(
+            ServerRequestContract request,
+            ResponseContract response,
+            RouteContract route,
+            RouteDispatchedHandlerContract handler) {
         if (response instanceof JsonResponseContract jsonResponse && route.hasResponseStruct()) {
             ResponseStructContract responseStruct = route.getResponseStruct();
             response = updateJsonWithResponseStruct(jsonResponse, responseStruct);
@@ -29,7 +33,9 @@ public class ResponseStructMiddleware implements RouteDispatchedMiddlewareContra
         return handler.routeDispatched(request, response, route);
     }
 
-    protected JsonResponseContract updateJsonWithResponseStruct(JsonResponseContract response, ResponseStructContract responseStruct) {
-        return response.withJsonAsBody(responseStruct.getStructuredData(response.getBodyAsJson(), true));
+    protected JsonResponseContract updateJsonWithResponseStruct(
+            JsonResponseContract response, ResponseStructContract responseStruct) {
+        return response.withJsonAsBody(
+                responseStruct.getStructuredData(response.getBodyAsJson(), true));
     }
 }

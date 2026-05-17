@@ -15,5 +15,8 @@ import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContra
 
 public interface SendingResponseMiddlewareContract {
 
-    ResponseContract sendingResponse(ServerRequestContract request, ResponseContract response, SendingResponseHandlerContract handler);
+    ResponseContract sendingResponse(
+            ServerRequestContract request,
+            ResponseContract response,
+            SendingResponseHandlerContract handler);
 }

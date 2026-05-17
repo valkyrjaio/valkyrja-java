@@ -9,5 +9,4 @@
 
 package io.valkyrja.validation.rule.contract;
 
-public interface RuleContract {
-}
+public interface RuleContract {}

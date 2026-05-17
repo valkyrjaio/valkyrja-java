@@ -16,10 +16,13 @@ import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.handler.abstract_.Handler;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
 
-public class RequestReceivedHandler extends Handler<RequestReceivedMiddlewareContract> implements RequestReceivedHandlerContract {
+public class RequestReceivedHandler extends Handler<RequestReceivedMiddlewareContract>
+        implements RequestReceivedHandlerContract {
 
     @SafeVarargs
-    public RequestReceivedHandler(ContainerContract container, Class<? extends RequestReceivedMiddlewareContract>... middleware) {
+    public RequestReceivedHandler(
+            ContainerContract container,
+            Class<? extends RequestReceivedMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 

@@ -12,8 +12,7 @@ package io.valkyrja.event.throwable.exception.abstract_;
 import io.valkyrja.event.throwable.contract.EventThrowable;
 import io.valkyrja.throwable.exception.RuntimeException;
 
-public abstract class EventRuntimeException extends RuntimeException
-        implements EventThrowable {
+public abstract class EventRuntimeException extends RuntimeException implements EventThrowable {
 
     protected EventRuntimeException(String message) {
         super(message);

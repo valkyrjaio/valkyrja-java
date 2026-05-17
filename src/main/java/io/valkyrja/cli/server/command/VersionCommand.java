@@ -25,7 +25,11 @@ public class VersionCommand {
     protected RouteContract route;
     protected OutputFactoryContract outputFactory;
 
-    public VersionCommand(OutputFactoryContract outputFactory, String appNamespace, String appVersion, RouteContract route) {
+    public VersionCommand(
+            OutputFactoryContract outputFactory,
+            String appNamespace,
+            String appVersion,
+            RouteContract route) {
         this.outputFactory = outputFactory;
         this.appNamespace = appNamespace;
         this.appVersion = appVersion;
@@ -42,15 +46,23 @@ public class VersionCommand {
         }
 
         if (route.hasOption("plain")) {
-            return outputFactory.createOutput().withMessages(
-                new Message(appNamespace + " v" + appVersion),
-                new NewLine(),
-                new Message("Built on Valkyrja v" + ApplicationInfo.VERSION + " (date: " + ApplicationInfo.VERSION_BUILD_DATE_TIME + ")"),
-                new NewLine(),
-                new Message("Running on Java " + System.getProperty("java.version"))
-            );
+            return outputFactory
+                    .createOutput()
+                    .withMessages(
+                            new Message(appNamespace + " v" + appVersion),
+                            new NewLine(),
+                            new Message(
+                                    "Built on Valkyrja v"
+                                            + ApplicationInfo.VERSION
+                                            + " (date: "
+                                            + ApplicationInfo.VERSION_BUILD_DATE_TIME
+                                            + ")"),
+                            new NewLine(),
+                            new Message("Running on Java " + System.getProperty("java.version")));
         }
 
-        return outputFactory.createOutput().withMessages(new Header(appNamespace, appVersion, route));
+        return outputFactory
+                .createOutput()
+                .withMessages(new Header(appNamespace, appVersion, route));
     }
 }

@@ -36,11 +36,17 @@ public class Response extends Message implements ResponseContract {
         setBody(body);
     }
 
-    public static Response create(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
+    public static Response create(
+            @Nullable String content,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers) {
         Stream stream = new Stream();
         stream.write(content != null ? content : "");
         stream.rewind();
-        return new Response(stream, statusCode != null ? statusCode : StatusCode.OK, headers != null ? headers : new HeaderCollection());
+        return new Response(
+                stream,
+                statusCode != null ? statusCode : StatusCode.OK,
+                headers != null ? headers : new HeaderCollection());
     }
 
     @Override
@@ -64,7 +70,10 @@ public class Response extends Message implements ResponseContract {
     @Override
     public ResponseContract withReasonPhrase(String reasonPhrase) {
         Response copy = (Response) copy();
-        copy.statusPhrase = (reasonPhrase != null && !reasonPhrase.isEmpty()) ? reasonPhrase : statusCode.asPhrase();
+        copy.statusPhrase =
+                (reasonPhrase != null && !reasonPhrase.isEmpty())
+                        ? reasonPhrase
+                        : statusCode.asPhrase();
         return copy;
     }
 
@@ -76,13 +85,18 @@ public class Response extends Message implements ResponseContract {
 
     @Override
     public ResponseContract withoutCookie(CookieContract cookie) {
-        HeaderCollectionContract newHeaders = headers.withAddedHeaders(new SetCookie(cookie.delete()));
+        HeaderCollectionContract newHeaders =
+                headers.withAddedHeaders(new SetCookie(cookie.delete()));
         return (ResponseContract) withHeaders(newHeaders);
     }
 
     @Override
     public ResponseContract sendHttpLine() {
-        System.out.printf("HTTP/%s %d %s%n", protocolVersion.getValue(), statusCode.getValue(), statusPhrase.isEmpty() ? statusCode.asPhrase() : statusPhrase);
+        System.out.printf(
+                "HTTP/%s %d %s%n",
+                protocolVersion.getValue(),
+                statusCode.getValue(),
+                statusPhrase.isEmpty() ? statusCode.asPhrase() : statusPhrase);
         return this;
     }
 

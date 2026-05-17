@@ -16,10 +16,13 @@ import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.handler.abstract_.Handler;
 import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 
-public class TerminatedHandler extends Handler<TerminatedMiddlewareContract> implements TerminatedHandlerContract {
+public class TerminatedHandler extends Handler<TerminatedMiddlewareContract>
+        implements TerminatedHandlerContract {
 
     @SafeVarargs
-    public TerminatedHandler(ContainerContract container, Class<? extends TerminatedMiddlewareContract>... middleware) {
+    public TerminatedHandler(
+            ContainerContract container,
+            Class<? extends TerminatedMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 

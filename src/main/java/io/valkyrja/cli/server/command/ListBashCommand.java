@@ -24,19 +24,24 @@ public class ListBashCommand {
     protected RouteCollectionContract collection;
     protected OutputFactoryContract outputFactory;
 
-    public ListBashCommand(RouteContract route, RouteCollectionContract collection, OutputFactoryContract outputFactory) {
+    public ListBashCommand(
+            RouteContract route,
+            RouteCollectionContract collection,
+            OutputFactoryContract outputFactory) {
         this.route = route;
         this.collection = collection;
         this.outputFactory = outputFactory;
     }
 
     public static MessageContract help() {
-        return new Message("A command to list all the commands present within the Cli component for bash completion.");
+        return new Message(
+                "A command to list all the commands present within the Cli component for bash completion.");
     }
 
     public OutputContract run() {
         OutputContract output = outputFactory.createOutput();
-        List<RouteContract> routes = collection.all().values().stream().collect(Collectors.toList());
+        List<RouteContract> routes =
+                collection.all().values().stream().collect(Collectors.toList());
 
         int colonAt = -1;
 
@@ -44,15 +49,21 @@ public class ListBashCommand {
             String namespace = route.getArgument("namespace").getFirstValue();
             colonAt = namespace.indexOf(':');
             final String ns = namespace;
-            routes = routes.stream()
-                .filter(r -> r.getName().startsWith(ns))
-                .collect(Collectors.toList());
+            routes =
+                    routes.stream()
+                            .filter(r -> r.getName().startsWith(ns))
+                            .collect(Collectors.toList());
         }
 
         final int finalColonAt = colonAt;
-        List<String> routesForBash = routes.stream()
-            .map(r -> finalColonAt >= 0 ? r.getName().substring(finalColonAt + 1) : r.getName())
-            .collect(Collectors.toList());
+        List<String> routesForBash =
+                routes.stream()
+                        .map(
+                                r ->
+                                        finalColonAt >= 0
+                                                ? r.getName().substring(finalColonAt + 1)
+                                                : r.getName())
+                        .collect(Collectors.toList());
 
         return output.withAddedMessages(new Message(String.join(" ", routesForBash)));
     }

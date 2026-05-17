@@ -19,11 +19,15 @@ import io.valkyrja.http.middleware.data.RouteMatchedResult;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
+import org.jspecify.annotations.Nullable;
 
 public class RequestStructMiddleware implements RouteMatchedMiddlewareContract {
 
     @Override
-    public RouteMatchedResult routeMatched(ServerRequestContract request, RouteContract route, RouteMatchedHandlerContract handler) {
+    public RouteMatchedResult routeMatched(
+            ServerRequestContract request,
+            RouteContract route,
+            RouteMatchedHandlerContract handler) {
         if (route.hasRequestStruct()) {
             RequestStructContract struct = route.getRequestStruct();
             ResponseContract response = ensureRequestConformsToMessage(request, route, struct);
@@ -35,31 +39,42 @@ public class RequestStructMiddleware implements RouteMatchedMiddlewareContract {
         return handler.routeMatched(request, route);
     }
 
-    protected ResponseContract ensureRequestConformsToMessage(ServerRequestContract request, RouteContract route, RequestStructContract struct) {
+    protected @Nullable ResponseContract ensureRequestConformsToMessage(
+            ServerRequestContract request, RouteContract route, RequestStructContract struct) {
         ResponseContract extra = ensureRequestHasNoExtraData(request, route, struct);
         if (extra != null) return extra;
         return ensureRequestIsValid(request, route, struct);
     }
 
-    protected ResponseContract ensureRequestHasNoExtraData(ServerRequestContract request, RouteContract route, RequestStructContract struct) {
+    protected @Nullable ResponseContract ensureRequestHasNoExtraData(
+            ServerRequestContract request, RouteContract route, RequestStructContract struct) {
         if (struct.determineIfRequestContainsExtraData(request)) {
             return getExtraDataErrorResponse(request, route, struct);
         }
         return null;
     }
 
-    protected ResponseContract getExtraDataErrorResponse(ServerRequestContract request, RouteContract route, RequestStructContract struct) {
-        return new Response(new io.valkyrja.http.message.stream.Stream(), StatusCode.PAYLOAD_TOO_LARGE, new HeaderCollection());
+    protected ResponseContract getExtraDataErrorResponse(
+            ServerRequestContract request, RouteContract route, RequestStructContract struct) {
+        return new Response(
+                new io.valkyrja.http.message.stream.Stream(),
+                StatusCode.PAYLOAD_TOO_LARGE,
+                new HeaderCollection());
     }
 
-    protected ResponseContract ensureRequestIsValid(ServerRequestContract request, RouteContract route, RequestStructContract struct) {
+    protected @Nullable ResponseContract ensureRequestIsValid(
+            ServerRequestContract request, RouteContract route, RequestStructContract struct) {
         if (!struct.validate(request).validateRules()) {
             return getValidationErrorsResponse(request, route, struct);
         }
         return null;
     }
 
-    protected ResponseContract getValidationErrorsResponse(ServerRequestContract request, RouteContract route, RequestStructContract struct) {
-        return new Response(new io.valkyrja.http.message.stream.Stream(), StatusCode.BAD_REQUEST, new HeaderCollection());
+    protected ResponseContract getValidationErrorsResponse(
+            ServerRequestContract request, RouteContract route, RequestStructContract struct) {
+        return new Response(
+                new io.valkyrja.http.message.stream.Stream(),
+                StatusCode.BAD_REQUEST,
+                new HeaderCollection());
     }
 }

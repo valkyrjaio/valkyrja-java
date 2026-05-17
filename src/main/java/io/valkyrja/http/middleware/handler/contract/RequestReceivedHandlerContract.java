@@ -13,7 +13,8 @@ import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.middleware.contract.RequestReceivedMiddlewareContract;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 
-public interface RequestReceivedHandlerContract extends HandlerContract<RequestReceivedMiddlewareContract> {
+public interface RequestReceivedHandlerContract
+        extends HandlerContract<RequestReceivedMiddlewareContract> {
 
     RequestReceivedResult requestReceived(ServerRequestContract request);
 }

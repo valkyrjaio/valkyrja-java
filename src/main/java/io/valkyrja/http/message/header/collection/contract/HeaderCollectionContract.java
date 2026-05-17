@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.header.collection.contract;
 
 import io.valkyrja.http.message.header.contract.HeaderContract;
-
 import java.util.Map;
 
 public interface HeaderCollectionContract {

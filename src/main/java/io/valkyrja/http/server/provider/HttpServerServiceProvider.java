@@ -25,7 +25,6 @@ import io.valkyrja.http.server.middleware.routematched.RequestStructMiddleware;
 import io.valkyrja.http.server.middleware.routematched.ResponseStructMiddleware;
 import io.valkyrja.http.server.middleware.throwablecaught.LogThrowableCaughtMiddleware;
 import io.valkyrja.log.logger.contract.LoggerContract;
-
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -34,17 +33,22 @@ public class HttpServerServiceProvider implements ServiceProviderContract {
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
-                RequestHandlerContract.class,       HttpServerServiceProvider::publishRequestHandler,
-                LogThrowableCaughtMiddleware.class, HttpServerServiceProvider::publishLogThrowableCaughtMiddleware,
-                RequestStructMiddleware.class,      HttpServerServiceProvider::publishRequestStructMiddleware,
-                ResponseStructMiddleware.class,     HttpServerServiceProvider::publishResponseStructMiddleware,
-                CacheResponseMiddleware.class,      HttpServerServiceProvider::publishCacheResponseMiddleware);
+                RequestHandlerContract.class, HttpServerServiceProvider::publishRequestHandler,
+                LogThrowableCaughtMiddleware.class,
+                        HttpServerServiceProvider::publishLogThrowableCaughtMiddleware,
+                RequestStructMiddleware.class,
+                        HttpServerServiceProvider::publishRequestStructMiddleware,
+                ResponseStructMiddleware.class,
+                        HttpServerServiceProvider::publishResponseStructMiddleware,
+                CacheResponseMiddleware.class,
+                        HttpServerServiceProvider::publishCacheResponseMiddleware);
     }
 
     public static void publishRequestHandler(ContainerContract container) {
         ApplicationContract app = container.getSingleton(ApplicationContract.class);
 
-        ThrowableCaughtHandlerContract throwableCaught = container.getSingleton(ThrowableCaughtHandlerContract.class);
+        ThrowableCaughtHandlerContract throwableCaught =
+                container.getSingleton(ThrowableCaughtHandlerContract.class);
         throwableCaught.add(LogThrowableCaughtMiddleware.class);
 
         container.setSingleton(

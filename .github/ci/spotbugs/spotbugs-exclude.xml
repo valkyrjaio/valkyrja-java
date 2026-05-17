@@ -56,25 +56,135 @@
     </Match>
 
     <!--
-        Service classes that store injected dependencies by design.
-        Dispatchers and the application kernel must hold references to the
-        services they were constructed with.
+        Framework-wide: mutable fields are returned/stored by design throughout the framework.
+        Adding defensive copies everywhere would contradict the framework's performance goals
+        and the intentional mutability of builder/middleware patterns.
     -->
     <Match>
-        <Class name="io.valkyrja.application.kernel.Valkyrja" />
         <Bug pattern="EI_EXPOSE_REP" />
     </Match>
     <Match>
-        <Class name="io.valkyrja.application.kernel.Valkyrja" />
         <Bug pattern="EI_EXPOSE_REP2" />
     </Match>
+
+    <!--
+        Framework-wide: constructors perform validation and throw on invalid input.
+        This is an intentional design — it mirrors PHP's constructor validation pattern
+        and the risk of finalizer attacks is accepted.
+    -->
     <Match>
-        <Class name="io.valkyrja.dispatch.dispatcher.Dispatcher" />
-        <Bug pattern="EI_EXPOSE_REP2" />
+        <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    </Match>
+
+    <!--
+        Framework-wide: methods intentionally declare throws RuntimeException to signal
+        unchecked error conditions in framework contracts and route dispatchers.
+    -->
+    <Match>
+        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+    </Match>
+
+    <!--
+        Framework-wide: protected fields on Controller, Router, InputHandler, etc. are
+        declared for subclass access in application code — SpotBugs cannot see subclasses
+        outside this analysis scope.
+    -->
+    <Match>
+        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+    </Match>
+
+    <!--
+        Framework-wide: AttributeRouteCollector and JsonServerRequest use reflection to
+        construct route handlers and parse JSON; catching Exception is required because
+        reflection APIs declare checked exceptions that vary by implementation.
+    -->
+    <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
+
+    <!--
+        Intentional design: overridable methods called in constructors below are safe
+        because they only read already-assigned fields, matching a pattern used throughout
+        the framework.
+    -->
+    <Match>
+        <Class name="io.valkyrja.cli.middleware.handler.abstract_.Handler" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
     </Match>
     <Match>
-        <Class name="io.valkyrja.event.dispatcher.Dispatcher" />
-        <Bug pattern="EI_EXPOSE_REP2" />
+        <Class name="io.valkyrja.http.middleware.handler.abstract_.Handler" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.message.header.Header" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.message.request.Request" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+
+    <!--
+        Intentional design: InputHandler.run() calls System.exit() as the CLI entry point
+        — this is the intended termination path for a CLI application.
+    -->
+    <Match>
+        <Class name="io.valkyrja.cli.server.handler.InputHandler" />
+        <Bug pattern="DM_EXIT" />
+    </Match>
+
+    <!--
+        Intentional design: Exiter.exit is public so that application code can override
+        the exit behavior by replacing the field.
+    -->
+    <Match>
+        <Class name="io.valkyrja.cli.server.support.Exiter" />
+        <Bug pattern="MS_PKGPROTECT" />
+    </Match>
+
+    <!--
+        Intentional design: ExchangeCgiHttp.run() hides Http.run() to provide a
+        CGI-specific entry point with a different signature.
+    -->
+    <Match>
+        <Class name="io.valkyrja.application.entry.ExchangeCgiHttp" />
+        <Bug pattern="HSM_HIDING_METHOD" />
+    </Match>
+
+    <!--
+        NullAway requires a null guard on requestUri here because the factory method
+        can return null in some paths. SpotBugs sees the surrounding flow as non-null,
+        but the check is needed to satisfy the NullAway static analysis constraint.
+    -->
+    <Match>
+        <Class name="io.valkyrja.http.message.uri.factory.MarshalUriFactory" />
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
+    </Match>
+
+    <!--
+        Benchmark code: ChildContainerBenchmark.has() return value is intentionally
+        ignored — it is exercising the call path for timing purposes, not acting on
+        the result.
+    -->
+    <Match>
+        <Class name="io.valkyrja.container.manager.benchmark.ChildContainerBenchmark" />
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT" />
+    </Match>
+
+    <!--
+        Intentional design: JsonServerRequest silently ignores malformed JSON in the
+        constructor — invalid JSON leaves parsedJson as the empty default rather than
+        crashing the request. CacheResponseMiddleware silently ignores IOException when
+        deleting an expired cache file — deletion is best-effort and failure is
+        non-critical.
+    -->
+    <Match>
+        <Class name="io.valkyrja.http.message.request.JsonServerRequest" />
+        <Bug pattern="DE_MIGHT_IGNORE" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.server.middleware.CacheResponseMiddleware" />
+        <Bug pattern="DE_MIGHT_IGNORE" />
     </Match>
 
 </FindBugsFilter>

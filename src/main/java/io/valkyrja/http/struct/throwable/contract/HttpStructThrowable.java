@@ -11,5 +11,4 @@ package io.valkyrja.http.struct.throwable.contract;
 
 import io.valkyrja.http.throwable.contract.HttpThrowable;
 
-public interface HttpStructThrowable extends HttpThrowable {
-}
+public interface HttpStructThrowable extends HttpThrowable {}

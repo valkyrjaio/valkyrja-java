@@ -17,6 +17,8 @@ import io.valkyrja.cli.interaction.format.TextColorFormat;
 public class SuccessFormatter extends Formatter {
 
     public SuccessFormatter() {
-        super(new TextColorFormat(TextColor.LIGHT_WHITE), new BackgroundColorFormat(BackgroundColor.GREEN));
+        super(
+                new TextColorFormat(TextColor.LIGHT_WHITE),
+                new BackgroundColorFormat(BackgroundColor.GREEN));
     }
 }

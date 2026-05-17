@@ -13,7 +13,6 @@ import io.valkyrja.application.data.contract.ConfigContract;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.ApplicationComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
-
 import java.util.List;
 import java.util.function.Consumer;
 

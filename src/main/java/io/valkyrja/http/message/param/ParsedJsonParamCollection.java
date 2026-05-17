@@ -11,10 +11,11 @@ package io.valkyrja.http.message.param;
 
 import io.valkyrja.http.message.param.abstract_.ParamCollection;
 import io.valkyrja.http.message.param.contract.ParsedJsonParamCollectionContract;
-
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
-public class ParsedJsonParamCollection extends ParamCollection implements ParsedJsonParamCollectionContract {
+public class ParsedJsonParamCollection extends ParamCollection
+        implements ParsedJsonParamCollectionContract {
 
     public ParsedJsonParamCollection(Map<String, Object> params) {
         super(params);
@@ -25,7 +26,7 @@ public class ParsedJsonParamCollection extends ParamCollection implements Parsed
     }
 
     @Override
-    public Object get(String key) {
+    public @Nullable Object get(String key) {
         return params.getOrDefault(key, null);
     }
 

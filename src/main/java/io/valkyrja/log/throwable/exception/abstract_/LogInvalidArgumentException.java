@@ -12,7 +12,8 @@ package io.valkyrja.log.throwable.exception.abstract_;
 import io.valkyrja.log.throwable.contract.LogThrowable;
 import io.valkyrja.throwable.exception.InvalidArgumentException;
 
-public abstract class LogInvalidArgumentException extends InvalidArgumentException implements LogThrowable {
+public abstract class LogInvalidArgumentException extends InvalidArgumentException
+        implements LogThrowable {
 
     public LogInvalidArgumentException(String message) {
         super(message);

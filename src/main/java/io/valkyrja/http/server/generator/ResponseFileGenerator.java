@@ -30,9 +30,15 @@ public class ResponseFileGenerator extends FileGenerator implements ResponseFile
         sb.append("reasonPhrase=").append(response.getReasonPhrase()).append("\n");
         sb.append("protocolVersion=").append(response.getProtocolVersion().getValue()).append("\n");
 
-        response.getHeaders().getAll().forEach((name, header) ->
-            sb.append("header.").append(name).append("=").append(header.getHeaderLine()).append("\n")
-        );
+        response.getHeaders()
+                .getAll()
+                .forEach(
+                        (name, header) ->
+                                sb.append("header.")
+                                        .append(name)
+                                        .append("=")
+                                        .append(header.getHeaderLine())
+                                        .append("\n"));
 
         response.getBody().rewind();
         sb.append("body=").append(response.getBody().getContents()).append("\n");

@@ -50,7 +50,8 @@ public class CheckGlobalInteractionOptionsMiddleware implements InputReceivedMid
     }
 
     protected void setIsInteractive(InputContract input) {
-        if (input.hasOption(noInteractionOptionShortName) || input.hasOption(noInteractionOptionName)) {
+        if (input.hasOption(noInteractionOptionShortName)
+                || input.hasOption(noInteractionOptionName)) {
             config.setInteractive(false);
         }
     }

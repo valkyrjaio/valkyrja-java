@@ -54,11 +54,13 @@ public class Processor implements ProcessorContract {
         return parameter;
     }
 
-    protected String replaceParameterNameInRegex(RouteContract route, ParameterContract parameter, String regex) {
+    protected String replaceParameterNameInRegex(
+            RouteContract route, ParameterContract parameter, String regex) {
         String nameReplacement = getRegexParameterNameReplacement(parameter);
 
         if (!regex.contains(nameReplacement)) {
-            throw new HttpRoutingInvalidRoutePathException(route.getPath() + " is missing " + nameReplacement);
+            throw new HttpRoutingInvalidRoutePathException(
+                    route.getPath() + " is missing " + nameReplacement);
         }
 
         String parameterRegex = getParameterRegex(parameter);
@@ -69,15 +71,18 @@ public class Processor implements ProcessorContract {
     protected String getRegexParameterNameReplacement(ParameterContract parameter) {
         boolean isOptional = parameter.isOptional();
         return (isOptional ? Regex.PATH : "")
-            + "{" + parameter.getName() + (isOptional ? "?" : "") + "}";
+                + "{"
+                + parameter.getName()
+                + (isOptional ? "?" : "")
+                + "}";
     }
 
     protected String getParameterRegex(ParameterContract parameter) {
         return getParameterRegexOptionalCaptureGroupStart(parameter)
-            + getParameterRegexCaptureGroupStart(parameter)
-            + getParameterRegexNameCaptureGroup(parameter)
-            + parameter.getRegex()
-            + getParameterRegexCaptureGroupEnd(parameter);
+                + getParameterRegexCaptureGroupStart(parameter)
+                + getParameterRegexNameCaptureGroup(parameter)
+                + parameter.getRegex()
+                + getParameterRegexCaptureGroupEnd(parameter);
     }
 
     protected String getParameterRegexOptionalCaptureGroupStart(ParameterContract parameter) {
@@ -85,13 +90,17 @@ public class Processor implements ProcessorContract {
     }
 
     protected String getParameterRegexCaptureGroupStart(ParameterContract parameter) {
-        return parameter.shouldCapture() ? Regex.START_CAPTURE_GROUP : Regex.START_NON_CAPTURE_GROUP;
+        return parameter.shouldCapture()
+                ? Regex.START_CAPTURE_GROUP
+                : Regex.START_NON_CAPTURE_GROUP;
     }
 
     protected String getParameterRegexNameCaptureGroup(ParameterContract parameter) {
         return parameter.shouldCapture()
-            ? Regex.START_CAPTURE_GROUP_NAME + parameter.getName() + Regex.END_CAPTURE_GROUP_NAME
-            : "";
+                ? Regex.START_CAPTURE_GROUP_NAME
+                        + parameter.getName()
+                        + Regex.END_CAPTURE_GROUP_NAME
+                : "";
     }
 
     protected String getParameterRegexCaptureGroupEnd(ParameterContract parameter) {

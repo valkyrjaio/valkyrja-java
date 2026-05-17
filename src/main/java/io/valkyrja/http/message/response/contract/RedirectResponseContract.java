@@ -16,8 +16,10 @@ import io.valkyrja.http.message.uri.contract.UriContract;
 
 public interface RedirectResponseContract extends ResponseContract {
 
-    static RedirectResponseContract createFromUri(UriContract uri, StatusCode statusCode, HeaderCollectionContract headers) {
-        throw new UnsupportedOperationException("createFromUri must be implemented by the concrete class");
+    static RedirectResponseContract createFromUri(
+            UriContract uri, StatusCode statusCode, HeaderCollectionContract headers) {
+        throw new UnsupportedOperationException(
+                "createFromUri must be implemented by the concrete class");
     }
 
     UriContract getUri();

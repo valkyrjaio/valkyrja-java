@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.stream.enum_;
 
 public enum ModeTranslation {
-
     NONE(""),
     WINDOWS("t"),
     BINARY_SAFE("b");

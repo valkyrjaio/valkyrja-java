@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 
 public abstract class CookieFactory {
 
-    private static final Pattern COOKIE_PATTERN = Pattern.compile(
-        "(?:(?:\\n?[ \\t]*)|(?:; ))(?<name>[!#$%&'*+\\-.0-9A-Z^_`a-z|~]+)=(?<DQUOTE>\"?)(?<value>[\\x21\\x23-\\x2b\\x2d-\\x3a\\x3c-\\x5b\\x5d-\\x7e]*)\\k<DQUOTE>(?=\\n?[ \\t]*$|; )"
-    );
+    private static final Pattern COOKIE_PATTERN =
+            Pattern.compile(
+                    "(?:(?:\\n?[ \\t]*)|(?:; ))(?<name>[!#$%&'*+\\-.0-9A-Z^_`a-z|~]+)=(?<DQUOTE>\"?)(?<value>[\\x21\\x23-\\x2b\\x2d-\\x3a\\x3c-\\x5b\\x5d-\\x7e]*)\\k<DQUOTE>(?=\\n?[ \\t]*$|; )");
 
     public static Map<String, String> parseCookieHeader(String cookieHeader) {
         Map<String, String> cookies = new LinkedHashMap<>();
@@ -38,8 +38,8 @@ public abstract class CookieFactory {
 
     public static String convertCookieArrayToHeaderString(Map<String, String> cookies) {
         return cookies.entrySet().stream()
-            .map(entry -> combineKeyAndValue(entry.getKey(), entry.getValue()))
-            .collect(Collectors.joining("; "));
+                .map(entry -> combineKeyAndValue(entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining("; "));
     }
 
     public static String combineKeyAndValue(String key, String value) {

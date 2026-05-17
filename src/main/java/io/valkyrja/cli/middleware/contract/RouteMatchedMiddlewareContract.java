@@ -16,5 +16,6 @@ import io.valkyrja.cli.routing.data.contract.RouteContract;
 public interface RouteMatchedMiddlewareContract {
 
     /** Returns either a RouteContract to dispatch, or OutputContract to short-circuit. */
-    Object routeMatched(InputContract input, RouteContract route, RouteMatchedHandlerContract handler);
+    Object routeMatched(
+            InputContract input, RouteContract route, RouteMatchedHandlerContract handler);
 }

@@ -32,7 +32,11 @@ public class Output implements OutputContract {
         this(true, false, false, ExitCode.SUCCESS);
     }
 
-    public Output(boolean isInteractive, boolean isQuiet, boolean isSilent, ExitCode exitCode,
+    public Output(
+            boolean isInteractive,
+            boolean isQuiet,
+            boolean isSilent,
+            ExitCode exitCode,
             MessageContract... messages) {
         this.isInteractive = isInteractive;
         this.isQuiet = isQuiet;

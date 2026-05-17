@@ -11,15 +11,17 @@ package io.valkyrja.http.message.abstract_;
 
 import io.valkyrja.http.message.contract.MessageContract;
 import io.valkyrja.http.message.enum_.ProtocolVersion;
+import io.valkyrja.http.message.header.collection.HeaderCollection;
 import io.valkyrja.http.message.header.collection.contract.HeaderCollectionContract;
 import io.valkyrja.http.message.header.contract.HeaderContract;
+import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.stream.contract.StreamContract;
 
 public abstract class Message implements MessageContract {
 
-    protected HeaderCollectionContract headers;
+    protected HeaderCollectionContract headers = new HeaderCollection();
     protected ProtocolVersion protocolVersion = ProtocolVersion.V1_1;
-    protected StreamContract stream;
+    protected StreamContract stream = new Stream();
 
     @Override
     public ProtocolVersion getProtocolVersion() {
@@ -62,11 +64,13 @@ public abstract class Message implements MessageContract {
         this.stream = body;
     }
 
-    protected HeaderCollectionContract injectHeader(HeaderContract header, HeaderCollectionContract headers, boolean override) {
+    protected HeaderCollectionContract injectHeader(
+            HeaderContract header, HeaderCollectionContract headers, boolean override) {
         String headerName = header.getNormalizedName();
-        HeaderContract newHeader = (override || !headers.has(headerName))
-                ? header
-                : headers.get(headerName).withAddedValues(header.getValues().toArray());
+        HeaderContract newHeader =
+                (override || !headers.has(headerName))
+                        ? header
+                        : headers.get(headerName).withAddedValues(header.getValues().toArray());
         return headers.withHeader(newHeader);
     }
 

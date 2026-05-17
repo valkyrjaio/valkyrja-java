@@ -11,7 +11,8 @@ package io.valkyrja.cli.interaction.throwable.exception;
 
 import io.valkyrja.cli.interaction.throwable.exception.abstract_.CliInteractionInvalidArgumentException;
 
-public class CliInteractionInvalidNonEmptyValueException extends CliInteractionInvalidArgumentException {
+public class CliInteractionInvalidNonEmptyValueException
+        extends CliInteractionInvalidArgumentException {
 
     public CliInteractionInvalidNonEmptyValueException(String message) {
         super(message);

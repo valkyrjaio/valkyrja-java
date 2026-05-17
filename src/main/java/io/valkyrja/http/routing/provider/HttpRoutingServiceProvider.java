@@ -35,7 +35,6 @@ import io.valkyrja.http.routing.processor.contract.ProcessorContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import io.valkyrja.http.routing.url.Url;
 import io.valkyrja.http.routing.url.contract.UrlContract;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,13 +45,15 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
-                RouterContract.class,                 HttpRoutingServiceProvider::publishRouter,
-                RouteCollectionContract.class,        HttpRoutingServiceProvider::publishRouteCollection,
-                MatcherContract.class,                HttpRoutingServiceProvider::publishMatcher,
-                UrlContract.class,                    HttpRoutingServiceProvider::publishUrl,
-                RouteCollectorContract.class,         HttpRoutingServiceProvider::publishAttributesRouteCollector,
-                ProcessorContract.class,              HttpRoutingServiceProvider::publishProcessor,
-                RoutingResponseFactoryContract.class, HttpRoutingServiceProvider::publishResponseFactory);
+                RouterContract.class, HttpRoutingServiceProvider::publishRouter,
+                RouteCollectionContract.class, HttpRoutingServiceProvider::publishRouteCollection,
+                MatcherContract.class, HttpRoutingServiceProvider::publishMatcher,
+                UrlContract.class, HttpRoutingServiceProvider::publishUrl,
+                RouteCollectorContract.class,
+                        HttpRoutingServiceProvider::publishAttributesRouteCollector,
+                ProcessorContract.class, HttpRoutingServiceProvider::publishProcessor,
+                RoutingResponseFactoryContract.class,
+                        HttpRoutingServiceProvider::publishResponseFactory);
     }
 
     public static void publishRouter(ContainerContract container) {
@@ -105,8 +106,7 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
 
     public static void publishUrl(ContainerContract container) {
         container.setSingleton(
-                UrlContract.class,
-                new Url(container.getSingleton(RouteCollectionContract.class)));
+                UrlContract.class, new Url(container.getSingleton(RouteCollectionContract.class)));
     }
 
     public static void publishAttributesRouteCollector(ContainerContract container) {

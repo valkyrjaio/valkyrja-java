@@ -14,17 +14,16 @@ import io.valkyrja.http.message.header.factory.HeaderFactory;
 import io.valkyrja.http.message.header.throwable.exception.HttpHeaderUnsupportedOffsetSetException;
 import io.valkyrja.http.message.header.throwable.exception.HttpHeaderUnsupportedOffsetUnsetException;
 import io.valkyrja.http.message.header.value.contract.ValueContract;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class Header implements HeaderContract, Iterable<Object> {
 
-    protected String name;
-    protected String normalizedName;
+    protected String name = "";
+    protected String normalizedName = "";
     protected List<Object> values = new ArrayList<>();
     protected int position = 0;
 
@@ -45,7 +44,7 @@ public class Header implements HeaderContract, Iterable<Object> {
             int idx = value.indexOf(delimiter);
             header = value.substring(0, idx);
             valuesAsString = value.substring(idx + 1);
-            valuesArr = new String[]{valuesAsString};
+            valuesArr = new String[] {valuesAsString};
         } else {
             valuesArr = new String[0];
         }
@@ -176,7 +175,7 @@ public class Header implements HeaderContract, Iterable<Object> {
     protected void updateName(String name) {
         HeaderFactory.assertValidName(name);
         this.name = name;
-        this.normalizedName = name.toLowerCase();
+        this.normalizedName = name.toLowerCase(Locale.ROOT);
     }
 
     protected void updateValues(Object... values) {
@@ -189,10 +188,10 @@ public class Header implements HeaderContract, Iterable<Object> {
 
     protected String valuesToString() {
         return values.stream()
-            .map(v -> v instanceof ValueContract vc ? vc.toString() : (String) v)
-            .filter(s -> !s.isEmpty())
-            .map(String::trim)
-            .collect(Collectors.joining(", "));
+                .map(v -> v instanceof ValueContract vc ? vc.toString() : (String) v)
+                .filter(s -> !s.isEmpty())
+                .map(String::trim)
+                .collect(Collectors.joining(", "));
     }
 
     protected List<Object> filterValues(Object... values) {

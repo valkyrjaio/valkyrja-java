@@ -13,7 +13,6 @@ import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.routing.data.HttpRoutingData;
 import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
-
 import java.util.Map;
 
 public interface RouteCollectionContract {

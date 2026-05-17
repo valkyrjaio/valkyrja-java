@@ -17,10 +17,13 @@ import io.valkyrja.http.middleware.handler.abstract_.Handler;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
-public class RouteMatchedHandler extends Handler<RouteMatchedMiddlewareContract> implements RouteMatchedHandlerContract {
+public class RouteMatchedHandler extends Handler<RouteMatchedMiddlewareContract>
+        implements RouteMatchedHandlerContract {
 
     @SafeVarargs
-    public RouteMatchedHandler(ContainerContract container, Class<? extends RouteMatchedMiddlewareContract>... middleware) {
+    public RouteMatchedHandler(
+            ContainerContract container,
+            Class<? extends RouteMatchedMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 

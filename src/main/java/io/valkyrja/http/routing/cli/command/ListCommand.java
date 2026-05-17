@@ -25,7 +25,6 @@ import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -50,31 +49,33 @@ public class ListCommand {
         Map<String, RouteContract> routes = collection.getAll(RequestMethod.ANY);
 
         if (routes.isEmpty()) {
-            return output
-                .withExitCode(ExitCode.ERROR)
-                .withAddedMessages(new Banner(new ErrorMessage("No routes were found")));
+            return output.withExitCode(ExitCode.ERROR)
+                    .withAddedMessages(new Banner(new ErrorMessage("No routes were found")));
         }
 
-        List<RouteContract> sortedRoutes = routes.values().stream()
-            .sorted(Comparator.comparing(RouteContract::getPath))
-            .toList();
+        List<RouteContract> sortedRoutes =
+                routes.values().stream()
+                        .sorted(Comparator.comparing(RouteContract::getPath))
+                        .toList();
 
-        output = output.withAddedMessages(
-            new NewLine(),
-            new Message("Routes:", new HighlightedTextFormatter()),
-            new NewLine()
-        );
+        output =
+                output.withAddedMessages(
+                        new NewLine(),
+                        new Message("Routes:", new HighlightedTextFormatter()),
+                        new NewLine());
 
         for (RouteContract route : sortedRoutes) {
-            output = output.withAddedMessages(
-                new Message("  "),
-                new Message(route.getPath(), new Formatter(new TextColorFormat(TextColor.MAGENTA))),
-                new NewLine(),
-                new Message("    - "),
-                new Message("Name: "),
-                new Message(route.getName(), new HighlightedTextFormatter()),
-                new NewLine()
-            );
+            output =
+                    output.withAddedMessages(
+                            new Message("  "),
+                            new Message(
+                                    route.getPath(),
+                                    new Formatter(new TextColorFormat(TextColor.MAGENTA))),
+                            new NewLine(),
+                            new Message("    - "),
+                            new Message("Name: "),
+                            new Message(route.getName(), new HighlightedTextFormatter()),
+                            new NewLine());
 
             output = getOutputForDynamicRoute(output, route);
         }
@@ -86,12 +87,12 @@ public class ListCommand {
         if (route instanceof DynamicRouteContract dynamic) {
             String regex = dynamic.getRegex();
             if (!regex.isEmpty()) {
-                output = output.withAddedMessages(
-                    new Message("    - "),
-                    new Message("Regex: "),
-                    new Message(regex, new HighlightedTextFormatter()),
-                    new NewLine()
-                );
+                output =
+                        output.withAddedMessages(
+                                new Message("    - "),
+                                new Message("Regex: "),
+                                new Message(regex, new HighlightedTextFormatter()),
+                                new NewLine());
             }
         }
         return output;

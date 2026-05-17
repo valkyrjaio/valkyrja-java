@@ -11,7 +11,6 @@ package io.valkyrja.cli.routing.data;
 
 import io.valkyrja.cli.routing.data.contract.CliRoutingDataContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
-
 import java.util.Map;
 import java.util.function.Supplier;
 

@@ -50,7 +50,14 @@ public class Answer extends Message implements AnswerContract {
     }
 
     protected Answer copy() {
-        Answer copy = new Answer(defaultResponse, validationCallable, hasBeenAnswered, text, formatter, allowedResponses);
+        Answer copy =
+                new Answer(
+                        defaultResponse,
+                        validationCallable,
+                        hasBeenAnswered,
+                        text,
+                        formatter,
+                        allowedResponses);
         copy.userResponse = this.userResponse;
         return copy;
     }
@@ -115,7 +122,8 @@ public class Answer extends Message implements AnswerContract {
     @Override
     public Predicate<String> getValidationCallable() {
         if (validationCallable == null) {
-            throw new CliInteractionNoValidationCallableException("No validation callable has been set");
+            throw new CliInteractionNoValidationCallableException(
+                    "No validation callable has been set");
         }
         return validationCallable;
     }
@@ -152,7 +160,7 @@ public class Answer extends Message implements AnswerContract {
         String response = this.userResponse;
 
         return (allowedResponses.isEmpty() && callable == null)
-            || allowedResponses.contains(response)
-            || (callable != null && callable.test(response));
+                || allowedResponses.contains(response)
+                || (callable != null && callable.test(response));
     }
 }

@@ -10,7 +10,6 @@
 package io.valkyrja.http.struct.response.contract;
 
 import io.valkyrja.http.struct.contract.StructContract;
-
 import java.util.Map;
 
 public interface ResponseStructContract extends StructContract {

@@ -16,16 +16,15 @@ public abstract class RouteFactory {
 
     public static Route fromRoute(RouteContract route) {
         return new Route(
-            route.getName(),
-            route.getDescription(),
-            route.getHandler(),
-            route.hasHelpText() ? route.getHelpText() : null,
-            route.getRouteMatchedMiddleware(),
-            route.getRouteDispatchedMiddleware(),
-            route.getThrowableCaughtMiddleware(),
-            route.getExitedMiddleware(),
-            route.getArguments(),
-            route.getOptions()
-        );
+                route.getName(),
+                route.getDescription(),
+                route.getHandler(),
+                route.hasHelpText() ? route.getHelpText() : null,
+                route.getRouteMatchedMiddleware(),
+                route.getRouteDispatchedMiddleware(),
+                route.getThrowableCaughtMiddleware(),
+                route.getExitedMiddleware(),
+                route.getArguments(),
+                route.getOptions());
     }
 }

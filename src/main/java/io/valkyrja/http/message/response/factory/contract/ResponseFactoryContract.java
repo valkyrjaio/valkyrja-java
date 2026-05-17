@@ -15,19 +15,34 @@ import io.valkyrja.http.message.response.contract.JsonResponseContract;
 import io.valkyrja.http.message.response.contract.RedirectResponseContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.message.response.contract.TextResponseContract;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 public interface ResponseFactoryContract {
 
-    ResponseContract createResponse(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
+    ResponseContract createResponse(
+            @Nullable String content,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers);
 
-    TextResponseContract createTextResponse(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
+    TextResponseContract createTextResponse(
+            @Nullable String content,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers);
 
-    JsonResponseContract createJsonResponse(@Nullable Map<String, Object> data, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
+    JsonResponseContract createJsonResponse(
+            @Nullable Map<String, Object> data,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers);
 
-    JsonResponseContract createJsonpResponse(String callback, @Nullable Map<String, Object> data, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
+    JsonResponseContract createJsonpResponse(
+            String callback,
+            @Nullable Map<String, Object> data,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers);
 
-    RedirectResponseContract createRedirectResponse(@Nullable String uri, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers);
+    RedirectResponseContract createRedirectResponse(
+            @Nullable String uri,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers);
 }

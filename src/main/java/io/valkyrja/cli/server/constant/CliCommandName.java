@@ -11,8 +11,8 @@ package io.valkyrja.cli.server.constant;
 
 public final class CliCommandName {
 
-    public static final String HELP    = "help";
-    public static final String LIST    = "list";
+    public static final String HELP = "help";
+    public static final String LIST = "list";
     public static final String VERSION = "version";
 
     private CliCommandName() {}

@@ -11,5 +11,4 @@ package io.valkyrja.http.message.file.throwable.contract;
 
 import io.valkyrja.http.message.throwable.contract.HttpMessageThrowable;
 
-public interface UploadedFileThrowable extends HttpMessageThrowable {
-}
+public interface UploadedFileThrowable extends HttpMessageThrowable {}

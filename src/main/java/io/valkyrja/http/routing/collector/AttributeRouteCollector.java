@@ -25,19 +25,18 @@ import io.valkyrja.http.routing.attribute.route.Middlewares;
 import io.valkyrja.http.routing.attribute.route.Name;
 import io.valkyrja.http.routing.attribute.route.Path;
 import io.valkyrja.http.routing.attribute.route.RequestMethod;
-import io.valkyrja.http.routing.attribute.route.RouteHandler;
 import io.valkyrja.http.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.processor.Processor;
 import io.valkyrja.http.routing.processor.contract.ProcessorContract;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
 import io.valkyrja.http.struct.response.contract.ResponseStructContract;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.Nullable;
 
 public class AttributeRouteCollector implements RouteCollectorContract {
 
@@ -76,11 +75,14 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         }
 
         for (Route annotation : annotations) {
-            io.valkyrja.http.routing.data.Route route = buildRouteFromAnnotation(annotation, clazz, method);
+            io.valkyrja.http.routing.data.Route route =
+                    buildRouteFromAnnotation(annotation, clazz, method);
             route = (io.valkyrja.http.routing.data.Route) updatePath(route, clazz, method);
             route = (io.valkyrja.http.routing.data.Route) updateName(route, clazz, method);
             route = (io.valkyrja.http.routing.data.Route) updateMiddleware(route, clazz, method);
-            route = (io.valkyrja.http.routing.data.Route) updateRequestMethods(route, clazz, method);
+            route =
+                    (io.valkyrja.http.routing.data.Route)
+                            updateRequestMethods(route, clazz, method);
             routes.add(processor.route(route));
         }
 
@@ -98,11 +100,16 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         }
 
         for (DynamicRoute annotation : annotations) {
-            io.valkyrja.http.routing.data.DynamicRoute route = buildDynamicRouteFromAnnotation(annotation, clazz, method);
+            io.valkyrja.http.routing.data.DynamicRoute route =
+                    buildDynamicRouteFromAnnotation(annotation, clazz, method);
             route = (io.valkyrja.http.routing.data.DynamicRoute) updatePath(route, clazz, method);
             route = (io.valkyrja.http.routing.data.DynamicRoute) updateName(route, clazz, method);
-            route = (io.valkyrja.http.routing.data.DynamicRoute) updateMiddleware(route, clazz, method);
-            route = (io.valkyrja.http.routing.data.DynamicRoute) updateRequestMethods(route, clazz, method);
+            route =
+                    (io.valkyrja.http.routing.data.DynamicRoute)
+                            updateMiddleware(route, clazz, method);
+            route =
+                    (io.valkyrja.http.routing.data.DynamicRoute)
+                            updateRequestMethods(route, clazz, method);
             route = updateParameters(route, clazz, method);
             routes.add(processor.route(route));
         }
@@ -110,57 +117,69 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         return routes;
     }
 
-    protected io.valkyrja.http.routing.data.Route buildRouteFromAnnotation(Route annotation, Class<?> clazz, Method method) {
+    protected io.valkyrja.http.routing.data.Route buildRouteFromAnnotation(
+            Route annotation, Class<?> clazz, Method method) {
         return new io.valkyrja.http.routing.data.Route(
-            annotation.path(),
-            annotation.name(),
-            buildHandler(clazz, method),
-            Arrays.asList(annotation.requestMethods()),
-            Arrays.asList(annotation.routeMatchedMiddleware()),
-            Arrays.asList(annotation.routeDispatchedMiddleware()),
-            Arrays.asList(annotation.throwableCaughtMiddleware()),
-            Arrays.asList(annotation.sendingResponseMiddleware()),
-            Arrays.asList(annotation.terminatedMiddleware()),
-            buildRequestStruct(annotation.requestStruct()),
-            buildResponseStruct(annotation.responseStruct())
-        );
+                annotation.path(),
+                annotation.name(),
+                buildHandler(clazz, method),
+                Arrays.asList(annotation.requestMethods()),
+                Arrays.asList(annotation.routeMatchedMiddleware()),
+                Arrays.asList(annotation.routeDispatchedMiddleware()),
+                Arrays.asList(annotation.throwableCaughtMiddleware()),
+                Arrays.asList(annotation.sendingResponseMiddleware()),
+                Arrays.asList(annotation.terminatedMiddleware()),
+                buildRequestStruct(annotation.requestStruct()),
+                buildResponseStruct(annotation.responseStruct()));
     }
 
-    protected io.valkyrja.http.routing.data.DynamicRoute buildDynamicRouteFromAnnotation(DynamicRoute annotation, Class<?> clazz, Method method) {
+    protected io.valkyrja.http.routing.data.DynamicRoute buildDynamicRouteFromAnnotation(
+            DynamicRoute annotation, Class<?> clazz, Method method) {
         List<io.valkyrja.http.routing.data.Parameter> parameters = new ArrayList<>();
         for (Parameter param : annotation.parameters()) {
-            parameters.add(new io.valkyrja.http.routing.data.Parameter(param.name(), param.regex()));
+            parameters.add(
+                    new io.valkyrja.http.routing.data.Parameter(param.name(), param.regex()));
         }
 
         return new io.valkyrja.http.routing.data.DynamicRoute(
-            annotation.path(),
-            annotation.name(),
-            "",
-            new ArrayList<>(parameters),
-            buildHandler(clazz, method),
-            Arrays.asList(annotation.requestMethods()),
-            Arrays.asList(annotation.routeMatchedMiddleware()),
-            Arrays.asList(annotation.routeDispatchedMiddleware()),
-            Arrays.asList(annotation.throwableCaughtMiddleware()),
-            Arrays.asList(annotation.sendingResponseMiddleware()),
-            Arrays.asList(annotation.terminatedMiddleware()),
-            buildRequestStruct(annotation.requestStruct()),
-            buildResponseStruct(annotation.responseStruct())
-        );
+                annotation.path(),
+                annotation.name(),
+                "",
+                new ArrayList<>(parameters),
+                buildHandler(clazz, method),
+                Arrays.asList(annotation.requestMethods()),
+                Arrays.asList(annotation.routeMatchedMiddleware()),
+                Arrays.asList(annotation.routeDispatchedMiddleware()),
+                Arrays.asList(annotation.throwableCaughtMiddleware()),
+                Arrays.asList(annotation.sendingResponseMiddleware()),
+                Arrays.asList(annotation.terminatedMiddleware()),
+                buildRequestStruct(annotation.requestStruct()),
+                buildResponseStruct(annotation.responseStruct()));
     }
 
-    protected BiFunction<io.valkyrja.container.manager.contract.ContainerContract, RouteContract, io.valkyrja.http.message.response.contract.ResponseContract> buildHandler(Class<?> clazz, Method method) {
+    protected BiFunction<
+                    io.valkyrja.container.manager.contract.ContainerContract,
+                    RouteContract,
+                    io.valkyrja.http.message.response.contract.ResponseContract>
+            buildHandler(Class<?> clazz, Method method) {
         return (container, route) -> {
             try {
                 Object instance = clazz.getDeclaredConstructor().newInstance();
-                return (io.valkyrja.http.message.response.contract.ResponseContract) method.invoke(instance, container, route);
+                return (io.valkyrja.http.message.response.contract.ResponseContract)
+                        method.invoke(instance, container, route);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to invoke route handler: " + clazz.getName() + "#" + method.getName(), e);
+                throw new RuntimeException(
+                        "Failed to invoke route handler: "
+                                + clazz.getName()
+                                + "#"
+                                + method.getName(),
+                        e);
             }
         };
     }
 
-    protected RequestStructContract buildRequestStruct(Class<? extends RequestStructContract> structClass) {
+    protected @Nullable RequestStructContract buildRequestStruct(
+            Class<? extends RequestStructContract> structClass) {
         if (structClass == RequestStructContract.class) return null;
         try {
             return structClass.getDeclaredConstructor().newInstance();
@@ -169,7 +188,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         }
     }
 
-    protected ResponseStructContract buildResponseStruct(Class<? extends ResponseStructContract> structClass) {
+    protected @Nullable ResponseStructContract buildResponseStruct(
+            Class<? extends ResponseStructContract> structClass) {
         if (structClass == ResponseStructContract.class) return null;
         try {
             return structClass.getDeclaredConstructor().newInstance();
@@ -219,26 +239,40 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             Class<?> middlewareClass = mw.name();
 
             if (RouteMatchedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedRouteMatchedMiddleware((Class<? extends RouteMatchedMiddlewareContract>) middlewareClass);
+                route =
+                        route.withAddedRouteMatchedMiddleware(
+                                (Class<? extends RouteMatchedMiddlewareContract>) middlewareClass);
             }
             if (RouteDispatchedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedRouteDispatchedMiddleware((Class<? extends RouteDispatchedMiddlewareContract>) middlewareClass);
+                route =
+                        route.withAddedRouteDispatchedMiddleware(
+                                (Class<? extends RouteDispatchedMiddlewareContract>)
+                                        middlewareClass);
             }
             if (ThrowableCaughtMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedThrowableCaughtMiddleware((Class<? extends ThrowableCaughtMiddlewareContract>) middlewareClass);
+                route =
+                        route.withAddedThrowableCaughtMiddleware(
+                                (Class<? extends ThrowableCaughtMiddlewareContract>)
+                                        middlewareClass);
             }
             if (SendingResponseMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedSendingResponseMiddleware((Class<? extends SendingResponseMiddlewareContract>) middlewareClass);
+                route =
+                        route.withAddedSendingResponseMiddleware(
+                                (Class<? extends SendingResponseMiddlewareContract>)
+                                        middlewareClass);
             }
             if (TerminatedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                route = route.withAddedTerminatedMiddleware((Class<? extends TerminatedMiddlewareContract>) middlewareClass);
+                route =
+                        route.withAddedTerminatedMiddleware(
+                                (Class<? extends TerminatedMiddlewareContract>) middlewareClass);
             }
         }
 
         return route;
     }
 
-    protected RouteContract updateRequestMethods(RouteContract route, Class<?> clazz, Method method) {
+    protected RouteContract updateRequestMethods(
+            RouteContract route, Class<?> clazz, Method method) {
         RequestMethod requestMethodAnnotation = method.getAnnotation(RequestMethod.class);
         if (requestMethodAnnotation != null) {
             route = route.withAddedRequestMethods(requestMethodAnnotation.requestMethods());
@@ -246,7 +280,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         return route;
     }
 
-    protected io.valkyrja.http.routing.data.DynamicRoute updateParameters(io.valkyrja.http.routing.data.DynamicRoute route, Class<?> clazz, Method method) {
+    protected io.valkyrja.http.routing.data.DynamicRoute updateParameters(
+            io.valkyrja.http.routing.data.DynamicRoute route, Class<?> clazz, Method method) {
         List<io.valkyrja.http.routing.data.Parameter> parameters = new ArrayList<>();
         for (io.valkyrja.http.routing.data.contract.ParameterContract p : route.getParameters()) {
             parameters.add(convertToDataParameter(p));
@@ -260,23 +295,25 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         }
 
         for (Parameter param : methodParams) {
-            parameters.add(new io.valkyrja.http.routing.data.Parameter(param.name(), param.regex()));
+            parameters.add(
+                    new io.valkyrja.http.routing.data.Parameter(param.name(), param.regex()));
         }
 
-        return (io.valkyrja.http.routing.data.DynamicRoute) route.withParameters(
-            parameters.toArray(new io.valkyrja.http.routing.data.contract.ParameterContract[0])
-        );
+        return (io.valkyrja.http.routing.data.DynamicRoute)
+                route.withParameters(
+                        parameters.toArray(
+                                new io.valkyrja.http.routing.data.contract.ParameterContract[0]));
     }
 
-    protected io.valkyrja.http.routing.data.Parameter convertToDataParameter(io.valkyrja.http.routing.data.contract.ParameterContract parameter) {
+    protected io.valkyrja.http.routing.data.Parameter convertToDataParameter(
+            io.valkyrja.http.routing.data.contract.ParameterContract parameter) {
         return new io.valkyrja.http.routing.data.Parameter(
-            parameter.getName(),
-            parameter.getRegex(),
-            parameter.hasCast() ? parameter.getCast() : null,
-            parameter.isOptional(),
-            parameter.shouldCapture(),
-            parameter.getDefault(),
-            null
-        );
+                parameter.getName(),
+                parameter.getRegex(),
+                parameter.hasCast() ? parameter.getCast() : null,
+                parameter.isOptional(),
+                parameter.shouldCapture(),
+                parameter.getDefault(),
+                null);
     }
 }

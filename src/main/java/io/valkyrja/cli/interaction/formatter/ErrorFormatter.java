@@ -17,6 +17,8 @@ import io.valkyrja.cli.interaction.format.TextColorFormat;
 public class ErrorFormatter extends Formatter {
 
     public ErrorFormatter() {
-        super(new TextColorFormat(TextColor.LIGHT_WHITE), new BackgroundColorFormat(BackgroundColor.RED));
+        super(
+                new TextColorFormat(TextColor.LIGHT_WHITE),
+                new BackgroundColorFormat(BackgroundColor.RED));
     }
 }

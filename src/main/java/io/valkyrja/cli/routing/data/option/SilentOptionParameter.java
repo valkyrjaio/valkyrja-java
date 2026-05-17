@@ -20,6 +20,15 @@ import java.util.List;
 public class SilentOptionParameter extends OptionParameter {
 
     public SilentOptionParameter() {
-        super(OptionName.SILENT, "All output is suppressed.", "", "", List.of(OptionShortName.SILENT), List.of(), new ArrayList<>(), OptionMode.OPTIONAL, OptionValueMode.NONE);
+        super(
+                OptionName.SILENT,
+                "All output is suppressed.",
+                "",
+                "",
+                List.of(OptionShortName.SILENT),
+                List.of(),
+                new ArrayList<>(),
+                OptionMode.OPTIONAL,
+                OptionValueMode.NONE);
     }
 }

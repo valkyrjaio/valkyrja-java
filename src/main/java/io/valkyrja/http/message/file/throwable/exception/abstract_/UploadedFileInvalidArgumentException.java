@@ -12,8 +12,8 @@ package io.valkyrja.http.message.file.throwable.exception.abstract_;
 import io.valkyrja.http.message.file.throwable.contract.UploadedFileThrowable;
 import io.valkyrja.http.message.throwable.exception.abstract_.HttpMessageInvalidArgumentException;
 
-public abstract class UploadedFileInvalidArgumentException extends HttpMessageInvalidArgumentException
-        implements UploadedFileThrowable {
+public abstract class UploadedFileInvalidArgumentException
+        extends HttpMessageInvalidArgumentException implements UploadedFileThrowable {
 
     protected UploadedFileInvalidArgumentException(String message) {
         super(message);

@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.uri.enum_;
 
 public enum Scheme {
-
     EMPTY(""),
     HTTP("http"),
     HTTPS("https");

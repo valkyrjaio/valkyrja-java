@@ -18,13 +18,12 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.matcher.contract.MatcherContract;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRoutePathException;
 import io.valkyrja.type.data.Cast;
-import org.jspecify.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import org.jspecify.annotations.Nullable;
 
 public class Matcher implements MatcherContract {
 
@@ -74,7 +73,8 @@ public class Matcher implements MatcherContract {
         return null;
     }
 
-    protected DynamicRouteContract processArguments(DynamicRouteContract route, java.util.regex.Matcher matcher) {
+    protected DynamicRouteContract processArguments(
+            DynamicRouteContract route, java.util.regex.Matcher matcher) {
         List<ParameterContract> parameters = route.getParameters();
 
         if (parameters.isEmpty()) {

@@ -12,7 +12,6 @@ package io.valkyrja.http.routing.url;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRouteNameException;
 import io.valkyrja.http.routing.url.contract.UrlContract;
-
 import java.util.Map;
 
 public class Url implements UrlContract {
@@ -24,7 +23,8 @@ public class Url implements UrlContract {
     }
 
     @Override
-    public String getUrl(String name, Map<String, Object> data) throws HttpRoutingInvalidRouteNameException {
+    public String getUrl(String name, Map<String, Object> data)
+            throws HttpRoutingInvalidRouteNameException {
         String path = collection.getByName(name).getPath();
 
         for (Map.Entry<String, Object> entry : data.entrySet()) {

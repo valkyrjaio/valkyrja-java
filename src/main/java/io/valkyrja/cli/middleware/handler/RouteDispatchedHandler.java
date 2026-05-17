@@ -17,15 +17,19 @@ import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContrac
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
-public class RouteDispatchedHandler extends Handler<RouteDispatchedMiddlewareContract> implements RouteDispatchedHandlerContract {
+public class RouteDispatchedHandler extends Handler<RouteDispatchedMiddlewareContract>
+        implements RouteDispatchedHandlerContract {
 
     @SafeVarargs
-    public RouteDispatchedHandler(ContainerContract container, Class<? extends RouteDispatchedMiddlewareContract>... middleware) {
+    public RouteDispatchedHandler(
+            ContainerContract container,
+            Class<? extends RouteDispatchedMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 
     @Override
-    public OutputContract routeDispatched(InputContract input, OutputContract output, RouteContract route) {
+    public OutputContract routeDispatched(
+            InputContract input, OutputContract output, RouteContract route) {
         Class<? extends RouteDispatchedMiddlewareContract> next = this.next;
         return next != null
                 ? getMiddleware(next).routeDispatched(input, output, route, this)

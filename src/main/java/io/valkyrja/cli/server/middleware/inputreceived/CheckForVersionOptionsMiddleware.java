@@ -19,7 +19,8 @@ public class CheckForVersionOptionsMiddleware implements InputReceivedMiddleware
     protected String optionName;
     protected String optionShortName;
 
-    public CheckForVersionOptionsMiddleware(String commandName, String optionName, String optionShortName) {
+    public CheckForVersionOptionsMiddleware(
+            String commandName, String optionName, String optionShortName) {
         this.commandName = commandName;
         this.optionName = optionName;
         this.optionShortName = optionShortName;

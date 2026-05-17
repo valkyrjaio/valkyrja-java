@@ -9,6 +9,7 @@
 
 package io.valkyrja.cli.routing.dispatcher;
 
+import io.valkyrja.cli.interaction.argument.contract.ArgumentContract;
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
@@ -18,9 +19,13 @@ import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
+import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
+import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Router implements RouterContract {
 
@@ -61,7 +66,7 @@ public class Router implements RouterContract {
             return routeNotMatchedHandler.routeNotMatched(input, notFoundOutput);
         }
 
-        RouteContract route = collection.get(commandName);
+        RouteContract route = bindArguments(input, collection.get(commandName));
 
         Object afterMatched = routeMatchedHandler.routeMatched(input, route);
 
@@ -73,5 +78,34 @@ public class Router implements RouterContract {
         OutputContract output = matchedRoute.getHandler().apply(container, matchedRoute);
 
         return routeDispatchedHandler.routeDispatched(input, output, matchedRoute);
+    }
+
+    protected RouteContract bindArguments(InputContract input, RouteContract route) {
+        List<ArgumentContract> inputArgs = input.getArguments();
+        List<ArgumentParameterContract> schemas = route.getArguments();
+
+        if (schemas.isEmpty() || inputArgs.isEmpty()) {
+            return route;
+        }
+
+        List<ArgumentParameterContract> bound = new ArrayList<>();
+        int inputIdx = 0;
+
+        for (int i = 0; i < schemas.size(); i++) {
+            ArgumentParameterContract schema = schemas.get(i);
+            boolean isLast = i == schemas.size() - 1;
+
+            if (isLast && schema.getValueMode() == ArgumentValueMode.ARRAY) {
+                while (inputIdx < inputArgs.size()) {
+                    schema = schema.withAddedArguments(inputArgs.get(inputIdx++));
+                }
+            } else if (inputIdx < inputArgs.size()) {
+                schema = schema.withAddedArguments(inputArgs.get(inputIdx++));
+            }
+
+            bound.add(schema);
+        }
+
+        return route.withArguments(bound.toArray(new ArgumentParameterContract[0]));
     }
 }

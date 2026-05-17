@@ -20,6 +20,15 @@ import java.util.List;
 public class HelpOptionParameter extends OptionParameter {
 
     public HelpOptionParameter() {
-        super(OptionName.HELP, "Help with this command", "", "", List.of(OptionShortName.HELP), List.of(), new ArrayList<>(), OptionMode.OPTIONAL, OptionValueMode.NONE);
+        super(
+                OptionName.HELP,
+                "Help with this command",
+                "",
+                "",
+                List.of(OptionShortName.HELP),
+                List.of(),
+                new ArrayList<>(),
+                OptionMode.OPTIONAL,
+                OptionValueMode.NONE);
     }
 }

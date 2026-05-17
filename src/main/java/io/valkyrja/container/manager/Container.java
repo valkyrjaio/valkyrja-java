@@ -263,8 +263,8 @@ public class Container extends ProvidersAware {
     }
 
     /**
-     * Package-private accessor for NativeChildContainer — exposes the deferred callback for a
-     * given id without putting it on the public contract.
+     * Package-private accessor for NativeChildContainer — exposes the deferred callback for a given
+     * id without putting it on the public contract.
      */
     @Nullable Consumer<ContainerContract> getCallback(Class<?> id) {
         return callbacks.get(id);

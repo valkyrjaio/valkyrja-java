@@ -19,7 +19,6 @@ import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
 import io.valkyrja.http.struct.response.contract.ResponseStructContract;
-
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -39,7 +38,8 @@ public interface RouteContract {
 
     BiFunction<ContainerContract, RouteContract, ResponseContract> getHandler();
 
-    RouteContract withHandler(BiFunction<ContainerContract, RouteContract, ResponseContract> handler);
+    RouteContract withHandler(
+            BiFunction<ContainerContract, RouteContract, ResponseContract> handler);
 
     List<RequestMethod> getRequestMethods();
 
@@ -51,33 +51,43 @@ public interface RouteContract {
 
     List<Class<? extends RouteMatchedMiddlewareContract>> getRouteMatchedMiddleware();
 
-    RouteContract withRouteMatchedMiddleware(Class<? extends RouteMatchedMiddlewareContract>... middleware);
+    RouteContract withRouteMatchedMiddleware(
+            Class<? extends RouteMatchedMiddlewareContract>... middleware);
 
-    RouteContract withAddedRouteMatchedMiddleware(Class<? extends RouteMatchedMiddlewareContract>... middleware);
+    RouteContract withAddedRouteMatchedMiddleware(
+            Class<? extends RouteMatchedMiddlewareContract>... middleware);
 
     List<Class<? extends RouteDispatchedMiddlewareContract>> getRouteDispatchedMiddleware();
 
-    RouteContract withRouteDispatchedMiddleware(Class<? extends RouteDispatchedMiddlewareContract>... middleware);
+    RouteContract withRouteDispatchedMiddleware(
+            Class<? extends RouteDispatchedMiddlewareContract>... middleware);
 
-    RouteContract withAddedRouteDispatchedMiddleware(Class<? extends RouteDispatchedMiddlewareContract>... middleware);
+    RouteContract withAddedRouteDispatchedMiddleware(
+            Class<? extends RouteDispatchedMiddlewareContract>... middleware);
 
     List<Class<? extends ThrowableCaughtMiddlewareContract>> getThrowableCaughtMiddleware();
 
-    RouteContract withThrowableCaughtMiddleware(Class<? extends ThrowableCaughtMiddlewareContract>... middleware);
+    RouteContract withThrowableCaughtMiddleware(
+            Class<? extends ThrowableCaughtMiddlewareContract>... middleware);
 
-    RouteContract withAddedThrowableCaughtMiddleware(Class<? extends ThrowableCaughtMiddlewareContract>... middleware);
+    RouteContract withAddedThrowableCaughtMiddleware(
+            Class<? extends ThrowableCaughtMiddlewareContract>... middleware);
 
     List<Class<? extends SendingResponseMiddlewareContract>> getSendingResponseMiddleware();
 
-    RouteContract withSendingResponseMiddleware(Class<? extends SendingResponseMiddlewareContract>... middleware);
+    RouteContract withSendingResponseMiddleware(
+            Class<? extends SendingResponseMiddlewareContract>... middleware);
 
-    RouteContract withAddedSendingResponseMiddleware(Class<? extends SendingResponseMiddlewareContract>... middleware);
+    RouteContract withAddedSendingResponseMiddleware(
+            Class<? extends SendingResponseMiddlewareContract>... middleware);
 
     List<Class<? extends TerminatedMiddlewareContract>> getTerminatedMiddleware();
 
-    RouteContract withTerminatedMiddleware(Class<? extends TerminatedMiddlewareContract>... middleware);
+    RouteContract withTerminatedMiddleware(
+            Class<? extends TerminatedMiddlewareContract>... middleware);
 
-    RouteContract withAddedTerminatedMiddleware(Class<? extends TerminatedMiddlewareContract>... middleware);
+    RouteContract withAddedTerminatedMiddleware(
+            Class<? extends TerminatedMiddlewareContract>... middleware);
 
     boolean hasRequestStruct();
 

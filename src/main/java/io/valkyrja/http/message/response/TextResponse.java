@@ -29,12 +29,14 @@ public class TextResponse extends Response implements TextResponseContract {
         super(createBody(text), statusCode, injectContentType(headers));
     }
 
-    public static TextResponse create(@Nullable String content, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
+    public static TextResponse create(
+            @Nullable String content,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers) {
         return new TextResponse(
                 content != null ? content : "",
                 statusCode != null ? statusCode : StatusCode.OK,
-                headers != null ? headers : new HeaderCollection()
-        );
+                headers != null ? headers : new HeaderCollection());
     }
 
     private static Stream createBody(String text) {
@@ -45,6 +47,7 @@ public class TextResponse extends Response implements TextResponseContract {
     }
 
     private static HeaderCollectionContract injectContentType(HeaderCollectionContract headers) {
-        return headers.withHeader(new Header(HeaderName.CONTENT_TYPE, ContentTypeValue.TEXT_PLAIN_UTF8));
+        return headers.withHeader(
+                new Header(HeaderName.CONTENT_TYPE, ContentTypeValue.TEXT_PLAIN_UTF8));
     }
 }

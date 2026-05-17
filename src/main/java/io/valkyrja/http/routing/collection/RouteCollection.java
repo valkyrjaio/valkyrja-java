@@ -18,13 +18,11 @@ import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidDynamicRou
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRouteNameException;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRoutePathException;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRouteRegexException;
-import org.jspecify.annotations.Nullable;
-
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.jspecify.annotations.Nullable;
 
 public class RouteCollection implements RouteCollectionContract {
 
@@ -40,10 +38,10 @@ public class RouteCollection implements RouteCollectionContract {
 
     @Override
     public void setFromData(HttpRoutingData data) {
-        this.routes       = new LinkedHashMap<>(data.routes());
-        this.paths        = new LinkedHashMap<>(data.paths());
+        this.routes = new LinkedHashMap<>(data.routes());
+        this.paths = new LinkedHashMap<>(data.paths());
         this.dynamicPaths = new LinkedHashMap<>(data.dynamicPaths());
-        this.regexes      = new LinkedHashMap<>(data.regexes());
+        this.regexes = new LinkedHashMap<>(data.regexes());
     }
 
     @Override
@@ -58,7 +56,7 @@ public class RouteCollection implements RouteCollectionContract {
         if (method != RequestMethod.ANY) {
             String type = method.getValue();
             return (paths.containsKey(type) && paths.get(type).containsKey(path))
-                || (dynamicPaths.containsKey(type) && dynamicPaths.get(type).containsKey(path));
+                    || (dynamicPaths.containsKey(type) && dynamicPaths.get(type).containsKey(path));
         }
         return RequestMethod.all().stream().anyMatch(m -> hasPath(path, m));
     }
@@ -69,7 +67,12 @@ public class RouteCollection implements RouteCollectionContract {
         if (route != null) {
             return route;
         }
-        throw new HttpRoutingInvalidRoutePathException("The path '" + path + "' is not a valid route for the given method '" + method.getValue() + "'");
+        throw new HttpRoutingInvalidRoutePathException(
+                "The path '"
+                        + path
+                        + "' is not a valid route for the given method '"
+                        + method.getValue()
+                        + "'");
     }
 
     @Override
@@ -87,7 +90,12 @@ public class RouteCollection implements RouteCollectionContract {
         if (route != null) {
             return route;
         }
-        throw new HttpRoutingInvalidRouteRegexException("The regex '" + regex + "' is not a valid route for the given method '" + method.getValue() + "'");
+        throw new HttpRoutingInvalidRouteRegexException(
+                "The regex '"
+                        + regex
+                        + "' is not a valid route for the given method '"
+                        + method.getValue()
+                        + "'");
     }
 
     @Override
@@ -126,7 +134,8 @@ public class RouteCollection implements RouteCollectionContract {
         if (supplier != null) {
             return supplier.get();
         }
-        throw new HttpRoutingInvalidRouteNameException("A route with the name '" + name + "' does not exist");
+        throw new HttpRoutingInvalidRouteNameException(
+                "A route with the name '" + name + "' does not exist");
     }
 
     @Override
@@ -151,16 +160,25 @@ public class RouteCollection implements RouteCollectionContract {
             }
             return name != null ? getRouteFromName(name) : null;
         }
-        for (RequestMethod m : List.of(RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST,
-                RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE,
-                RequestMethod.OPTIONS, RequestMethod.TRACE, RequestMethod.CONNECT)) {
+        for (RequestMethod m :
+                List.of(
+                        RequestMethod.GET,
+                        RequestMethod.HEAD,
+                        RequestMethod.POST,
+                        RequestMethod.PATCH,
+                        RequestMethod.PUT,
+                        RequestMethod.DELETE,
+                        RequestMethod.OPTIONS,
+                        RequestMethod.TRACE,
+                        RequestMethod.CONNECT)) {
             RouteContract route = internalGetByPath(path, m);
             if (route != null) return route;
         }
         return null;
     }
 
-    protected @Nullable DynamicRouteContract internalGetByRegex(String regex, RequestMethod method) {
+    protected @Nullable DynamicRouteContract internalGetByRegex(
+            String regex, RequestMethod method) {
         if (method != RequestMethod.ANY) {
             String type = method.getValue();
             if (regexes.containsKey(type)) {
@@ -171,9 +189,17 @@ public class RouteCollection implements RouteCollectionContract {
             }
             return null;
         }
-        for (RequestMethod m : List.of(RequestMethod.GET, RequestMethod.HEAD, RequestMethod.POST,
-                RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE,
-                RequestMethod.OPTIONS, RequestMethod.TRACE, RequestMethod.CONNECT)) {
+        for (RequestMethod m :
+                List.of(
+                        RequestMethod.GET,
+                        RequestMethod.HEAD,
+                        RequestMethod.POST,
+                        RequestMethod.PATCH,
+                        RequestMethod.PUT,
+                        RequestMethod.DELETE,
+                        RequestMethod.OPTIONS,
+                        RequestMethod.TRACE,
+                        RequestMethod.CONNECT)) {
             DynamicRouteContract route = internalGetByRegex(regex, m);
             if (route != null) return route;
         }

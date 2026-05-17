@@ -36,35 +36,34 @@ import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
  * WorkerHttp.handle(app, data, request);
  * }</pre>
  *
- * <p>{@link #bootstrap} performs the full application bootstrap and force-resolves
- * any services that must live in the frozen parent container. {@link #handle} creates
- * an isolated {@link ChildContainer} per request so state never bleeds between requests.
+ * <p>{@link #bootstrap} performs the full application bootstrap and force-resolves any services
+ * that must live in the frozen parent container. {@link #handle} creates an isolated {@link
+ * ChildContainer} per request so state never bleeds between requests.
  *
- * <p>Concrete subclasses add the server-specific request loop (e.g. registering
- * a Sun HTTP handler, attaching a Netty pipeline, etc.) and may override any of the
- * decomposed methods to adapt to their runtime context.
+ * <p>Concrete subclasses add the server-specific request loop (e.g. registering a Sun HTTP handler,
+ * attaching a Netty pipeline, etc.) and may override any of the decomposed methods to adapt to
+ * their runtime context.
  *
- * <p>All methods are {@code public static} so the full bootstrap/handle lifecycle
- * can be reproduced without extending this class — useful for runtimes that cannot
- * use inheritance (e.g. Go, or any Java code that already has its own class hierarchy).
+ * <p>All methods are {@code public static} so the full bootstrap/handle lifecycle can be reproduced
+ * without extending this class — useful for runtimes that cannot use inheritance (e.g. Go, or any
+ * Java code that already has its own class hierarchy).
  */
 public abstract class WorkerHttp extends App {
 
     /**
      * Bootstrap the application once at worker startup.
      *
-     * <p>Call this once before the worker request loop begins. The returned
-     * {@link ApplicationContract} is frozen after this call — its container must
-     * not be written to again. Pass it (along with the snapshot from
-     * {@code app.getContainer().getData()}) to {@link #handle} for every
-     * subsequent request.
+     * <p>Call this once before the worker request loop begins. The returned {@link
+     * ApplicationContract} is frozen after this call — its container must not be written to again.
+     * Pass it (along with the snapshot from {@code app.getContainer().getData()}) to {@link
+     * #handle} for every subsequent request.
      *
      * @param config the HTTP configuration
      * @return the bootstrapped, frozen application
      */
     public static ApplicationContract bootstrap(HttpConfigContract config) {
-        ApplicationContract app       = start(config);
-        ContainerContract   container = app.getContainer();
+        ApplicationContract app = start(config);
+        ContainerContract container = app.getContainer();
 
         bootstrapThrowableHandler(app, container);
         bootstrapParentServices(app);
@@ -75,18 +74,18 @@ public abstract class WorkerHttp extends App {
     /**
      * Handle a single request using an isolated child container.
      *
-     * <p>Creates a {@link ChildContainer} scoped to this request, bootstraps its
-     * request-scoped singletons, dispatches the request, then discards the child.
-     * The parent application and its container are never mutated.
+     * <p>Creates a {@link ChildContainer} scoped to this request, bootstraps its request-scoped
+     * singletons, dispatches the request, then discards the child. The parent application and its
+     * container are never mutated.
      *
-     * @param app     the frozen parent application (returned by {@link #bootstrap})
-     * @param data    the container data snapshot captured after {@link #bootstrap}
+     * @param app the frozen parent application (returned by {@link #bootstrap})
+     * @param data the container data snapshot captured after {@link #bootstrap}
      * @param request the current HTTP request
      */
     public static void handle(
             ApplicationContract app, ContainerData data, ServerRequestContract request) {
         ContainerContract childContainer = getChildContainer(app, data);
-        ApplicationContract childApp     = getChildApplication(app, childContainer);
+        ApplicationContract childApp = getChildApplication(app, childContainer);
 
         bootstrapChildContainer(childApp, childContainer);
         handleRequest(childContainer, request);
@@ -95,12 +94,11 @@ public abstract class WorkerHttp extends App {
     /**
      * Get a child container scoped to the current request.
      *
-     * @param app  the frozen parent application
+     * @param app the frozen parent application
      * @param data the container data snapshot
      * @return the child container
      */
-    public static ContainerContract getChildContainer(
-            ApplicationContract app, ContainerData data) {
+    public static ContainerContract getChildContainer(ApplicationContract app, ContainerData data) {
         ContainerContract parent = app.getContainer();
 
         return new ChildContainer(parent, data);
@@ -109,11 +107,11 @@ public abstract class WorkerHttp extends App {
     /**
      * Get a child application scoped to the current request.
      *
-     * <p>Returns a {@link ChildApplication} wrapping the frozen parent with the
-     * request-scoped child container, so {@link ApplicationContract} resolves to
-     * the request-scoped wrapper rather than the frozen parent.
+     * <p>Returns a {@link ChildApplication} wrapping the frozen parent with the request-scoped
+     * child container, so {@link ApplicationContract} resolves to the request-scoped wrapper rather
+     * than the frozen parent.
      *
-     * @param app       the frozen parent application
+     * @param app the frozen parent application
      * @param container the request-scoped child container
      * @return the child application for this request
      */
@@ -125,7 +123,7 @@ public abstract class WorkerHttp extends App {
     /**
      * Bootstrap a child container with the request-scoped singletons.
      *
-     * @param app       the request-scoped child application
+     * @param app the request-scoped child application
      * @param container the request-scoped child container
      */
     public static void bootstrapChildContainer(
@@ -138,10 +136,9 @@ public abstract class WorkerHttp extends App {
      * Dispatch the request via the {@link RequestHandlerContract} resolved from the container.
      *
      * @param container the request-scoped child container
-     * @param request   the current HTTP request
+     * @param request the current HTTP request
      */
-    public static void handleRequest(
-            ContainerContract container, ServerRequestContract request) {
+    public static void handleRequest(ContainerContract container, ServerRequestContract request) {
         RequestHandlerContract handler = container.getSingleton(RequestHandlerContract.class);
         handler.run(request);
     }
@@ -149,8 +146,8 @@ public abstract class WorkerHttp extends App {
     /**
      * Get the current HTTP request.
      *
-     * <p>Override in subclasses to adapt request creation to the server runtime
-     * (e.g. extract from a Netty {@code ChannelHandlerContext}).
+     * <p>Override in subclasses to adapt request creation to the server runtime (e.g. extract from
+     * a Netty {@code ChannelHandlerContext}).
      *
      * @return the current server request
      */
@@ -161,9 +158,9 @@ public abstract class WorkerHttp extends App {
     /**
      * Force-resolve services that must be pre-built in the parent container.
      *
-     * <p>Override in subclasses to eagerly resolve expensive shared services
-     * (e.g. the route collection) so they are cached in the frozen parent rather
-     * than being re-created fresh on every request's child container.
+     * <p>Override in subclasses to eagerly resolve expensive shared services (e.g. the route
+     * collection) so they are cached in the frozen parent rather than being re-created fresh on
+     * every request's child container.
      *
      * @param app the bootstrapped parent application
      */

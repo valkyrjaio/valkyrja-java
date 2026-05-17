@@ -10,7 +10,6 @@
 package io.valkyrja.cli.middleware.contract;
 
 import io.valkyrja.cli.interaction.input.contract.InputContract;
-import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
 
 public interface InputReceivedMiddlewareContract {

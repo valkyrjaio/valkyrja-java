@@ -16,5 +16,8 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 
 public interface RouteMatchedMiddlewareContract {
 
-    RouteMatchedResult routeMatched(ServerRequestContract request, RouteContract route, RouteMatchedHandlerContract handler);
+    RouteMatchedResult routeMatched(
+            ServerRequestContract request,
+            RouteContract route,
+            RouteMatchedHandlerContract handler);
 }

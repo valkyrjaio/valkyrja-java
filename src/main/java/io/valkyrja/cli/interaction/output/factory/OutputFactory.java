@@ -40,26 +40,43 @@ public class OutputFactory implements OutputFactoryContract {
 
     @Override
     public OutputContract createOutput(ExitCode exitCode, MessageContract... messages) {
-        return new Output(config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
+        return new Output(
+                config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
     }
 
     @Override
     public EmptyOutputContract createEmptyOutput(ExitCode exitCode, MessageContract... messages) {
-        return new EmptyOutput(config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
+        return new EmptyOutput(
+                config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
     }
 
     @Override
     public PlainOutputContract createPlainOutput(ExitCode exitCode, MessageContract... messages) {
-        return new PlainOutput(config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
+        return new PlainOutput(
+                config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
     }
 
     @Override
-    public FileOutputContract createFileOutput(String filepath, ExitCode exitCode, MessageContract... messages) {
-        return new FileOutput(filepath, config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
+    public FileOutputContract createFileOutput(
+            String filepath, ExitCode exitCode, MessageContract... messages) {
+        return new FileOutput(
+                filepath,
+                config.isInteractive(),
+                config.isQuiet(),
+                config.isSilent(),
+                exitCode,
+                messages);
     }
 
     @Override
-    public StreamOutputContract createStreamOutput(OutputStream stream, ExitCode exitCode, MessageContract... messages) {
-        return new StreamOutput(stream, config.isInteractive(), config.isQuiet(), config.isSilent(), exitCode, messages);
+    public StreamOutputContract createStreamOutput(
+            OutputStream stream, ExitCode exitCode, MessageContract... messages) {
+        return new StreamOutput(
+                stream,
+                config.isInteractive(),
+                config.isQuiet(),
+                config.isSilent(),
+                exitCode,
+                messages);
     }
 }

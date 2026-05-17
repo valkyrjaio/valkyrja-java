@@ -46,7 +46,17 @@ public class Route implements RouteContract {
             String name,
             String description,
             BiFunction<ContainerContract, RouteContract, OutputContract> handler) {
-        this(name, description, handler, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        this(
+                name,
+                description,
+                handler,
+                null,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>());
     }
 
     public Route(
@@ -73,7 +83,17 @@ public class Route implements RouteContract {
     }
 
     protected Route copy() {
-        return new Route(name, description, handler, helpText, routeMatchedMiddleware, routeDispatchedMiddleware, throwableCaughtMiddleware, exitedMiddleware, arguments, options);
+        return new Route(
+                name,
+                description,
+                handler,
+                helpText,
+                routeMatchedMiddleware,
+                routeDispatchedMiddleware,
+                throwableCaughtMiddleware,
+                exitedMiddleware,
+                arguments,
+                options);
     }
 
     @Override
@@ -143,9 +163,12 @@ public class Route implements RouteContract {
     @Override
     public ArgumentParameterContract getArgument(String name) {
         return arguments.stream()
-            .filter(a -> a.getName().equals(name))
-            .findFirst()
-            .orElseThrow(() -> new CliRoutingInvalidArgumentNameException("The argument `" + name + "` was not found"));
+                .filter(a -> a.getName().equals(name))
+                .findFirst()
+                .orElseThrow(
+                        () ->
+                                new CliRoutingInvalidArgumentNameException(
+                                        "The argument `" + name + "` was not found"));
     }
 
     @Override
@@ -181,9 +204,12 @@ public class Route implements RouteContract {
     @Override
     public OptionParameterContract getOption(String name) {
         return options.stream()
-            .filter(o -> o.getName().equals(name))
-            .findFirst()
-            .orElseThrow(() -> new CliRoutingInvalidOptionNameException("The option `" + name + "` was not found"));
+                .filter(o -> o.getName().equals(name))
+                .findFirst()
+                .orElseThrow(
+                        () ->
+                                new CliRoutingInvalidOptionNameException(
+                                        "The option `" + name + "` was not found"));
     }
 
     @Override
@@ -207,14 +233,16 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public RouteContract withRouteMatchedMiddleware(List<Class<? extends RouteMatchedMiddlewareContract>> middleware) {
+    public RouteContract withRouteMatchedMiddleware(
+            List<Class<? extends RouteMatchedMiddlewareContract>> middleware) {
         Route copy = copy();
         copy.routeMatchedMiddleware = new ArrayList<>(middleware);
         return copy;
     }
 
     @Override
-    public RouteContract withAddedRouteMatchedMiddleware(List<Class<? extends RouteMatchedMiddlewareContract>> middleware) {
+    public RouteContract withAddedRouteMatchedMiddleware(
+            List<Class<? extends RouteMatchedMiddlewareContract>> middleware) {
         Route copy = copy();
         copy.routeMatchedMiddleware = new ArrayList<>(this.routeMatchedMiddleware);
         copy.routeMatchedMiddleware.addAll(middleware);
@@ -227,14 +255,16 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public RouteContract withRouteDispatchedMiddleware(List<Class<? extends RouteDispatchedMiddlewareContract>> middleware) {
+    public RouteContract withRouteDispatchedMiddleware(
+            List<Class<? extends RouteDispatchedMiddlewareContract>> middleware) {
         Route copy = copy();
         copy.routeDispatchedMiddleware = new ArrayList<>(middleware);
         return copy;
     }
 
     @Override
-    public RouteContract withAddedRouteDispatchedMiddleware(List<Class<? extends RouteDispatchedMiddlewareContract>> middleware) {
+    public RouteContract withAddedRouteDispatchedMiddleware(
+            List<Class<? extends RouteDispatchedMiddlewareContract>> middleware) {
         Route copy = copy();
         copy.routeDispatchedMiddleware = new ArrayList<>(this.routeDispatchedMiddleware);
         copy.routeDispatchedMiddleware.addAll(middleware);
@@ -247,14 +277,16 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public RouteContract withThrowableCaughtMiddleware(List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware) {
+    public RouteContract withThrowableCaughtMiddleware(
+            List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware) {
         Route copy = copy();
         copy.throwableCaughtMiddleware = new ArrayList<>(middleware);
         return copy;
     }
 
     @Override
-    public RouteContract withAddedThrowableCaughtMiddleware(List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware) {
+    public RouteContract withAddedThrowableCaughtMiddleware(
+            List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware) {
         Route copy = copy();
         copy.throwableCaughtMiddleware = new ArrayList<>(this.throwableCaughtMiddleware);
         copy.throwableCaughtMiddleware.addAll(middleware);
@@ -267,14 +299,16 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public RouteContract withExitedMiddleware(List<Class<? extends ExitedMiddlewareContract>> middleware) {
+    public RouteContract withExitedMiddleware(
+            List<Class<? extends ExitedMiddlewareContract>> middleware) {
         Route copy = copy();
         copy.exitedMiddleware = new ArrayList<>(middleware);
         return copy;
     }
 
     @Override
-    public RouteContract withAddedExitedMiddleware(List<Class<? extends ExitedMiddlewareContract>> middleware) {
+    public RouteContract withAddedExitedMiddleware(
+            List<Class<? extends ExitedMiddlewareContract>> middleware) {
         Route copy = copy();
         copy.exitedMiddleware = new ArrayList<>(this.exitedMiddleware);
         copy.exitedMiddleware.addAll(middleware);
@@ -287,7 +321,8 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public RouteContract withHandler(BiFunction<ContainerContract, RouteContract, OutputContract> handler) {
+    public RouteContract withHandler(
+            BiFunction<ContainerContract, RouteContract, OutputContract> handler) {
         Route copy = copy();
         copy.handler = handler;
         return copy;

@@ -58,6 +58,7 @@ public class HelpCommand {
         this.route = route;
         this.collection = collection;
         this.outputFactory = outputFactory;
+        this.helpRoute = route;
     }
 
     public static MessageContract help() {
@@ -68,15 +69,21 @@ public class HelpCommand {
         String commandName = route.getOption("command").getFirstValue();
 
         if (!collection.has(commandName)) {
-            return outputFactory.createOutput()
-                .withExitCode(ExitCode.ERROR)
-                .withAddedMessages(new Banner(new ErrorMessage("Command `" + commandName + "` was not found.")));
+            return outputFactory
+                    .createOutput()
+                    .withExitCode(ExitCode.ERROR)
+                    .withAddedMessages(
+                            new Banner(
+                                    new ErrorMessage(
+                                            "Command `" + commandName + "` was not found.")));
         }
 
         helpRoute = collection.get(commandName);
 
-        OutputContract output = outputFactory.createOutput()
-            .withMessages(new Header(appNamespace, appVersion, route));
+        OutputContract output =
+                outputFactory
+                        .createOutput()
+                        .withMessages(new Header(appNamespace, appVersion, route));
 
         return getHelpText(output);
     }
@@ -146,24 +153,24 @@ public class HelpCommand {
     }
 
     protected Messages getNameMessages() {
-        return new Messages(new Message("Name: ", new HighlightedTextFormatter()), new Message(helpRoute.getName()));
+        return new Messages(
+                new Message("Name: ", new HighlightedTextFormatter()),
+                new Message(helpRoute.getName()));
     }
 
     protected Messages getDescriptionMessages() {
         return new Messages(
-            new Message("Description:", new HighlightedTextFormatter()),
-            new NewLine(),
-            getIndentedText(new Message(helpRoute.getDescription()))
-        );
+                new Message("Description:", new HighlightedTextFormatter()),
+                new NewLine(),
+                getIndentedText(new Message(helpRoute.getDescription())));
     }
 
     protected Messages getHelpTextMessages(MessageContract helpText) {
         return new Messages(
-            new Message("Help:", new HighlightedTextFormatter()),
-            new NewLine(),
-            getIndentedText(helpText),
-            new NewLine()
-        );
+                new Message("Help:", new HighlightedTextFormatter()),
+                new NewLine(),
+                getIndentedText(helpText),
+                new NewLine());
     }
 
     protected Messages getUsageMessages() {
@@ -174,14 +181,17 @@ public class HelpCommand {
         usage += " [global options]";
         if (helpRoute.hasArguments()) {
             for (ArgumentParameterContract argument : helpRoute.getArguments()) {
-                usage += " [" + argument.getName() + (argument.getValueMode() == ArgumentValueMode.ARRAY ? "..." : "") + "]";
+                usage +=
+                        " ["
+                                + argument.getName()
+                                + (argument.getValueMode() == ArgumentValueMode.ARRAY ? "..." : "")
+                                + "]";
             }
         }
         return new Messages(
-            new Message("Usage:", new HighlightedTextFormatter()),
-            new NewLine(),
-            getIndentedText(new Message(usage))
-        );
+                new Message("Usage:", new HighlightedTextFormatter()),
+                new NewLine(),
+                getIndentedText(new Message(usage)));
     }
 
     protected Messages getOptionsHeadingMessages() {
@@ -195,12 +205,18 @@ public class HelpCommand {
     protected Messages getOptionMessages(OptionParameterContract option) {
         List<MessageContract> msgs = new ArrayList<>();
         msgs.add(new Message("  "));
-        msgs.add(new Message("--" + option.getName(), new Formatter(new TextColorFormat(TextColor.MAGENTA))));
+        msgs.add(
+                new Message(
+                        "--" + option.getName(),
+                        new Formatter(new TextColorFormat(TextColor.MAGENTA))));
 
         List<String> shortNames = option.getShortNames();
         if (!shortNames.isEmpty()) {
             msgs.add(new Message(", "));
-            msgs.add(new Message("-" + String.join("|", shortNames), new Formatter(new TextColorFormat(TextColor.MAGENTA))));
+            msgs.add(
+                    new Message(
+                            "-" + String.join("|", shortNames),
+                            new Formatter(new TextColorFormat(TextColor.MAGENTA))));
         }
 
         if (option.hasValueDisplayName()) {
@@ -250,14 +266,13 @@ public class HelpCommand {
 
     protected Messages getArgumentMessages(ArgumentParameterContract argument) {
         return new Messages(
-            new Message("  "),
-            new Message(argument.getName()),
-            new NewLine(),
-            new Message("    "),
-            new Message(argument.getDescription()),
-            new NewLine(),
-            new NewLine()
-        );
+                new Message("  "),
+                new Message(argument.getName()),
+                new NewLine(),
+                new Message("    "),
+                new Message(argument.getDescription()),
+                new NewLine(),
+                new NewLine());
     }
 
     protected MessageContract getIndentedText(MessageContract message) {

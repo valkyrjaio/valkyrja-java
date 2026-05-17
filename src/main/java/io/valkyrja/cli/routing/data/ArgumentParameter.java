@@ -28,10 +28,20 @@ public class ArgumentParameter extends Parameter implements ArgumentParameterCon
     protected List<ArgumentContract> arguments;
 
     public ArgumentParameter(String name, String description) {
-        this(name, description, ArgumentMode.OPTIONAL, ArgumentValueMode.DEFAULT, new ArrayList<>());
+        this(
+                name,
+                description,
+                ArgumentMode.OPTIONAL,
+                ArgumentValueMode.DEFAULT,
+                new ArrayList<>());
     }
 
-    public ArgumentParameter(String name, String description, ArgumentMode mode, ArgumentValueMode valueMode, List<ArgumentContract> arguments) {
+    public ArgumentParameter(
+            String name,
+            String description,
+            ArgumentMode mode,
+            ArgumentValueMode valueMode,
+            List<ArgumentContract> arguments) {
         super(name, description);
         this.mode = mode;
         this.valueMode = valueMode;

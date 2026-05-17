@@ -9,5 +9,4 @@
 
 package io.valkyrja.http.message.response.contract;
 
-public interface EmptyResponseContract extends ResponseContract {
-}
+public interface EmptyResponseContract extends ResponseContract {}

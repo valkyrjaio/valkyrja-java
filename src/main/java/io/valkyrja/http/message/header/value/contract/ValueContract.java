@@ -9,8 +9,6 @@
 
 package io.valkyrja.http.message.header.value.contract;
 
-import io.valkyrja.http.message.header.value.component.contract.ComponentContract;
-
 import java.util.List;
 
 /**
@@ -19,7 +17,8 @@ import java.util.List;
 public interface ValueContract {
 
     static ValueContract fromValue(String value) {
-        throw new UnsupportedOperationException("fromValue must be implemented by the concrete class");
+        throw new UnsupportedOperationException(
+                "fromValue must be implemented by the concrete class");
     }
 
     List<Object> getComponents();
