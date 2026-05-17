@@ -11,7 +11,8 @@ package io.valkyrja.http.struct.throwable.exception;
 
 import io.valkyrja.http.struct.throwable.exception.abstract_.HttpStructInvalidArgumentException;
 
-public class HttpStructJsonServerRequestExpectedException extends HttpStructInvalidArgumentException {
+public class HttpStructJsonServerRequestExpectedException
+        extends HttpStructInvalidArgumentException {
 
     public HttpStructJsonServerRequestExpectedException(String message) {
         super(message);

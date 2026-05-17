@@ -19,6 +19,7 @@ import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContrac
 import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.server.handler.contract.InputHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import org.jspecify.annotations.Nullable;
 
 public class InputHandler implements InputHandlerContract {
 
@@ -82,7 +83,7 @@ public class InputHandler implements InputHandlerContract {
         return router.dispatch(processedInput);
     }
 
-    protected OutputContract emptyOutput() {
+    protected @Nullable OutputContract emptyOutput() {
         return null;
     }
 }

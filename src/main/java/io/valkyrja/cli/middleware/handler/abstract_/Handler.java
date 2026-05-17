@@ -11,7 +11,6 @@ package io.valkyrja.cli.middleware.handler.abstract_;
 
 import io.valkyrja.cli.middleware.handler.contract.HandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

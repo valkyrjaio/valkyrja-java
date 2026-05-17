@@ -21,15 +21,17 @@ import io.valkyrja.http.message.header.collection.contract.HeaderCollectionContr
 import io.valkyrja.http.message.response.contract.JsonResponseContract;
 import io.valkyrja.http.message.response.throwable.exception.HttpRequestInvalidJsonCallbackException;
 import io.valkyrja.http.message.stream.Stream;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 public class JsonResponse extends Response implements JsonResponseContract {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final Pattern JS_IDENTIFIER = Pattern.compile("^[$_\\p{L}][$_\\p{L}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Pc}\\u200C\\u200D]*+$", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern JS_IDENTIFIER =
+            Pattern.compile(
+                    "^[$_\\p{L}][$_\\p{L}\\p{Mn}\\p{Mc}\\p{Nd}\\p{Pc}\\u200C\\u200D]*+$",
+                    Pattern.UNICODE_CHARACTER_CLASS);
 
     protected Map<String, Object> data;
 
@@ -37,17 +39,24 @@ public class JsonResponse extends Response implements JsonResponseContract {
         this(Map.of(), StatusCode.OK, new HeaderCollection());
     }
 
-    public JsonResponse(Map<String, Object> data, StatusCode statusCode, HeaderCollectionContract headers) {
-        super(createBody(data), statusCode, headers.withHeader(new Header(HeaderName.CONTENT_TYPE, ContentTypeValue.APPLICATION_JSON)));
+    public JsonResponse(
+            Map<String, Object> data, StatusCode statusCode, HeaderCollectionContract headers) {
+        super(
+                createBody(data),
+                statusCode,
+                headers.withHeader(
+                        new Header(HeaderName.CONTENT_TYPE, ContentTypeValue.APPLICATION_JSON)));
         this.data = data;
     }
 
-    public static JsonResponse createFromData(@Nullable Map<String, Object> data, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
+    public static JsonResponse createFromData(
+            @Nullable Map<String, Object> data,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers) {
         return new JsonResponse(
                 data != null ? data : Map.of(),
                 statusCode != null ? statusCode : StatusCode.OK,
-                headers != null ? headers : new HeaderCollection()
-        );
+                headers != null ? headers : new HeaderCollection());
     }
 
     @Override
@@ -111,7 +120,8 @@ public class JsonResponse extends Response implements JsonResponseContract {
     private void verifyCallback(String callback) {
         for (String part : callback.split("\\.")) {
             if (!JS_IDENTIFIER.matcher(part).matches()) {
-                throw new HttpRequestInvalidJsonCallbackException("The callback name is not valid.");
+                throw new HttpRequestInvalidJsonCallbackException(
+                        "The callback name is not valid.");
             }
         }
     }

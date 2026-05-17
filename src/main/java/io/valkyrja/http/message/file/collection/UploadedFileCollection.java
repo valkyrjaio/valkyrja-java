@@ -13,7 +13,6 @@ import io.valkyrja.http.message.file.collection.contract.UploadedFileCollectionC
 import io.valkyrja.http.message.file.contract.UploadedFileContract;
 import io.valkyrja.http.message.file.throwable.exception.UploadedFileInvalidKeyException;
 import io.valkyrja.http.message.file.throwable.exception.UploadedFileInvalidParamException;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,7 +36,8 @@ public class UploadedFileCollection implements UploadedFileCollectionContract {
 
     protected static void validateFile(UploadedFileContract file) {
         if (file == null) {
-            throw new UploadedFileInvalidParamException("File must be an UploadedFileContract instance");
+            throw new UploadedFileInvalidParamException(
+                    "File must be an UploadedFileContract instance");
         }
     }
 
@@ -49,7 +49,8 @@ public class UploadedFileCollection implements UploadedFileCollectionContract {
     @Override
     public UploadedFileContract get(String key) {
         if (!files.containsKey(key)) {
-            throw new UploadedFileInvalidKeyException("The provided key '" + key + "' does not exist in the collection");
+            throw new UploadedFileInvalidKeyException(
+                    "The provided key '" + key + "' does not exist in the collection");
         }
         return files.get(key);
     }
@@ -64,7 +65,12 @@ public class UploadedFileCollection implements UploadedFileCollectionContract {
         Set<String> keySet = Arrays.stream(keys).collect(Collectors.toSet());
         return files.entrySet().stream()
                 .filter(e -> keySet.contains(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (a, b) -> a,
+                                LinkedHashMap::new));
     }
 
     @Override
@@ -72,7 +78,12 @@ public class UploadedFileCollection implements UploadedFileCollectionContract {
         Set<String> keySet = Arrays.stream(keys).collect(Collectors.toSet());
         return files.entrySet().stream()
                 .filter(e -> !keySet.contains(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (a, b) -> a,
+                                LinkedHashMap::new));
     }
 
     @Override

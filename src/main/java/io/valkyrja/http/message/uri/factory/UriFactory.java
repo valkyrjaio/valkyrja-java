@@ -17,9 +17,9 @@ import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidFromString
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPathException;
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPortException;
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidQueryException;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Locale;
 
 public abstract class UriFactory {
 
@@ -34,12 +34,12 @@ public abstract class UriFactory {
         try {
             URI parsed = new URI(uri);
 
-            String scheme   = parsed.getScheme() != null ? parsed.getScheme() : "";
+            String scheme = parsed.getScheme() != null ? parsed.getScheme() : "";
             String userInfo = parsed.getRawUserInfo() != null ? parsed.getRawUserInfo() : "";
-            String host     = parsed.getHost() != null ? parsed.getHost() : "";
-            int    port     = parsed.getPort() != -1 ? parsed.getPort() : 0;
-            String path     = parsed.getRawPath() != null ? parsed.getRawPath() : "";
-            String query    = parsed.getRawQuery() != null ? parsed.getRawQuery() : "";
+            String host = parsed.getHost() != null ? parsed.getHost() : "";
+            int port = parsed.getPort() != -1 ? parsed.getPort() : 0;
+            String path = parsed.getRawPath() != null ? parsed.getRawPath() : "";
+            String query = parsed.getRawQuery() != null ? parsed.getRawQuery() : "";
             String fragment = parsed.getRawFragment() != null ? parsed.getRawFragment() : "";
 
             String username = "";
@@ -56,15 +56,7 @@ public abstract class UriFactory {
             }
 
             return new Uri(
-                filterScheme(scheme),
-                username,
-                password,
-                host,
-                port,
-                path,
-                query,
-                fragment
-            );
+                    filterScheme(scheme), username, password, host, port, path, query, fragment);
         } catch (URISyntaxException e) {
             throw new HttpUriInvalidFromStringException("Invalid uri `" + uri + "` provided", e);
         }
@@ -72,14 +64,14 @@ public abstract class UriFactory {
 
     public static String toString(UriContract uri) {
         return getSchemeStringPart(uri)
-            + getAuthorityStringPart(uri)
-            + getPathStringPart(uri)
-            + getQueryStringPart(uri)
-            + getFragmentStringPart(uri);
+                + getAuthorityStringPart(uri)
+                + getPathStringPart(uri)
+                + getQueryStringPart(uri)
+                + getFragmentStringPart(uri);
     }
 
     public static Scheme filterScheme(String scheme) {
-        scheme = scheme.toLowerCase();
+        scheme = scheme.toLowerCase(Locale.ROOT);
         scheme = scheme.replaceAll(":(//)?$", "");
 
         for (Scheme s : Scheme.values()) {
@@ -93,7 +85,8 @@ public abstract class UriFactory {
 
     public static void validatePort(int port) {
         if (!Port.isValid(port)) {
-            throw new HttpUriInvalidPortException("Invalid port `%" + port + "` specified; must be a valid TCP/UDP port");
+            throw new HttpUriInvalidPortException(
+                    "Invalid port `%" + port + "` specified; must be a valid TCP/UDP port");
         }
     }
 
@@ -113,11 +106,13 @@ public abstract class UriFactory {
 
     public static void validatePath(String path) {
         if (path.contains("?")) {
-            throw new HttpUriInvalidPathException("Invalid path of `" + path + "` provided; must not contain a query string");
+            throw new HttpUriInvalidPathException(
+                    "Invalid path of `" + path + "` provided; must not contain a query string");
         }
 
         if (path.contains("#")) {
-            throw new HttpUriInvalidPathException("Invalid path of `" + path + "` provided; must not contain a URI fragment");
+            throw new HttpUriInvalidPathException(
+                    "Invalid path of `" + path + "` provided; must not contain a URI fragment");
         }
     }
 
@@ -134,8 +129,9 @@ public abstract class UriFactory {
     public static void validateQuery(String query) {
         if (query.contains("#")) {
             throw new HttpUriInvalidQueryException(
-                "Invalid query string of `" + query + "` provided; must not contain a URI fragment"
-            );
+                    "Invalid query string of `"
+                            + query
+                            + "` provided; must not contain a URI fragment");
         }
     }
 
@@ -149,8 +145,7 @@ public abstract class UriFactory {
         return fragment;
     }
 
-    public static void validateFragment(String fragment) {
-    }
+    public static void validateFragment(String fragment) {}
 
     public static boolean isStandardPort(Scheme scheme, String host, int port) {
         if (scheme == Scheme.EMPTY) {

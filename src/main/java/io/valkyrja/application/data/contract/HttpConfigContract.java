@@ -16,7 +16,6 @@ import io.valkyrja.http.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
 import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
-
 import java.util.List;
 
 public interface HttpConfigContract extends ConfigContract {

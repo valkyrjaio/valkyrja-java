@@ -38,6 +38,11 @@ sourceSets {
     }
 }
 
+dependencies {
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0")
+    compileOnly("org.jspecify:jspecify:1.0.0")
+}
+
 spotbugs {
     toolVersion.set("4.9.8")
     excludeFilter.set(layout.projectDirectory.file("spotbugs-exclude.xml"))

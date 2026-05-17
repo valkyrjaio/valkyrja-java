@@ -14,21 +14,29 @@ import io.valkyrja.http.message.header.collection.HeaderCollection;
 import io.valkyrja.http.message.header.collection.contract.HeaderCollectionContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.message.throwable.exception.abstract_.HttpMessageRuntimeException;
+import org.jspecify.annotations.Nullable;
 
 public class HttpResponseException extends HttpMessageRuntimeException {
 
     protected StatusCode statusCode;
     protected HeaderCollectionContract headers;
-    protected ResponseContract response;
+    protected @Nullable ResponseContract response;
 
-    public HttpResponseException(StatusCode statusCode, String message, HeaderCollectionContract headers, ResponseContract response) {
+    public HttpResponseException(
+            StatusCode statusCode,
+            String message,
+            HeaderCollectionContract headers,
+            @Nullable ResponseContract response) {
         super(message != null ? message : "");
 
-        this.statusCode = statusCode != null
-                ? statusCode
-                : (response != null ? response.getStatusCode() : StatusCode.INTERNAL_SERVER_ERROR);
-        this.headers    = headers != null ? headers : new HeaderCollection();
-        this.response   = response != null ? response.withStatusCode(this.statusCode) : null;
+        this.statusCode =
+                statusCode != null
+                        ? statusCode
+                        : (response != null
+                                ? response.getStatusCode()
+                                : StatusCode.INTERNAL_SERVER_ERROR);
+        this.headers = headers != null ? headers : new HeaderCollection();
+        this.response = response != null ? response.withStatusCode(this.statusCode) : null;
     }
 
     public StatusCode getStatusCode() {
@@ -39,7 +47,7 @@ public class HttpResponseException extends HttpMessageRuntimeException {
         return headers;
     }
 
-    public ResponseContract getResponse() {
+    public @Nullable ResponseContract getResponse() {
         return response;
     }
 }

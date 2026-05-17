@@ -19,17 +19,22 @@ import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContra
 
 public class NoCacheResponseMiddleware implements SendingResponseMiddlewareContract {
 
-    protected String[] expires      = {"Sun, 01 Jan 2014 00:00:00 GMT"};
-    protected String[] cacheControl = {"no-store", "no-cache", "must-revalidate", "post-check=0", "pre-check=0"};
-    protected String[] pragma       = {"no-cache"};
+    protected String[] expires = {"Sun, 01 Jan 2014 00:00:00 GMT"};
+    protected String[] cacheControl = {
+        "no-store", "no-cache", "must-revalidate", "post-check=0", "pre-check=0"
+    };
+    protected String[] pragma = {"no-cache"};
 
     @Override
-    public ResponseContract sendingResponse(ServerRequestContract request, ResponseContract response, SendingResponseHandlerContract handler) {
+    public ResponseContract sendingResponse(
+            ServerRequestContract request,
+            ResponseContract response,
+            SendingResponseHandlerContract handler) {
         HeaderCollectionContract headers = response.getHeaders();
-        headers = headers
-            .withHeader(new Header(HeaderName.EXPIRES, (Object[]) expires))
-            .withHeader(new Header(HeaderName.CACHE_CONTROL, (Object[]) cacheControl))
-            .withHeader(new Header(HeaderName.PRAGMA, (Object[]) pragma));
+        headers =
+                headers.withHeader(new Header(HeaderName.EXPIRES, (Object[]) expires))
+                        .withHeader(new Header(HeaderName.CACHE_CONTROL, (Object[]) cacheControl))
+                        .withHeader(new Header(HeaderName.PRAGMA, (Object[]) pragma));
 
         return handler.sendingResponse(request, (ResponseContract) response.withHeaders(headers));
     }

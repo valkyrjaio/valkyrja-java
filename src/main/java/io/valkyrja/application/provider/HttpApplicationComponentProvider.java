@@ -20,7 +20,6 @@ import io.valkyrja.http.routing.provider.HttpRoutingCliComponentProvider;
 import io.valkyrja.http.routing.provider.HttpRoutingComponentProvider;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import io.valkyrja.http.server.provider.HttpServerComponentProvider;
-
 import java.util.List;
 
 public class HttpApplicationComponentProvider implements ComponentProviderContract {

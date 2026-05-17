@@ -12,7 +12,6 @@ package io.valkyrja.cli.routing.collection;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingInvalidRouteNameException;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -47,7 +46,11 @@ public class RouteCollection implements RouteCollectionContract {
     @Override
     public Map<String, RouteContract> all() {
         return routes.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(),
-                        (a, b) -> a, LinkedHashMap::new));
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                e -> e.getValue().get(),
+                                (a, b) -> a,
+                                LinkedHashMap::new));
     }
 }

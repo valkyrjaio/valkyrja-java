@@ -16,7 +16,8 @@ public interface QuestionContract extends MessageContract {
 
     BiFunction<OutputContract, AnswerContract, OutputContract> getCallable();
 
-    QuestionContract withCallable(BiFunction<OutputContract, AnswerContract, OutputContract> callable);
+    QuestionContract withCallable(
+            BiFunction<OutputContract, AnswerContract, OutputContract> callable);
 
     AnswerContract getAnswer();
 

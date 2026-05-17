@@ -12,17 +12,16 @@ package io.valkyrja.application.entry;
 import com.sun.net.httpserver.HttpServer;
 import io.valkyrja.application.data.contract.HttpConfigContract;
 import io.valkyrja.throwable.exception.RuntimeException;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
 /**
  * CGI-style HTTP entry point for the built-in Sun {@link HttpServer}.
  *
- * <p>Re-bootstraps the full application on every incoming exchange — clean container
- * isolation per request at the cost of full bootstrap overhead each time. For
- * production use prefer {@link ExchangeHttp}, which bootstraps once and isolates
- * each request with a {@link io.valkyrja.container.manager.ChildContainer}.
+ * <p>Re-bootstraps the full application on every incoming exchange — clean container isolation per
+ * request at the cost of full bootstrap overhead each time. For production use prefer {@link
+ * ExchangeHttp}, which bootstraps once and isolates each request with a {@link
+ * io.valkyrja.container.manager.ChildContainer}.
  */
 public class ExchangeCgiHttp extends Http {
 
@@ -37,7 +36,7 @@ public class ExchangeCgiHttp extends Http {
         try {
             server = HttpServer.create(new InetSocketAddress(config.port()), 0);
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage() != null ? e.getMessage() : "", e);
         }
 
         server.createContext("/", exchange -> Http.run(config));

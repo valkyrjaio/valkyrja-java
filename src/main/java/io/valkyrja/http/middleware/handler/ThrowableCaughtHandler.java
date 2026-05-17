@@ -16,15 +16,19 @@ import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.middleware.handler.abstract_.Handler;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 
-public class ThrowableCaughtHandler extends Handler<ThrowableCaughtMiddlewareContract> implements ThrowableCaughtHandlerContract {
+public class ThrowableCaughtHandler extends Handler<ThrowableCaughtMiddlewareContract>
+        implements ThrowableCaughtHandlerContract {
 
     @SafeVarargs
-    public ThrowableCaughtHandler(ContainerContract container, Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
+    public ThrowableCaughtHandler(
+            ContainerContract container,
+            Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 
     @Override
-    public ResponseContract throwableCaught(ServerRequestContract request, ResponseContract response, Throwable throwable) {
+    public ResponseContract throwableCaught(
+            ServerRequestContract request, ResponseContract response, Throwable throwable) {
         Class<? extends ThrowableCaughtMiddlewareContract> next = this.next;
         return next != null
                 ? getMiddleware(next).throwableCaught(request, response, throwable, this)

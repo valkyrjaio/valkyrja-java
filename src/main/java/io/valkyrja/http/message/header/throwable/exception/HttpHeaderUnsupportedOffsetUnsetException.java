@@ -9,7 +9,8 @@
 
 package io.valkyrja.http.message.header.throwable.exception;
 
-public class HttpHeaderUnsupportedOffsetUnsetException extends HttpHeaderUnsupportedMethodException {
+public class HttpHeaderUnsupportedOffsetUnsetException
+        extends HttpHeaderUnsupportedMethodException {
 
     public HttpHeaderUnsupportedOffsetUnsetException(String message) {
         super(message);

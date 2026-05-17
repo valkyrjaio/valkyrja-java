@@ -10,7 +10,6 @@
 package io.valkyrja.log.enum_;
 
 public enum LogLevel {
-
     DEBUG("debug"),
     INFO("info"),
     NOTICE("notice"),

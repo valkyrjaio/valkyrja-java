@@ -11,10 +11,10 @@ package io.valkyrja.http.message.param;
 
 import io.valkyrja.http.message.param.abstract_.ParamCollection;
 import io.valkyrja.http.message.param.contract.ParsedBodyParamCollectionContract;
-
 import java.util.Map;
 
-public class ParsedBodyParamCollection extends ParamCollection implements ParsedBodyParamCollectionContract {
+public class ParsedBodyParamCollection extends ParamCollection
+        implements ParsedBodyParamCollectionContract {
 
     public ParsedBodyParamCollection(Map<String, Object> params) {
         super(params);

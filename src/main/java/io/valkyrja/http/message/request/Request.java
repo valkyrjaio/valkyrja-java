@@ -21,8 +21,8 @@ import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.stream.contract.StreamContract;
 import io.valkyrja.http.message.uri.Uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
-
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 public class Request extends Message implements RequestContract {
 
@@ -30,13 +30,17 @@ public class Request extends Message implements RequestContract {
 
     protected UriContract uri;
     protected RequestMethod method;
-    protected String requestTarget = null;
+    protected @Nullable String requestTarget = null;
 
     public Request() {
         this(new Uri(), RequestMethod.GET, new Stream(), new HeaderCollection());
     }
 
-    public Request(UriContract uri, RequestMethod method, StreamContract body, HeaderCollectionContract headers) {
+    public Request(
+            UriContract uri,
+            RequestMethod method,
+            StreamContract body,
+            HeaderCollectionContract headers) {
         this.uri = uri;
         this.method = method;
         this.headers = headers;
@@ -116,7 +120,8 @@ public class Request extends Message implements RequestContract {
 
     protected void validateRequestTarget(String requestTarget) {
         if (WHITESPACE.matcher(requestTarget).find()) {
-            throw new HttpRequestInvalidRequestTargetException("Invalid request target provided; cannot contain whitespace");
+            throw new HttpRequestInvalidRequestTargetException(
+                    "Invalid request target provided; cannot contain whitespace");
         }
     }
 

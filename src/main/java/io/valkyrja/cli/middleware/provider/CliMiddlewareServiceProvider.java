@@ -33,47 +33,63 @@ public class CliMiddlewareServiceProvider implements ServiceProviderContract {
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
-                InputReceivedHandlerContract.class,   CliMiddlewareServiceProvider::publishInputReceivedHandler,
-                ThrowableCaughtHandlerContract.class, CliMiddlewareServiceProvider::publishThrowableCaughtHandler,
-                RouteMatchedHandlerContract.class,    CliMiddlewareServiceProvider::publishRouteMatchedHandler,
-                RouteNotMatchedHandlerContract.class, CliMiddlewareServiceProvider::publishRouteNotMatchedHandler,
-                RouteDispatchedHandlerContract.class, CliMiddlewareServiceProvider::publishRouteDispatchedHandler,
-                ExitedHandlerContract.class,          CliMiddlewareServiceProvider::publishExitedHandler);
+                InputReceivedHandlerContract.class,
+                        CliMiddlewareServiceProvider::publishInputReceivedHandler,
+                ThrowableCaughtHandlerContract.class,
+                        CliMiddlewareServiceProvider::publishThrowableCaughtHandler,
+                RouteMatchedHandlerContract.class,
+                        CliMiddlewareServiceProvider::publishRouteMatchedHandler,
+                RouteNotMatchedHandlerContract.class,
+                        CliMiddlewareServiceProvider::publishRouteNotMatchedHandler,
+                RouteDispatchedHandlerContract.class,
+                        CliMiddlewareServiceProvider::publishRouteDispatchedHandler,
+                ExitedHandlerContract.class, CliMiddlewareServiceProvider::publishExitedHandler);
     }
 
     public static void publishInputReceivedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        container.setSingleton(InputReceivedHandlerContract.class,
-                new InputReceivedHandler(container, config.inputReceivedMiddleware().toArray(new Class[0])));
+        container.setSingleton(
+                InputReceivedHandlerContract.class,
+                new InputReceivedHandler(
+                        container, config.inputReceivedMiddleware().toArray(new Class[0])));
     }
 
     public static void publishThrowableCaughtHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        container.setSingleton(ThrowableCaughtHandlerContract.class,
-                new ThrowableCaughtHandler(container, config.throwableCaughtMiddleware().toArray(new Class[0])));
+        container.setSingleton(
+                ThrowableCaughtHandlerContract.class,
+                new ThrowableCaughtHandler(
+                        container, config.throwableCaughtMiddleware().toArray(new Class[0])));
     }
 
     public static void publishRouteMatchedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        container.setSingleton(RouteMatchedHandlerContract.class,
-                new RouteMatchedHandler(container, config.routeMatchedMiddleware().toArray(new Class[0])));
+        container.setSingleton(
+                RouteMatchedHandlerContract.class,
+                new RouteMatchedHandler(
+                        container, config.routeMatchedMiddleware().toArray(new Class[0])));
     }
 
     public static void publishRouteNotMatchedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        container.setSingleton(RouteNotMatchedHandlerContract.class,
-                new RouteNotMatchedHandler(container, config.routeNotMatchedMiddleware().toArray(new Class[0])));
+        container.setSingleton(
+                RouteNotMatchedHandlerContract.class,
+                new RouteNotMatchedHandler(
+                        container, config.routeNotMatchedMiddleware().toArray(new Class[0])));
     }
 
     public static void publishRouteDispatchedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        container.setSingleton(RouteDispatchedHandlerContract.class,
-                new RouteDispatchedHandler(container, config.routeDispatchedMiddleware().toArray(new Class[0])));
+        container.setSingleton(
+                RouteDispatchedHandlerContract.class,
+                new RouteDispatchedHandler(
+                        container, config.routeDispatchedMiddleware().toArray(new Class[0])));
     }
 
     public static void publishExitedHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
-        container.setSingleton(ExitedHandlerContract.class,
+        container.setSingleton(
+                ExitedHandlerContract.class,
                 new ExitedHandler(container, config.exitedMiddleware().toArray(new Class[0])));
     }
 }

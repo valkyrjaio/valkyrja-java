@@ -14,9 +14,7 @@ import io.valkyrja.http.message.header.throwable.exception.HttpHeaderUnsupported
 import io.valkyrja.http.message.header.throwable.exception.HttpHeaderUnsupportedOffsetUnsetException;
 import io.valkyrja.http.message.header.value.component.contract.ComponentContract;
 import io.valkyrja.http.message.header.value.contract.ValueContract;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +37,7 @@ public class Value implements ValueContract, Iterable<ComponentContract> {
         if (value.contains(delimiter)) {
             parts = value.split(delimiter, -1);
         } else {
-            parts = new String[]{value};
+            parts = new String[] {value};
         }
 
         return new Value((Object[]) parts);
@@ -74,10 +72,10 @@ public class Value implements ValueContract, Iterable<ComponentContract> {
     @Override
     public String toString() {
         return components.stream()
-            .map(c -> c instanceof ComponentContract ? c.toString() : (String) c)
-            .filter(s -> !s.isEmpty())
-            .map(String::trim)
-            .collect(Collectors.joining("; "));
+                .map(c -> c instanceof ComponentContract ? c.toString() : (String) c)
+                .filter(s -> !s.isEmpty())
+                .map(String::trim)
+                .collect(Collectors.joining("; "));
     }
 
     public boolean offsetExists(int offset) {
@@ -123,9 +121,9 @@ public class Value implements ValueContract, Iterable<ComponentContract> {
     @Override
     public Iterator<ComponentContract> iterator() {
         return components.stream()
-            .filter(c -> c instanceof ComponentContract)
-            .map(c -> (ComponentContract) c)
-            .iterator();
+                .filter(c -> c instanceof ComponentContract)
+                .map(c -> (ComponentContract) c)
+                .iterator();
     }
 
     protected Value copy() {

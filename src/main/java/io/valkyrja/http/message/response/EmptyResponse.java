@@ -25,6 +25,9 @@ public class EmptyResponse extends Response implements EmptyResponseContract {
     }
 
     public EmptyResponse(HeaderCollectionContract headers) {
-        super(new Stream(PhpWrapper.memory, Mode.READ, ModeTranslation.BINARY_SAFE), StatusCode.NO_CONTENT, headers);
+        super(
+                new Stream(PhpWrapper.memory, Mode.READ, ModeTranslation.BINARY_SAFE),
+                StatusCode.NO_CONTENT,
+                headers);
     }
 }

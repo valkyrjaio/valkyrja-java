@@ -14,7 +14,6 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.http.routing.cli.command.ListCommand;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
-
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -22,8 +21,7 @@ public class HttpRoutingCliServiceProvider implements ServiceProviderContract {
 
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
-        return Map.of(
-                ListCommand.class, HttpRoutingCliServiceProvider::publishListCommand);
+        return Map.of(ListCommand.class, HttpRoutingCliServiceProvider::publishListCommand);
     }
 
     public static void publishListCommand(ContainerContract container) {

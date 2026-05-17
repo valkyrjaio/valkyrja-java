@@ -12,5 +12,5 @@ package io.valkyrja.http.message.uri.data;
 public class HostPortAccumulator {
 
     public String host = "";
-    public int    port = 0;
+    public int port = 0;
 }

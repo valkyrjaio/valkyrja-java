@@ -15,5 +15,8 @@ import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContra
 
 public interface RouteNotMatchedMiddlewareContract {
 
-    ResponseContract routeNotMatched(ServerRequestContract request, ResponseContract response, RouteNotMatchedHandlerContract handler);
+    ResponseContract routeNotMatched(
+            ServerRequestContract request,
+            ResponseContract response,
+            RouteNotMatchedHandlerContract handler);
 }

@@ -34,8 +34,8 @@ import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.stream.contract.StreamContract;
 import io.valkyrja.http.message.uri.Uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
-
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 public class JsonServerRequest extends ServerRequest implements JsonServerRequestContract {
 
@@ -45,10 +45,18 @@ public class JsonServerRequest extends ServerRequest implements JsonServerReques
     protected ParsedJsonParamCollectionContract parsedJson;
 
     public JsonServerRequest() {
-        this(new Uri(), RequestMethod.GET, new Stream(), new HeaderCollection(), ProtocolVersion.V1_1,
-                new ServerParamCollection(Map.of()), new CookieParamCollection(Map.of()),
-                new QueryParamCollection(Map.of()), new ParsedBodyParamCollection(Map.of()),
-                new ParsedJsonParamCollection(Map.of()), new UploadedFileCollection(Map.of()));
+        this(
+                new Uri(),
+                RequestMethod.GET,
+                new Stream(),
+                new HeaderCollection(),
+                ProtocolVersion.V1_1,
+                new ServerParamCollection(Map.of()),
+                new CookieParamCollection(Map.of()),
+                new QueryParamCollection(Map.of()),
+                new ParsedBodyParamCollection(Map.of()),
+                new ParsedJsonParamCollection(Map.of()),
+                new UploadedFileCollection(Map.of()));
     }
 
     public JsonServerRequest(
@@ -61,11 +69,21 @@ public class JsonServerRequest extends ServerRequest implements JsonServerReques
             CookieParamCollectionContract cookies,
             QueryParamCollectionContract query,
             ParsedBodyParamCollectionContract parsedBody,
-            ParsedJsonParamCollectionContract parsedJson,
-            UploadedFileCollectionContract files
-    ) {
-        super(uri, method, body, headers, protocol, server, cookies, query, parsedBody, files, null);
-        this.parsedJson = parsedJson;
+            @Nullable ParsedJsonParamCollectionContract parsedJson,
+            UploadedFileCollectionContract files) {
+        super(
+                uri,
+                method,
+                body,
+                headers,
+                protocol,
+                server,
+                cookies,
+                query,
+                parsedBody,
+                files,
+                null);
+        this.parsedJson = parsedJson != null ? parsedJson : new ParsedJsonParamCollection(Map.of());
 
         String contentType = headers.getHeaderLine(HeaderName.CONTENT_TYPE);
 
@@ -73,8 +91,11 @@ public class JsonServerRequest extends ServerRequest implements JsonServerReques
             String bodyContents = stream.toString();
             if (!bodyContents.isEmpty()) {
                 try {
-                    Map<String, Object> jsonData = MAPPER.readValue(bodyContents, new TypeReference<Map<String, Object>>() {});
-                    this.parsedJson = ParsedJsonParamCollection.fromArray(flattenToStringObjectMap(jsonData));
+                    Map<String, Object> jsonData =
+                            MAPPER.readValue(
+                                    bodyContents, new TypeReference<Map<String, Object>>() {});
+                    this.parsedJson =
+                            ParsedJsonParamCollection.fromArray(flattenToStringObjectMap(jsonData));
                 } catch (Exception e) {
                     // malformed JSON — leave parsedJson as-is
                 }
@@ -99,8 +120,19 @@ public class JsonServerRequest extends ServerRequest implements JsonServerReques
 
     @Override
     protected JsonServerRequest copy() {
-        JsonServerRequest copy = new JsonServerRequest(uri, method, stream, headers, protocolVersion,
-                server, cookies, query, parsedBody, parsedJson, files);
+        JsonServerRequest copy =
+                new JsonServerRequest(
+                        uri,
+                        method,
+                        stream,
+                        headers,
+                        protocolVersion,
+                        server,
+                        cookies,
+                        query,
+                        parsedBody,
+                        parsedJson,
+                        files);
         copy.requestTarget = requestTarget;
         copy.hadParsedBody = hadParsedBody;
         return copy;

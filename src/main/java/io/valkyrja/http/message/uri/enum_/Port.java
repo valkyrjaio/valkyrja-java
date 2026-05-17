@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.uri.enum_;
 
 public enum Port {
-
     HTTP(80),
     HTTPS(433);
 

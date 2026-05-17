@@ -22,11 +22,11 @@ import io.valkyrja.http.routing.throwable.exception.HttpRoutingNoRequestStructEx
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingNoResponseStructException;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
 import io.valkyrja.http.struct.response.contract.ResponseStructContract;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.Nullable;
 
 public class Route implements RouteContract {
 
@@ -39,8 +39,8 @@ public class Route implements RouteContract {
     protected List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware;
     protected List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware;
     protected List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware;
-    protected RequestStructContract requestStruct;
-    protected ResponseStructContract responseStruct;
+    protected @Nullable RequestStructContract requestStruct;
+    protected @Nullable ResponseStructContract responseStruct;
 
     public Route(
             String path,
@@ -52,9 +52,8 @@ public class Route implements RouteContract {
             List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
             List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware,
             List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware,
-            RequestStructContract requestStruct,
-            ResponseStructContract responseStruct
-    ) {
+            @Nullable RequestStructContract requestStruct,
+            @Nullable ResponseStructContract responseStruct) {
         this.path = path;
         this.name = name;
         this.handler = handler;
@@ -68,8 +67,22 @@ public class Route implements RouteContract {
         this.responseStruct = responseStruct;
     }
 
-    public Route(String path, String name, BiFunction<ContainerContract, RouteContract, ResponseContract> handler) {
-        this(path, name, handler, List.of(RequestMethod.HEAD, RequestMethod.GET), List.of(), List.of(), List.of(), List.of(), List.of(), null, null);
+    public Route(
+            String path,
+            String name,
+            BiFunction<ContainerContract, RouteContract, ResponseContract> handler) {
+        this(
+                path,
+                name,
+                handler,
+                List.of(RequestMethod.HEAD, RequestMethod.GET),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                null,
+                null);
     }
 
     @Override
@@ -116,7 +129,8 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public RouteContract withHandler(BiFunction<ContainerContract, RouteContract, ResponseContract> handler) {
+    public RouteContract withHandler(
+            BiFunction<ContainerContract, RouteContract, ResponseContract> handler) {
         Route copy = copy();
         copy.handler = handler;
         return copy;
@@ -157,7 +171,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withRouteMatchedMiddleware(Class<? extends RouteMatchedMiddlewareContract>... middleware) {
+    public final RouteContract withRouteMatchedMiddleware(
+            Class<? extends RouteMatchedMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.routeMatchedMiddleware = new ArrayList<>(Arrays.asList(middleware));
         return copy;
@@ -165,7 +180,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withAddedRouteMatchedMiddleware(Class<? extends RouteMatchedMiddlewareContract>... middleware) {
+    public final RouteContract withAddedRouteMatchedMiddleware(
+            Class<? extends RouteMatchedMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.routeMatchedMiddleware.addAll(Arrays.asList(middleware));
         return copy;
@@ -178,7 +194,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withRouteDispatchedMiddleware(Class<? extends RouteDispatchedMiddlewareContract>... middleware) {
+    public final RouteContract withRouteDispatchedMiddleware(
+            Class<? extends RouteDispatchedMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.routeDispatchedMiddleware = new ArrayList<>(Arrays.asList(middleware));
         return copy;
@@ -186,7 +203,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withAddedRouteDispatchedMiddleware(Class<? extends RouteDispatchedMiddlewareContract>... middleware) {
+    public final RouteContract withAddedRouteDispatchedMiddleware(
+            Class<? extends RouteDispatchedMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.routeDispatchedMiddleware.addAll(Arrays.asList(middleware));
         return copy;
@@ -199,7 +217,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withThrowableCaughtMiddleware(Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
+    public final RouteContract withThrowableCaughtMiddleware(
+            Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.throwableCaughtMiddleware = new ArrayList<>(Arrays.asList(middleware));
         return copy;
@@ -207,7 +226,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withAddedThrowableCaughtMiddleware(Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
+    public final RouteContract withAddedThrowableCaughtMiddleware(
+            Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.throwableCaughtMiddleware.addAll(Arrays.asList(middleware));
         return copy;
@@ -220,7 +240,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withSendingResponseMiddleware(Class<? extends SendingResponseMiddlewareContract>... middleware) {
+    public final RouteContract withSendingResponseMiddleware(
+            Class<? extends SendingResponseMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.sendingResponseMiddleware = new ArrayList<>(Arrays.asList(middleware));
         return copy;
@@ -228,7 +249,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withAddedSendingResponseMiddleware(Class<? extends SendingResponseMiddlewareContract>... middleware) {
+    public final RouteContract withAddedSendingResponseMiddleware(
+            Class<? extends SendingResponseMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.sendingResponseMiddleware.addAll(Arrays.asList(middleware));
         return copy;
@@ -241,7 +263,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withTerminatedMiddleware(Class<? extends TerminatedMiddlewareContract>... middleware) {
+    public final RouteContract withTerminatedMiddleware(
+            Class<? extends TerminatedMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.terminatedMiddleware = new ArrayList<>(Arrays.asList(middleware));
         return copy;
@@ -249,7 +272,8 @@ public class Route implements RouteContract {
 
     @Override
     @SafeVarargs
-    public final RouteContract withAddedTerminatedMiddleware(Class<? extends TerminatedMiddlewareContract>... middleware) {
+    public final RouteContract withAddedTerminatedMiddleware(
+            Class<? extends TerminatedMiddlewareContract>... middleware) {
         Route copy = copy();
         copy.terminatedMiddleware.addAll(Arrays.asList(middleware));
         return copy;
@@ -263,7 +287,8 @@ public class Route implements RouteContract {
     @Override
     public RequestStructContract getRequestStruct() {
         if (requestStruct == null) {
-            throw new HttpRoutingNoRequestStructException("No request struct was set for this route");
+            throw new HttpRoutingNoRequestStructException(
+                    "No request struct was set for this route");
         }
         return requestStruct;
     }
@@ -283,7 +308,8 @@ public class Route implements RouteContract {
     @Override
     public ResponseStructContract getResponseStruct() {
         if (responseStruct == null) {
-            throw new HttpRoutingNoResponseStructException("No response struct was set for this route");
+            throw new HttpRoutingNoResponseStructException(
+                    "No response struct was set for this route");
         }
         return responseStruct;
     }
@@ -296,8 +322,18 @@ public class Route implements RouteContract {
     }
 
     protected Route copy() {
-        return new Route(path, name, handler, requestMethods, routeMatchedMiddleware, routeDispatchedMiddleware,
-                throwableCaughtMiddleware, sendingResponseMiddleware, terminatedMiddleware, requestStruct, responseStruct);
+        return new Route(
+                path,
+                name,
+                handler,
+                requestMethods,
+                routeMatchedMiddleware,
+                routeDispatchedMiddleware,
+                throwableCaughtMiddleware,
+                sendingResponseMiddleware,
+                terminatedMiddleware,
+                requestStruct,
+                responseStruct);
     }
 
     protected String getFilteredPath(String path) {

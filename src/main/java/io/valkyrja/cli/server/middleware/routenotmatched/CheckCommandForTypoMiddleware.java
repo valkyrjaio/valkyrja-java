@@ -30,20 +30,23 @@ public class CheckCommandForTypoMiddleware implements RouteNotMatchedMiddlewareC
     protected RouterContract router;
     protected RouteCollectionContract collection;
     protected String defaultAnswer;
-    protected RouteContract matchedRoute;
+    protected @Nullable RouteContract matchedRoute;
 
-    public CheckCommandForTypoMiddleware(RouterContract router, RouteCollectionContract collection) {
+    public CheckCommandForTypoMiddleware(
+            RouterContract router, RouteCollectionContract collection) {
         this(router, collection, "no");
     }
 
-    public CheckCommandForTypoMiddleware(RouterContract router, RouteCollectionContract collection, String defaultAnswer) {
+    public CheckCommandForTypoMiddleware(
+            RouterContract router, RouteCollectionContract collection, String defaultAnswer) {
         this.router = router;
         this.collection = collection;
         this.defaultAnswer = defaultAnswer;
     }
 
     @Override
-    public OutputContract routeNotMatched(InputContract input, OutputContract output, RouteNotMatchedHandlerContract handler) {
+    public OutputContract routeNotMatched(
+            InputContract input, OutputContract output, RouteNotMatchedHandlerContract handler) {
         Object routeOrOutput = checkCommandNameForTypo(input, output);
 
         if (routeOrOutput instanceof RouteContract matchingRoute) {
@@ -74,31 +77,37 @@ public class CheckCommandForTypoMiddleware implements RouteNotMatchedMiddlewareC
     }
 
     protected Object askToRunSimilarCommands(OutputContract output, List<RouteContract> commands) {
-        List<String> commandNames = commands.stream().map(RouteContract::getName).collect(Collectors.toList());
+        List<String> commandNames =
+                commands.stream().map(RouteContract::getName).collect(Collectors.toList());
 
-        output = output.withAddedMessages(
-            new NewLine(),
-            new Question(
-                "Did you mean to run one of the following commands?",
-                (o, answer) -> questionCallback(o, answer, commands),
-                new Answer(defaultAnswer, null, false, "You answered: `%s`", null, commandNames)
-            )
-        ).writeMessages();
+        output =
+                output.withAddedMessages(
+                                new NewLine(),
+                                new Question(
+                                        "Did you mean to run one of the following commands?",
+                                        (o, answer) -> questionCallback(o, answer, commands),
+                                        new Answer(
+                                                defaultAnswer,
+                                                null,
+                                                false,
+                                                "You answered: `%s`",
+                                                null,
+                                                commandNames)))
+                        .writeMessages();
 
         return matchedRoute != null ? matchedRoute : output;
     }
 
-    protected OutputContract questionCallback(OutputContract output, AnswerContract answer, List<RouteContract> commands) {
+    protected OutputContract questionCallback(
+            OutputContract output, AnswerContract answer, List<RouteContract> commands) {
         String response = answer.getUserResponse();
         matchedRoute = !response.equals("no") ? getMatchedRoute(commands, response) : null;
         return output;
     }
 
-    protected @Nullable RouteContract getMatchedRoute(List<RouteContract> commands, String response) {
-        return commands.stream()
-            .filter(c -> c.getName().equals(response))
-            .findFirst()
-            .orElse(null);
+    protected @Nullable RouteContract getMatchedRoute(
+            List<RouteContract> commands, String response) {
+        return commands.stream().filter(c -> c.getName().equals(response)).findFirst().orElse(null);
     }
 
     private static double similarText(String a, String b) {

@@ -16,15 +16,19 @@ import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
 import io.valkyrja.http.middleware.handler.abstract_.Handler;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
 
-public class SendingResponseHandler extends Handler<SendingResponseMiddlewareContract> implements SendingResponseHandlerContract {
+public class SendingResponseHandler extends Handler<SendingResponseMiddlewareContract>
+        implements SendingResponseHandlerContract {
 
     @SafeVarargs
-    public SendingResponseHandler(ContainerContract container, Class<? extends SendingResponseMiddlewareContract>... middleware) {
+    public SendingResponseHandler(
+            ContainerContract container,
+            Class<? extends SendingResponseMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 
     @Override
-    public ResponseContract sendingResponse(ServerRequestContract request, ResponseContract response) {
+    public ResponseContract sendingResponse(
+            ServerRequestContract request, ResponseContract response) {
         Class<? extends SendingResponseMiddlewareContract> next = this.next;
         return next != null
                 ? getMiddleware(next).sendingResponse(request, response, this)

@@ -16,15 +16,14 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
-
 import java.util.List;
 
 /**
  * A per-request child application backed by a {@link io.valkyrja.container.manager.ChildContainer}
  * or {@link io.valkyrja.container.manager.NativeChildContainer}.
  *
- * <p>Owns a child container for request-scoped isolation. All non-container methods delegate to
- * the parent application — no re-bootstrapping occurs.
+ * <p>Owns a child container for request-scoped isolation. All non-container methods delegate to the
+ * parent application — no re-bootstrapping occurs.
  *
  * <p>The parent application must be fully bootstrapped and its container frozen before any child is
  * created. Each request creates its own child for the lifetime of that request, then discards it.

@@ -9,13 +9,15 @@
 
 package io.valkyrja.support.time;
 
+import org.jspecify.annotations.Nullable;
+
 public class Microtime {
 
     private Microtime() {
         /* This utility class should not be instantiated */
     }
 
-    private static Long frozenTime = null;
+    private static @Nullable Long frozenTime = null;
 
     public static void freeze() {
         frozenTime = microtime();

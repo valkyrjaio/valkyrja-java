@@ -17,7 +17,9 @@ import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.Nullable;
 
 public class Question extends Message implements QuestionContract {
 
@@ -35,7 +37,7 @@ public class Question extends Message implements QuestionContract {
             String text,
             BiFunction<OutputContract, AnswerContract, OutputContract> callable,
             AnswerContract answer,
-            FormatterContract formatter) {
+            @Nullable FormatterContract formatter) {
         super(text, formatter);
         this.callable = callable;
         this.answer = answer;
@@ -51,7 +53,8 @@ public class Question extends Message implements QuestionContract {
     }
 
     @Override
-    public QuestionContract withCallable(BiFunction<OutputContract, AnswerContract, OutputContract> callable) {
+    public QuestionContract withCallable(
+            BiFunction<OutputContract, AnswerContract, OutputContract> callable) {
         Question copy = copy();
         copy.callable = callable;
         return copy;
@@ -71,7 +74,8 @@ public class Question extends Message implements QuestionContract {
 
     @Override
     public AnswerContract ask() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+        try (BufferedReader reader =
+                new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
             String line = reader.readLine();
             if (line == null || line.trim().isEmpty()) {
                 return answer;

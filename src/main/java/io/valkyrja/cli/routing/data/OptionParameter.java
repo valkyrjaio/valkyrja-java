@@ -33,7 +33,16 @@ public class OptionParameter extends Parameter implements OptionParameterContrac
     protected OptionValueMode valueMode;
 
     public OptionParameter(String name, String description) {
-        this(name, description, "", "", new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), OptionMode.OPTIONAL, OptionValueMode.DEFAULT);
+        this(
+                name,
+                description,
+                "",
+                "",
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                OptionMode.OPTIONAL,
+                OptionValueMode.DEFAULT);
     }
 
     public OptionParameter(
@@ -58,7 +67,16 @@ public class OptionParameter extends Parameter implements OptionParameterContrac
 
     @Override
     protected OptionParameter copy() {
-        return new OptionParameter(name, description, valueDisplayName, defaultValue, shortNames, validValues, options, mode, valueMode);
+        return new OptionParameter(
+                name,
+                description,
+                valueDisplayName,
+                defaultValue,
+                shortNames,
+                validValues,
+                options,
+                mode,
+                valueMode);
     }
 
     @Override

@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.stream.enum_;
 
 public enum PhpWrapper {
-
     stdin("php://stdin"),
     stdout("php://stdout"),
     stderr("php://stderr"),

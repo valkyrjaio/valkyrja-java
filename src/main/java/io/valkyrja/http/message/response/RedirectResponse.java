@@ -17,11 +17,12 @@ import io.valkyrja.http.message.header.contract.HeaderContract;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.RedirectResponseContract;
 import io.valkyrja.http.message.response.throwable.exception.HttpRequestInvalidRedirectStatusCodeException;
-import org.jspecify.annotations.Nullable;
+import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.uri.Uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
 import io.valkyrja.http.message.uri.enum_.Scheme;
 import io.valkyrja.http.message.uri.factory.UriFactory;
+import org.jspecify.annotations.Nullable;
 
 public class RedirectResponse extends Response implements RedirectResponseContract {
 
@@ -31,18 +32,24 @@ public class RedirectResponse extends Response implements RedirectResponseContra
         this(new Uri("/"), StatusCode.FOUND, new HeaderCollection());
     }
 
-    public RedirectResponse(UriContract uri, StatusCode statusCode, HeaderCollectionContract headers) {
-        super(null, validateRedirectStatus(statusCode), headers.withHeader(buildLocationHeader(uri)));
+    public RedirectResponse(
+            UriContract uri, StatusCode statusCode, HeaderCollectionContract headers) {
+        super(
+                new Stream(),
+                validateRedirectStatus(statusCode),
+                headers.withHeader(buildLocationHeader(uri)));
         this.uri = uri;
     }
 
-    public static RedirectResponse createFromUri(@Nullable UriContract uri, @Nullable StatusCode statusCode, @Nullable HeaderCollectionContract headers) {
+    public static RedirectResponse createFromUri(
+            @Nullable UriContract uri,
+            @Nullable StatusCode statusCode,
+            @Nullable HeaderCollectionContract headers) {
         UriContract resolvedUri = uri != null ? uri : new Uri("/");
         return new RedirectResponse(
                 resolvedUri,
                 statusCode != null ? statusCode : StatusCode.FOUND,
-                headers != null ? headers : new HeaderCollection()
-        );
+                headers != null ? headers : new HeaderCollection());
     }
 
     @Override
@@ -60,7 +67,8 @@ public class RedirectResponse extends Response implements RedirectResponseContra
 
     @Override
     public RedirectResponseContract secure(String path, ServerRequestContract request) {
-        UriContract secureUri = new Uri(Scheme.HTTPS, "", "", request.getUri().getHostPort(), 0, path, "", "");
+        UriContract secureUri =
+                new Uri(Scheme.HTTPS, "", "", request.getUri().getHostPort(), 0, path, "", "");
         return withUri(secureUri);
     }
 
@@ -98,7 +106,8 @@ public class RedirectResponse extends Response implements RedirectResponseContra
 
     private static StatusCode validateRedirectStatus(StatusCode statusCode) {
         if (!statusCode.isRedirect()) {
-            throw new HttpRequestInvalidRedirectStatusCodeException("Invalid redirect status code " + statusCode.getValue() + " used.");
+            throw new HttpRequestInvalidRedirectStatusCodeException(
+                    "Invalid redirect status code " + statusCode.getValue() + " used.");
         }
         return statusCode;
     }

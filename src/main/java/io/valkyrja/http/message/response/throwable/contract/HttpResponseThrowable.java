@@ -11,5 +11,4 @@ package io.valkyrja.http.message.response.throwable.contract;
 
 import io.valkyrja.http.message.throwable.contract.HttpMessageThrowable;
 
-public interface HttpResponseThrowable extends HttpMessageThrowable {
-}
+public interface HttpResponseThrowable extends HttpMessageThrowable {}

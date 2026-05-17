@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.stream.enum_;
 
 public enum Mode {
-
     READ("r"),
     READ_WRITE("r+"),
     WRITE("w"),
@@ -35,22 +34,22 @@ public enum Mode {
 
     public boolean isReadable() {
         return this == READ
-            || this == READ_WRITE
-            || this == WRITE_READ
-            || this == WRITE_READ_END
-            || this == CREATE_WRITE_READ
-            || this == WRITE_READ_CREATE;
+                || this == READ_WRITE
+                || this == WRITE_READ
+                || this == WRITE_READ_END
+                || this == CREATE_WRITE_READ
+                || this == WRITE_READ_CREATE;
     }
 
     public boolean isWriteable() {
         return this == READ_WRITE
-            || this == WRITE
-            || this == WRITE_READ
-            || this == WRITE_END
-            || this == WRITE_READ_END
-            || this == CREATE_WRITE
-            || this == CREATE_WRITE_READ
-            || this == WRITE_CREATE
-            || this == WRITE_READ_CREATE;
+                || this == WRITE
+                || this == WRITE_READ
+                || this == WRITE_END
+                || this == WRITE_READ_END
+                || this == CREATE_WRITE
+                || this == CREATE_WRITE_READ
+                || this == WRITE_CREATE
+                || this == WRITE_READ_CREATE;
     }
 }

@@ -22,7 +22,8 @@ import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContra
 public class RedirectTrailingSlashMiddleware implements RequestReceivedMiddlewareContract {
 
     @Override
-    public RequestReceivedResult requestReceived(ServerRequestContract request, RequestReceivedHandlerContract handler) {
+    public RequestReceivedResult requestReceived(
+            ServerRequestContract request, RequestReceivedHandlerContract handler) {
         if (shouldRedirectRequest(request)) {
             UriContract uri = createBeforeRedirectUri(request.getUri());
             ResponseContract response = createBeforeRedirectResponse(uri);
@@ -39,15 +40,14 @@ public class RedirectTrailingSlashMiddleware implements RequestReceivedMiddlewar
 
     protected UriContract createBeforeRedirectUri(UriContract uri) {
         return new Uri(
-            uri.getScheme(),
-            uri.getUsername(),
-            uri.getPassword(),
-            uri.getHost(),
-            uri.getPort(),
-            "/" + uri.getPath().replaceAll("^/+|/+$", ""),
-            uri.getQuery(),
-            uri.getFragment()
-        );
+                uri.getScheme(),
+                uri.getUsername(),
+                uri.getPassword(),
+                uri.getHost(),
+                uri.getPort(),
+                "/" + uri.getPath().replaceAll("^/+|/+$", ""),
+                uri.getQuery(),
+                uri.getFragment());
     }
 
     protected RedirectResponseContract createBeforeRedirectResponse(UriContract uri) {

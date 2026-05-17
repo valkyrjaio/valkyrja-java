@@ -14,7 +14,6 @@ import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
-
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -28,7 +27,10 @@ public class ViewRouteNotMatchedMiddleware implements RouteNotMatchedMiddlewareC
     }
 
     @Override
-    public ResponseContract routeNotMatched(ServerRequestContract request, ResponseContract response, RouteNotMatchedHandlerContract handler) {
+    public ResponseContract routeNotMatched(
+            ServerRequestContract request,
+            ResponseContract response,
+            RouteNotMatchedHandlerContract handler) {
         String name = errorsTemplateDir + "/" + response.getStatusCode().getValue();
         Map<String, Object> variables = Map.of("request", request, "response", response);
 

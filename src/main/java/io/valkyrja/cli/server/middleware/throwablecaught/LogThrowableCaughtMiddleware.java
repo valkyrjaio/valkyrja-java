@@ -15,6 +15,7 @@ import io.valkyrja.cli.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jspecify.annotations.Nullable;
 
 public class LogThrowableCaughtMiddleware implements ThrowableCaughtMiddlewareContract {
 
@@ -25,7 +26,11 @@ public class LogThrowableCaughtMiddleware implements ThrowableCaughtMiddlewareCo
     }
 
     @Override
-    public OutputContract throwableCaught(InputContract input, OutputContract output, Throwable throwable, ThrowableCaughtHandlerContract handler) {
+    public OutputContract throwableCaught(
+            InputContract input,
+            @Nullable OutputContract output,
+            Throwable throwable,
+            ThrowableCaughtHandlerContract handler) {
         String commandName = input.getCommandName();
         String logMessage = "Cli Server Error\nUrl: " + commandName;
         logger.log(Level.SEVERE, logMessage, throwable);

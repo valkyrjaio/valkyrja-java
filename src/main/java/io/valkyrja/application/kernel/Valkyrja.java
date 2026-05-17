@@ -18,7 +18,6 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -62,14 +61,12 @@ public class Valkyrja implements ApplicationContract {
             return providers;
         }
 
-        List<ComponentProviderContract> result = new ArrayList<>();
+        providers = new ArrayList<>();
 
         for (ComponentProviderContract provider : config.providers()) {
-            result.addAll(provider.getComponentProviders(this));
-            result.add(provider);
+            collectProviders(provider);
         }
 
-        providers = result;
         return providers;
     }
 
@@ -79,13 +76,12 @@ public class Valkyrja implements ApplicationContract {
             return serviceProviders;
         }
 
-        List<ServiceProviderContract> result = new ArrayList<>();
+        serviceProviders = new ArrayList<>();
 
         for (ComponentProviderContract provider : getProviders()) {
-            result.addAll(provider.getContainerProviders(this));
+            serviceProviders.addAll(provider.getContainerProviders(this));
         }
 
-        serviceProviders = result;
         return serviceProviders;
     }
 
@@ -95,13 +91,12 @@ public class Valkyrja implements ApplicationContract {
             return eventProviders;
         }
 
-        List<ListenerProviderContract> result = new ArrayList<>();
+        eventProviders = new ArrayList<>();
 
         for (ComponentProviderContract provider : getProviders()) {
-            result.addAll(provider.getEventProviders(this));
+            eventProviders.addAll(provider.getEventProviders(this));
         }
 
-        eventProviders = result;
         return eventProviders;
     }
 
@@ -111,13 +106,12 @@ public class Valkyrja implements ApplicationContract {
             return cliRouteProviders;
         }
 
-        List<CliRouteProviderContract> result = new ArrayList<>();
+        cliRouteProviders = new ArrayList<>();
 
         for (ComponentProviderContract provider : getProviders()) {
-            result.addAll(provider.getCliProviders(this));
+            cliRouteProviders.addAll(provider.getCliProviders(this));
         }
 
-        cliRouteProviders = result;
         return cliRouteProviders;
     }
 
@@ -127,13 +121,12 @@ public class Valkyrja implements ApplicationContract {
             return httpRouteProviders;
         }
 
-        List<HttpRouteProviderContract> result = new ArrayList<>();
+        httpRouteProviders = new ArrayList<>();
 
         for (ComponentProviderContract provider : getProviders()) {
-            result.addAll(provider.getHttpProviders(this));
+            httpRouteProviders.addAll(provider.getHttpProviders(this));
         }
 
-        httpRouteProviders = result;
         return httpRouteProviders;
     }
 
@@ -150,6 +143,13 @@ public class Valkyrja implements ApplicationContract {
     @Override
     public String getVersion() {
         return config.version();
+    }
+
+    protected void collectProviders(ComponentProviderContract provider) {
+        for (ComponentProviderContract nested : provider.getComponentProviders(this)) {
+            collectProviders(nested);
+        }
+        providers.add(provider);
     }
 
     protected void bootstrapTimezone() {

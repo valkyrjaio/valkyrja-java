@@ -11,7 +11,6 @@ package io.valkyrja.http.message.param;
 
 import io.valkyrja.http.message.param.abstract_.ParamCollection;
 import io.valkyrja.http.message.param.contract.QueryParamCollectionContract;
-
 import java.util.Map;
 
 public class QueryParamCollection extends ParamCollection implements QueryParamCollectionContract {

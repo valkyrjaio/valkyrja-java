@@ -18,13 +18,15 @@ import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.http.server.generator.ResponseFileGenerator;
-
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class CacheResponseMiddleware implements RequestReceivedMiddlewareContract, TerminatedMiddlewareContract {
+public class CacheResponseMiddleware
+        implements RequestReceivedMiddlewareContract, TerminatedMiddlewareContract {
 
     protected String filePath;
     protected boolean debug;
@@ -40,13 +42,17 @@ public class CacheResponseMiddleware implements RequestReceivedMiddlewareContrac
     }
 
     @Override
-    public RequestReceivedResult requestReceived(ServerRequestContract request, RequestReceivedHandlerContract handler) {
+    public RequestReceivedResult requestReceived(
+            ServerRequestContract request, RequestReceivedHandlerContract handler) {
         String cacheFilePath = getCachePathForRequest(request);
         File cacheFile = new File(cacheFilePath);
 
         if (shouldLoadCachedResponse(cacheFile)) {
             if (isCachedResponseFileExpired(cacheFile)) {
-                cacheFile.delete();
+                try {
+                    Files.delete(cacheFile.toPath());
+                } catch (IOException ignored) {
+                }
                 return handler.requestReceived(request);
             }
         }
@@ -55,7 +61,10 @@ public class CacheResponseMiddleware implements RequestReceivedMiddlewareContrac
     }
 
     @Override
-    public void terminated(ServerRequestContract request, ResponseContract response, TerminatedHandlerContract handler) {
+    public void terminated(
+            ServerRequestContract request,
+            ResponseContract response,
+            TerminatedHandlerContract handler) {
         if (!shouldNotCache(request, response)) {
             String cacheFilePath = getCachePathForRequest(request);
             ResponseFileGenerator generator = new ResponseFileGenerator(response, cacheFilePath);
@@ -67,7 +76,7 @@ public class CacheResponseMiddleware implements RequestReceivedMiddlewareContrac
 
     protected boolean shouldNotCache(ServerRequestContract request, ResponseContract response) {
         return response.getStatusCode().getValue() >= StatusCode.INTERNAL_SERVER_ERROR.getValue()
-            || new File(getCachePathForRequest(request)).exists();
+                || new File(getCachePathForRequest(request)).exists();
     }
 
     protected boolean shouldLoadCachedResponse(File cacheFile) {
@@ -76,7 +85,8 @@ public class CacheResponseMiddleware implements RequestReceivedMiddlewareContrac
 
     protected boolean isCachedResponseFileExpired(File cacheFile) {
         long lastModified = cacheFile.lastModified();
-        return lastModified > 0 && (System.currentTimeMillis() / 1000L) - (lastModified / 1000L) > ttl;
+        return lastModified > 0
+                && (System.currentTimeMillis() / 1000L) - (lastModified / 1000L) > ttl;
     }
 
     protected String getHashedPath(ServerRequestContract request) {

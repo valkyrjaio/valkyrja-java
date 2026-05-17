@@ -28,7 +28,11 @@ public class Input implements InputContract {
         this("valkyrja", "list", new ArrayList<>(), new ArrayList<>());
     }
 
-    public Input(String caller, String commandName, List<ArgumentContract> arguments, List<OptionContract> options) {
+    public Input(
+            String caller,
+            String commandName,
+            List<ArgumentContract> arguments,
+            List<OptionContract> options) {
         this.caller = caller;
         this.commandName = commandName;
         this.arguments = new ArrayList<>(arguments);
@@ -86,9 +90,10 @@ public class Input implements InputContract {
     @Override
     public InputContract withoutArgument(String value) {
         Input copy = copy();
-        copy.arguments = arguments.stream()
-            .filter(a -> !a.getValue().equals(value))
-            .collect(Collectors.toList());
+        copy.arguments =
+                arguments.stream()
+                        .filter(a -> !a.getValue().equals(value))
+                        .collect(Collectors.toList());
         return copy;
     }
 
@@ -106,9 +111,7 @@ public class Input implements InputContract {
 
     @Override
     public List<OptionContract> getOption(String name) {
-        return options.stream()
-            .filter(o -> o.getName().equals(name))
-            .collect(Collectors.toList());
+        return options.stream().filter(o -> o.getName().equals(name)).collect(Collectors.toList());
     }
 
     @Override
@@ -134,9 +137,10 @@ public class Input implements InputContract {
     @Override
     public InputContract withoutOption(String name) {
         Input copy = copy();
-        copy.options = options.stream()
-            .filter(o -> !o.getName().equals(name))
-            .collect(Collectors.toList());
+        copy.options =
+                options.stream()
+                        .filter(o -> !o.getName().equals(name))
+                        .collect(Collectors.toList());
         return copy;
     }
 

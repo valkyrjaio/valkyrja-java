@@ -20,15 +20,15 @@ public class Banner extends Message {
         int textLength = text.length();
         String spaces = " ".repeat(textLength);
 
-        this.messages = new Messages(
-            new NewLine(),
-            (Message) message.withText(spaces),
-            new NewLine(),
-            (Message) message.withText(text),
-            new NewLine(),
-            (Message) message.withText(spaces),
-            new NewLine()
-        );
+        this.messages =
+                new Messages(
+                        new NewLine(),
+                        (Message) message.withText(spaces),
+                        new NewLine(),
+                        (Message) message.withText(text),
+                        new NewLine(),
+                        (Message) message.withText(spaces),
+                        new NewLine());
     }
 
     @Override

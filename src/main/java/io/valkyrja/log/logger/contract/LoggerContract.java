@@ -10,7 +10,6 @@
 package io.valkyrja.log.logger.contract;
 
 import io.valkyrja.log.enum_.LogLevel;
-
 import java.util.Map;
 
 public interface LoggerContract {

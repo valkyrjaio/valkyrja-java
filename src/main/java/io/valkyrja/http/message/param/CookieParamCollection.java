@@ -11,10 +11,10 @@ package io.valkyrja.http.message.param;
 
 import io.valkyrja.http.message.param.abstract_.ParamCollection;
 import io.valkyrja.http.message.param.contract.CookieParamCollectionContract;
-
 import java.util.Map;
 
-public class CookieParamCollection extends ParamCollection implements CookieParamCollectionContract {
+public class CookieParamCollection extends ParamCollection
+        implements CookieParamCollectionContract {
 
     public CookieParamCollection(Map<String, Object> params) {
         super(params);

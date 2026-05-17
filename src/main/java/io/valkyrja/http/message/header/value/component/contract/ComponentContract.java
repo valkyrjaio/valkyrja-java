@@ -10,12 +10,14 @@
 package io.valkyrja.http.message.header.value.component.contract;
 
 /**
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.6">RFC 7230 Section 3.2.6</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc7230#section-3.2.6">RFC 7230 Section
+ *     3.2.6</a>
  */
 public interface ComponentContract {
 
     static ComponentContract fromValue(String value) {
-        throw new UnsupportedOperationException("fromValue must be implemented by the concrete class");
+        throw new UnsupportedOperationException(
+                "fromValue must be implemented by the concrete class");
     }
 
     String getToken();

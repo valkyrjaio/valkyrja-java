@@ -17,14 +17,14 @@ import io.valkyrja.http.message.file.throwable.exception.UploadedFileMoveFailure
 import io.valkyrja.http.message.file.throwable.exception.UploadedFileUnableToWriteFileException;
 import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.stream.contract.StreamContract;
-import org.jspecify.annotations.Nullable;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.jspecify.annotations.Nullable;
 
 public class UploadedFile implements UploadedFileContract {
 
@@ -36,9 +36,15 @@ public class UploadedFile implements UploadedFileContract {
     protected String fileName;
     protected String mediaType;
 
-    public UploadedFile(@Nullable String file, @Nullable StreamContract stream, int size, @Nullable String fileName, @Nullable String mediaType) {
+    public UploadedFile(
+            @Nullable String file,
+            @Nullable StreamContract stream,
+            int size,
+            @Nullable String fileName,
+            @Nullable String mediaType) {
         if (file == null && stream == null) {
-            throw new UploadedFileInvalidUploadedFileException("One of file or stream are required");
+            throw new UploadedFileInvalidUploadedFileException(
+                    "One of file or stream are required");
         }
 
         this.file = file;
@@ -57,14 +63,15 @@ public class UploadedFile implements UploadedFileContract {
         }
 
         if (this.file == null) {
-            throw new UploadedFileInvalidUploadedFileException("One of file or stream are required");
+            throw new UploadedFileInvalidUploadedFileException(
+                    "One of file or stream are required");
         }
 
         this.stream = new Stream();
 
         try {
             byte[] bytes = Files.readAllBytes(Paths.get(this.file));
-            this.stream.write(new String(bytes));
+            this.stream.write(new String(bytes, StandardCharsets.UTF_8));
             this.stream.rewind();
         } catch (IOException e) {
             throw new UploadedFileInvalidUploadedFileException("Unable to read file: " + this.file);
@@ -88,7 +95,12 @@ public class UploadedFile implements UploadedFileContract {
         }
 
         if (this.file != null && new File(this.file).isFile()) {
-            new File(this.file).delete();
+            try {
+                Files.delete(Paths.get(this.file));
+            } catch (IOException e) {
+                throw new UploadedFileMoveFailureException(
+                        "Unable to delete original file: " + this.file);
+            }
         }
 
         this.hasBeenMoved = true;
@@ -128,11 +140,10 @@ public class UploadedFile implements UploadedFileContract {
         validateHasNotBeenMoved(null);
     }
 
-    protected void validateHasNotBeenMoved(String message) {
+    protected void validateHasNotBeenMoved(@Nullable String message) {
         if (this.hasBeenMoved) {
             throw new UploadedFileAlreadyMovedException(
-                message != null ? message : "Cannot move file after it has already been moved"
-            );
+                    message != null ? message : "Cannot move file after it has already been moved");
         }
     }
 
@@ -141,8 +152,9 @@ public class UploadedFile implements UploadedFileContract {
 
         if (!dir.isDirectory() || !dir.canWrite()) {
             throw new UploadedFileInvalidDirectoryException(
-                "The target directory `" + targetDirectory + "` does not exists or is not writable"
-            );
+                    "The target directory `"
+                            + targetDirectory
+                            + "` does not exists or is not writable");
         }
     }
 
@@ -153,7 +165,7 @@ public class UploadedFile implements UploadedFileContract {
 
             while (!s.eof()) {
                 String chunk = s.read(4096);
-                out.write(chunk.getBytes());
+                out.write(chunk.getBytes(StandardCharsets.UTF_8));
             }
         } catch (IOException e) {
             throw new UploadedFileUnableToWriteFileException("Unable to write to designated path");

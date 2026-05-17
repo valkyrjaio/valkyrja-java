@@ -63,5 +63,6 @@ public interface ListenerContract {
      * @param handler the handler
      * @return new listener
      */
-    ListenerContract withHandler(BiFunction<ContainerContract, Map<String, Object>, Object> handler);
+    ListenerContract withHandler(
+            BiFunction<ContainerContract, Map<String, Object>, Object> handler);
 }

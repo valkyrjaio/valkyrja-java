@@ -10,12 +10,13 @@
 package io.valkyrja.http.message.param.contract;
 
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 public interface ParamCollectionContract {
 
     boolean has(String key);
 
-    Object get(String key);
+    @Nullable Object get(String key);
 
     Map<String, Object> getAll();
 

@@ -11,7 +11,8 @@ package io.valkyrja.http.message.file.throwable.exception;
 
 import io.valkyrja.http.message.file.throwable.exception.abstract_.UploadedFileInvalidArgumentException;
 
-public class UploadedFileInvalidFilesArrayStructureException extends UploadedFileInvalidArgumentException {
+public class UploadedFileInvalidFilesArrayStructureException
+        extends UploadedFileInvalidArgumentException {
 
     public UploadedFileInvalidFilesArrayStructureException(String message) {
         super(message);

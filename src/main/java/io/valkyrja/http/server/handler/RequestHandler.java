@@ -45,26 +45,31 @@ public class RequestHandler implements RequestHandlerContract {
     }
 
     public RequestHandler(ContainerContract container) {
-        this(container, new Router(container), new RequestReceivedHandler(container),
-            new ThrowableCaughtHandler(container), new SendingResponseHandler(container), new TerminatedHandler(container), false);
+        this(
+                container,
+                new Router(container),
+                new RequestReceivedHandler(container),
+                new ThrowableCaughtHandler(container),
+                new SendingResponseHandler(container),
+                new TerminatedHandler(container),
+                false);
     }
 
     public RequestHandler(
-        ContainerContract container,
-        RouterContract router,
-        RequestReceivedHandlerContract requestReceivedHandler,
-        ThrowableCaughtHandlerContract throwableCaughtHandler,
-        SendingResponseHandlerContract sendingResponseHandler,
-        TerminatedHandlerContract terminatedHandler,
-        boolean debug
-    ) {
-        this.container               = container;
-        this.router                  = router;
-        this.requestReceivedHandler  = requestReceivedHandler;
-        this.throwableCaughtHandler  = throwableCaughtHandler;
-        this.sendingResponseHandler  = sendingResponseHandler;
-        this.terminatedHandler       = terminatedHandler;
-        this.debug                   = debug;
+            ContainerContract container,
+            RouterContract router,
+            RequestReceivedHandlerContract requestReceivedHandler,
+            ThrowableCaughtHandlerContract throwableCaughtHandler,
+            SendingResponseHandlerContract sendingResponseHandler,
+            TerminatedHandlerContract terminatedHandler,
+            boolean debug) {
+        this.container = container;
+        this.router = router;
+        this.requestReceivedHandler = requestReceivedHandler;
+        this.throwableCaughtHandler = throwableCaughtHandler;
+        this.sendingResponseHandler = sendingResponseHandler;
+        this.terminatedHandler = terminatedHandler;
+        this.debug = debug;
     }
 
     @Override
@@ -107,7 +112,8 @@ public class RequestHandler implements RequestHandlerContract {
     protected ResponseContract dispatchRouter(ServerRequestContract request) {
         container.setSingleton(ServerRequestContract.class, request);
 
-        RequestReceivedResult requestAfterMiddleware = requestReceivedHandler.requestReceived(request);
+        RequestReceivedResult requestAfterMiddleware =
+                requestReceivedHandler.requestReceived(request);
 
         if (requestAfterMiddleware.response() != null) {
             return requestAfterMiddleware.response();
@@ -136,14 +142,21 @@ public class RequestHandler implements RequestHandlerContract {
         Stream body = new Stream();
         body.write("Unknown Server Error Occurred");
         body.rewind();
-        return new Response(body, StatusCode.INTERNAL_SERVER_ERROR, new io.valkyrja.http.message.header.collection.HeaderCollection());
+        return new Response(
+                body,
+                StatusCode.INTERNAL_SERVER_ERROR,
+                new io.valkyrja.http.message.header.collection.HeaderCollection());
     }
 
-    protected ResponseContract getDefaultErrorResponseForHttpException(HttpResponseException httpException) {
+    protected ResponseContract getDefaultErrorResponseForHttpException(
+            HttpResponseException httpException) {
         StatusCode statusCode = httpException.getStatusCode();
         Stream body = new Stream();
         body.write("Unknown Server Error Occurred - " + httpException.getMessage());
         body.rewind();
-        return new Response(body, statusCode, new io.valkyrja.http.message.header.collection.HeaderCollection());
+        return new Response(
+                body,
+                statusCode,
+                new io.valkyrja.http.message.header.collection.HeaderCollection());
     }
 }

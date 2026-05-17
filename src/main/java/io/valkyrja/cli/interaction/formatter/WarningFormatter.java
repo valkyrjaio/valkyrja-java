@@ -17,6 +17,8 @@ import io.valkyrja.cli.interaction.format.TextColorFormat;
 public class WarningFormatter extends Formatter {
 
     public WarningFormatter() {
-        super(new TextColorFormat(TextColor.BLACK), new BackgroundColorFormat(BackgroundColor.YELLOW));
+        super(
+                new TextColorFormat(TextColor.BLACK),
+                new BackgroundColorFormat(BackgroundColor.YELLOW));
     }
 }

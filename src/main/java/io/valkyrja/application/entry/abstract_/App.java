@@ -101,9 +101,9 @@ public abstract class App {
     /**
      * Bootstrap the throwable handler for the application.
      *
-     * <p>Override in subclasses to register a concrete error handler when debug
-     * mode is enabled. No-op by default — Java does not ship a universal
-     * display-errors handler the way PHP ships Whoops.
+     * <p>Override in subclasses to register a concrete error handler when debug mode is enabled.
+     * No-op by default — Java does not ship a universal display-errors handler the way PHP ships
+     * Whoops.
      */
     public static void bootstrapThrowableHandler(
             ApplicationContract app, ContainerContract container) {

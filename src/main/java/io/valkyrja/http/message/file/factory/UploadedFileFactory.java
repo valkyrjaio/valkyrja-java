@@ -14,11 +14,13 @@ import io.valkyrja.http.message.stream.contract.StreamContract;
 
 public abstract class UploadedFileFactory {
 
-    public static UploadedFile createFromFile(String file, int size, String fileName, String mediaType) {
+    public static UploadedFile createFromFile(
+            String file, int size, String fileName, String mediaType) {
         return new UploadedFile(file, null, size, fileName, mediaType);
     }
 
-    public static UploadedFile createFromStream(StreamContract stream, int size, String fileName, String mediaType) {
+    public static UploadedFile createFromStream(
+            StreamContract stream, int size, String fileName, String mediaType) {
         return new UploadedFile(null, stream, size, fileName, mediaType);
     }
 }

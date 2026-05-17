@@ -10,10 +10,10 @@
 package io.valkyrja.http.message.enum_;
 
 /**
- * @see <a href="http://www.iana.org/assignments/http-status-codes/">IANA HTTP Status Code Registry</a>
+ * @see <a href="http://www.iana.org/assignments/http-status-codes/">IANA HTTP Status Code
+ *     Registry</a>
  */
 public enum StatusText {
-
     CONTINUE("Continue"),
     SWITCHING_PROTOCOLS("Switching Protocols"),
     PROCESSING("Processing"),

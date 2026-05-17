@@ -13,7 +13,6 @@ import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.struct.contract.StructContract;
 import io.valkyrja.validation.rule.contract.RuleContract;
 import io.valkyrja.validation.validator.contract.ValidatorContract;
-
 import java.util.List;
 import java.util.Map;
 

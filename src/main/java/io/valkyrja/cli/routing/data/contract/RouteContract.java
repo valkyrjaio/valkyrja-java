@@ -64,27 +64,34 @@ public interface RouteContract {
 
     List<Class<? extends RouteMatchedMiddlewareContract>> getRouteMatchedMiddleware();
 
-    RouteContract withRouteMatchedMiddleware(List<Class<? extends RouteMatchedMiddlewareContract>> middleware);
+    RouteContract withRouteMatchedMiddleware(
+            List<Class<? extends RouteMatchedMiddlewareContract>> middleware);
 
-    RouteContract withAddedRouteMatchedMiddleware(List<Class<? extends RouteMatchedMiddlewareContract>> middleware);
+    RouteContract withAddedRouteMatchedMiddleware(
+            List<Class<? extends RouteMatchedMiddlewareContract>> middleware);
 
     List<Class<? extends RouteDispatchedMiddlewareContract>> getRouteDispatchedMiddleware();
 
-    RouteContract withRouteDispatchedMiddleware(List<Class<? extends RouteDispatchedMiddlewareContract>> middleware);
+    RouteContract withRouteDispatchedMiddleware(
+            List<Class<? extends RouteDispatchedMiddlewareContract>> middleware);
 
-    RouteContract withAddedRouteDispatchedMiddleware(List<Class<? extends RouteDispatchedMiddlewareContract>> middleware);
+    RouteContract withAddedRouteDispatchedMiddleware(
+            List<Class<? extends RouteDispatchedMiddlewareContract>> middleware);
 
     List<Class<? extends ThrowableCaughtMiddlewareContract>> getThrowableCaughtMiddleware();
 
-    RouteContract withThrowableCaughtMiddleware(List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware);
+    RouteContract withThrowableCaughtMiddleware(
+            List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware);
 
-    RouteContract withAddedThrowableCaughtMiddleware(List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware);
+    RouteContract withAddedThrowableCaughtMiddleware(
+            List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware);
 
     List<Class<? extends ExitedMiddlewareContract>> getExitedMiddleware();
 
     RouteContract withExitedMiddleware(List<Class<? extends ExitedMiddlewareContract>> middleware);
 
-    RouteContract withAddedExitedMiddleware(List<Class<? extends ExitedMiddlewareContract>> middleware);
+    RouteContract withAddedExitedMiddleware(
+            List<Class<? extends ExitedMiddlewareContract>> middleware);
 
     BiFunction<ContainerContract, RouteContract, OutputContract> getHandler();
 

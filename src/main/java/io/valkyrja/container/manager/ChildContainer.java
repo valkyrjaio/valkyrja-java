@@ -16,12 +16,12 @@ import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
 /**
- * A per-request child container that interacts with the parent exclusively through
- * {@link ContainerContract} — no direct field access required.
+ * A per-request child container that interacts with the parent exclusively through {@link
+ * ContainerContract} — no direct field access required.
  *
  * <p>Works across all languages regardless of whether they support class inheritance with protected
- * field access (Java, PHP, Python, C++, C#) or not (Go, Rust, C). This is the portable,
- * universally compatible implementation.
+ * field access (Java, PHP, Python, C++, C#) or not (Go, Rust, C). This is the portable, universally
+ * compatible implementation.
  *
  * <p>The constructor copies two maps from the parent's {@link ContainerData}:
  *
@@ -60,9 +60,9 @@ public class ChildContainer extends Container {
     }
 
     /**
-     * Intercepts only the case where the parent has a cached instance but the child does not.
-     * All other paths (child's own instances, creating from child's copied binding) are handled
-     * by the base {@link Container#getSingletonWithoutChecks} using the child's own maps.
+     * Intercepts only the case where the parent has a cached instance but the child does not. All
+     * other paths (child's own instances, creating from child's copied binding) are handled by the
+     * base {@link Container#getSingletonWithoutChecks} using the child's own maps.
      */
     @Override
     protected @Nullable <T> T getSingletonWithoutChecks(Class<T> id) {
@@ -92,9 +92,9 @@ public class ChildContainer extends Container {
     }
 
     /**
-     * Publish a deferred service using the child's copied callbacks. The callback's presence
-     * is sufficient guard. Runs with the child as the container so bindings register into the
-     * child's own maps.
+     * Publish a deferred service using the child's copied callbacks. The callback's presence is
+     * sufficient guard. Runs with the child as the container so bindings register into the child's
+     * own maps.
      */
     @Override
     public void publish(Class<?> id) {
@@ -125,10 +125,10 @@ public class ChildContainer extends Container {
     // Container.isSingletonBinding (super) via this.singletons, which is sufficient.
 
     /**
-     * Parent check must come first. If the parent already published a provider at bootstrap,
-     * the child must not republish it — doing so would re-run the callback and re-register
-     * bindings. The child's own published map (super.isPublished) tracks only what the child
-     * itself has lazily published via its copied callbacks.
+     * Parent check must come first. If the parent already published a provider at bootstrap, the
+     * child must not republish it — doing so would re-run the callback and re-register bindings.
+     * The child's own published map (super.isPublished) tracks only what the child itself has
+     * lazily published via its copied callbacks.
      */
     @Override
     public boolean isPublished(Class<?> id) {

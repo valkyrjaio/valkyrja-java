@@ -15,19 +15,26 @@ import io.valkyrja.cli.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.cli.middleware.handler.abstract_.Handler;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
-public class ThrowableCaughtHandler extends Handler<ThrowableCaughtMiddlewareContract> implements ThrowableCaughtHandlerContract {
+public class ThrowableCaughtHandler extends Handler<ThrowableCaughtMiddlewareContract>
+        implements ThrowableCaughtHandlerContract {
 
     @SafeVarargs
-    public ThrowableCaughtHandler(ContainerContract container, Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
+    public ThrowableCaughtHandler(
+            ContainerContract container,
+            Class<? extends ThrowableCaughtMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 
     @Override
-    public OutputContract throwableCaught(InputContract input, OutputContract output, Throwable throwable) {
+    public OutputContract throwableCaught(
+            InputContract input, @Nullable OutputContract output, Throwable throwable) {
         Class<? extends ThrowableCaughtMiddlewareContract> next = this.next;
         return next != null
                 ? getMiddleware(next).throwableCaught(input, output, throwable, this)
-                : output;
+                : Objects.requireNonNull(
+                        output, "No middleware produced an output for the throwable");
     }
 }

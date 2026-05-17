@@ -34,7 +34,6 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.http.routing.matcher.Matcher;
 import io.valkyrja.http.routing.matcher.contract.MatcherContract;
-
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
@@ -55,31 +54,37 @@ public class Router implements RouterContract {
     }
 
     public Router(ContainerContract container) {
-        this(container, new Matcher(), new ResponseFactory(),
-            new ThrowableCaughtHandler(container), new RouteMatchedHandler(container), new RouteNotMatchedHandler(container),
-            new RouteDispatchedHandler(container), new SendingResponseHandler(container), new TerminatedHandler(container));
+        this(
+                container,
+                new Matcher(),
+                new ResponseFactory(),
+                new ThrowableCaughtHandler(container),
+                new RouteMatchedHandler(container),
+                new RouteNotMatchedHandler(container),
+                new RouteDispatchedHandler(container),
+                new SendingResponseHandler(container),
+                new TerminatedHandler(container));
     }
 
     public Router(
-        ContainerContract container,
-        MatcherContract matcher,
-        ResponseFactoryContract responseFactory,
-        ThrowableCaughtHandlerContract throwableCaughtHandler,
-        RouteMatchedHandlerContract routeMatchedHandler,
-        RouteNotMatchedHandlerContract routeNotMatchedHandler,
-        RouteDispatchedHandlerContract routeDispatchedHandler,
-        SendingResponseHandlerContract sendingResponseHandler,
-        TerminatedHandlerContract terminatedHandler
-    ) {
-        this.container             = container;
-        this.matcher               = matcher;
-        this.responseFactory       = responseFactory;
-        this.throwableCaughtHandler    = throwableCaughtHandler;
-        this.routeMatchedHandler       = routeMatchedHandler;
-        this.routeNotMatchedHandler    = routeNotMatchedHandler;
-        this.routeDispatchedHandler    = routeDispatchedHandler;
-        this.sendingResponseHandler    = sendingResponseHandler;
-        this.terminatedHandler         = terminatedHandler;
+            ContainerContract container,
+            MatcherContract matcher,
+            ResponseFactoryContract responseFactory,
+            ThrowableCaughtHandlerContract throwableCaughtHandler,
+            RouteMatchedHandlerContract routeMatchedHandler,
+            RouteNotMatchedHandlerContract routeNotMatchedHandler,
+            RouteDispatchedHandlerContract routeDispatchedHandler,
+            SendingResponseHandlerContract sendingResponseHandler,
+            TerminatedHandlerContract terminatedHandler) {
+        this.container = container;
+        this.matcher = matcher;
+        this.responseFactory = responseFactory;
+        this.throwableCaughtHandler = throwableCaughtHandler;
+        this.routeMatchedHandler = routeMatchedHandler;
+        this.routeNotMatchedHandler = routeNotMatchedHandler;
+        this.routeDispatchedHandler = routeDispatchedHandler;
+        this.sendingResponseHandler = sendingResponseHandler;
+        this.terminatedHandler = terminatedHandler;
     }
 
     @Override
@@ -97,7 +102,8 @@ public class Router implements RouterContract {
     public ResponseContract dispatchRoute(ServerRequestContract request, RouteContract route) {
         routeMatched(route);
 
-        RouteMatchedResult routeAfterMiddlewareResult = routeMatchedHandler.routeMatched(request, route);
+        RouteMatchedResult routeAfterMiddlewareResult =
+                routeMatchedHandler.routeMatched(request, route);
 
         if (routeAfterMiddlewareResult.response() != null) {
             return routeAfterMiddlewareResult.response();
@@ -107,7 +113,8 @@ public class Router implements RouterContract {
 
         container.setSingleton(RouteContract.class, routeAfterMiddleware);
 
-        ResponseContract response = routeAfterMiddleware.getHandler().apply(container, routeAfterMiddleware);
+        ResponseContract response =
+                routeAfterMiddleware.getHandler().apply(container, routeAfterMiddleware);
 
         return routeDispatchedHandler.routeDispatched(request, response, routeAfterMiddleware);
     }

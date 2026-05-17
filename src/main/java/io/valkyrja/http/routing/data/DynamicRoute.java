@@ -23,11 +23,11 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRouteParameterException;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
 import io.valkyrja.http.struct.response.contract.ResponseStructContract;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.Nullable;
 
 public class DynamicRoute extends Route implements DynamicRouteContract {
 
@@ -46,19 +46,44 @@ public class DynamicRoute extends Route implements DynamicRouteContract {
             List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
             List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware,
             List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware,
-            RequestStructContract requestStruct,
-            ResponseStructContract responseStruct
-    ) {
-        super(path, name, handler, requestMethods, routeMatchedMiddleware, routeDispatchedMiddleware,
-                throwableCaughtMiddleware, sendingResponseMiddleware, terminatedMiddleware, requestStruct, responseStruct);
+            @Nullable RequestStructContract requestStruct,
+            @Nullable ResponseStructContract responseStruct) {
+        super(
+                path,
+                name,
+                handler,
+                requestMethods,
+                routeMatchedMiddleware,
+                routeDispatchedMiddleware,
+                throwableCaughtMiddleware,
+                sendingResponseMiddleware,
+                terminatedMiddleware,
+                requestStruct,
+                responseStruct);
         this.regex = regex;
         this.parameters = new ArrayList<>(parameters);
     }
 
-    public DynamicRoute(String path, String name, String regex, List<ParameterContract> parameters,
+    public DynamicRoute(
+            String path,
+            String name,
+            String regex,
+            List<ParameterContract> parameters,
             BiFunction<ContainerContract, RouteContract, ResponseContract> handler) {
-        this(path, name, regex, parameters, handler, List.of(RequestMethod.HEAD, RequestMethod.GET),
-                List.of(), List.of(), List.of(), List.of(), List.of(), null, null);
+        this(
+                path,
+                name,
+                regex,
+                parameters,
+                handler,
+                List.of(RequestMethod.HEAD, RequestMethod.GET),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                null,
+                null);
     }
 
     @Override
@@ -97,7 +122,10 @@ public class DynamicRoute extends Route implements DynamicRouteContract {
         return parameters.stream()
                 .filter(p -> p.getName().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new HttpRoutingInvalidRouteParameterException("No parameter named '" + name + "' exists on this route"));
+                .orElseThrow(
+                        () ->
+                                new HttpRoutingInvalidRouteParameterException(
+                                        "No parameter named '" + name + "' exists on this route"));
     }
 
     @Override
@@ -107,8 +135,19 @@ public class DynamicRoute extends Route implements DynamicRouteContract {
 
     @Override
     protected DynamicRoute copy() {
-        return new DynamicRoute(path, name, regex, parameters, handler, requestMethods, routeMatchedMiddleware,
-                routeDispatchedMiddleware, throwableCaughtMiddleware, sendingResponseMiddleware, terminatedMiddleware,
-                requestStruct, responseStruct);
+        return new DynamicRoute(
+                path,
+                name,
+                regex,
+                parameters,
+                handler,
+                requestMethods,
+                routeMatchedMiddleware,
+                routeDispatchedMiddleware,
+                throwableCaughtMiddleware,
+                sendingResponseMiddleware,
+                terminatedMiddleware,
+                requestStruct,
+                responseStruct);
     }
 }

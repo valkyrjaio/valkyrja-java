@@ -10,7 +10,6 @@
 package io.valkyrja.http.routing.collector.contract;
 
 import io.valkyrja.http.routing.data.contract.RouteContract;
-
 import java.util.List;
 
 public interface RouteCollectorContract {

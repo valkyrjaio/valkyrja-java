@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.enum_;
 
 public enum ProtocolVersion {
-
     V1("1.0"),
     V1_1("1.1"),
     V2("2"),

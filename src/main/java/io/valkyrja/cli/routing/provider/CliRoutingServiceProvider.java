@@ -35,7 +35,7 @@ public class CliRoutingServiceProvider implements ServiceProviderContract {
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
-                RouterContract.class,          CliRoutingServiceProvider::publishRouter,
+                RouterContract.class, CliRoutingServiceProvider::publishRouter,
                 RouteCollectionContract.class, CliRoutingServiceProvider::publishRouteCollection);
     }
 
@@ -69,7 +69,10 @@ public class CliRoutingServiceProvider implements ServiceProviderContract {
 
         if (!controllers.isEmpty() && container.isSingleton(RouteCollectorContract.class)) {
             RouteCollectorContract collector = container.getSingleton(RouteCollectorContract.class);
-            collection.add(collector.getRoutes(controllers.toArray(new Class[0])).toArray(new RouteContract[0]));
+            collection.add(
+                    collector
+                            .getRoutes(controllers.toArray(new Class[0]))
+                            .toArray(new RouteContract[0]));
         }
 
         collection.add(routes.toArray(new RouteContract[0]));

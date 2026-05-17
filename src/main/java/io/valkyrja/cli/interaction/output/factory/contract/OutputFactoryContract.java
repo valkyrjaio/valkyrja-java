@@ -38,15 +38,18 @@ public interface OutputFactoryContract {
         return createPlainOutput(ExitCode.SUCCESS, messages);
     }
 
-    FileOutputContract createFileOutput(String filepath, ExitCode exitCode, MessageContract... messages);
+    FileOutputContract createFileOutput(
+            String filepath, ExitCode exitCode, MessageContract... messages);
 
     default FileOutputContract createFileOutput(String filepath, MessageContract... messages) {
         return createFileOutput(filepath, ExitCode.SUCCESS, messages);
     }
 
-    StreamOutputContract createStreamOutput(OutputStream stream, ExitCode exitCode, MessageContract... messages);
+    StreamOutputContract createStreamOutput(
+            OutputStream stream, ExitCode exitCode, MessageContract... messages);
 
-    default StreamOutputContract createStreamOutput(OutputStream stream, MessageContract... messages) {
+    default StreamOutputContract createStreamOutput(
+            OutputStream stream, MessageContract... messages) {
         return createStreamOutput(stream, ExitCode.SUCCESS, messages);
     }
 }

@@ -10,6 +10,7 @@
 package io.valkyrja.cli.interaction.message;
 
 import io.valkyrja.cli.interaction.formatter.contract.FormatterContract;
+import org.jspecify.annotations.Nullable;
 
 public class NewLine extends Message {
 
@@ -17,7 +18,7 @@ public class NewLine extends Message {
         this(null);
     }
 
-    public NewLine(FormatterContract formatter) {
+    public NewLine(@Nullable FormatterContract formatter) {
         super("\n", formatter);
     }
 }

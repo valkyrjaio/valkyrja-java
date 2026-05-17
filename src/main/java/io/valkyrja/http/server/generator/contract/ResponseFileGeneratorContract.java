@@ -11,5 +11,4 @@ package io.valkyrja.http.server.generator.contract;
 
 import io.valkyrja.support.generator.contract.FileGeneratorContract;
 
-public interface ResponseFileGeneratorContract extends FileGeneratorContract {
-}
+public interface ResponseFileGeneratorContract extends FileGeneratorContract {}

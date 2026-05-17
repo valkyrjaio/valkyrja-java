@@ -11,5 +11,4 @@ package io.valkyrja.log.throwable.contract;
 
 import io.valkyrja.throwable.contract.ThrowableContract;
 
-public interface LogThrowable extends ThrowableContract {
-}
+public interface LogThrowable extends ThrowableContract {}

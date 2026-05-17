@@ -11,7 +11,8 @@ package io.valkyrja.http.routing.throwable.exception;
 
 import io.valkyrja.http.routing.throwable.exception.abstract_.HttpRoutingInvalidArgumentException;
 
-public class HttpRoutingInvalidDynamicRouteNameException extends HttpRoutingInvalidArgumentException {
+public class HttpRoutingInvalidDynamicRouteNameException
+        extends HttpRoutingInvalidArgumentException {
 
     public HttpRoutingInvalidDynamicRouteNameException(String message) {
         super(message);

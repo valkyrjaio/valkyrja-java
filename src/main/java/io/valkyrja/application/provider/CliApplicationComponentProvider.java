@@ -19,7 +19,6 @@ import io.valkyrja.cli.server.provider.CliServerComponentProvider;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
-
 import java.util.List;
 
 public class CliApplicationComponentProvider implements ComponentProviderContract {

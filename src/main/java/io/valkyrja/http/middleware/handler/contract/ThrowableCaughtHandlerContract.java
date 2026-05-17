@@ -13,7 +13,9 @@ import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 
-public interface ThrowableCaughtHandlerContract extends HandlerContract<ThrowableCaughtMiddlewareContract> {
+public interface ThrowableCaughtHandlerContract
+        extends HandlerContract<ThrowableCaughtMiddlewareContract> {
 
-    ResponseContract throwableCaught(ServerRequestContract request, ResponseContract response, Throwable throwable);
+    ResponseContract throwableCaught(
+            ServerRequestContract request, ResponseContract response, Throwable throwable);
 }

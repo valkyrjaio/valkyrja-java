@@ -11,9 +11,7 @@ package io.valkyrja.http.message.header.value;
 
 import io.valkyrja.http.message.enum_.SameSite;
 import io.valkyrja.http.message.header.value.component.Component;
-import io.valkyrja.http.message.header.value.component.contract.ComponentContract;
 import io.valkyrja.http.message.header.value.contract.CookieContract;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -26,9 +24,9 @@ import java.util.stream.Collectors;
 
 public class Cookie extends Value implements CookieContract {
 
-    private static final DateTimeFormatter COOKIE_DATE_FORMATTER = DateTimeFormatter
-        .ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH)
-        .withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter COOKIE_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.ENGLISH)
+                    .withZone(ZoneOffset.UTC);
 
     protected String name;
     protected String value;
@@ -50,17 +48,16 @@ public class Cookie extends Value implements CookieContract {
     }
 
     public Cookie(
-        String name,
-        String value,
-        int expire,
-        String path,
-        String domain,
-        boolean secure,
-        boolean httpOnly,
-        boolean raw,
-        SameSite sameSite,
-        boolean delete
-    ) {
+            String name,
+            String value,
+            int expire,
+            String path,
+            String domain,
+            boolean secure,
+            boolean httpOnly,
+            boolean raw,
+            SameSite sameSite,
+            boolean delete) {
         super();
         this.name = name;
         this.value = value;
@@ -88,10 +85,11 @@ public class Cookie extends Value implements CookieContract {
 
         List<String> parts = new ArrayList<>();
 
-        parts.add(new Component(
-            URLEncoder.encode(this.name, StandardCharsets.UTF_8),
-            URLEncoder.encode(cookieValue, StandardCharsets.UTF_8)
-        ).toString());
+        parts.add(
+                new Component(
+                                URLEncoder.encode(this.name, StandardCharsets.UTF_8),
+                                URLEncoder.encode(cookieValue, StandardCharsets.UTF_8))
+                        .toString());
 
         if (cookieExpire != 0) {
             String expires = COOKIE_DATE_FORMATTER.format(Instant.ofEpochSecond(cookieExpire));
@@ -121,9 +119,7 @@ public class Cookie extends Value implements CookieContract {
 
         parts.add(new Component("samesite", this.sameSite.getValue()).toString());
 
-        return parts.stream()
-            .filter(s -> !s.isEmpty())
-            .collect(Collectors.joining("; "));
+        return parts.stream().filter(s -> !s.isEmpty()).collect(Collectors.joining("; "));
     }
 
     @Override
@@ -135,9 +131,7 @@ public class Cookie extends Value implements CookieContract {
 
     @Override
     public int getMaxAge() {
-        return this.expire > 0
-            ? this.expire - (int) Instant.now().getEpochSecond()
-            : 0;
+        return this.expire > 0 ? this.expire - (int) Instant.now().getEpochSecond() : 0;
     }
 
     @Override
@@ -249,36 +243,30 @@ public class Cookie extends Value implements CookieContract {
     }
 
     protected String getDomainComponentString() {
-        return !this.domain.isEmpty()
-            ? new Component("domain", this.domain).toString()
-            : "";
+        return !this.domain.isEmpty() ? new Component("domain", this.domain).toString() : "";
     }
 
     protected String getSecureComponentString() {
-        return this.secure
-            ? new Component("secure").toString()
-            : "";
+        return this.secure ? new Component("secure").toString() : "";
     }
 
     protected String getHttpOnlyComponentString() {
-        return this.httpOnly
-            ? new Component("httponly").toString()
-            : "";
+        return this.httpOnly ? new Component("httponly").toString() : "";
     }
 
     protected Cookie copy() {
-        Cookie newCookie = new Cookie(
-            this.name,
-            this.value,
-            this.expire,
-            this.path,
-            this.domain,
-            this.secure,
-            this.httpOnly,
-            this.raw,
-            this.sameSite,
-            this.delete
-        );
+        Cookie newCookie =
+                new Cookie(
+                        this.name,
+                        this.value,
+                        this.expire,
+                        this.path,
+                        this.domain,
+                        this.secure,
+                        this.httpOnly,
+                        this.raw,
+                        this.sameSite,
+                        this.delete);
         newCookie.components = new ArrayList<>(this.components);
         newCookie.position = this.position;
         return newCookie;

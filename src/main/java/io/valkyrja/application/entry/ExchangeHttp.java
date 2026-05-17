@@ -23,29 +23,28 @@ import java.net.InetSocketAddress;
 /**
  * HTTP entry point for the built-in Sun {@link HttpServer} worker runtime.
  *
- * <p>Uses the JDK's {@code com.sun.net.httpserver} package — no additional
- * dependencies required. Bootstraps once at startup, then dispatches each
- * incoming exchange to an isolated {@link io.valkyrja.container.manager.ChildContainer}
- * so request state never bleeds between concurrent exchanges.
+ * <p>Uses the JDK's {@code com.sun.net.httpserver} package — no additional dependencies required.
+ * Bootstraps once at startup, then dispatches each incoming exchange to an isolated {@link
+ * io.valkyrja.container.manager.ChildContainer} so request state never bleeds between concurrent
+ * exchanges.
  *
- * <p>For runtimes that require additional dependencies (Netty, Tomcat, Jetty, etc.)
- * extend {@link WorkerHttp} directly in a separate module.
+ * <p>For runtimes that require additional dependencies (Netty, Tomcat, Jetty, etc.) extend {@link
+ * WorkerHttp} directly in a separate module.
  */
 public class ExchangeHttp extends WorkerHttp {
 
     /**
      * Start the Sun HTTP server worker loop.
      *
-     * <p>Bootstraps the application once, then registers a context handler that
-     * dispatches every incoming exchange to an isolated child container for the
-     * lifetime of that request.
+     * <p>Bootstraps the application once, then registers a context handler that dispatches every
+     * incoming exchange to an isolated child container for the lifetime of that request.
      *
      * @param config the HTTP configuration
      * @throws IOException if the server socket cannot be opened
      */
     public static void run(HttpConfigContract config) throws IOException {
-        ApplicationContract app  = bootstrap(config);
-        ContainerData       data = (ContainerData) app.getContainer().getData();
+        ApplicationContract app = bootstrap(config);
+        ContainerData data = (ContainerData) app.getContainer().getData();
 
         HttpServer server = HttpServer.create(new InetSocketAddress(config.port()), 0);
         server.createContext("/", exchange -> handle(app, data, getRequest(exchange)));
@@ -55,8 +54,8 @@ public class ExchangeHttp extends WorkerHttp {
     /**
      * Get the HTTP request from a Sun HTTP exchange.
      *
-     * <p>Override in subclasses to populate the request from exchange metadata
-     * (headers, body, remote address, etc.) once the full request adapter exists.
+     * <p>Override in subclasses to populate the request from exchange metadata (headers, body,
+     * remote address, etc.) once the full request adapter exists.
      *
      * @param exchange the incoming Sun HTTP exchange
      * @return the current server request

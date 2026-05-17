@@ -16,10 +16,12 @@ import io.valkyrja.cli.middleware.handler.abstract_.Handler;
 import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
-public class ExitedHandler extends Handler<ExitedMiddlewareContract> implements ExitedHandlerContract {
+public class ExitedHandler extends Handler<ExitedMiddlewareContract>
+        implements ExitedHandlerContract {
 
     @SafeVarargs
-    public ExitedHandler(ContainerContract container, Class<? extends ExitedMiddlewareContract>... middleware) {
+    public ExitedHandler(
+            ContainerContract container, Class<? extends ExitedMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 

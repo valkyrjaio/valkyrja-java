@@ -11,6 +11,7 @@ package io.valkyrja.cli.interaction.message;
 
 import io.valkyrja.cli.interaction.formatter.contract.FormatterContract;
 import io.valkyrja.cli.interaction.message.contract.ProgressContract;
+import org.jspecify.annotations.Nullable;
 
 public class Progress extends Message implements ProgressContract {
 
@@ -21,7 +22,11 @@ public class Progress extends Message implements ProgressContract {
         this(text, false, 0, null);
     }
 
-    public Progress(String text, boolean isComplete, int percentage, FormatterContract formatter) {
+    public Progress(
+            String text,
+            boolean isComplete,
+            int percentage,
+            @Nullable FormatterContract formatter) {
         super(text, formatter);
         this.isComplete = isComplete;
         this.percentage = percentage;

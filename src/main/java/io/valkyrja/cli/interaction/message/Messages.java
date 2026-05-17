@@ -25,15 +25,13 @@ public class Messages extends Message {
 
     @Override
     public String getText() {
-        return messages.stream()
-            .map(MessageContract::getText)
-            .collect(Collectors.joining());
+        return messages.stream().map(MessageContract::getText).collect(Collectors.joining());
     }
 
     @Override
     public String getFormattedText() {
         return messages.stream()
-            .map(MessageContract::getFormattedText)
-            .collect(Collectors.joining());
+                .map(MessageContract::getFormattedText)
+                .collect(Collectors.joining());
     }
 }

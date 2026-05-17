@@ -12,7 +12,8 @@ package io.valkyrja.http.throwable.exception.abstract_;
 import io.valkyrja.http.throwable.contract.HttpThrowable;
 import io.valkyrja.throwable.exception.InvalidArgumentException;
 
-public abstract class HttpInvalidArgumentException extends InvalidArgumentException implements HttpThrowable {
+public abstract class HttpInvalidArgumentException extends InvalidArgumentException
+        implements HttpThrowable {
 
     protected HttpInvalidArgumentException(String message) {
         super(message);

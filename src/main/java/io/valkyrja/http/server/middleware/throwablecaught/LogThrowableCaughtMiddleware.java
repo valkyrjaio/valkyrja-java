@@ -14,7 +14,6 @@ import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.log.logger.contract.LoggerContract;
-
 import java.util.Map;
 
 public class LogThrowableCaughtMiddleware implements ThrowableCaughtMiddlewareContract {
@@ -26,8 +25,12 @@ public class LogThrowableCaughtMiddleware implements ThrowableCaughtMiddlewareCo
     }
 
     @Override
-    public ResponseContract throwableCaught(ServerRequestContract request, ResponseContract response, Throwable throwable, ThrowableCaughtHandlerContract handler) {
-        String url        = request.getUri().getPath();
+    public ResponseContract throwableCaught(
+            ServerRequestContract request,
+            ResponseContract response,
+            Throwable throwable,
+            ThrowableCaughtHandlerContract handler) {
+        String url = request.getUri().getPath();
         String logMessage = "Http Server Error\nUrl: " + url;
 
         logger.throwable(throwable, logMessage, Map.of());

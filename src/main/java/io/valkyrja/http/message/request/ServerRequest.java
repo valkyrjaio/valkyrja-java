@@ -31,8 +31,8 @@ import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.stream.contract.StreamContract;
 import io.valkyrja.http.message.uri.Uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
-
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 public class ServerRequest extends Request implements ServerRequestContract {
 
@@ -44,10 +44,18 @@ public class ServerRequest extends Request implements ServerRequestContract {
     protected AttributeParamCollectionContract attributes;
 
     public ServerRequest() {
-        this(new Uri(), RequestMethod.GET, new Stream(), new HeaderCollection(), ProtocolVersion.V1_1,
-                new ServerParamCollection(Map.of()), new CookieParamCollection(Map.of()),
-                new QueryParamCollection(Map.of()), new ParsedBodyParamCollection(Map.of()),
-                new UploadedFileCollection(Map.of()), new AttributeParamCollection());
+        this(
+                new Uri(),
+                RequestMethod.GET,
+                new Stream(),
+                new HeaderCollection(),
+                ProtocolVersion.V1_1,
+                new ServerParamCollection(Map.of()),
+                new CookieParamCollection(Map.of()),
+                new QueryParamCollection(Map.of()),
+                new ParsedBodyParamCollection(Map.of()),
+                new UploadedFileCollection(Map.of()),
+                new AttributeParamCollection());
     }
 
     public ServerRequest(
@@ -61,8 +69,7 @@ public class ServerRequest extends Request implements ServerRequestContract {
             QueryParamCollectionContract query,
             ParsedBodyParamCollectionContract parsedBody,
             UploadedFileCollectionContract files,
-            AttributeParamCollectionContract attributes
-    ) {
+            @Nullable AttributeParamCollectionContract attributes) {
         super(uri, method, body, headers);
         this.protocolVersion = protocol;
         this.server = server;
@@ -70,7 +77,7 @@ public class ServerRequest extends Request implements ServerRequestContract {
         this.query = query;
         this.parsedBody = parsedBody;
         this.files = files;
-        this.attributes = attributes;
+        this.attributes = attributes != null ? attributes : new AttributeParamCollection();
     }
 
     @Override
@@ -152,8 +159,19 @@ public class ServerRequest extends Request implements ServerRequestContract {
 
     @Override
     protected ServerRequest copy() {
-        ServerRequest copy = new ServerRequest(uri, method, stream, headers, protocolVersion,
-                server, cookies, query, parsedBody, files, attributes);
+        ServerRequest copy =
+                new ServerRequest(
+                        uri,
+                        method,
+                        stream,
+                        headers,
+                        protocolVersion,
+                        server,
+                        cookies,
+                        query,
+                        parsedBody,
+                        files,
+                        attributes);
         copy.requestTarget = requestTarget;
         return copy;
     }

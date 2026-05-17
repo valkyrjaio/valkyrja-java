@@ -10,12 +10,12 @@
 package io.valkyrja.http.message.param.abstract_;
 
 import io.valkyrja.http.message.param.contract.ParamCollectionContract;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 
 public abstract class ParamCollection implements ParamCollectionContract {
 
@@ -30,7 +30,9 @@ public abstract class ParamCollection implements ParamCollectionContract {
         throw new UnsupportedOperationException("fromArray must be called on a concrete subclass");
     }
 
-    protected static ParamCollection fromArrayInternal(Map<String, Object> data, java.util.function.Function<Map<String, Object>, ParamCollection> constructor) {
+    protected static ParamCollection fromArrayInternal(
+            Map<String, Object> data,
+            java.util.function.Function<Map<String, Object>, ParamCollection> constructor) {
         Map<String, Object> result = new LinkedHashMap<>();
 
         for (Map.Entry<String, Object> entry : data.entrySet()) {
@@ -64,7 +66,7 @@ public abstract class ParamCollection implements ParamCollectionContract {
     }
 
     @Override
-    public Object get(String key) {
+    public @Nullable Object get(String key) {
         return params.getOrDefault(key, null);
     }
 
@@ -78,7 +80,12 @@ public abstract class ParamCollection implements ParamCollectionContract {
         Set<String> keySet = Arrays.stream(keys).collect(Collectors.toSet());
         return params.entrySet().stream()
                 .filter(e -> keySet.contains(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (a, b) -> a,
+                                LinkedHashMap::new));
     }
 
     @Override
@@ -86,7 +93,12 @@ public abstract class ParamCollection implements ParamCollectionContract {
         Set<String> keySet = Arrays.stream(keys).collect(Collectors.toSet());
         return params.entrySet().stream()
                 .filter(e -> !keySet.contains(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (a, b) -> a,
+                                LinkedHashMap::new));
     }
 
     @Override

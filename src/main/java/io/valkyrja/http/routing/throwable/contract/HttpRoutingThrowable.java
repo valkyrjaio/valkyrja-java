@@ -11,5 +11,4 @@ package io.valkyrja.http.routing.throwable.contract;
 
 import io.valkyrja.http.throwable.contract.HttpThrowable;
 
-public interface HttpRoutingThrowable extends HttpThrowable {
-}
+public interface HttpRoutingThrowable extends HttpThrowable {}

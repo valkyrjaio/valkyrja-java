@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.file.collection.contract;
 
 import io.valkyrja.http.message.file.contract.UploadedFileContract;
-
 import java.util.Map;
 
 public interface UploadedFileCollectionContract {

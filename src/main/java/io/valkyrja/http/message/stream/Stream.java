@@ -13,12 +13,13 @@ import io.valkyrja.http.message.stream.contract.StreamContract;
 import io.valkyrja.http.message.stream.enum_.Mode;
 import io.valkyrja.http.message.stream.enum_.ModeTranslation;
 import io.valkyrja.http.message.stream.enum_.PhpWrapper;
-
+import io.valkyrja.http.message.stream.throwable.exception.HttpStreamStreamSeekException;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 public class Stream implements StreamContract {
 
@@ -102,6 +103,7 @@ public class Stream implements StreamContract {
             case SEEK_SET -> position = offset;
             case SEEK_CUR -> position = position + offset;
             case SEEK_END -> position = size + offset;
+            default -> throw new HttpStreamStreamSeekException("Invalid whence value: " + whence);
         }
 
         if (position < 0) {
@@ -180,7 +182,12 @@ public class Stream implements StreamContract {
         Map<String, Object> meta = new HashMap<>();
         meta.put("wrapper_type", wrapper != null ? wrapper.getValue() : null);
         meta.put("stream_type", "MEMORY");
-        meta.put("mode", mode != null ? mode.getValue() + (modeTranslation != null ? modeTranslation.getValue() : "") : null);
+        meta.put(
+                "mode",
+                mode != null
+                        ? mode.getValue()
+                                + (modeTranslation != null ? modeTranslation.getValue() : "")
+                        : null);
         meta.put("unread_bytes", buffer.size() - position);
         meta.put("seekable", isSeekable());
         meta.put("uri", wrapper != null ? wrapper.getValue() : null);
@@ -188,7 +195,7 @@ public class Stream implements StreamContract {
     }
 
     @Override
-    public Object getMetadataItem(String key) {
+    public @Nullable Object getMetadataItem(String key) {
         return getMetadata().get(key);
     }
 }

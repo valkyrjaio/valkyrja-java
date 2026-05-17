@@ -66,7 +66,8 @@ public class Dispatcher implements DispatcherContract {
     }
 
     /** Dispatch a class method. */
-    protected @Nullable Object dispatchClassMethod(MethodDispatch dispatch, Map<String, Object> arguments) {
+    protected @Nullable Object dispatchClassMethod(
+            MethodDispatch dispatch, Map<String, Object> arguments) {
         Class<?> clazz = dispatch.getClassName();
         String methodName = dispatch.getMethod();
         Object[] args = resolveArguments(dispatch, arguments);
@@ -81,7 +82,8 @@ public class Dispatcher implements DispatcherContract {
             throw new DispatchInvalidDispatchCapabilityException(
                     "Exception in " + dispatch, cause != null ? cause : e);
         } catch (ReflectiveOperationException e) {
-            throw new DispatchInvalidDispatchCapabilityException("Failed to dispatch: " + dispatch, e);
+            throw new DispatchInvalidDispatchCapabilityException(
+                    "Failed to dispatch: " + dispatch, e);
         }
     }
 
@@ -95,7 +97,8 @@ public class Dispatcher implements DispatcherContract {
             Object instance = dispatch.isStatic() ? null : container.get(clazz);
             return field.get(instance);
         } catch (ReflectiveOperationException e) {
-            throw new DispatchInvalidDispatchCapabilityException("Failed to dispatch field: " + dispatch, e);
+            throw new DispatchInvalidDispatchCapabilityException(
+                    "Failed to dispatch field: " + dispatch, e);
         }
     }
 
@@ -114,7 +117,8 @@ public class Dispatcher implements DispatcherContract {
                     "Global constants are not supported in Java. Use a class-scoped constant: "
                             + constantName);
         } catch (ReflectiveOperationException e) {
-            throw new DispatchInvalidDispatchCapabilityException("Failed to dispatch constant: " + dispatch, e);
+            throw new DispatchInvalidDispatchCapabilityException(
+                    "Failed to dispatch constant: " + dispatch, e);
         }
     }
 
@@ -126,7 +130,8 @@ public class Dispatcher implements DispatcherContract {
     }
 
     /** Dispatch a callable. */
-    protected @Nullable Object dispatchCallable(CallableDispatch dispatch, Map<String, Object> arguments) {
+    protected @Nullable Object dispatchCallable(
+            CallableDispatch dispatch, Map<String, Object> arguments) {
         Object[] args = resolveArguments(dispatch, arguments);
         return dispatch.getCallable().apply(args);
     }

@@ -21,17 +21,21 @@ public class HttpRedirectResponseException extends HttpResponseException {
 
     protected UriContract uri;
 
-    public HttpRedirectResponseException(UriContract uri, StatusCode statusCode, HeaderCollectionContract headers, ResponseContract response) {
+    public HttpRedirectResponseException(
+            UriContract uri,
+            StatusCode statusCode,
+            HeaderCollectionContract headers,
+            ResponseContract response) {
         super(
                 statusCode != null ? statusCode : StatusCode.FOUND,
                 "Redirect",
                 headers != null ? headers : new HeaderCollection(),
-                response != null ? response : RedirectResponse.createFromUri(
-                        uri != null ? uri : new Uri("/"),
-                        statusCode != null ? statusCode : StatusCode.FOUND,
-                        headers != null ? headers : new HeaderCollection()
-                )
-        );
+                response != null
+                        ? response
+                        : RedirectResponse.createFromUri(
+                                uri != null ? uri : new Uri("/"),
+                                statusCode != null ? statusCode : StatusCode.FOUND,
+                                headers != null ? headers : new HeaderCollection()));
 
         this.uri = uri != null ? uri : new Uri("/");
     }

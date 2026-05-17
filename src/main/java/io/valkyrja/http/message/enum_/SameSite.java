@@ -10,7 +10,6 @@
 package io.valkyrja.http.message.enum_;
 
 public enum SameSite {
-
     NONE("none"),
     LAX("lax"),
     STRICT("strict");

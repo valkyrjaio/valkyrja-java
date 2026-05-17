@@ -72,9 +72,7 @@ public class Component implements ComponentContract {
 
     @Override
     public String toString() {
-        return !token.isEmpty() && !text.isEmpty()
-            ? token + "=" + text
-            : token;
+        return !token.isEmpty() && !text.isEmpty() ? token + "=" + text : token;
     }
 
     protected String filterText(String text) {

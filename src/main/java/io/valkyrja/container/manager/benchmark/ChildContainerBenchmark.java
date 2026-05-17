@@ -16,12 +16,12 @@ import io.valkyrja.container.manager.NativeChildContainer;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
 /**
- * Rough benchmark comparing {@link NativeChildContainer} (direct field access) against
- * {@link ChildContainer} (contract-only with map copy).
+ * Rough benchmark comparing {@link NativeChildContainer} (direct field access) against {@link
+ * ChildContainer} (contract-only with map copy).
  *
  * <p>This is a manual warm-up benchmark using {@link System#nanoTime()}. It is not as rigorous as
- * JMH (no dead-code elimination protection, no forking) but gives a reliable directional signal
- * for the two main cost centres:
+ * JMH (no dead-code elimination protection, no forking) but gives a reliable directional signal for
+ * the two main cost centres:
  *
  * <ul>
  *   <li><b>Construction</b> — ChildContainer copies singletons + deferredCallbacks maps;
@@ -36,7 +36,7 @@ import io.valkyrja.container.manager.contract.ContainerContract;
  */
 public class ChildContainerBenchmark {
 
-    private static final int WARMUP     = 50_000;
+    private static final int WARMUP = 50_000;
     private static final int ITERATIONS = 500_000;
 
     public static void main(String[] args) {
@@ -62,17 +62,21 @@ public class ChildContainerBenchmark {
     // --- Scenarios ---
 
     private static void benchmarkConstruction(Container parent, ContainerData parentData) {
-        long childNs = time(() -> {
-            for (int i = 0; i < ITERATIONS; i++) {
-                new NativeChildContainer(parent);
-            }
-        });
+        long childNs =
+                time(
+                        () -> {
+                            for (int i = 0; i < ITERATIONS; i++) {
+                                new NativeChildContainer(parent);
+                            }
+                        });
 
-        long portableNs = time(() -> {
-            for (int i = 0; i < ITERATIONS; i++) {
-                new ChildContainer(parent, parentData);
-            }
-        });
+        long portableNs =
+                time(
+                        () -> {
+                            for (int i = 0; i < ITERATIONS; i++) {
+                                new ChildContainer(parent, parentData);
+                            }
+                        });
 
         report("Construction", childNs, portableNs);
     }
@@ -82,19 +86,23 @@ public class ChildContainerBenchmark {
         NativeChildContainer warmChild = new NativeChildContainer(parent);
         ChildContainer warmPortable = new ChildContainer(parent, parentData);
 
-        long childNs = time(() -> {
-            for (int i = 0; i < ITERATIONS; i++) {
-                NativeChildContainer c = new NativeChildContainer(parent);
-                c.getSingleton(BenchmarkService.class);
-            }
-        });
+        long childNs =
+                time(
+                        () -> {
+                            for (int i = 0; i < ITERATIONS; i++) {
+                                NativeChildContainer c = new NativeChildContainer(parent);
+                                c.getSingleton(BenchmarkService.class);
+                            }
+                        });
 
-        long portableNs = time(() -> {
-            for (int i = 0; i < ITERATIONS; i++) {
-                ChildContainer c = new ChildContainer(parent, parentData);
-                c.getSingleton(BenchmarkService.class);
-            }
-        });
+        long portableNs =
+                time(
+                        () -> {
+                            for (int i = 0; i < ITERATIONS; i++) {
+                                ChildContainer c = new ChildContainer(parent, parentData);
+                                c.getSingleton(BenchmarkService.class);
+                            }
+                        });
 
         // Suppress unused warning
         warmChild.has(BenchmarkService.class);
@@ -104,17 +112,21 @@ public class ChildContainerBenchmark {
     }
 
     private static void benchmarkFullRequest(Container parent, ContainerData parentData) {
-        long childNs = time(() -> {
-            for (int i = 0; i < ITERATIONS; i++) {
-                runChild(parent);
-            }
-        });
+        long childNs =
+                time(
+                        () -> {
+                            for (int i = 0; i < ITERATIONS; i++) {
+                                runChild(parent);
+                            }
+                        });
 
-        long portableNs = time(() -> {
-            for (int i = 0; i < ITERATIONS; i++) {
-                runPortable(parent, parentData);
-            }
-        });
+        long portableNs =
+                time(
+                        () -> {
+                            for (int i = 0; i < ITERATIONS; i++) {
+                                runPortable(parent, parentData);
+                            }
+                        });
 
         report("Full request simulation", childNs, portableNs);
     }
@@ -157,8 +169,7 @@ public class ChildContainerBenchmark {
         System.out.printf("%-40s%n", label);
         System.out.printf(
                 "  NativeChildContainer          %8.2f ms  (%6.2f ns/op)%n", childMs, childNsOp);
-        System.out.printf(
-                "  ChildContainer  %8.2f ms  (%6.2f ns/op)%n", portableMs, portableNsOp);
+        System.out.printf("  ChildContainer  %8.2f ms  (%6.2f ns/op)%n", portableMs, portableNsOp);
         System.out.printf("  Ratio (child/native)    %.2fx%n%n", ratio);
     }
 

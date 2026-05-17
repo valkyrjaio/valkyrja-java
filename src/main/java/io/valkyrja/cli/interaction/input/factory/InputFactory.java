@@ -21,7 +21,8 @@ import java.util.List;
 
 public abstract class InputFactory {
 
-    public static InputContract fromGlobals(String[] args, String applicationName, String commandName) {
+    public static InputContract fromGlobals(
+            String[] args, String applicationName, String commandName) {
         return inputWithProperties(new Input(), args, applicationName, commandName);
     }
 
@@ -33,21 +34,18 @@ public abstract class InputFactory {
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (i == 0) {
-                applicationName = arg;
+                commandName = arg;
             } else if (arg.startsWith("-")) {
                 List<Option> parsed = OptionFactory.fromArg(arg);
                 options.addAll(parsed);
-            } else if (i == 1) {
-                commandName = arg;
             } else {
                 arguments.add(ArgumentFactory.fromArg(arg));
             }
         }
 
-        return input
-            .withCaller(applicationName)
-            .withCommandName(commandName)
-            .withArguments(arguments.toArray(new ArgumentContract[0]))
-            .withOptions(options.toArray(new OptionContract[0]));
+        return input.withCaller(applicationName)
+                .withCommandName(commandName)
+                .withArguments(arguments.toArray(new ArgumentContract[0]))
+                .withOptions(options.toArray(new OptionContract[0]));
     }
 }

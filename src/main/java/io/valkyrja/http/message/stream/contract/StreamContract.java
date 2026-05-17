@@ -11,6 +11,7 @@ package io.valkyrja.http.message.stream.contract;
 
 import java.io.Closeable;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 public interface StreamContract {
 
@@ -48,5 +49,5 @@ public interface StreamContract {
 
     Map<String, Object> getMetadata();
 
-    Object getMetadataItem(String key);
+    @Nullable Object getMetadataItem(String key);
 }

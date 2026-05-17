@@ -43,8 +43,10 @@ public class Formatter implements FormatterContract {
             return text;
         }
 
-        String set = formats.stream().map(FormatContract::getSetCode).collect(Collectors.joining(";"));
-        String unset = formats.stream().map(FormatContract::getUnsetCode).collect(Collectors.joining(";"));
+        String set =
+                formats.stream().map(FormatContract::getSetCode).collect(Collectors.joining(";"));
+        String unset =
+                formats.stream().map(FormatContract::getUnsetCode).collect(Collectors.joining(";"));
 
         return "\033[" + set + "m" + text + "\033[" + unset + "m";
     }

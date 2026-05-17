@@ -10,7 +10,6 @@
 package io.valkyrja.http.struct.response.abstract_;
 
 import io.valkyrja.http.struct.response.contract.ResponseStructContract;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 

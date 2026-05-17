@@ -13,24 +13,21 @@ import io.valkyrja.http.message.header.Header;
 import io.valkyrja.http.message.header.contract.HeaderContract;
 import io.valkyrja.http.message.header.throwable.exception.HttpHeaderInvalidNameException;
 import io.valkyrja.http.message.header.throwable.exception.HttpHeaderInvalidValueException;
-
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public abstract class HeaderFactory {
 
-    private static final Pattern CRLF_ATTACK_PATTERN = Pattern.compile(
-        "(?:(?:(?<!\\r)\\n)|(?:\\r(?!\\n))|(?:\\r\\n(?![ \\t])))"
-    );
+    private static final Pattern CRLF_ATTACK_PATTERN =
+            Pattern.compile("(?:(?:(?<!\\r)\\n)|(?:\\r(?!\\n))|(?:\\r\\n(?![ \\t])))");
 
-    private static final Pattern INVALID_CHARS_PATTERN = Pattern.compile(
-        "[^\\x09\\x0a\\x0d\\x20-\\x7E\\x80-\\xFE]"
-    );
+    private static final Pattern INVALID_CHARS_PATTERN =
+            Pattern.compile("[^\\x09\\x0a\\x0d\\x20-\\x7E\\x80-\\xFE]");
 
-    private static final Pattern VALID_NAME_PATTERN = Pattern.compile(
-        "^[a-zA-Z0-9'`#$%&*+.^_|~!\\-]+$"
-    );
+    private static final Pattern VALID_NAME_PATTERN =
+            Pattern.compile("^[a-zA-Z0-9'`#$%&*+.^_|~!\\-]+$");
 
     public static Map<String, HeaderContract> marshalHeaders(Map<String, String> server) {
         Map<String, HeaderContract> headers = new LinkedHashMap<>();
@@ -76,7 +73,8 @@ public abstract class HeaderFactory {
 
     public static void assertValidValue(String value) {
         if (!isValidValue(value)) {
-            throw new HttpHeaderInvalidValueException(String.format("\"%s\" is not valid header value", value));
+            throw new HttpHeaderInvalidValueException(
+                    String.format("\"%s\" is not valid header value", value));
         }
     }
 
@@ -94,7 +92,8 @@ public abstract class HeaderFactory {
 
     public static void assertValidName(String name) {
         if (!isValidName(name)) {
-            throw new HttpHeaderInvalidNameException(String.format("\"%s\" is not valid header name", name));
+            throw new HttpHeaderInvalidNameException(
+                    String.format("\"%s\" is not valid header name", name));
         }
     }
 
@@ -103,17 +102,14 @@ public abstract class HeaderFactory {
     }
 
     protected static boolean isInvalidValueAscii(int ascii) {
-        return (ascii < 32 && ascii != 9)
-            || ascii == 127
-            || ascii > 254;
+        return (ascii < 32 && ascii != 9) || ascii == 127 || ascii > 254;
     }
 
     protected static void marshalHeader(
-        Map<String, String> server,
-        Map<String, HeaderContract> headers,
-        String key,
-        String value
-    ) {
+            Map<String, String> server,
+            Map<String, HeaderContract> headers,
+            String key,
+            String value) {
         if (key.startsWith("REDIRECT_")) {
             key = key.substring(9);
 
@@ -123,13 +119,13 @@ public abstract class HeaderFactory {
         }
 
         if (isValidHttpHeader(key, value)) {
-            String name = key.substring(5).replace('_', '-').toLowerCase();
+            String name = key.substring(5).replace('_', '-').toLowerCase(Locale.ROOT);
             headers.put(name, new Header(name, value));
             return;
         }
 
         if (isValidHttpContentHeader(key, value)) {
-            String name = "content-" + key.substring(8).toLowerCase();
+            String name = "content-" + key.substring(8).toLowerCase(Locale.ROOT);
             headers.put(name, new Header(name, value));
         }
     }

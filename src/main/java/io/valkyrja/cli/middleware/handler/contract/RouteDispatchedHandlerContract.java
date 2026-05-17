@@ -14,7 +14,8 @@ import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 
-public interface RouteDispatchedHandlerContract extends HandlerContract<RouteDispatchedMiddlewareContract> {
+public interface RouteDispatchedHandlerContract
+        extends HandlerContract<RouteDispatchedMiddlewareContract> {
 
     OutputContract routeDispatched(InputContract input, OutputContract output, RouteContract route);
 }
