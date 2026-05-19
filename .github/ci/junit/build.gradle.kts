@@ -9,6 +9,7 @@
 
 plugins {
     java
+    jacoco
     id("com.github.ben-manes.versions") version "0.53.0"
 }
 
@@ -57,4 +58,13 @@ tasks.withType<JavaCompile> {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }
