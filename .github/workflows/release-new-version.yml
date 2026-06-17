@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   release:
-    uses: valkyrjaio/.github/.github/workflows/_create-java-release.yml@5471774760dfc2111d2fac7819b91e3bff45edb3
+    uses: valkyrjaio/.github/.github/workflows/_create-java-release.yml@13342de3aaf7e2c581c4b2420b59ef44a7b2c3b4
     secrets: inherit
     with:
       bump: ${{ inputs.bump }}
@@ -37,5 +37,5 @@ jobs:
 
   publish:
     needs: release
-    uses: valkyrjaio/.github/.github/workflows/_java-release-maven-publish.yml@5471774760dfc2111d2fac7819b91e3bff45edb3
+    uses: valkyrjaio/.github/.github/workflows/_java-release-maven-publish.yml@13342de3aaf7e2c581c4b2420b59ef44a7b2c3b4
     secrets: inherit
