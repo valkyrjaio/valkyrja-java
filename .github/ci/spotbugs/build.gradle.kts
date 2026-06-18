@@ -15,6 +15,7 @@ plugins {
     java
     id("com.github.spotbugs") version "6.4.8"
     id("com.github.ben-manes.versions") version "0.53.0"
+    id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
 group = "io.valkyrja"
