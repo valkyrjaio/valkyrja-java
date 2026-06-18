@@ -15,9 +15,9 @@ does the heavy lifting so you can focus on your application.
 <p>
     <a href="https://central.sonatype.com/artifact/io.valkyrja/valkyrja"><img src="https://img.shields.io/maven-central/v/io.valkyrja/valkyrja?label=Maven%20Central" alt="Latest Stable Version"></a>
     <a href="https://github.com/valkyrjaio/valkyrja-java"><img src="https://img.shields.io/badge/Java-21--25-orange" alt="Java Version"></a>
-    <a href="https://github.com/valkyrjaio/valkyrja-java/blob/master/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
-    <a href="https://github.com/valkyrjaio/valkyrja-java/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/valkyrjaio/valkyrja-java/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI Status"></a>
-    <a href="https://coveralls.io/github/valkyrjaio/valkyrja-java?branch=master"><img src="https://coveralls.io/repos/github/valkyrjaio/valkyrja-java/badge.svg?branch=master" alt="Coverage Status"></a>
+    <a href="https://github.com/valkyrjaio/valkyrja-java/blob/26.x/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
+    <a href="https://github.com/valkyrjaio/valkyrja-java/actions/workflows/ci.yml?query=branch%3A26.x"><img src="https://github.com/valkyrjaio/valkyrja-java/actions/workflows/ci.yml/badge.svg?branch=26.x" alt="CI Status"></a>
+    <a href="https://coveralls.io/github/valkyrjaio/valkyrja-java?branch=26.x"><img src="https://coveralls.io/repos/github/valkyrjaio/valkyrja-java/badge.svg?branch=26.x" alt="Coverage Status"></a>
     <a href="https://sonarcloud.io/summary/new_code?id=valkyrjaio_valkyrja-java"><img src="https://sonarcloud.io/api/project_badges/measure?project=valkyrjaio_valkyrja-java&metric=sqale_rating" alt="Maintainability Rating"></a>
 </p>
 
