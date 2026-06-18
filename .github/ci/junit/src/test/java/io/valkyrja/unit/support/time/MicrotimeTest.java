@@ -7,7 +7,8 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.support.time;
+package io.valkyrja.unit.support.time;
+import io.valkyrja.support.time.*;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

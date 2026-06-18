@@ -114,6 +114,23 @@ public class NativeChildContainer extends Container {
         published.put(id, true);
     }
 
+    /**
+     * A service is available if the child knows it, or the parent does — including deferred
+     * providers.
+     */
+    @Override
+    public boolean has(Class<?> id) {
+        return super.has(id) || parent.getCallback(id) != null;
+    }
+
+    /** Publish a deferred provider registered in either the child or the parent on first access. */
+    @Override
+    protected void publishUnpublishedDeferred(Class<?> id) {
+        if ((callbacks.containsKey(id) || parent.getCallback(id) != null) && !isPublished(id)) {
+            publish(id);
+        }
+    }
+
     @Override
     public boolean isAlias(Class<?> id) {
         return aliases.containsKey(id) || parent.aliases.containsKey(id);

@@ -37,7 +37,9 @@ public class ListenerCollection implements ListenerCollectionContract {
     }
 
     public void setFromData(EventData data) {
+        events.clear();
         events.putAll(data.events());
+        listeners.clear();
         listeners.putAll(data.listeners());
     }
 
