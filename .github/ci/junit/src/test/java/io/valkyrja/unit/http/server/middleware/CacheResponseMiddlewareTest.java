@@ -11,8 +11,10 @@ package io.valkyrja.unit.http.server.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +32,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -120,6 +124,37 @@ final class CacheResponseMiddlewareTest {
         cache.requestReceived(request, receivedHandler());
 
         assertFalse(cacheFile.exists());
+    }
+
+    @Test
+    void requestReceivedIgnoresDeleteFailureOnExpiredCache(@TempDir Path dir) throws IOException {
+        var cache = new ExposedCache(dir.toString());
+        var request = request();
+        var cacheFile = new File(cache.pathFor(request));
+        writeCacheFile(cacheFile.getPath());
+        assertTrue(cacheFile.setLastModified(System.currentTimeMillis() - 3_600_000L));
+        var handler = receivedHandler();
+
+        try (var files = mockStatic(Files.class)) {
+            files.when(() -> Files.delete(any())).thenThrow(new IOException("locked"));
+
+            cache.requestReceived(request, handler);
+        }
+
+        verify(handler).requestReceived(any());
+    }
+
+    @Test
+    void hashedPathFallsBackToHashCodeWhenMd5Unavailable(@TempDir Path dir) {
+        var cache = new ExposedCache(dir.toString());
+        var request = request();
+
+        try (var digest = mockStatic(MessageDigest.class)) {
+            digest.when(() -> MessageDigest.getInstance("MD5"))
+                    .thenThrow(new NoSuchAlgorithmException("no MD5"));
+
+            assertNotNull(cache.pathFor(request));
+        }
     }
 
     private static void writeCacheFile(String path) throws IOException {

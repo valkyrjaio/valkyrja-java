@@ -13,12 +13,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.collection.RouteCollection;
+import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.http.routing.data.DynamicRoute;
 import io.valkyrja.http.routing.data.Parameter;
 import io.valkyrja.http.routing.data.Route;
@@ -28,6 +32,7 @@ import io.valkyrja.http.routing.matcher.Matcher;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRoutePathException;
 import io.valkyrja.type.data.Cast;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
 
@@ -144,5 +149,15 @@ final class MatcherTest {
         assertThrows(
                 HttpRoutingInvalidRoutePathException.class,
                 () -> matcher.match("/users/42", RequestMethod.GET));
+    }
+
+    @Test
+    void invalidRegexInCollectionIsSkipped() {
+        var collection = mock(RouteCollectionContract.class);
+        when(collection.hasPath(any(), any())).thenReturn(false);
+        when(collection.getRegexes(any())).thenReturn(Map.of("/users/(", "broken"));
+        var matcher = new Matcher(collection);
+
+        assertNull(matcher.match("/users/42", RequestMethod.GET));
     }
 }

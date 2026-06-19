@@ -13,11 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mockStatic;
 
 import io.valkyrja.http.message.file.UploadedFile;
 import io.valkyrja.http.message.file.throwable.exception.UploadedFileAlreadyMovedException;
 import io.valkyrja.http.message.file.throwable.exception.UploadedFileInvalidDirectoryException;
 import io.valkyrja.http.message.file.throwable.exception.UploadedFileInvalidUploadedFileException;
+import io.valkyrja.http.message.file.throwable.exception.UploadedFileMoveFailureException;
+import io.valkyrja.http.message.file.throwable.exception.UploadedFileUnableToWriteFileException;
 import io.valkyrja.http.message.stream.Stream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -118,5 +121,33 @@ final class UploadedFileTest {
         assertThrows(
                 UploadedFileInvalidDirectoryException.class,
                 () -> file.moveTo("/no/such/directory/out.txt"));
+    }
+
+    @Test
+    void moveToThrowsWhenTargetCannotBeWritten(@TempDir Path dir) throws IOException {
+        // The target path is an existing directory, so opening it for writing fails.
+        Path target = Files.createDirectory(dir.resolve("subdir"));
+        var file = new UploadedFile(null, streamOf("data"), 4, null, null);
+
+        assertThrows(
+                UploadedFileUnableToWriteFileException.class,
+                () -> file.moveTo(target.toString()));
+    }
+
+    @Test
+    void moveToThrowsWhenOriginalCannotBeDeleted(@TempDir Path dir) throws IOException {
+        Path source = Files.writeString(dir.resolve("source.txt"), "data");
+        var file = new UploadedFile(source.toString(), null, 4, null, null);
+        Path target = dir.resolve("dest.txt");
+        // Cache the source contents before mocking Files so only the delete is intercepted.
+        file.getStream();
+
+        try (var files = mockStatic(Files.class)) {
+            files.when(() -> Files.delete(source)).thenThrow(new IOException("locked"));
+
+            assertThrows(
+                    UploadedFileMoveFailureException.class,
+                    () -> file.moveTo(target.toString()));
+        }
     }
 }

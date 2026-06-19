@@ -55,6 +55,20 @@ final class ConcreteParamCollectionsTest {
     }
 
     @Test
+    void abstractBaseGetReturnsRawValueOrNull() {
+        var collection = new io.valkyrja.http.message.param.abstract_.ParamCollection(
+                Map.of("k", "v")) {
+            @Override
+            protected io.valkyrja.http.message.param.abstract_.ParamCollection copy() {
+                return this;
+            }
+        };
+
+        assertEquals("v", collection.get("k"));
+        assertNull(collection.get("missing"));
+    }
+
+    @Test
     void withReturnsSameTypeForEachCollection() {
         assertTrue(new CookieParamCollection(Map.of()).with(Map.of("a", "b")).has("a"));
         assertTrue(new QueryParamCollection(Map.of()).withAdded(Map.of("a", "b")).has("a"));

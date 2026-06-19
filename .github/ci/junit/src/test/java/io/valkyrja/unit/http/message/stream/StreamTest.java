@@ -85,6 +85,19 @@ final class StreamTest {
     }
 
     @Test
+    void toStringSwallowsErrorsAndReturnsEmpty() {
+        var stream = new Stream() {
+            @Override
+            public void rewind() {
+                throw new RuntimeException("boom");
+            }
+        };
+        stream.write("hello");
+
+        assertEquals("", stream.toString());
+    }
+
+    @Test
     void closeResetsAndDisablesStream() {
         var stream = new Stream();
         stream.write("hello");

@@ -11,6 +11,8 @@ package io.valkyrja.unit.http.routing.dispatcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,9 +24,11 @@ import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.message.response.factory.ResponseFactory;
+import io.valkyrja.http.middleware.data.RouteMatchedResult;
 import io.valkyrja.http.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteNotMatchedHandler;
+import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
 import io.valkyrja.http.middleware.handler.TerminatedHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
@@ -110,5 +114,30 @@ final class RouterTest {
                         new Route("/users", "users.index", HANDLER));
 
         assertNotNull(response);
+    }
+
+    @Test
+    void dispatchRouteShortCircuitsWhenMatchedMiddlewareReturnsResponse() {
+        var container = new Container();
+        var route = new Route("/users", "users.index", HANDLER);
+        var shortCircuit = new EmptyResponse();
+        var matchedHandler = mock(RouteMatchedHandlerContract.class);
+        when(matchedHandler.routeMatched(any(), any()))
+                .thenReturn(new RouteMatchedResult(route, shortCircuit));
+        var router =
+                new Router(
+                        container,
+                        new Matcher(new RouteCollection()),
+                        new ResponseFactory(),
+                        new ThrowableCaughtHandler(container),
+                        matchedHandler,
+                        new RouteNotMatchedHandler(container),
+                        new RouteDispatchedHandler(container),
+                        new SendingResponseHandler(container),
+                        new TerminatedHandler(container));
+
+        var response = router.dispatchRoute(request("/users", RequestMethod.GET), route);
+
+        assertSame(shortCircuit, response);
     }
 }

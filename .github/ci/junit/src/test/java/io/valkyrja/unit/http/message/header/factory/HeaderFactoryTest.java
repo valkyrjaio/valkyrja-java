@@ -40,6 +40,8 @@ final class HeaderFactoryTest {
     void isValidValue() {
         assertTrue(HeaderFactory.isValidValue("normal value"));
         assertFalse(HeaderFactory.isValidValue("a\r\nb"));
+        // A bare control character (no CRLF) is rejected by the invalid-chars check.
+        assertFalse(HeaderFactory.isValidValue("a\u0001b"));
     }
 
     @Test
