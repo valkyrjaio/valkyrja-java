@@ -18,6 +18,7 @@ import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.server.handler.contract.InputHandlerContract;
+import io.valkyrja.cli.server.support.Exiter;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import org.jspecify.annotations.Nullable;
 
@@ -69,7 +70,7 @@ public class InputHandler implements InputHandlerContract {
         exit(input, output);
         Object exitCode = output.getExitCode();
         int code = exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
-        System.exit(code);
+        Exiter.exit(code);
     }
 
     protected OutputContract dispatchRouter(InputContract input) {

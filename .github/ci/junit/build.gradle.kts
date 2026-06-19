@@ -39,6 +39,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.0")
     compileOnly("org.jspecify:jspecify:1.0.0")
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.0")
+    testImplementation("org.mockito:mockito-core:5.14.2")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -64,6 +66,19 @@ tasks.test {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
+    // Exclude non-unit-testable infra:
+    //  - benchmark harnesses are performance tooling, not production logic.
+    //  - the Sun HttpServer entry adapters (ExchangeHttp/ExchangeCgiHttp) are Java-only bootstrap
+    //    glue with no PHP equivalent; their run() starts non-daemon server threads that cannot be
+    //    exercised from a unit test without leaking the server / hanging the test JVM.
+    classDirectories.setFrom(
+            classDirectories.files.map { dir ->
+                fileTree(dir) {
+                    exclude("**/benchmark/**")
+                    exclude("**/application/entry/ExchangeHttp.class")
+                    exclude("**/application/entry/ExchangeCgiHttp.class")
+                }
+            })
     reports {
         xml.required.set(true)
         html.required.set(true)

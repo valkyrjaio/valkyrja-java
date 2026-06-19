@@ -11,7 +11,7 @@ package io.valkyrja.application.data;
 
 import io.valkyrja.application.data.contract.CliConfigContract;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.application.provider.ApplicationComponentProvider;
+import io.valkyrja.application.provider.CliWithHttpApplicationComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.InputReceivedMiddlewareContract;
@@ -98,7 +98,7 @@ public record CliConfig(
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of(new ApplicationComponentProvider()),
+                List.of(new CliWithHttpApplicationComponentProvider()),
                 List.of());
     }
 }
