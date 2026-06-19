@@ -59,6 +59,16 @@ final class ProcessorTest {
     }
 
     @Test
+    void buildsRegexForOptionalNonCapturingParameter() {
+        var param = new Parameter("id", "\\d+", null, true, false, null, null);
+        var dynamic = new DynamicRoute("/{id?}", "opt", "", List.of(param), HANDLER);
+
+        var processed = (DynamicRouteContract) processor.route(dynamic);
+
+        assertFalse(processed.getRegex().isEmpty());
+    }
+
+    @Test
     void keepsExistingRegex() {
         var dynamic =
                 new DynamicRoute(

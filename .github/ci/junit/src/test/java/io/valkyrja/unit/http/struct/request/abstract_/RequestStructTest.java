@@ -69,6 +69,17 @@ final class RequestStructTest {
     }
 
     @Test
+    void validatesDeclaredRules() {
+        ServerRequestContract request =
+                new ServerRequest()
+                        .withParsedBody(new ParsedBodyParamCollection(Map.of("name", "bob")));
+        var struct = new io.valkyrja.classes.http.struct.ValidatingStructClass();
+
+        assertFalse(struct.getValidationRules(request).isEmpty());
+        assertTrue(struct.validate(request).validateRules());
+    }
+
+    @Test
     void jsonStructRequiresJsonRequest() {
         var struct = new JsonStructClass();
 

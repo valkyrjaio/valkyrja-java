@@ -77,6 +77,16 @@ final class RouteCollectionTest {
     }
 
     @Test
+    void anyLookupThrowsWhenNoMethodMatches() {
+        assertThrows(
+                HttpRoutingInvalidRoutePathException.class,
+                () -> collection.getByPath("/none", RequestMethod.ANY));
+        assertThrows(
+                HttpRoutingInvalidRouteRegexException.class,
+                () -> collection.getByRegex("/none", RequestMethod.ANY));
+    }
+
+    @Test
     void missingLookupsThrow() {
         assertThrows(
                 HttpRoutingInvalidRoutePathException.class,

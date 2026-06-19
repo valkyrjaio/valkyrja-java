@@ -83,6 +83,10 @@ final class UriTest {
         assertTrue(uri.hasPort());
         assertEquals("example.com:8080", uri.getHostPort());
         assertEquals("https://example.com:8080", uri.getSchemeHostPort());
+
+        // Empty scheme omits the scheme prefix from scheme-host-port.
+        var schemeless = new Uri(Scheme.EMPTY, "", "", "host", 8080, "", "", "");
+        assertEquals("host:8080", schemeless.getSchemeHostPort());
     }
 
     @Test

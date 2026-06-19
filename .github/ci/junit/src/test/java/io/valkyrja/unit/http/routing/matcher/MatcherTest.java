@@ -70,6 +70,50 @@ final class MatcherTest {
     }
 
     @Test
+    void parameterWithoutCastUsesRawMatch() {
+        var dynamic =
+                new DynamicRoute(
+                        "/items/{id}",
+                        "items.show",
+                        "/items/(?<id>\\d+)",
+                        List.of((io.valkyrja.http.routing.data.contract.ParameterContract)
+                                new Parameter("id", "\\d+")),
+                        HANDLER);
+        var matcher = new Matcher(collectionWith(dynamic));
+
+        var matched = (DynamicRouteContract) matcher.match("/items/7", RequestMethod.GET);
+
+        assertEquals("7", matched.getParameter("id").getValue());
+    }
+
+    @Test
+    void invalidRegexIsSkipped() {
+        var dynamic =
+                new DynamicRoute(
+                        "/bad", "bad", "[invalid", List.of(new Parameter("x", "\\d+")), HANDLER);
+        var matcher = new Matcher(collectionWith(dynamic));
+
+        assertNull(matcher.match("/other", RequestMethod.GET));
+    }
+
+    @Test
+    void parameterWithoutGroupOrDefaultIsKept() {
+        // The regex captures "id" but the parameter is named "other": no group match, no default.
+        var dynamic =
+                new DynamicRoute(
+                        "/k/{x}",
+                        "k",
+                        "/k/(?<id>\\d+)",
+                        List.of(new Parameter("other", "\\d+")),
+                        HANDLER);
+        var matcher = new Matcher(collectionWith(dynamic));
+
+        var matched = (DynamicRouteContract) matcher.match("/k/9", RequestMethod.GET);
+
+        assertNull(matched.getParameter("other").getValue());
+    }
+
+    @Test
     void returnsNullWhenNothingMatches() {
         var matcher = new Matcher(collectionWith(new Route("/users", "users.index", HANDLER)));
 

@@ -32,6 +32,16 @@ final class HttpRedirectResponseExceptionTest {
     }
 
     @Test
+    void usesProvidedResponse() {
+        var provided = new io.valkyrja.http.message.response.EmptyResponse();
+        var exception =
+                new HttpRedirectResponseException(
+                        new Uri("/x"), StatusCode.FOUND, new HeaderCollection(), provided);
+
+        assertNotNull(exception.getResponse());
+    }
+
+    @Test
     void defaultsUriToRootWhenNull() {
         var exception = new HttpRedirectResponseException(null, StatusCode.MOVED_PERMANENTLY, null, null);
 

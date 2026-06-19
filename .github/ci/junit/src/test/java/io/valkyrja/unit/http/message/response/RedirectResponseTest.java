@@ -57,6 +57,14 @@ final class RedirectResponseTest {
     }
 
     @Test
+    void emptyUriProducesRootLocationHeader() {
+        var response =
+                new RedirectResponse(new Uri(), StatusCode.FOUND, new HeaderCollection());
+
+        assertTrue(response.getHeaders().getHeaderLine("location").contains("/"));
+    }
+
+    @Test
     void createFromUriDefaults() {
         var response = RedirectResponse.createFromUri(null, null, null);
 

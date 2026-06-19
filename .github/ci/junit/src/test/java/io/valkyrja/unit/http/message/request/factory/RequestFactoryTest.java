@@ -73,12 +73,21 @@ final class RequestFactoryTest {
     void jsonFromGlobals() {
         Map<String, String> server = new LinkedHashMap<>();
         server.put("REQUEST_METHOD", "POST");
+        server.put("HTTP_COOKIE", "session=abc");
 
         var request =
                 RequestFactory.jsonFromGlobals(server, Map.of("q", "1"), Map.of("b", "1"), null, null);
 
         assertInstanceOf(JsonServerRequest.class, request);
         assertEquals("1", request.getQueryParams().getAll().get("q"));
+        assertEquals("abc", request.getCookieParams().getAll().get("session"));
+    }
+
+    @Test
+    void jsonFromGlobalsWithoutCookies() {
+        var request = RequestFactory.jsonFromGlobals(new LinkedHashMap<>(), null, null, null, null);
+
+        assertTrue(request.getCookieParams().getAll().isEmpty());
     }
 
     @Test

@@ -59,5 +59,8 @@ final class ConcreteParamCollectionsTest {
         assertTrue(new CookieParamCollection(Map.of()).with(Map.of("a", "b")).has("a"));
         assertTrue(new QueryParamCollection(Map.of()).withAdded(Map.of("a", "b")).has("a"));
         assertTrue(new ParsedJsonParamCollection(Map.of()).with(Map.of("a", "b")).has("a"));
+        assertTrue(new ServerParamCollection(Map.of()).with(Map.of("a", "b")).has("a"));
+        assertTrue(new ParsedBodyParamCollection(Map.of()).withAdded(Map.of("a", "b")).has("a"));
+        assertTrue(new AttributeParamCollection(Map.of()).with(Map.of("a", "b")).has("a"));
     }
 }

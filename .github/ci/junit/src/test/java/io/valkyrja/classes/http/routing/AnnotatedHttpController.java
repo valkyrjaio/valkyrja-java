@@ -10,6 +10,8 @@
 package io.valkyrja.classes.http.routing;
 
 import io.valkyrja.classes.http.middleware.PassThroughHttpMiddleware;
+import io.valkyrja.classes.http.struct.FailingRequestStructClass;
+import io.valkyrja.classes.http.struct.FailingResponseStructClass;
 import io.valkyrja.classes.http.struct.ParsedBodyStructClass;
 import io.valkyrja.classes.http.struct.ResponseStructClass;
 import io.valkyrja.container.manager.contract.ContainerContract;
@@ -66,5 +68,40 @@ public final class AnnotatedHttpController {
     @Route(path = "/boom", name = "boom")
     public ResponseContract boom(ContainerContract container, RouteContract route) {
         throw new IllegalStateException("handler failure");
+    }
+
+    @DynamicRoute(
+            path = "/m1/{id}",
+            name = "m1",
+            parameters = {@Parameter(name = "id", regex = "\\d+")})
+    @DynamicRoute(
+            path = "/m2/{id}",
+            name = "m2",
+            parameters = {@Parameter(name = "id", regex = "\\d+")})
+    public ResponseContract multiDynamic(ContainerContract container, RouteContract route) {
+        return new EmptyResponse();
+    }
+
+    @Route(path = "/mw", name = "mw")
+    @Middleware(name = PassThroughHttpMiddleware.class)
+    @Middleware(name = PassThroughHttpMiddleware.class)
+    public ResponseContract multiMiddleware(ContainerContract container, RouteContract route) {
+        return new EmptyResponse();
+    }
+
+    @DynamicRoute(path = "/p/{a}/{b}", name = "params", parameters = {})
+    @Parameter(name = "a", regex = "\\d+")
+    @Parameter(name = "b", regex = "\\d+")
+    public ResponseContract multiParams(ContainerContract container, RouteContract route) {
+        return new EmptyResponse();
+    }
+
+    @Route(
+            path = "/badstruct",
+            name = "badstruct",
+            requestStruct = FailingRequestStructClass.class,
+            responseStruct = FailingResponseStructClass.class)
+    public ResponseContract badStruct(ContainerContract container, RouteContract route) {
+        return new EmptyResponse();
     }
 }
