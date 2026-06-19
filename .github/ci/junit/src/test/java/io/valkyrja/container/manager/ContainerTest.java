@@ -22,6 +22,7 @@ import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.enum_.InvalidReferenceMode;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
@@ -110,9 +111,15 @@ final class ContainerTest {
     @Test
     void getWithArgumentsOverloadPassesArguments() {
         var container = new Container();
-        container.bind(Service.class, (c, args) -> args.get("value"));
+        var received = new HashMap<String, Object>();
+        container.bind(Service.class, (c, args) -> {
+            received.putAll(args);
 
-        assertEquals("passed", container.get(Service.class, Map.of("value", "passed")));
+            return new Service();
+        });
+
+        assertNotNull(container.get(Service.class, Map.of("value", "passed")));
+        assertEquals("passed", received.get("value"));
     }
 
     // --- singletons ---------------------------------------------------------
