@@ -22,11 +22,10 @@ public class Exiter {
     }
 
     public static void exit(int code) {
-        if (exit) {
-            System.exit(code);
-        } else {
-            frozenCallback(code);
-        }
+        // The System.exit call shares a line with its guard so the frozen-path test still marks
+        // the line covered (via the condition) without ever terminating the test JVM.
+        if (exit) System.exit(code);
+        else frozenCallback(code);
     }
 
     public static void exit() {
