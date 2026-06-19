@@ -81,6 +81,8 @@ final class HeaderCollectionTest {
         assertEquals(1, ((HeaderCollection) collection.withHeaders(new Header("Only", "v"))).getAll().size());
         assertFalse(
                 collection.withoutHeaders("content-type", "accept").has("content-type"));
+        // Removing a header that is not present is a no-op.
+        assertTrue(collection.withoutHeaders("missing").has("content-type"));
     }
 
     @Test
