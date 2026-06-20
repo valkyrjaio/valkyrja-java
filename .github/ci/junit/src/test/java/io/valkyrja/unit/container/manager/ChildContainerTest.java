@@ -278,4 +278,26 @@ final class ChildContainerTest {
 
         assertFalse(child.isPublished(SingletonClass.class));
     }
+
+    @Test
+    void resolvesServiceFromParentThenChild() {
+        parent.bind(ServiceClass.class, ServiceClass::make);
+        var freshChild = createChild();
+        assertNotNull(freshChild.getService(ServiceClass.class, java.util.Map.of()));
+
+        freshChild.bind(SingletonClass.class, SingletonClass::make);
+        assertNotNull(freshChild.getService(SingletonClass.class, java.util.Map.of()));
+    }
+
+    @Test
+    void resolvesAliasFromParentThenChild() {
+        parent.bind(ServiceClass.class, ServiceClass::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceClass.class));
+        var freshChild = createChild();
+        assertNotNull(freshChild.get(CharSequence.class));
+
+        freshChild.bind(ServiceClass.class, ServiceClass::make);
+        freshChild.bindAlias(Runnable.class, raw(ServiceClass.class));
+        assertNotNull(freshChild.get(Runnable.class));
+    }
 }

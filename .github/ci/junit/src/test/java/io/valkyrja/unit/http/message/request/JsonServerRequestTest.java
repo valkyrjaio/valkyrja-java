@@ -80,4 +80,44 @@ final class JsonServerRequestTest {
 
         assertSame(collection, new JsonServerRequest().withParsedJson(collection).getParsedJson());
     }
+
+    private static JsonServerRequest build(String contentType, String body, java.util.Map<String, Object> parsedBody) {
+        var stream = new Stream();
+        if (!body.isEmpty()) {
+            stream.write(body);
+            stream.rewind();
+        }
+        var headers = new HeaderCollection(new Header(HeaderName.CONTENT_TYPE, contentType));
+        return new JsonServerRequest(
+                new Uri(),
+                RequestMethod.POST,
+                stream,
+                headers,
+                ProtocolVersion.V1_1,
+                new ServerParamCollection(Map.of()),
+                new CookieParamCollection(Map.of()),
+                new QueryParamCollection(Map.of()),
+                new ParsedBodyParamCollection(parsedBody),
+                null,
+                new UploadedFileCollection(Map.of()));
+    }
+
+    @Test
+    void ignoresBodyWhenContentTypeIsNotJson() {
+        assertTrue(build("text/plain", "{\"name\":\"bob\"}", Map.of()).getParsedJson().getAll().isEmpty());
+    }
+
+    @Test
+    void ignoresEmptyBodyWithJsonContentType() {
+        assertTrue(
+                build(ContentTypeValue.APPLICATION_JSON, "", Map.of()).getParsedJson().getAll().isEmpty());
+    }
+
+    @Test
+    void parsesJsonWhenParsedBodyAlreadyPresent() {
+        var request = build(ContentTypeValue.APPLICATION_JSON, "{\"name\":\"bob\"}", Map.of("x", "y"));
+
+        assertEquals("bob", request.getParsedJson().getAll().get("name"));
+    }
+
 }

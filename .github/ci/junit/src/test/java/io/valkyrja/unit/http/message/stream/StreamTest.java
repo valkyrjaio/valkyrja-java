@@ -186,4 +186,15 @@ final class StreamTest {
         assertEquals("HIllo world", stream.toString());
     }
 
+
+    @Test
+    void writeOverPositionPastEndDropsTrailing() {
+        var stream = new Stream();
+        stream.write("hello");
+        stream.rewind();
+        stream.write("REPLACED");
+
+        assertEquals("REPLACED", stream.toString());
+    }
+
 }

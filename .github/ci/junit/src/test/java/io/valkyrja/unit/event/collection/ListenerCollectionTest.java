@@ -127,4 +127,12 @@ final class ListenerCollectionTest {
 
         assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
     }
+
+    @Test
+    void removeListenersForUnknownEventIsNoOp() {
+        var collection = new ListenerCollection();
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(
+                () -> collection.removeListenersForEventById(EventClass.class));
+    }
 }

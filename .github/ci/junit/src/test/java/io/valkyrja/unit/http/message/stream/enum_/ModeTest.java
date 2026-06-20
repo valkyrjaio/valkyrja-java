@@ -50,4 +50,15 @@ final class ModeTest {
             boolean ignored = mode.isReadable() || mode.isWriteable();
         }
     }
+
+    @Test
+    void readableAndWriteableForEveryMode() {
+        for (Mode mode : Mode.values()) {
+            mode.isReadable();
+            mode.isWriteable();
+        }
+        assertTrue(Mode.READ.isReadable());
+        assertFalse(Mode.WRITE.isReadable());
+    }
+
 }

@@ -87,4 +87,24 @@ final class RequestTest {
 
         assertEquals("", updated.getHeaders().getHeaderLine("host"));
     }
+
+    @Test
+    void withUriPreservesExistingHostWhenRequested() {
+        var request =
+                new Request(
+                        new io.valkyrja.http.message.uri.Uri(),
+                        RequestMethod.GET,
+                        new Stream(),
+                        new HeaderCollection(
+                                new io.valkyrja.http.message.header.Header(
+                                        io.valkyrja.http.message.constant.HeaderName.HOST,
+                                        "keep.com")));
+
+        var result = request.withUri(io.valkyrja.http.message.uri.factory.UriFactory.fromString("https://other.com/"), true);
+
+        assertEquals(
+                "keep.com",
+                result.getHeaders().getHeaderLine(io.valkyrja.http.message.constant.HeaderName.HOST));
+    }
+
 }

@@ -87,4 +87,10 @@ final class RequestStructTest {
                 HttpStructJsonServerRequestExpectedException.class,
                 () -> struct.getDataFromRequest(new ServerRequest()));
     }
+
+    @Test
+    void validateRulesPassesWhenNoRulesDeclared() {
+        assertTrue(new QueryStructClass().validate(new ServerRequest()).validateRules());
+    }
+
 }
