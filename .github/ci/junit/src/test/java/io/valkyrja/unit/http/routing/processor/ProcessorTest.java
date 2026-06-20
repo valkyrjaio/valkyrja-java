@@ -103,4 +103,15 @@ final class ProcessorTest {
 
         assertThrows(HttpRoutingInvalidRoutePathException.class, () -> processor.route(dynamic));
     }
+
+    @Test
+    void marksParameterOptionalWhenPlaceholderHasQuestionMark() {
+        var param = new Parameter("id", "\\d+");
+        var dynamic = new DynamicRoute("/{id?}", "opt", "", List.of(param), HANDLER);
+
+        var processed = (DynamicRouteContract) processor.route(dynamic);
+
+        assertFalse(processed.getRegex().isEmpty());
+    }
+
 }

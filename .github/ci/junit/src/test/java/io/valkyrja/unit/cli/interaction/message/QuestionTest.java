@@ -90,4 +90,15 @@ final class QuestionTest {
 
         assertEquals("yes", answered.getUserResponse());
     }
+
+    @Test
+    void askReturnsDefaultAnswerOnBlankInput() {
+        System.setIn(new ByteArrayInputStream("   \n".getBytes(StandardCharsets.UTF_8)));
+
+        var answered = question().ask();
+
+        // Non-null but blank line → trimmed-empty branch returns the default.
+        assertEquals("yes", answered.getUserResponse());
+    }
+
 }

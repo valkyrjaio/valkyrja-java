@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
+import io.valkyrja.classes.event.NonStoppingStoppableEventClass;
 
 final class EventDispatcherTest {
 
@@ -139,4 +140,20 @@ final class EventDispatcherTest {
         assertInstanceOf(ArgumentsCapableEventClass.class, result);
         assertEquals(Map.of("key", "value"), ((ArgumentsCapableEventClass) result).getArguments());
     }
+
+    @Test
+    void nonStoppingStoppableEventRunsAllListeners() {
+        var collection = new ListenerCollection();
+        collection.addListener(listener(NonStoppingStoppableEventClass.class, "listener"));
+        collection.addListener(listener(NonStoppingStoppableEventClass.class, "listener2"));
+        var dispatcher = dispatcherWith(collection);
+
+        var event =
+                (NonStoppingStoppableEventClass)
+                        dispatcher.dispatch(new NonStoppingStoppableEventClass());
+
+        // Propagation is never stopped, so every listener still dispatches.
+        assertEquals(List.of("test", "test"), event.getDispatches());
+    }
+
 }

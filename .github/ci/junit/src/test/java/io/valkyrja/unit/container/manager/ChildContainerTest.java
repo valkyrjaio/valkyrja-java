@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.classes.container.ServiceClass;
@@ -27,6 +28,7 @@ import io.valkyrja.container.manager.Container;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 
 /** Per-request child container delegating to the parent through the contract only. */
 final class ChildContainerTest {
@@ -300,4 +302,13 @@ final class ChildContainerTest {
         freshChild.bindAlias(Runnable.class, raw(ServiceClass.class));
         assertNotNull(freshChild.get(Runnable.class));
     }
+
+    @Test
+    void getAliasedThrowsWhenNeitherHasAlias() {
+        // Neither child nor parent has the alias → falls through to the failing super lookup.
+        assertThrows(
+                ContainerInvalidArgumentException.class,
+                () -> child.getAliased(Runnable.class, Map.of()));
+    }
+
 }
