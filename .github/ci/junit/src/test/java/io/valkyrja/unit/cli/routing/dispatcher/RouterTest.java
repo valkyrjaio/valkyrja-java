@@ -138,4 +138,46 @@ final class RouterTest {
 
         router.dispatch(input);
     }
+
+    @Test
+    void bindArgumentsReturnsRouteWhenNoInputArguments() {
+        var route =
+                new Route("cp", "copy", (c, r) -> new EmptyOutput())
+                        .withArguments(new ArgumentParameter("src", "Source"));
+        collection.add(route);
+        var input = new Input().withCommandName("cp");
+        // Schemas present but no input arguments → route returned unchanged.
+        when(routeMatchedHandler.routeMatched(any(), any()))
+                .thenAnswer(
+                        invocation -> {
+                            RouteContract bound = invocation.getArgument(1);
+                            assertEquals(0, bound.getArgument("src").getArguments().size());
+                            return new EmptyOutput();
+                        });
+
+        router.dispatch(input);
+    }
+
+    @Test
+    void bindArgumentsBindsMultipleSchemasAndSkipsMissingInput() {
+        var route =
+                new Route("mv", "move", (c, r) -> new EmptyOutput())
+                        .withArguments(
+                                new ArgumentParameter("src", "Source"),
+                                new ArgumentParameter("dst", "Dest"));
+        collection.add(route);
+        var input = new Input().withCommandName("mv").withArguments(new Argument("a"));
+        // Two schemas, one input: first schema binds, the last (non-array) schema is left unbound.
+        when(routeMatchedHandler.routeMatched(any(), any()))
+                .thenAnswer(
+                        invocation -> {
+                            RouteContract bound = invocation.getArgument(1);
+                            assertEquals("a", bound.getArgument("src").getFirstValue());
+                            assertEquals(0, bound.getArgument("dst").getArguments().size());
+                            return new EmptyOutput();
+                        });
+
+        router.dispatch(input);
+    }
+
 }

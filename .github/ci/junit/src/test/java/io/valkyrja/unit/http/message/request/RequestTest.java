@@ -107,4 +107,15 @@ final class RequestTest {
                 result.getHeaders().getHeaderLine(io.valkyrja.http.message.constant.HeaderName.HOST));
     }
 
+
+    @Test
+    void withUriPreserveHostWithNoExistingHeaderAddsHost() {
+        var uri = new Uri(Scheme.HTTP, "", "", "new-host.com", 0, "/", "", "");
+
+        // preserveHost is requested but there is no existing HOST header, so the URI host is added.
+        var updated = new Request().withUri(uri, true);
+
+        assertEquals("new-host.com", updated.getHeaders().getHeaderLine("host"));
+    }
+
 }

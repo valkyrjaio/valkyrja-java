@@ -313,4 +313,13 @@ final class NativeChildContainerTest {
         assertInstanceOf(ProvidedClass.class, child.get(ProvidedClass.class));
     }
 
+
+    @Test
+    void getSingletonFromChildBinding() {
+        child.bindSingleton(SingletonClass.class, SingletonClass::make);
+
+        // Child has its own singleton binding → creates and caches without consulting the parent.
+        assertInstanceOf(SingletonClass.class, child.getSingleton(SingletonClass.class));
+    }
+
 }

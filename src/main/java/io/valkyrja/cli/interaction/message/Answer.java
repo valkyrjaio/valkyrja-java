@@ -159,8 +159,9 @@ public class Answer extends Message implements AnswerContract {
         Predicate<String> callable = this.validationCallable;
         String response = this.userResponse;
 
-        return (allowedResponses.isEmpty() && callable == null)
-                || allowedResponses.contains(response)
+        // allowedResponses always contains at least the default response (seeded by every
+        // constructor and mutator), so the "no constraints at all" case is unreachable.
+        return allowedResponses.contains(response)
                 || (callable != null && callable.test(response));
     }
 }
