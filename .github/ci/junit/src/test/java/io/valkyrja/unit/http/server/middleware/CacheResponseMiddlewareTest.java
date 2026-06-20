@@ -182,4 +182,17 @@ final class CacheResponseMiddlewareTest {
 
         assertNotNull(debugCache.requestReceived(request(), receivedHandler()));
     }
+
+    @Test
+    void freshCacheWithZeroTimestampIsNotExpired(@TempDir Path dir) throws IOException {
+        var cache = new ExposedCache(dir.toString());
+        var request = request();
+        var file = new java.io.File(cache.pathFor(request));
+        writeCacheFile(file.getPath());
+        file.setLastModified(0L);
+
+        cache.requestReceived(request, receivedHandler());
+
+        assertTrue(file.exists());
+    }
 }

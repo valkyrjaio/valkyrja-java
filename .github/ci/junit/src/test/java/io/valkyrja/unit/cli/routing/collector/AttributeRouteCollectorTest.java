@@ -94,4 +94,13 @@ final class AttributeRouteCollectorTest {
     void emptyClassListYieldsNoRoutes() {
         assertTrue(new AttributeRouteCollector().getRoutes().isEmpty());
     }
+
+    @Test
+    void collectsControllerWithoutClassNameAndUnrelatedMiddleware() {
+        var routes =
+                new AttributeRouteCollector()
+                        .getRoutes(io.valkyrja.classes.cli.routing.PlainController.class);
+
+        assertTrue(routes.stream().anyMatch(route -> route.getName().equals("plain")));
+    }
 }

@@ -265,4 +265,24 @@ final class NativeChildContainerTest {
 
         assertFalse(child.isPublished(SingletonClass.class));
     }
+
+    @Test
+    void resolvesSingletonFromParentAndCaches() {
+        parent.bindSingleton(SingletonClass.class, SingletonClass::make);
+        var freshChild = new NativeChildContainer(parent);
+
+        assertNotNull(freshChild.getSingleton(SingletonClass.class));
+    }
+
+    @Test
+    void resolvesAliasFromParentThenChild() {
+        parent.bind(ServiceClass.class, ServiceClass::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceClass.class));
+        var freshChild = new NativeChildContainer(parent);
+        assertNotNull(freshChild.get(CharSequence.class));
+
+        freshChild.bind(ServiceClass.class, ServiceClass::make);
+        freshChild.bindAlias(Runnable.class, raw(ServiceClass.class));
+        assertNotNull(freshChild.get(Runnable.class));
+    }
 }
