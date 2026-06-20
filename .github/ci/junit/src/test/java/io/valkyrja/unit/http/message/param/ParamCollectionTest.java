@@ -11,6 +11,7 @@ package io.valkyrja.unit.http.message.param;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -79,5 +80,19 @@ final class ParamCollectionTest {
     @Test
     void baseFromArrayIsUnsupported() {
         assertThrows(UnsupportedOperationException.class, () -> ParamCollection.fromArray(Map.of()));
+    }
+
+    @Test
+    void baseGetReturnsRawValueOrNull() {
+        var collection =
+                new ParamCollection(Map.of("k", "v")) {
+                    @Override
+                    protected ParamCollection copy() {
+                        return this;
+                    }
+                };
+
+        assertEquals("v", collection.get("k"));
+        assertNull(collection.get("missing"));
     }
 }
