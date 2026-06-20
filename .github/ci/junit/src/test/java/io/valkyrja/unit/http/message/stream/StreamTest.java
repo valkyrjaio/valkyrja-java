@@ -10,6 +10,7 @@
 package io.valkyrja.unit.http.message.stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -142,4 +143,29 @@ final class StreamTest {
         assertEquals(true, meta.get("seekable"));
         assertEquals("MEMORY", stream.getMetadataItem("stream_type"));
     }
+
+    @Test
+    void metadataHandlesNullWrapperModeAndTranslation() {
+        var meta = new Stream(null, null, null).getMetadata();
+
+        assertNull(meta.get("wrapper_type"));
+        assertNull(meta.get("mode"));
+        assertNull(meta.get("uri"));
+    }
+
+    @Test
+    void closeIsIdempotent() {
+        var stream = new Stream();
+        stream.close();
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(stream::close);
+    }
+
+    @Test
+    void toStringReturnsEmptyForNonReadableStream() {
+        var stream = new Stream(PhpWrapper.memory, Mode.WRITE, ModeTranslation.BINARY_SAFE);
+
+        assertEquals("", stream.toString());
+    }
+
 }

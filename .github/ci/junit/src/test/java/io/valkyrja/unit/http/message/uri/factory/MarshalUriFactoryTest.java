@@ -198,4 +198,72 @@ final class MarshalUriFactoryTest {
     void isInstantiableBySubclass() {
         assertNotNull(new MarshalUriFactory() {});
     }
+
+    @Test
+    void marshalHostReturnsWhenServerNameIsNotIpv6() {
+        Map<String, String> server = new LinkedHashMap<>();
+        server.put("SERVER_NAME", "example.com");
+        server.put("SERVER_ADDR", "1.2.3.4");
+        var accumulator = new HostPortAccumulator();
+
+        MarshalUriFactory.marshalHostAndPortFromHeaders(accumulator, server, headers(null, null));
+
+        assertEquals("example.com", accumulator.host);
+    }
+
+    @Test
+    void unencodedUrlEmptyFallsThrough() {
+        Map<String, String> server = new LinkedHashMap<>();
+        server.put("IIS_WasUrlRewritten", "1");
+        server.put("UNENCODED_URL", "");
+        server.put("REQUEST_URI", "/fallthrough");
+
+        assertEquals("/fallthrough", MarshalUriFactory.marshalRequestUri(server));
+    }
+
+    @Test
+    void emptyRewriteHeaderIsInvalid() {
+        Map<String, String> server = new LinkedHashMap<>();
+        server.put("HTTP_X_REWRITE_URL", "");
+        server.put("REQUEST_URI", "/r");
+
+        assertEquals("/r", MarshalUriFactory.marshalRequestUri(server));
+    }
+
+    @Test
+    void httpsOffDoesNotForceHttps() {
+        Map<String, String> server = new LinkedHashMap<>();
+        server.put("HTTPS", "off");
+        server.put("SERVER_NAME", "host");
+
+        var uri = MarshalUriFactory.marshalUriFromServer(server, headers(null, null));
+
+        assertEquals(Scheme.HTTP, uri.getScheme());
+    }
+
+    @Test
+    void marshalIpv6WithPortAndWithoutColonInAddress() {
+        Map<String, String> withPort = new LinkedHashMap<>();
+        withPort.put("SERVER_NAME", "[::1]");
+        withPort.put("SERVER_PORT", "9090");
+        withPort.put("SERVER_ADDR", "::1");
+        var a1 = new HostPortAccumulator();
+        MarshalUriFactory.marshalHostAndPortFromHeaders(a1, withPort, headers(null, null));
+        assertEquals("[::1]", a1.host);
+
+        Map<String, String> noColon = new LinkedHashMap<>();
+        noColon.put("SERVER_NAME", "[abcd]");
+        noColon.put("SERVER_ADDR", "abcd");
+        var a2 = new HostPortAccumulator();
+        MarshalUriFactory.marshalHostAndPortFromHeaders(a2, noColon, headers(null, null));
+        assertEquals("[abcd]", a2.host);
+    }
+
+    @Test
+    void emptyRequestUriFallsToDefault() {
+        Map<String, String> server = new LinkedHashMap<>();
+        server.put("REQUEST_URI", "");
+
+        assertEquals("/", MarshalUriFactory.marshalRequestUri(server));
+    }
 }

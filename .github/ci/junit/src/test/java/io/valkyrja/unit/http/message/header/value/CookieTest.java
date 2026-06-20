@@ -112,4 +112,13 @@ final class CookieTest {
         assertTrue(rendered.contains("session=delete"));
         assertTrue(rendered.contains("max-age="));
     }
+
+    @Test
+    void httpOnlyComponentRenderingBranches() {
+        assertTrue(
+                ((Cookie) new Cookie("s", "v").withHttpOnly(true)).toString().contains("httponly"));
+        assertFalse(
+                ((Cookie) new Cookie("s", "v").withHttpOnly(false)).toString().contains("httponly"));
+    }
+
 }

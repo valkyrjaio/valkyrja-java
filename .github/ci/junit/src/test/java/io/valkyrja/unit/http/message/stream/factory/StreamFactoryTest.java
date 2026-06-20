@@ -108,4 +108,27 @@ final class StreamFactoryTest {
     void isInstantiableBySubclass() {
         assertNotNull(new StreamFactory() {});
     }
+
+    @Test
+    void isModeWriteableCoversEachWritableChar() {
+        assertTrue(StreamFactory.isModeWriteable("w"));
+        assertTrue(StreamFactory.isModeWriteable("x"));
+        assertTrue(StreamFactory.isModeWriteable("c"));
+        assertTrue(StreamFactory.isModeWriteable("a"));
+        assertTrue(StreamFactory.isModeWriteable("+"));
+        assertFalse(StreamFactory.isModeWriteable("r"));
+    }
+
+    @Test
+    void toStringReturnsEmptyForNullAndNonReadableStreams() {
+        assertEquals("", StreamFactory.toString(null));
+        assertEquals(
+                "",
+                StreamFactory.toString(
+                        new Stream(
+                                io.valkyrja.http.message.stream.enum_.PhpWrapper.memory,
+                                io.valkyrja.http.message.stream.enum_.Mode.WRITE,
+                                io.valkyrja.http.message.stream.enum_.ModeTranslation.BINARY_SAFE)));
+    }
+
 }

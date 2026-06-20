@@ -122,4 +122,19 @@ final class UriFactoryTest {
     void isInstantiableBySubclass() {
         assertNotNull(new UriFactory() {});
     }
+
+    @Test
+    void fromStringEmptyAndHttpsAndOpaqueBranches() {
+        assertNotNull(UriFactory.fromString(""));
+        assertNotNull(UriFactory.fromString("https://host/path"));
+        // Opaque URI has a null raw path, exercising the path null-default.
+        assertNotNull(UriFactory.fromString("http:opaque"));
+    }
+
+    @Test
+    void isStandardPortHostAndPortBranches() {
+        assertTrue(UriFactory.isStandardPort(Scheme.HTTP, "", 80));
+        assertTrue(UriFactory.isStandardPort(Scheme.HTTP, "host", 0));
+        assertFalse(UriFactory.isStandardPort(Scheme.HTTP, "host", 8080));
+    }
 }

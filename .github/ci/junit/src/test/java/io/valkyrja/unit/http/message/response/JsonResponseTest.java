@@ -97,4 +97,14 @@ final class JsonResponseTest {
                 RuntimeException.class,
                 () -> new JsonResponse(Map.of("bad", new Object()), StatusCode.OK, new HeaderCollection()));
     }
+
+    @Test
+    void createFromDataWithProvidedValues() {
+        var response =
+                JsonResponse.createFromData(
+                        Map.of("k", "v"), StatusCode.ACCEPTED, new HeaderCollection());
+
+        assertEquals(StatusCode.ACCEPTED, response.getStatusCode());
+    }
+
 }

@@ -10,6 +10,7 @@
 package io.valkyrja.unit.http.message.response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -103,4 +104,29 @@ final class RedirectResponseTest {
 
         assertEquals("/", response.getUri().getPath());
     }
+
+    @Test
+    void backUsesRefererBranches() {
+        var request = mock(ServerRequestContract.class);
+        var headers = mock(HeaderCollectionContract.class);
+        when(request.getHeaders()).thenReturn(headers);
+        when(request.getUri())
+                .thenReturn(
+                        new io.valkyrja.http.message.uri.Uri(
+                                io.valkyrja.http.message.uri.enum_.Scheme.HTTPS,
+                                "", "", "example.com", 0, "/", "", ""));
+        var redirect = new RedirectResponse();
+
+        when(headers.getHeaderLine("Referer")).thenReturn("");
+        assertTrue(redirect.back(request).getHeaders().getHeaderLine("Location").endsWith("/"));
+
+        when(headers.getHeaderLine("Referer")).thenReturn("https://example.com/page");
+        assertTrue(
+                redirect.back(request).getHeaders().getHeaderLine("Location").contains("/page"));
+
+        when(headers.getHeaderLine("Referer")).thenReturn("https://evil.com/page");
+        assertFalse(
+                redirect.back(request).getHeaders().getHeaderLine("Location").contains("evil"));
+    }
+
 }

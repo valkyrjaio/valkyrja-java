@@ -91,11 +91,8 @@ public abstract class MarshalUriFactory {
             requestUri = server.get("REQUEST_URI");
         }
 
-        boolean isRequestUriValid = isValidRequestUri(requestUri);
-
-        if (isRequestUriValid && requestUri != null) {
-            String result = requestUri.replaceAll("^[^/:]+://[^/]+", "");
-            return result != null ? result : requestUri;
+        if (requestUri != null && !requestUri.isEmpty()) {
+            return requestUri.replaceAll("^[^/:]+://[^/]+", "");
         }
 
         String origPathInfo = marshalRequestUriFromOrigPathInfo(server);

@@ -14,9 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import io.valkyrja.http.message.enum_.ProtocolVersion;
 import io.valkyrja.http.message.enum_.RequestMethod;
+import io.valkyrja.http.message.file.contract.UploadedFileContract;
 import io.valkyrja.http.message.request.JsonServerRequest;
 import io.valkyrja.http.message.request.factory.RequestFactory;
 import java.util.LinkedHashMap;
@@ -88,6 +90,36 @@ final class RequestFactoryTest {
         var request = RequestFactory.jsonFromGlobals(new LinkedHashMap<>(), null, null, null, null);
 
         assertTrue(request.getCookieParams().getAll().isEmpty());
+    }
+
+    @Test
+    void fromGlobalsWithAllParamsProvided() {
+        var request =
+                RequestFactory.fromGlobals(
+                        new LinkedHashMap<>(),
+                        Map.of("q", "1"),
+                        Map.of("b", "1"),
+                        Map.of("session", "abc"),
+                        Map.of("f", mock(UploadedFileContract.class)));
+
+        assertEquals("1", request.getQueryParams().getAll().get("q"));
+        assertEquals("1", request.getParsedBody().getAll().get("b"));
+        assertEquals("abc", request.getCookieParams().getAll().get("session"));
+        assertTrue(request.getUploadedFiles().getAll().containsKey("f"));
+    }
+
+    @Test
+    void jsonFromGlobalsWithCookiesAndFilesProvided() {
+        var request =
+                RequestFactory.jsonFromGlobals(
+                        new LinkedHashMap<>(),
+                        null,
+                        null,
+                        Map.of("session", "abc"),
+                        Map.of("f", mock(UploadedFileContract.class)));
+
+        assertEquals("abc", request.getCookieParams().getAll().get("session"));
+        assertTrue(request.getUploadedFiles().getAll().containsKey("f"));
     }
 
     @Test
