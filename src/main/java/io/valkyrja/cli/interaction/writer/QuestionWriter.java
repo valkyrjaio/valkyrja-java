@@ -62,15 +62,13 @@ public class QuestionWriter implements WriterContract {
         AnswerContract answer = question.getAnswer();
         List<String> validResponses = answer.getAllowedResponses();
 
-        if (!validResponses.isEmpty()) {
-            output = output.writeMessage(new Message(" ("));
-            String joined =
-                    validResponses.stream()
-                            .map(v -> "`" + v + "`")
-                            .collect(Collectors.joining(" or "));
-            output = output.writeMessage(new Message(joined));
-            output = output.writeMessage(new Message(")"));
-        }
+        // An answer always carries at least its default response, so there is always at least one
+        // valid response to render.
+        output = output.writeMessage(new Message(" ("));
+        String joined =
+                validResponses.stream().map(v -> "`" + v + "`").collect(Collectors.joining(" or "));
+        output = output.writeMessage(new Message(joined));
+        output = output.writeMessage(new Message(")"));
 
         output = output.writeMessage(new Message(" [default: \""));
         output =

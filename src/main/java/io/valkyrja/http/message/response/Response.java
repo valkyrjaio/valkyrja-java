@@ -92,11 +92,10 @@ public class Response extends Message implements ResponseContract {
 
     @Override
     public ResponseContract sendHttpLine() {
+        // statusPhrase is never empty — every setter normalizes a blank phrase to the status'
+        // canonical phrase, so it can be printed directly.
         System.out.printf(
-                "HTTP/%s %d %s%n",
-                protocolVersion.getValue(),
-                statusCode.getValue(),
-                statusPhrase.isEmpty() ? statusCode.asPhrase() : statusPhrase);
+                "HTTP/%s %d %s%n", protocolVersion.getValue(), statusCode.getValue(), statusPhrase);
         return this;
     }
 

@@ -161,7 +161,6 @@ public class Answer extends Message implements AnswerContract {
 
         // allowedResponses always contains at least the default response (seeded by every
         // constructor and mutator), so the "no constraints at all" case is unreachable.
-        return allowedResponses.contains(response)
-                || (callable != null && callable.test(response));
+        return allowedResponses.contains(response) || (callable != null && callable.test(response));
     }
 }

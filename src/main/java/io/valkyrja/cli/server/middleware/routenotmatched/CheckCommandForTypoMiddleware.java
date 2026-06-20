@@ -51,8 +51,9 @@ public class CheckCommandForTypoMiddleware implements RouteNotMatchedMiddlewareC
 
         if (routeOrOutput instanceof RouteContract matchingRoute) {
             output = router.dispatch(input.withCommandName(matchingRoute.getName()));
-        } else if (routeOrOutput instanceof OutputContract o) {
-            output = o;
+        } else {
+            // checkCommandNameForTypo only ever returns a route or an output.
+            output = (OutputContract) routeOrOutput;
         }
 
         return handler.routeNotMatched(input, output);
@@ -115,12 +116,12 @@ public class CheckCommandForTypoMiddleware implements RouteNotMatchedMiddlewareC
             return 0.0;
         }
         int common = 0;
-        boolean[] usedA = new boolean[a.length()];
+        // Each character in `a` matches at most one not-yet-used character in `b`; the inner break
+        // moves on to the next `a` character as soon as a match is found.
         boolean[] usedB = new boolean[b.length()];
         for (int i = 0; i < a.length(); i++) {
             for (int j = 0; j < b.length(); j++) {
-                if (!usedA[i] && !usedB[j] && a.charAt(i) == b.charAt(j)) {
-                    usedA[i] = true;
+                if (!usedB[j] && a.charAt(i) == b.charAt(j)) {
                     usedB[j] = true;
                     common++;
                     break;

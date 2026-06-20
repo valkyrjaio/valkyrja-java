@@ -90,9 +90,8 @@ public class UploadedFile implements UploadedFileContract {
 
         writeStream(targetPath);
 
-        if (this.stream != null) {
-            this.stream.close();
-        }
+        // writeStream() resolves the stream via getStream(), so it is always present here.
+        this.stream.close();
 
         if (this.file != null && new File(this.file).isFile()) {
             try {

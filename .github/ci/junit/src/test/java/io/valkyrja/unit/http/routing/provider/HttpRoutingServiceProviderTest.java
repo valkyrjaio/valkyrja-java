@@ -121,4 +121,42 @@ final class HttpRoutingServiceProviderTest {
     private static RouteContract route(String name, String path) {
         return new Route(path, name, (container, route) -> new EmptyResponse());
     }
+
+    @Test
+    void publishRouteCollectionWithoutControllersSkipsCollector() {
+        var container = new Container();
+        container.setSingleton(ProcessorContract.class, new Processor());
+
+        var app = mock(ApplicationContract.class);
+        var routeProvider = mock(HttpRouteProviderContract.class);
+        when(routeProvider.getControllerClasses()).thenReturn(List.of());
+        when(routeProvider.getRoutes()).thenReturn(List.of(route("direct", "/direct")));
+        when(app.getHttpProviders()).thenReturn(List.of(routeProvider));
+        container.setSingleton(ApplicationContract.class, app);
+
+        HttpRoutingServiceProvider.publishRouteCollection(container);
+
+        var collection = container.getSingleton(RouteCollectionContract.class);
+        assertTrue(collection.hasName("direct"));
+    }
+
+
+    @Test
+    void publishRouteCollectionWithControllersButNoCollectorSkipsCollection() {
+        var container = new Container();
+        container.setSingleton(ProcessorContract.class, new Processor());
+        // No RouteCollectorContract singleton is registered.
+        var app = mock(ApplicationContract.class);
+        var routeProvider = mock(HttpRouteProviderContract.class);
+        when(routeProvider.getControllerClasses()).thenReturn(List.of(Object.class));
+        when(routeProvider.getRoutes()).thenReturn(List.of(route("direct", "/direct")));
+        when(app.getHttpProviders()).thenReturn(List.of(routeProvider));
+        container.setSingleton(ApplicationContract.class, app);
+
+        HttpRoutingServiceProvider.publishRouteCollection(container);
+
+        var collection = container.getSingleton(RouteCollectionContract.class);
+        assertTrue(collection.hasName("direct"));
+    }
+
 }
