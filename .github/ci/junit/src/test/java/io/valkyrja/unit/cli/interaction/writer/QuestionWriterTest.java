@@ -93,4 +93,12 @@ final class QuestionWriterTest {
 
         assertNotNull(writer.write(new Output(), question()));
     }
+
+    @Test
+    void writeWithQuietOutputSkipsInteractivePrompt() {
+        muteStdout();
+
+        assertNotNull(writer.write(new Output().withIsQuiet(true), question()));
+    }
+
 }

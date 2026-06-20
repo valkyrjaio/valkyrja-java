@@ -10,7 +10,6 @@
 package io.valkyrja.unit.http.message.constant;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.http.message.constant.Port;
@@ -24,6 +23,5 @@ final class PortTest {
         assertTrue(Port.isValid(80));
         assertFalse(Port.isValid(0));
         assertFalse(Port.isValid(70000));
-        assertNotNull(new Port());
     }
 }

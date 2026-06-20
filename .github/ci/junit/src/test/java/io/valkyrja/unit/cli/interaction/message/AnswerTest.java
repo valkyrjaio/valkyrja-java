@@ -122,4 +122,14 @@ final class AnswerTest {
                 1, answer.getAllowedResponses().stream().filter("yes"::equals).count());
     }
 
+
+    @Test
+    void isValidResponseFailsWhenCallableRejects() {
+        assertFalse(
+                new Answer("yes")
+                        .withUserResponse("nope")
+                        .withValidationCallable(response -> false)
+                        .isValidResponse());
+    }
+
 }

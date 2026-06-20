@@ -127,4 +127,10 @@ final class RouteCollectionTest {
         assertTrue(restored.hasName("users.index"));
         assertTrue(restored.hasPath("/users", RequestMethod.GET));
     }
+
+    @Test
+    void hasPathAndHasRegexAreFalseForMissingEntries() {
+        assertFalse(collection.hasPath("/missing", RequestMethod.GET));
+        assertFalse(collection.hasRegex("/missing/(\\d+)", RequestMethod.GET));
+    }
 }
