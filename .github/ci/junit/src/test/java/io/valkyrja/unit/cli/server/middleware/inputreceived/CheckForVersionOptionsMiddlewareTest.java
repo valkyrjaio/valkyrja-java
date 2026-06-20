@@ -35,4 +35,17 @@ final class CheckForVersionOptionsMiddlewareTest {
                         new Input().withOptions(new Option("V", OptionType.SHORT)), handler));
         assertNotNull(middleware.inputReceived(new Input(), handler));
     }
+
+    @Test
+    void rewritesWhenLongOptionPresent() {
+        var handler = mock(InputReceivedHandlerContract.class);
+        when(handler.inputReceived(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertNotNull(
+                new CheckForVersionOptionsMiddleware("version", "version", "V")
+                        .inputReceived(
+                                new Input().withOptions(new Option("version", OptionType.LONG)),
+                                handler));
+    }
+
 }

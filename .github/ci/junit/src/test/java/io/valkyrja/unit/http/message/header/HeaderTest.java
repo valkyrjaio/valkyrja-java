@@ -127,4 +127,18 @@ final class HeaderTest {
         assertEquals("a", new Header("x-test", "a", "").getHeaderLine());
     }
 
+
+    @Test
+    void iteratorValidityFlipsAtEnd() {
+        var header = new Header("x-test", "a", "b");
+        header.rewind();
+        int count = 0;
+        while (header.valid()) {
+            header.next();
+            count++;
+        }
+
+        assertEquals(2, count);
+    }
+
 }

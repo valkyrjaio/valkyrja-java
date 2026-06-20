@@ -129,4 +129,25 @@ final class RedirectResponseTest {
                 redirect.back(request).getHeaders().getHeaderLine("Location").contains("evil"));
     }
 
+
+    @Test
+    void backTreatsNullRefererAsRoot() {
+        var request = mock(ServerRequestContract.class);
+        var headers = mock(HeaderCollectionContract.class);
+        when(request.getHeaders()).thenReturn(headers);
+        when(request.getUri())
+                .thenReturn(
+                        new io.valkyrja.http.message.uri.Uri(
+                                io.valkyrja.http.message.uri.enum_.Scheme.HTTPS,
+                                "", "", "example.com", 0, "/", "", ""));
+        when(headers.getHeaderLine("Referer")).thenReturn(null);
+
+        assertTrue(
+                new RedirectResponse()
+                        .back(request)
+                        .getHeaders()
+                        .getHeaderLine("Location")
+                        .endsWith("/"));
+    }
+
 }

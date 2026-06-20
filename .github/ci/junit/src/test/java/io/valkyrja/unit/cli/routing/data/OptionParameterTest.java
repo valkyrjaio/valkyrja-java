@@ -126,4 +126,36 @@ final class OptionParameterTest {
                                         new Option("verbose", "2", OptionType.LONG));
         assertFalse(defaultTooMany.areValuesValid());
     }
+
+    @Test
+    void valueModeNoneRejectsOptionsWithValueOnAdders() {
+        var param = param().withValueMode(OptionValueMode.NONE);
+
+        assertThrows(
+                CliRoutingInvalidOptionWithValueException.class,
+                () -> param.withOptions(new Option("verbose", "1", OptionType.LONG)));
+        assertThrows(
+                CliRoutingInvalidOptionWithValueException.class,
+                () -> param.withAddedOptions(new Option("verbose", "1", OptionType.LONG)));
+    }
+
+    @Test
+    void valueModeNoneAllowsValuelessOptions() {
+        var param = param().withValueMode(OptionValueMode.NONE);
+
+        assertEquals(1, param.withOptions(new Option("verbose", OptionType.LONG)).getOptions().size());
+        assertEquals(
+                1, param.withAddedOptions(new Option("verbose", OptionType.LONG)).getOptions().size());
+    }
+
+    @Test
+    void areValuesValidCoversModeAndValueModeBranches() {
+        assertFalse(param().withMode(OptionMode.REQUIRED).areValuesValid());
+        assertTrue(
+                param().withMode(OptionMode.REQUIRED)
+                        .withOptions(new Option("verbose", "1", OptionType.LONG))
+                        .areValuesValid());
+        assertTrue(param().areValuesValid());
+        assertTrue(param().withValueMode(OptionValueMode.NONE).areValuesValid());
+    }
 }

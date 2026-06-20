@@ -59,4 +59,23 @@ final class CheckGlobalInteractionOptionsMiddlewareTest {
 
         assertTrue(config.isInteractive());
     }
+
+    @Test
+    void appliesFlagsWhenLongOptionsPresent() {
+        var handler = mock(InputReceivedHandlerContract.class);
+        when(handler.inputReceived(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        var config = new CliInteractionConfig();
+        var input =
+                new Input()
+                        .withOptions(new Option("no-interaction", OptionType.LONG))
+                        .withAddedOption(new Option("quiet", OptionType.LONG))
+                        .withAddedOption(new Option("silent", OptionType.LONG));
+
+        middleware(config).inputReceived(input, handler);
+
+        assertFalse(config.isInteractive());
+        assertTrue(config.isQuiet());
+        assertTrue(config.isSilent());
+    }
+
 }

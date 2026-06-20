@@ -162,4 +162,24 @@ final class CacheResponseMiddlewareTest {
         Files.createDirectories(p.getParent());
         Files.writeString(p, "cached");
     }
+
+    @Test
+    void terminatedSkipsCachingWhenCacheFileAlreadyExists(@TempDir Path dir) {
+        var cache = new ExposedCache(dir.toString());
+        var request = request();
+        var handler = mock(TerminatedHandlerContract.class);
+
+        cache.terminated(request, Response.create("a", StatusCode.OK, new HeaderCollection()), handler);
+        // Second call: the cache file now exists, so shouldNotCache returns via the exists() operand.
+        cache.terminated(request, Response.create("b", StatusCode.OK, new HeaderCollection()), handler);
+
+        assertTrue(new java.io.File(cache.pathFor(request)).exists());
+    }
+
+    @Test
+    void requestReceivedInDebugModeDelegatesWithoutLoadingCache(@TempDir Path dir) {
+        var debugCache = new CacheResponseMiddleware(dir.toString(), true);
+
+        assertNotNull(debugCache.requestReceived(request(), receivedHandler()));
+    }
 }

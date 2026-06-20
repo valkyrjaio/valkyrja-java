@@ -150,4 +150,18 @@ final class UploadedFileTest {
                     () -> file.moveTo(target.toString()));
         }
     }
+
+    @Test
+    void moveToRejectsNonWritableDirectory(@TempDir Path dir) throws IOException {
+        Path readonly = Files.createDirectory(dir.resolve("readonly"));
+        assertTrue(readonly.toFile().setWritable(false));
+        var file = new UploadedFile(null, streamOf("data"), 4, null, null);
+        try {
+            assertThrows(
+                    UploadedFileInvalidDirectoryException.class,
+                    () -> file.moveTo(readonly.resolve("out.txt").toString()));
+        } finally {
+            readonly.toFile().setWritable(true);
+        }
+    }
 }

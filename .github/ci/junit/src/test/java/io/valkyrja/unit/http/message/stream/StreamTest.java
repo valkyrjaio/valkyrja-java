@@ -168,4 +168,22 @@ final class StreamTest {
         assertEquals("", stream.toString());
     }
 
+
+    @Test
+    void metadataWithModeButNullTranslation() {
+        var meta = new Stream(PhpWrapper.memory, Mode.WRITE, null).getMetadata();
+
+        assertEquals("w", meta.get("mode"));
+    }
+
+    @Test
+    void writeInMiddleKeepsTrailingBytes() {
+        var stream = new Stream();
+        stream.write("hello world");
+        stream.rewind();
+        stream.write("HI");
+
+        assertEquals("HIllo world", stream.toString());
+    }
+
 }

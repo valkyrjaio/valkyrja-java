@@ -104,4 +104,18 @@ final class ValueTest {
         assertEquals("a", new Value("a", "").toString());
     }
 
+
+    @Test
+    void iteratorValidityFlipsAtEnd() {
+        var value = new Value("a", "b");
+        value.rewind();
+        int count = 0;
+        while (value.valid()) {
+            value.next();
+            count++;
+        }
+
+        assertEquals(2, count);
+    }
+
 }
