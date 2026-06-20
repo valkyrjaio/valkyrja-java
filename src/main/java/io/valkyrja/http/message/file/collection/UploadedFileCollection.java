@@ -63,27 +63,29 @@ public class UploadedFileCollection implements UploadedFileCollectionContract {
     @Override
     public Map<String, UploadedFileContract> getOnly(String... keys) {
         Set<String> keySet = Arrays.stream(keys).collect(Collectors.toSet());
-        return files.entrySet().stream()
-                .filter(e -> keySet.contains(e.getKey()))
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (a, b) -> a,
-                                LinkedHashMap::new));
+
+        Map<String, UploadedFileContract> result = new LinkedHashMap<>();
+        for (var entry : files.entrySet()) {
+            if (keySet.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     @Override
     public Map<String, UploadedFileContract> getAllExcept(String... keys) {
         Set<String> keySet = Arrays.stream(keys).collect(Collectors.toSet());
-        return files.entrySet().stream()
-                .filter(e -> !keySet.contains(e.getKey()))
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (a, b) -> a,
-                                LinkedHashMap::new));
+
+        Map<String, UploadedFileContract> result = new LinkedHashMap<>();
+        for (var entry : files.entrySet()) {
+            if (!keySet.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     @Override

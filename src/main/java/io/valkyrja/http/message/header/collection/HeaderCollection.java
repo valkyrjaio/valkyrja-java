@@ -82,28 +82,28 @@ public class HeaderCollection implements HeaderCollectionContract {
     public Map<String, HeaderContract> getOnly(String... names) {
         Set<String> nameSet = Arrays.stream(names).collect(Collectors.toSet());
 
-        return headers.entrySet().stream()
-                .filter(entry -> nameSet.contains(entry.getKey()))
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (a, b) -> a,
-                                LinkedHashMap::new));
+        Map<String, HeaderContract> result = new LinkedHashMap<>();
+        for (var entry : headers.entrySet()) {
+            if (nameSet.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     @Override
     public Map<String, HeaderContract> getAllExcept(String... names) {
         Set<String> nameSet = Arrays.stream(names).collect(Collectors.toSet());
 
-        return headers.entrySet().stream()
-                .filter(entry -> !nameSet.contains(entry.getKey()))
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (a, b) -> a,
-                                LinkedHashMap::new));
+        Map<String, HeaderContract> result = new LinkedHashMap<>();
+        for (var entry : headers.entrySet()) {
+            if (!nameSet.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     @Override

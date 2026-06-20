@@ -63,19 +63,18 @@ public class UploadedFile implements UploadedFileContract {
             return this.stream;
         }
 
-        if (this.file == null) {
-            throw new UploadedFileInvalidUploadedFileException(
-                    "One of file or stream are required");
-        }
+        // The constructor rejects a both-null file/stream and a non-null stream returned above, so
+        // file is always present here; requireNonNull both documents and enforces that invariant.
+        String file = Objects.requireNonNull(this.file, "One of file or stream are required");
 
         this.stream = new Stream();
 
         try {
-            byte[] bytes = Files.readAllBytes(Paths.get(this.file));
+            byte[] bytes = Files.readAllBytes(Paths.get(file));
             this.stream.write(new String(bytes, StandardCharsets.UTF_8));
             this.stream.rewind();
         } catch (IOException e) {
-            throw new UploadedFileInvalidUploadedFileException("Unable to read file: " + this.file);
+            throw new UploadedFileInvalidUploadedFileException("Unable to read file: " + file);
         }
 
         return this.stream;
