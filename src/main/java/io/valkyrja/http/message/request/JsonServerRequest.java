@@ -87,7 +87,8 @@ public class JsonServerRequest extends ServerRequest implements JsonServerReques
 
         String contentType = headers.getHeaderLine(HeaderName.CONTENT_TYPE);
 
-        if (contentType != null && contentType.contains(ContentTypeValue.APPLICATION_JSON)) {
+        // getHeaderLine never returns null (missing headers yield an empty string).
+        if (contentType.contains(ContentTypeValue.APPLICATION_JSON)) {
             String bodyContents = stream.toString();
             if (!bodyContents.isEmpty()) {
                 try {

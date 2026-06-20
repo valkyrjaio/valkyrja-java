@@ -127,4 +127,33 @@ final class ListenerCollectionTest {
 
         assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
     }
+
+    @Test
+    void removeListenersForUnknownEventIsNoOp() {
+        var collection = new ListenerCollection();
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(
+                () -> collection.removeListenersForEventById(EventClass.class));
+    }
+
+    @Test
+    void emptyEventEntryReportsNoListeners() {
+        var collection = new ListenerCollection();
+        collection.setFromData(new EventData(Map.of(EventClass.class, Map.of()), Map.of()));
+
+        // Event key present but no listener ids → non-null-but-empty branch.
+        assertFalse(collection.hasListenersForEventById(EventClass.class));
+        assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
+    }
+
+    @Test
+    void getListenersSkipsMissingListenerReferences() {
+        var collection = new ListenerCollection();
+        collection.setFromData(
+                new EventData(Map.of(EventClass.class, Map.of("ghost", "ghost")), Map.of()));
+
+        // Listener id referenced by the event but absent from the listeners map → skipped.
+        assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
+    }
+
 }

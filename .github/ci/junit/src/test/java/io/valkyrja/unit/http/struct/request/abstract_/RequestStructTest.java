@@ -87,4 +87,18 @@ final class RequestStructTest {
                 HttpStructJsonServerRequestExpectedException.class,
                 () -> struct.getDataFromRequest(new ServerRequest()));
     }
+
+    @Test
+    void validateRulesPassesWhenNoRulesDeclared() {
+        assertTrue(new QueryStructClass().validate(new ServerRequest()).validateRules());
+    }
+
+
+    @Test
+    void validateFailsWhenRulesDoNotPass() {
+        var struct = new io.valkyrja.classes.http.struct.FailingValidationStructClass();
+
+        assertFalse(struct.validate(new ServerRequest()).validateRules());
+    }
+
 }

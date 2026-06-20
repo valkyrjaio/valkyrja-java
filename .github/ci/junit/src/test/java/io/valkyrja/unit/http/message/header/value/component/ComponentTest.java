@@ -65,4 +65,12 @@ final class ComponentTest {
         assertEquals("changed", withText.getText());
         assertEquals("key", original.getToken());
     }
+
+    @Test
+    void toStringCoversTokenAndTextBranches() {
+        assertEquals("key=value", new Component("key", "value").toString());
+        assertEquals("token", new Component("token", "").toString());
+        assertEquals("", new Component("", "value").toString());
+    }
+
 }

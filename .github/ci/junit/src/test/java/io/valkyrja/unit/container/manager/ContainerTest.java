@@ -233,4 +233,16 @@ final class ContainerTest {
                                 Map.of(),
                                 InvalidReferenceMode.NEW_INSTANCE_OR_THROW_EXCEPTION));
     }
+
+    @Test
+    void getSingletonWithNullFactoryThrows() {
+        var container = new Container();
+        // Singleton factory yields null → the cache-put is skipped and the lookup ultimately fails.
+        container.bindSingleton(SingletonClass.class, (c, a) -> null);
+
+        assertThrows(
+                ContainerInvalidArgumentException.class,
+                () -> container.getSingleton(SingletonClass.class));
+    }
+
 }

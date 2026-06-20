@@ -248,4 +248,25 @@ final class DispatcherTest {
                 DispatchInvalidDispatchCapabilityException.class,
                 () -> dispatcher.dispatch(new UnknownDispatchClass()));
     }
+
+    @Test
+    void dispatchesCallableWithExternalArguments() {
+        Function<Object[], Object> callable = args -> "args:" + args.length;
+        var dispatch = new CallableDispatch(callable);
+
+        // Non-empty external arguments take precedence over the dispatch's own.
+        assertEquals("args:1", dispatcher.dispatch(dispatch, Map.of("value", "ext")));
+    }
+
+    @Test
+    void findMethodSkipsNameMatchWithWrongArgumentCount() {
+        // "echo" exists but takes one parameter; dispatching with zero args matches the name but
+        // not the parameter count, so no method is found.
+        var dispatch = new MethodDispatch(DispatchableClass.class, "echo", true);
+
+        assertThrows(
+                DispatchInvalidDispatchCapabilityException.class,
+                () -> dispatcher.dispatch(dispatch));
+    }
+
 }

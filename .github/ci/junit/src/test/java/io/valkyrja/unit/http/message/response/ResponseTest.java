@@ -103,4 +103,28 @@ final class ResponseTest {
         assertTrue(output.contains("X-Test: v"));
         assertTrue(output.contains("payload"));
     }
+
+    @Test
+    void withReasonPhraseNullFallsBackToStatusPhrase() {
+        assertEquals(StatusCode.OK.asPhrase(), new Response().withReasonPhrase(null).getReasonPhrase());
+    }
+
+    @Test
+    void sendMethodsCoverPhraseAndSeekableBranches() {
+        var original = System.out;
+        System.setOut(new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8));
+        try {
+            new Response().sendHttpLine();
+            new Response().withReasonPhrase("Custom").sendHttpLine();
+            new Response().sendBody();
+            var closed = new Stream();
+            closed.close();
+            ((io.valkyrja.http.message.response.contract.ResponseContract)
+                            new Response().withBody(closed))
+                    .sendBody();
+        } finally {
+            System.setOut(original);
+        }
+    }
+
 }

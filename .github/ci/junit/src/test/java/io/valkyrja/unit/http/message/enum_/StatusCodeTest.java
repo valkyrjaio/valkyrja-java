@@ -49,4 +49,12 @@ final class StatusCodeTest {
             assertSame(code, StatusCode.valueOf(code.name()));
         }
     }
+
+    @Test
+    void isRedirectCoversBoundaries() {
+        assertFalse(StatusCode.OK.isRedirect());
+        assertTrue(StatusCode.FOUND.isRedirect());
+        assertFalse(StatusCode.BAD_REQUEST.isRedirect());
+    }
+
 }

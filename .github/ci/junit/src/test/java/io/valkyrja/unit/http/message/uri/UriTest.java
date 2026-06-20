@@ -115,4 +115,45 @@ final class UriTest {
     void toStringRebuildsFullUri() {
         assertEquals("https://user:pass@example.com:8080/path?q=1#frag", full().toString());
     }
+
+    @Test
+    void hasPortReflectsPortField() {
+        assertFalse(new Uri(Scheme.EMPTY, "", "", "h", 0, "", "", "").hasPort());
+        assertTrue(new Uri(Scheme.HTTP, "", "", "h", 8080, "", "", "").hasPort());
+    }
+
+    @Test
+    void hostPortBranches() {
+        assertEquals("", new Uri(Scheme.HTTP, "", "", "", 0, "", "", "").getHostPort());
+        assertEquals("h", new Uri(Scheme.HTTP, "", "", "h", 80, "", "", "").getHostPort());
+        assertEquals("h:8080", new Uri(Scheme.HTTP, "", "", "h", 8080, "", "", "").getHostPort());
+    }
+
+    @Test
+    void schemeHostPortBranches() {
+        assertEquals("", new Uri(Scheme.HTTP, "", "", "", 0, "", "", "").getSchemeHostPort());
+        assertEquals(
+                "h:8080", new Uri(Scheme.EMPTY, "", "", "h", 8080, "", "", "").getSchemeHostPort());
+        assertEquals(
+                "http://h:8080",
+                new Uri(Scheme.HTTP, "", "", "h", 8080, "", "", "").getSchemeHostPort());
+    }
+
+    @Test
+    void withSchemeKeepsExistingNonZeroPort() {
+        UriContract result =
+                new Uri(Scheme.HTTP, "", "", "h", 8080, "", "", "").withScheme(Scheme.HTTPS);
+
+        assertEquals(8080, result.getPort());
+    }
+
+    @Test
+    void withUserInfoKeepsProvidedPassword() {
+        assertTrue(new Uri().withUserInfo("user", "secret").getUserInfo().contains("secret"));
+    }
+
+    @Test
+    void withUserInfoWithNullPasswordYieldsUserOnly() {
+        assertEquals("user", new Uri().withUserInfo("user", null).getUserInfo());
+    }
 }

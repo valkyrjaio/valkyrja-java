@@ -116,4 +116,29 @@ final class HeaderTest {
         assertThrows(
                 HttpHeaderUnsupportedOffsetUnsetException.class, () -> header.offsetUnset(0));
     }
+
+    @Test
+    void offsetExistsRejectsNegativeOffset() {
+        assertFalse(new Header("x-test", "a").offsetExists(-1));
+    }
+
+    @Test
+    void headerLineSkipsEmptyValues() {
+        assertEquals("a", new Header("x-test", "a", "").getHeaderLine());
+    }
+
+
+    @Test
+    void iteratorValidityFlipsAtEnd() {
+        var header = new Header("x-test", "a", "b");
+        header.rewind();
+        int count = 0;
+        while (header.valid()) {
+            header.next();
+            count++;
+        }
+
+        assertEquals(2, count);
+    }
+
 }

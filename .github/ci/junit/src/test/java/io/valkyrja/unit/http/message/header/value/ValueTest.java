@@ -93,4 +93,29 @@ final class ValueTest {
         }
         assertEquals(1, count);
     }
+
+    @Test
+    void offsetExistsRejectsNegativeOffset() {
+        assertFalse(new Value("a").offsetExists(-1));
+    }
+
+    @Test
+    void toStringSkipsEmptyComponents() {
+        assertEquals("a", new Value("a", "").toString());
+    }
+
+
+    @Test
+    void iteratorValidityFlipsAtEnd() {
+        var value = new Value("a", "b");
+        value.rewind();
+        int count = 0;
+        while (value.valid()) {
+            value.next();
+            count++;
+        }
+
+        assertEquals(2, count);
+    }
+
 }

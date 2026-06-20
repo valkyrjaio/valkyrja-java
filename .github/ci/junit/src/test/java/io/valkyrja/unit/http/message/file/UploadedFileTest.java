@@ -150,4 +150,33 @@ final class UploadedFileTest {
                     () -> file.moveTo(target.toString()));
         }
     }
+
+    @Test
+    void moveToRejectsNonWritableDirectory(@TempDir Path dir) throws IOException {
+        Path readonly = Files.createDirectory(dir.resolve("readonly"));
+        assertTrue(readonly.toFile().setWritable(false));
+        var file = new UploadedFile(null, streamOf("data"), 4, null, null);
+        try {
+            assertThrows(
+                    UploadedFileInvalidDirectoryException.class,
+                    () -> file.moveTo(readonly.resolve("out.txt").toString()));
+        } finally {
+            readonly.toFile().setWritable(true);
+        }
+    }
+
+    @Test
+    void moveToSkipsDeleteWhenOriginalNoLongerExists(@TempDir Path dir) throws IOException {
+        var source = Files.writeString(dir.resolve("src.txt"), "data");
+        var file = new UploadedFile(source.toString(), null, 4, null, null);
+        // Cache the content, then remove the original so the post-move delete is skipped.
+        file.getStream();
+        Files.delete(source);
+        var target = dir.resolve("out.txt");
+
+        file.moveTo(target.toString());
+
+        assertEquals("data", Files.readString(target));
+    }
+
 }

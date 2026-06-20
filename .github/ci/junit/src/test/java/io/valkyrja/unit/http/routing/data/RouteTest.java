@@ -129,4 +129,13 @@ final class RouteTest {
         assertThrows(HttpRoutingNoResponseStructException.class, route::getResponseStruct);
         assertSame(struct, route.withResponseStruct(struct).getResponseStruct());
     }
+
+    @Test
+    void withAddedRequestMethodsSkipsExistingMethods() {
+        var updated = route().withAddedRequestMethods(RequestMethod.GET, RequestMethod.POST);
+
+        assertTrue(updated.hasRequestMethod(RequestMethod.GET));
+        assertTrue(updated.hasRequestMethod(RequestMethod.POST));
+    }
+
 }

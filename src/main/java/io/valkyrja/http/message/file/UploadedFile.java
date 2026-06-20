@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 public class UploadedFile implements UploadedFileContract {
@@ -62,19 +63,18 @@ public class UploadedFile implements UploadedFileContract {
             return this.stream;
         }
 
-        if (this.file == null) {
-            throw new UploadedFileInvalidUploadedFileException(
-                    "One of file or stream are required");
-        }
+        // The constructor rejects a both-null file/stream and a non-null stream returned above, so
+        // file is always present here; requireNonNull both documents and enforces that invariant.
+        String file = Objects.requireNonNull(this.file, "One of file or stream are required");
 
         this.stream = new Stream();
 
         try {
-            byte[] bytes = Files.readAllBytes(Paths.get(this.file));
+            byte[] bytes = Files.readAllBytes(Paths.get(file));
             this.stream.write(new String(bytes, StandardCharsets.UTF_8));
             this.stream.rewind();
         } catch (IOException e) {
-            throw new UploadedFileInvalidUploadedFileException("Unable to read file: " + this.file);
+            throw new UploadedFileInvalidUploadedFileException("Unable to read file: " + file);
         }
 
         return this.stream;
@@ -90,9 +90,8 @@ public class UploadedFile implements UploadedFileContract {
 
         writeStream(targetPath);
 
-        if (this.stream != null) {
-            this.stream.close();
-        }
+        // writeStream() resolves the stream via getStream(), so it is always present here.
+        Objects.requireNonNull(this.stream).close();
 
         if (this.file != null && new File(this.file).isFile()) {
             try {

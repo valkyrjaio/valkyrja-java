@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.classes.container.ServiceClass;
@@ -27,6 +28,7 @@ import io.valkyrja.container.manager.Container;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 
 /** Per-request child container delegating to the parent through the contract only. */
 final class ChildContainerTest {
@@ -278,4 +280,35 @@ final class ChildContainerTest {
 
         assertFalse(child.isPublished(SingletonClass.class));
     }
+
+    @Test
+    void resolvesServiceFromParentThenChild() {
+        parent.bind(ServiceClass.class, ServiceClass::make);
+        var freshChild = createChild();
+        assertNotNull(freshChild.getService(ServiceClass.class, java.util.Map.of()));
+
+        freshChild.bind(SingletonClass.class, SingletonClass::make);
+        assertNotNull(freshChild.getService(SingletonClass.class, java.util.Map.of()));
+    }
+
+    @Test
+    void resolvesAliasFromParentThenChild() {
+        parent.bind(ServiceClass.class, ServiceClass::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceClass.class));
+        var freshChild = createChild();
+        assertNotNull(freshChild.get(CharSequence.class));
+
+        freshChild.bind(ServiceClass.class, ServiceClass::make);
+        freshChild.bindAlias(Runnable.class, raw(ServiceClass.class));
+        assertNotNull(freshChild.get(Runnable.class));
+    }
+
+    @Test
+    void getAliasedThrowsWhenNeitherHasAlias() {
+        // Neither child nor parent has the alias → falls through to the failing super lookup.
+        assertThrows(
+                ContainerInvalidArgumentException.class,
+                () -> child.getAliased(Runnable.class, Map.of()));
+    }
+
 }

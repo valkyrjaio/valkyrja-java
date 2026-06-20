@@ -78,27 +78,29 @@ public abstract class ParamCollection implements ParamCollectionContract {
     @Override
     public Map<String, Object> getOnly(String... keys) {
         Set<String> keySet = Arrays.stream(keys).collect(Collectors.toSet());
-        return params.entrySet().stream()
-                .filter(e -> keySet.contains(e.getKey()))
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (a, b) -> a,
-                                LinkedHashMap::new));
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (var entry : params.entrySet()) {
+            if (keySet.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     @Override
     public Map<String, Object> getAllExcept(String... keys) {
         Set<String> keySet = Arrays.stream(keys).collect(Collectors.toSet());
-        return params.entrySet().stream()
-                .filter(e -> !keySet.contains(e.getKey()))
-                .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                (a, b) -> a,
-                                LinkedHashMap::new));
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (var entry : params.entrySet()) {
+            if (!keySet.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     @Override

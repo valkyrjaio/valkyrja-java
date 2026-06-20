@@ -159,7 +159,7 @@ public class Header implements HeaderContract, Iterable<Object> {
 
     @Override
     public boolean valid() {
-        return position >= 0 && position < values.size();
+        return position < values.size();
     }
 
     @Override

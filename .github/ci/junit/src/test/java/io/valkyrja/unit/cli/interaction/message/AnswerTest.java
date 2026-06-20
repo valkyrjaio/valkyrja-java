@@ -113,4 +113,23 @@ final class AnswerTest {
 
         assertTrue(answer.isValidResponse());
     }
+
+    @Test
+    void withAllowedResponsesDoesNotDuplicateDefault() {
+        var answer = new Answer("yes").withAllowedResponses("yes", "no");
+
+        assertEquals(
+                1, answer.getAllowedResponses().stream().filter("yes"::equals).count());
+    }
+
+
+    @Test
+    void isValidResponseFailsWhenCallableRejects() {
+        assertFalse(
+                new Answer("yes")
+                        .withUserResponse("nope")
+                        .withValidationCallable(response -> false)
+                        .isValidResponse());
+    }
+
 }

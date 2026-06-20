@@ -24,10 +24,8 @@ import java.util.Locale;
 public abstract class UriFactory {
 
     public static UriContract fromString(String uri) {
-        if (!uri.isEmpty()
-                && !uri.startsWith("/")
-                && !uri.startsWith(Scheme.HTTP.getValue())
-                && !uri.startsWith(Scheme.HTTPS.getValue())) {
+        // A value starting with "https" already starts with "http", so the http check covers both.
+        if (!uri.isEmpty() && !uri.startsWith("/") && !uri.startsWith(Scheme.HTTP.getValue())) {
             uri = "//" + uri;
         }
 

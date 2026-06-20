@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.classes.container.ServiceClass;
@@ -26,6 +27,7 @@ import io.valkyrja.container.manager.NativeChildContainer;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 
 /** Per-request child container with child-first reads and parent fallback via field access. */
 final class NativeChildContainerTest {
@@ -265,4 +267,59 @@ final class NativeChildContainerTest {
 
         assertFalse(child.isPublished(SingletonClass.class));
     }
+
+    @Test
+    void resolvesSingletonFromParentAndCaches() {
+        parent.bindSingleton(SingletonClass.class, SingletonClass::make);
+        var freshChild = new NativeChildContainer(parent);
+
+        assertNotNull(freshChild.getSingleton(SingletonClass.class));
+    }
+
+    @Test
+    void resolvesAliasFromParentThenChild() {
+        parent.bind(ServiceClass.class, ServiceClass::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceClass.class));
+        var freshChild = new NativeChildContainer(parent);
+        assertNotNull(freshChild.get(CharSequence.class));
+
+        freshChild.bind(ServiceClass.class, ServiceClass::make);
+        freshChild.bindAlias(Runnable.class, raw(ServiceClass.class));
+        assertNotNull(freshChild.get(Runnable.class));
+    }
+
+    @Test
+    void getSingletonThrowsWhenNeitherBound() {
+        // Neither child nor parent has the singleton binding → null path, then a failing lookup.
+        assertThrows(
+                ContainerInvalidArgumentException.class,
+                () -> child.getSingleton(SingletonClass.class));
+    }
+
+    @Test
+    void getSingletonWithNullParentFactoryThrows() {
+        parent.bindSingleton(SingletonClass.class, (c, a) -> null);
+
+        assertThrows(
+                ContainerInvalidArgumentException.class,
+                () -> child.getSingleton(SingletonClass.class));
+    }
+
+    @Test
+    void providerFromChildPublishesOnlyOnce() {
+        child.register(new BindingProviderClass());
+        // Resolve twice — the second resolution finds the provider already published.
+        assertInstanceOf(ProvidedClass.class, child.get(ProvidedClass.class));
+        assertInstanceOf(ProvidedClass.class, child.get(ProvidedClass.class));
+    }
+
+
+    @Test
+    void getSingletonFromChildBinding() {
+        child.bindSingleton(SingletonClass.class, SingletonClass::make);
+
+        // Child has its own singleton binding → creates and caches without consulting the parent.
+        assertInstanceOf(SingletonClass.class, child.getSingleton(SingletonClass.class));
+    }
+
 }

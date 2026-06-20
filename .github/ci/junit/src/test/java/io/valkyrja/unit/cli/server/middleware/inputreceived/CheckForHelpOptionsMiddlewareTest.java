@@ -36,4 +36,17 @@ final class CheckForHelpOptionsMiddlewareTest {
         // Without the option the input passes through untouched.
         assertNotNull(middleware.inputReceived(new Input(), handler));
     }
+
+    @Test
+    void rewritesWhenLongOptionPresent() {
+        var handler = mock(InputReceivedHandlerContract.class);
+        when(handler.inputReceived(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertNotNull(
+                new CheckForHelpOptionsMiddleware("help", "help", "h")
+                        .inputReceived(
+                                new Input().withOptions(new Option("help", OptionType.LONG)),
+                                handler));
+    }
+
 }

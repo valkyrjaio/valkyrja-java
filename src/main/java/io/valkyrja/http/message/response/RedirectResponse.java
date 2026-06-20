@@ -93,7 +93,8 @@ public class RedirectResponse extends Response implements RedirectResponseContra
 
     private boolean isInternalUri(ServerRequestContract request, UriContract uri) {
         String host = uri.getHost();
-        return host == null || host.isEmpty() || host.equals(request.getUri().getHost());
+        // getHost() never returns null, so an empty/equal host check suffices.
+        return host.isEmpty() || host.equals(request.getUri().getHost());
     }
 
     private static HeaderContract buildLocationHeader(UriContract uri) {

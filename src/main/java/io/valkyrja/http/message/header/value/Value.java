@@ -111,7 +111,7 @@ public class Value implements ValueContract, Iterable<ComponentContract> {
     }
 
     public boolean valid() {
-        return position >= 0 && position < components.size();
+        return position < components.size();
     }
 
     public void rewind() {

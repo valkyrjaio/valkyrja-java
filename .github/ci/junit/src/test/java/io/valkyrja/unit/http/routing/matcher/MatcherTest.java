@@ -160,4 +160,14 @@ final class MatcherTest {
 
         assertNull(matcher.match("/users/42", RequestMethod.GET));
     }
+
+    @Test
+    void skipsEmptyRegexAndNonMatchingPath() {
+        var collection = mock(RouteCollectionContract.class);
+        when(collection.hasPath(any(), any())).thenReturn(false);
+        when(collection.getRegexes(any()))
+                .thenReturn(Map.of("", "empty", "/nomatch/(\\d+)", "n"));
+
+        assertNull(new Matcher(collection).match("/users/abc", RequestMethod.GET));
+    }
 }

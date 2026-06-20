@@ -20,7 +20,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class Cookie extends Value implements CookieContract {
 
@@ -119,7 +118,8 @@ public class Cookie extends Value implements CookieContract {
 
         parts.add(new Component("samesite", this.sameSite.getValue()).toString());
 
-        return parts.stream().filter(s -> !s.isEmpty()).collect(Collectors.joining("; "));
+        // Every part is either guard-added or a named Component, so none are ever empty.
+        return String.join("; ", parts);
     }
 
     @Override

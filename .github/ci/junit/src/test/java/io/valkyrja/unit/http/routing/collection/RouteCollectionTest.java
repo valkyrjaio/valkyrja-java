@@ -127,4 +127,26 @@ final class RouteCollectionTest {
         assertTrue(restored.hasName("users.index"));
         assertTrue(restored.hasPath("/users", RequestMethod.GET));
     }
+
+    @Test
+    void hasPathAndHasRegexAreFalseForMissingEntries() {
+        assertFalse(collection.hasPath("/missing", RequestMethod.GET));
+        assertFalse(collection.hasRegex("/missing/(\\d+)", RequestMethod.GET));
+    }
+
+    @Test
+    void hasPathFindsDynamicRouteByItsPath() {
+        assertTrue(collection.hasPath("/users/{id}", RequestMethod.GET));
+    }
+
+    @Test
+    void hasPathFalseWhenMethodHasNoPaths() {
+        assertFalse(collection.hasPath("/users", RequestMethod.POST));
+    }
+
+    @Test
+    void hasRegexFalseWhenMethodHasNoRegexes() {
+        assertFalse(collection.hasRegex("/users/(\\d+)", RequestMethod.POST));
+    }
+
 }

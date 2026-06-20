@@ -85,4 +85,16 @@ final class ListCommandTest {
 
         assertEquals(ExitCode.ERROR, output.getExitCode());
     }
+
+    @Test
+    void runWithDynamicRouteEmptyRegexOmitsRegexLine() {
+        Map<String, RouteContract> routes = new LinkedHashMap<>();
+        routes.put("/x", new DynamicRoute("/x", "x.show", "", List.of(), HANDLER));
+        when(collection.getAll(RequestMethod.ANY)).thenReturn(routes);
+
+        var output = new ListCommand(collection, outputFactory).run();
+
+        assertFalse(output.getMessages().stream().anyMatch(m -> m.getText().contains("Regex:")));
+    }
+
 }

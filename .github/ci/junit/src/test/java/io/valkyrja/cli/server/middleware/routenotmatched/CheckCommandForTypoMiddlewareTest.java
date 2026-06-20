@@ -137,4 +137,15 @@ final class CheckCommandForTypoMiddlewareTest {
         // Callback returns the output unchanged; no route is selected.
         assertSame(result.getClass(), Output.class);
     }
+
+    @Test
+    void emptyRegisteredCommandNameIsSkipped() {
+        // A registered command with an empty name exercises the empty-string guard in similarText.
+        collection.add(route(""));
+        var input = new io.valkyrja.cli.interaction.input.Input().withCommandName("build");
+        var output = new Output();
+
+        assertSame(output, middleware().routeNotMatched(input, output, handler));
+    }
+
 }

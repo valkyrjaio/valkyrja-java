@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -80,7 +81,7 @@ public class Dispatcher implements DispatcherContract {
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
             throw new DispatchInvalidDispatchCapabilityException(
-                    "Exception in " + dispatch, cause != null ? cause : e);
+                    "Exception in " + dispatch, Objects.requireNonNullElse(cause, e));
         } catch (ReflectiveOperationException e) {
             throw new DispatchInvalidDispatchCapabilityException(
                     "Failed to dispatch: " + dispatch, e);

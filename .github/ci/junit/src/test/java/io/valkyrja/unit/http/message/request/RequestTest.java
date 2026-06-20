@@ -87,4 +87,35 @@ final class RequestTest {
 
         assertEquals("", updated.getHeaders().getHeaderLine("host"));
     }
+
+    @Test
+    void withUriPreservesExistingHostWhenRequested() {
+        var request =
+                new Request(
+                        new io.valkyrja.http.message.uri.Uri(),
+                        RequestMethod.GET,
+                        new Stream(),
+                        new HeaderCollection(
+                                new io.valkyrja.http.message.header.Header(
+                                        io.valkyrja.http.message.constant.HeaderName.HOST,
+                                        "keep.com")));
+
+        var result = request.withUri(io.valkyrja.http.message.uri.factory.UriFactory.fromString("https://other.com/"), true);
+
+        assertEquals(
+                "keep.com",
+                result.getHeaders().getHeaderLine(io.valkyrja.http.message.constant.HeaderName.HOST));
+    }
+
+
+    @Test
+    void withUriPreserveHostWithNoExistingHeaderAddsHost() {
+        var uri = new Uri(Scheme.HTTP, "", "", "new-host.com", 0, "/", "", "");
+
+        // preserveHost is requested but there is no existing HOST header, so the URI host is added.
+        var updated = new Request().withUri(uri, true);
+
+        assertEquals("new-host.com", updated.getHeaders().getHeaderLine("host"));
+    }
+
 }
