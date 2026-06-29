@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.valkyrja.classes.cli.middleware.PassThroughMiddleware;
+import io.valkyrja.fixtures.cli.middleware.PassThroughMiddleware;
 import io.valkyrja.cli.interaction.input.Input;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;

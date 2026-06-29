@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 
-import io.valkyrja.classes.http.middleware.PassThroughHttpMiddleware;
+import io.valkyrja.fixtures.http.middleware.PassThroughHttpMiddleware;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.EmptyResponse;

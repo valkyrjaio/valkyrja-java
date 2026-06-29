@@ -18,7 +18,7 @@ import io.valkyrja.application.data.Config;
 import io.valkyrja.application.kernel.ChildApplication;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.kernel.Valkyrja;
-import io.valkyrja.classes.container.SingletonClass;
+import io.valkyrja.fixtures.container.SingletonClass;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;

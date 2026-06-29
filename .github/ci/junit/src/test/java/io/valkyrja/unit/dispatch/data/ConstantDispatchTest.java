@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.classes.dispatch.DispatchableClass;
+import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import io.valkyrja.dispatch.data.ConstantDispatch;
 import io.valkyrja.dispatch.throwable.exception.DispatchNoClassException;
 import org.junit.jupiter.api.Test;

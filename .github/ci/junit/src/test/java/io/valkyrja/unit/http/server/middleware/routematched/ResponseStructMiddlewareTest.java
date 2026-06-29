@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.valkyrja.classes.http.struct.ResponseStructClass;
+import io.valkyrja.fixtures.http.struct.ResponseStructClass;
 import io.valkyrja.http.message.enum_.StatusCode;
 import io.valkyrja.http.message.header.collection.HeaderCollection;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;

@@ -14,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.valkyrja.classes.reflection.AbstractReflectableClass;
-import io.valkyrja.classes.reflection.NoDefaultConstructorClass;
-import io.valkyrja.classes.reflection.ReflectableClass;
+import io.valkyrja.fixtures.reflection.AbstractReflectableClass;
+import io.valkyrja.fixtures.reflection.NoDefaultConstructorClass;
+import io.valkyrja.fixtures.reflection.ReflectableClass;
 import io.valkyrja.reflection.support.Reflection;
 import io.valkyrja.reflection.throwable.exception.ReflectionInvalidClassToInstantiateException;
 import java.lang.reflect.Constructor;

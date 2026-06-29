@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import io.valkyrja.classes.http.routing.AnnotatedHttpController;
+import io.valkyrja.fixtures.http.routing.AnnotatedHttpController;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.collector.AttributeRouteCollector;
@@ -91,7 +91,7 @@ final class AttributeRouteCollectorTest {
     void collectsControllerWithoutClassAnnotationsAndUnrelatedMiddleware() {
         var routes =
                 new AttributeRouteCollector()
-                        .getRoutes(io.valkyrja.classes.http.routing.PlainHttpController.class);
+                        .getRoutes(io.valkyrja.fixtures.http.routing.PlainHttpController.class);
 
         assertTrue(
                 routes.stream().anyMatch(route -> route.getName().equals("plain")));
