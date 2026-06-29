@@ -14,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.classes.http.struct.JsonStructClass;
-import io.valkyrja.classes.http.struct.ParsedBodyStructClass;
-import io.valkyrja.classes.http.struct.QueryStructClass;
+import io.valkyrja.fixtures.http.struct.JsonStructClass;
+import io.valkyrja.fixtures.http.struct.ParsedBodyStructClass;
+import io.valkyrja.fixtures.http.struct.QueryStructClass;
 import io.valkyrja.http.message.param.ParsedBodyParamCollection;
 import io.valkyrja.http.message.param.ParsedJsonParamCollection;
 import io.valkyrja.http.message.param.QueryParamCollection;
@@ -73,7 +73,7 @@ final class RequestStructTest {
         ServerRequestContract request =
                 new ServerRequest()
                         .withParsedBody(new ParsedBodyParamCollection(Map.of("name", "bob")));
-        var struct = new io.valkyrja.classes.http.struct.ValidatingStructClass();
+        var struct = new io.valkyrja.fixtures.http.struct.ValidatingStructClass();
 
         assertFalse(struct.getValidationRules(request).isEmpty());
         assertTrue(struct.validate(request).validateRules());
@@ -96,7 +96,7 @@ final class RequestStructTest {
 
     @Test
     void validateFailsWhenRulesDoNotPass() {
-        var struct = new io.valkyrja.classes.http.struct.FailingValidationStructClass();
+        var struct = new io.valkyrja.fixtures.http.struct.FailingValidationStructClass();
 
         assertFalse(struct.validate(new ServerRequest()).validateRules());
     }

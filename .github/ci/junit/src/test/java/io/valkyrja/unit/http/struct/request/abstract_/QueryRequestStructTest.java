@@ -12,7 +12,7 @@ package io.valkyrja.unit.http.struct.request.abstract_;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.classes.http.struct.QueryStructClass;
+import io.valkyrja.fixtures.http.struct.QueryStructClass;
 import io.valkyrja.http.message.param.QueryParamCollection;
 import io.valkyrja.http.message.request.ServerRequest;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;

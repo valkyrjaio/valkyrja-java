@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.valkyrja.classes.dispatch.DispatchableClass;
-import io.valkyrja.classes.dispatch.UnknownDispatchClass;
+import io.valkyrja.fixtures.dispatch.DispatchableClass;
+import io.valkyrja.fixtures.dispatch.UnknownDispatchClass;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.dispatch.data.CallableDispatch;
 import io.valkyrja.dispatch.data.ClassDispatch;

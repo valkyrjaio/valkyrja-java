@@ -12,7 +12,7 @@ package io.valkyrja.dispatch.data;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
-import io.valkyrja.classes.dispatch.DispatchableClass;
+import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;

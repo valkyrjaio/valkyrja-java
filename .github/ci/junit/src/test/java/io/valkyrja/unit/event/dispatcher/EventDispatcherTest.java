@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.classes.event.ArgumentsCapableEventClass;
-import io.valkyrja.classes.event.DispatchCollectableEventClass;
-import io.valkyrja.classes.event.EventClass;
-import io.valkyrja.classes.event.StoppableEventClass;
+import io.valkyrja.fixtures.event.ArgumentsCapableEventClass;
+import io.valkyrja.fixtures.event.DispatchCollectableEventClass;
+import io.valkyrja.fixtures.event.EventClass;
+import io.valkyrja.fixtures.event.StoppableEventClass;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.event.collection.ListenerCollection;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
-import io.valkyrja.classes.event.NonStoppingStoppableEventClass;
+import io.valkyrja.fixtures.event.NonStoppingStoppableEventClass;
 
 final class EventDispatcherTest {
 

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.classes.dispatch.DispatchableClass;
+import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import io.valkyrja.dispatch.data.MethodDispatch;
 import io.valkyrja.throwable.exception.InvalidArgumentException;
 import org.junit.jupiter.api.Test;
