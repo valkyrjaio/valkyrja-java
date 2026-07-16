@@ -14,6 +14,7 @@ import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
+import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
@@ -63,6 +64,13 @@ public interface ApplicationContract {
      * @return flat list of HTTP provider instances
      */
     List<HttpRouteProviderContract> getHttpProviders();
+
+    /**
+     * Aggregate all gRPC route providers from all registered components.
+     *
+     * @return flat list of gRPC provider instances
+     */
+    List<GrpcRouteProviderContract> getGrpcProviders();
 
     /**
      * Whether the application is running in debug mode.

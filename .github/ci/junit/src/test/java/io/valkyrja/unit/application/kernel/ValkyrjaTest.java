@@ -24,7 +24,9 @@ import io.valkyrja.fixtures.application.provider.CliRouteComponentProviderClass;
 import io.valkyrja.fixtures.application.provider.ComponentProviderClass;
 import io.valkyrja.fixtures.application.provider.EventComponentProviderClass;
 import io.valkyrja.fixtures.application.provider.HttpComponentProviderClass;
+import io.valkyrja.fixtures.application.provider.GrpcRouteComponentProviderClass;
 import io.valkyrja.fixtures.application.provider.HttpRouteComponentProviderClass;
+import io.valkyrja.fixtures.grpc.GreeterRouteProvider;
 import io.valkyrja.fixtures.cli.routing.provider.CliRouteProviderClass;
 import io.valkyrja.fixtures.event.provider.ListenerProviderClass;
 import io.valkyrja.fixtures.http.routing.provider.HttpRouteProviderClass;
@@ -193,6 +195,26 @@ final class ValkyrjaTest {
 
         assertEquals(1, first.size());
         assertSame(first, application.getHttpProviders());
+    }
+
+    @Test
+    void getGrpcProviders() {
+        var application = appWith(new GrpcRouteComponentProviderClass());
+
+        var result = application.getGrpcProviders();
+
+        assertEquals(1, result.size());
+        assertInstanceOf(GreeterRouteProvider.class, result.get(0));
+    }
+
+    @Test
+    void getGrpcProvidersIsCached() {
+        var application = appWith(new GrpcRouteComponentProviderClass());
+
+        var first = application.getGrpcProviders();
+
+        assertEquals(1, first.size());
+        assertSame(first, application.getGrpcProviders());
     }
 
     @Test

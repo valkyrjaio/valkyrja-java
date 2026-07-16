@@ -15,6 +15,7 @@ import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
+import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
@@ -71,6 +72,11 @@ public class ChildApplication implements ApplicationContract {
     @Override
     public List<HttpRouteProviderContract> getHttpProviders() {
         return parent.getHttpProviders();
+    }
+
+    @Override
+    public List<GrpcRouteProviderContract> getGrpcProviders() {
+        return parent.getGrpcProviders();
     }
 
     @Override

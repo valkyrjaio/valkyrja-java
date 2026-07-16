@@ -117,6 +117,11 @@ final class ChildApplicationTest {
     }
 
     @Test
+    void getGrpcProvidersDelegatesToParent() {
+        assertEquals(parent.getGrpcProviders(), child.getGrpcProviders());
+    }
+
+    @Test
     void getDebugModeDelegatesToParent() {
         assertEquals(parent.getDebugMode(), child.getDebugMode());
     }

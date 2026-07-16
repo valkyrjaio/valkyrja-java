@@ -13,6 +13,7 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
+import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
@@ -57,4 +58,18 @@ public interface ComponentProviderContract {
      * @return list of HTTP route provider instances
      */
     List<HttpRouteProviderContract> getHttpProviders(ApplicationContract app);
+
+    /**
+     * Get the component's gRPC route providers.
+     *
+     * <p>Defaulted to an empty list: gRPC is an optional protocol, so only components that actually
+     * contribute gRPC routes override this — every other component inherits the empty default
+     * rather than declaring a redundant override.
+     *
+     * @param app the application
+     * @return list of gRPC route provider instances
+     */
+    default List<GrpcRouteProviderContract> getGrpcProviders(ApplicationContract app) {
+        return List.of();
+    }
 }
