@@ -202,4 +202,26 @@ final class RouteTest {
         assertTrue(route.isClientStreaming());
         assertTrue(route.isServerStreaming());
     }
+
+    @Test
+    void middlewareListsAreImmutable() {
+        // A "immutable" Route must not hand out a list callers can mutate underneath it.
+        Route route =
+                new Route("/pkg.Svc/M", (container, r) -> ServiceResponse.ok());
+        RouteContract withMiddleware =
+                route.withAddedRouteMatchedMiddleware(List.of(Matched.class));
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> route.getRouteMatchedMiddleware().add(Matched.class));
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> withMiddleware.getRouteMatchedMiddleware().add(Matched.class));
+        assertThrows(
+                UnsupportedOperationException.class,
+                () ->
+                        route.withRouteMatchedMiddleware(List.of(Matched.class))
+                                .getRouteMatchedMiddleware()
+                                .add(Matched.class));
+    }
 }

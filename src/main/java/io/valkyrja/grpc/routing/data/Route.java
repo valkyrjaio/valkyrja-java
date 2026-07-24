@@ -81,11 +81,13 @@ public class Route implements RouteContract {
         this.responseType = responseType;
         this.clientStreaming = clientStreaming;
         this.serverStreaming = serverStreaming;
-        this.routeMatchedMiddleware = new ArrayList<>(routeMatchedMiddleware);
-        this.routeDispatchedMiddleware = new ArrayList<>(routeDispatchedMiddleware);
-        this.throwableCaughtMiddleware = new ArrayList<>(throwableCaughtMiddleware);
-        this.sendingResponseMiddleware = new ArrayList<>(sendingResponseMiddleware);
-        this.terminatedMiddleware = new ArrayList<>(terminatedMiddleware);
+        // Copied immutably so the getters can hand the lists out directly on the dispatch hot
+        // path without a per-read defensive copy, and callers cannot mutate a built route.
+        this.routeMatchedMiddleware = List.copyOf(routeMatchedMiddleware);
+        this.routeDispatchedMiddleware = List.copyOf(routeDispatchedMiddleware);
+        this.throwableCaughtMiddleware = List.copyOf(throwableCaughtMiddleware);
+        this.sendingResponseMiddleware = List.copyOf(sendingResponseMiddleware);
+        this.terminatedMiddleware = List.copyOf(terminatedMiddleware);
     }
 
     protected Route copy() {
@@ -190,7 +192,7 @@ public class Route implements RouteContract {
     public RouteContract withRouteMatchedMiddleware(
             List<Class<? extends RouteMatchedMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.routeMatchedMiddleware = new ArrayList<>(middleware);
+        copy.routeMatchedMiddleware = List.copyOf(middleware);
         return copy;
     }
 
@@ -198,8 +200,10 @@ public class Route implements RouteContract {
     public RouteContract withAddedRouteMatchedMiddleware(
             List<Class<? extends RouteMatchedMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.routeMatchedMiddleware = new ArrayList<>(this.routeMatchedMiddleware);
-        copy.routeMatchedMiddleware.addAll(middleware);
+        List<Class<? extends RouteMatchedMiddlewareContract>> merged =
+                new ArrayList<>(this.routeMatchedMiddleware);
+        merged.addAll(middleware);
+        copy.routeMatchedMiddleware = List.copyOf(merged);
         return copy;
     }
 
@@ -212,7 +216,7 @@ public class Route implements RouteContract {
     public RouteContract withRouteDispatchedMiddleware(
             List<Class<? extends RouteDispatchedMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.routeDispatchedMiddleware = new ArrayList<>(middleware);
+        copy.routeDispatchedMiddleware = List.copyOf(middleware);
         return copy;
     }
 
@@ -220,8 +224,10 @@ public class Route implements RouteContract {
     public RouteContract withAddedRouteDispatchedMiddleware(
             List<Class<? extends RouteDispatchedMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.routeDispatchedMiddleware = new ArrayList<>(this.routeDispatchedMiddleware);
-        copy.routeDispatchedMiddleware.addAll(middleware);
+        List<Class<? extends RouteDispatchedMiddlewareContract>> merged =
+                new ArrayList<>(this.routeDispatchedMiddleware);
+        merged.addAll(middleware);
+        copy.routeDispatchedMiddleware = List.copyOf(merged);
         return copy;
     }
 
@@ -234,7 +240,7 @@ public class Route implements RouteContract {
     public RouteContract withThrowableCaughtMiddleware(
             List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.throwableCaughtMiddleware = new ArrayList<>(middleware);
+        copy.throwableCaughtMiddleware = List.copyOf(middleware);
         return copy;
     }
 
@@ -242,8 +248,10 @@ public class Route implements RouteContract {
     public RouteContract withAddedThrowableCaughtMiddleware(
             List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.throwableCaughtMiddleware = new ArrayList<>(this.throwableCaughtMiddleware);
-        copy.throwableCaughtMiddleware.addAll(middleware);
+        List<Class<? extends ThrowableCaughtMiddlewareContract>> merged =
+                new ArrayList<>(this.throwableCaughtMiddleware);
+        merged.addAll(middleware);
+        copy.throwableCaughtMiddleware = List.copyOf(merged);
         return copy;
     }
 
@@ -256,7 +264,7 @@ public class Route implements RouteContract {
     public RouteContract withSendingResponseMiddleware(
             List<Class<? extends SendingResponseMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.sendingResponseMiddleware = new ArrayList<>(middleware);
+        copy.sendingResponseMiddleware = List.copyOf(middleware);
         return copy;
     }
 
@@ -264,8 +272,10 @@ public class Route implements RouteContract {
     public RouteContract withAddedSendingResponseMiddleware(
             List<Class<? extends SendingResponseMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.sendingResponseMiddleware = new ArrayList<>(this.sendingResponseMiddleware);
-        copy.sendingResponseMiddleware.addAll(middleware);
+        List<Class<? extends SendingResponseMiddlewareContract>> merged =
+                new ArrayList<>(this.sendingResponseMiddleware);
+        merged.addAll(middleware);
+        copy.sendingResponseMiddleware = List.copyOf(merged);
         return copy;
     }
 
@@ -278,7 +288,7 @@ public class Route implements RouteContract {
     public RouteContract withTerminatedMiddleware(
             List<Class<? extends TerminatedMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.terminatedMiddleware = new ArrayList<>(middleware);
+        copy.terminatedMiddleware = List.copyOf(middleware);
         return copy;
     }
 
@@ -286,8 +296,10 @@ public class Route implements RouteContract {
     public RouteContract withAddedTerminatedMiddleware(
             List<Class<? extends TerminatedMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.terminatedMiddleware = new ArrayList<>(this.terminatedMiddleware);
-        copy.terminatedMiddleware.addAll(middleware);
+        List<Class<? extends TerminatedMiddlewareContract>> merged =
+                new ArrayList<>(this.terminatedMiddleware);
+        merged.addAll(middleware);
+        copy.terminatedMiddleware = List.copyOf(merged);
         return copy;
     }
 
