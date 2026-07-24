@@ -82,8 +82,12 @@ public class CancellationToken implements CancellationTokenContract {
                 return;
             }
 
-            this.cancelled = true;
+            // Publish the reason before the flag: readers outside this lock check isCancelled()
+            // first, and the volatile write to `cancelled` makes the preceding `reason` write
+            // visible to them. Flipping the order lets a reader observe a cancellation with a
+            // null reason and report CANCELLED for what was actually DEADLINE_EXCEEDED.
             this.reason = reason;
+            this.cancelled = true;
             toFire = new ArrayList<>(listeners);
             listeners.clear();
         }
