@@ -22,6 +22,7 @@ import io.valkyrja.grpc.routing.attribute.GrpcService;
 import io.valkyrja.grpc.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,19 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             try {
                 Object instance = clazz.getDeclaredConstructor().newInstance();
                 return (ServiceResponseContract) method.invoke(instance, container, route);
-            } catch (Exception e) {
+            } catch (InvocationTargetException e) {
+                // Surface the handler's own throwable (e.g. a framework-thrown CancelledException)
+                // rather than the reflection wrapper, so ServiceHandler can map it to the correct
+                // status instead of a blanket INTERNAL.
+                Throwable cause = e.getCause();
+                if (cause instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                }
+                if (cause instanceof Error error) {
+                    throw error;
+                }
+                throw new RuntimeException(cause != null ? cause : e);
+            } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }
         };

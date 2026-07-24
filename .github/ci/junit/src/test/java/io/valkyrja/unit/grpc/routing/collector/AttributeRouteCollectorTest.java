@@ -15,9 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.grpc.message.enum_.CancellationReason;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.collector.AttributeRouteCollector;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
+import io.valkyrja.grpc.throwable.exception.CancelledException;
 import io.valkyrja.fixtures.grpc.GreeterController;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +47,8 @@ final class AttributeRouteCollectorTest {
     @Test
     void skipsMethodsWithoutGrpcMethod() {
         Map<String, RouteContract> routes = collect(GreeterController.class);
-        // Three annotated methods; notAnRpc() is excluded.
-        assertEquals(3, routes.size());
+        // Four annotated methods; notAnRpc() is excluded.
+        assertEquals(4, routes.size());
     }
 
     @Test
@@ -109,6 +111,28 @@ final class AttributeRouteCollectorTest {
     }
 
     @Test
+    void reflectiveHandlerPropagatesTheHandlersOwnThrowable() {
+        RouteContract route = collect(GreeterController.class).get("/pkg.Greeter/Boom");
+        Container container = new Container();
+        // The handler's IllegalStateException must not be buried under a reflection wrapper.
+        assertThrows(
+                IllegalStateException.class, () -> route.getHandler().apply(container, route));
+    }
+
+    @Test
+    void reflectiveHandlerPropagatesCancelledExceptionUnwrapped() {
+        RouteContract route = collect(GreeterController.class).get("/pkg.Greeter/Cancelled");
+        Container container = new Container();
+        // Regression: rewrapping in RuntimeException made ServiceHandler report INTERNAL instead
+        // of CANCELLED, silently defeating cooperative cancellation.
+        CancelledException thrown =
+                assertThrows(
+                        CancelledException.class,
+                        () -> route.getHandler().apply(container, route));
+        assertEquals(CancellationReason.DEADLINE_EXCEEDED, thrown.getReason());
+    }
+
+    @Test
     void ignoresClassesWithoutGrpcServiceAnnotation() {
         assertTrue(collect(String.class).isEmpty());
     }
@@ -116,6 +140,6 @@ final class AttributeRouteCollectorTest {
     @Test
     void collectsAcrossMultipleClasses() {
         Map<String, RouteContract> routes = collect(GreeterController.class, String.class);
-        assertEquals(3, routes.size());
+        assertEquals(4, routes.size());
     }
 }
