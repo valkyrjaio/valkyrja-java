@@ -90,9 +90,13 @@ public abstract class WorkerGrpc extends App {
         ServiceResponseContract response = handler.handle(call);
         response = handler.sending(call, response);
 
-        writer.accept(response);
-
-        handler.terminate(call, response);
+        try {
+            writer.accept(response);
+        } finally {
+            // Terminated middleware must run even when the wire write blows up, so per-call
+            // resources are released and observers still see the call complete.
+            handler.terminate(call, response);
+        }
     }
 
     /**

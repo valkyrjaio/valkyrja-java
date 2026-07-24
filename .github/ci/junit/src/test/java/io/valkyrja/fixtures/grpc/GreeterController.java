@@ -30,6 +30,7 @@ import io.valkyrja.grpc.routing.attribute.GrpcMiddleware;
 import io.valkyrja.grpc.routing.attribute.GrpcService;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** Fixture gRPC service controller exercising the {@code AttributeRouteCollector}. */
 @GrpcService(service = "pkg.Greeter")
@@ -111,11 +112,16 @@ public class GreeterController {
     }
 
     public static final class TerminatedMiddleware implements TerminatedMiddlewareContract {
+
+        /** Counts terminations so tests can assert the stage ran. Reset per test. */
+        public static final AtomicInteger calls = new AtomicInteger();
+
         @Override
         public void terminated(
                 ServiceCallContract call,
                 ServiceResponseContract response,
                 TerminatedHandlerContract handler) {
+            calls.incrementAndGet();
             handler.terminated(call, response);
         }
     }

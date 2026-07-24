@@ -11,6 +11,7 @@ package io.valkyrja.functional.grpc.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.data.GrpcConfig;
@@ -21,6 +22,7 @@ import io.valkyrja.grpc.message.call.ServiceCall;
 import io.valkyrja.grpc.message.enum_.StatusCode;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.fixtures.grpc.GreeterComponentProvider;
+import io.valkyrja.fixtures.grpc.GreeterController;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -64,6 +66,28 @@ final class WorkerGrpcTest {
         assertNotNull(response);
         assertTrue(response.getStatus().isOk());
         assertEquals("hello", response.getMessages().iterator().next());
+    }
+
+    @Test
+    void dispatchRunsTerminatedEvenWhenTheWriterThrows() {
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+
+        // A wire write that blows up must not skip the Terminated stage, or per-call resources
+        // leak and observers never see the call complete.
+        GreeterController.TerminatedMiddleware.calls.set(0);
+        assertThrows(
+                IllegalStateException.class,
+                () ->
+                        WorkerGrpc.dispatch(
+                                app,
+                                data,
+                                ServiceCall.unary("/pkg.Greeter/StreamHellos", "req"),
+                                response -> {
+                                    throw new IllegalStateException("wire write failed");
+                                }));
+
+        assertEquals(1, GreeterController.TerminatedMiddleware.calls.get());
     }
 
     @Test
