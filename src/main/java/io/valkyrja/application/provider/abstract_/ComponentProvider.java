@@ -7,18 +7,26 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.grpc.server.provider;
+package io.valkyrja.application.provider.abstract_;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.application.provider.abstract_.ComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
+import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
-public class GrpcServerComponentProvider extends ComponentProvider {
+/**
+ * Base {@link ComponentProviderContract} implementation contributing nothing.
+ *
+ * <p>Every provider method on the contract is abstract, so each protocol is declared explicitly and
+ * none is privileged over another. Most components contribute to only one or two of them, though,
+ * and would otherwise repeat an identical empty implementation for each of the rest. Extending this
+ * base lets a component override just the methods it actually contributes to.
+ */
+public abstract class ComponentProvider implements ComponentProviderContract {
 
     @Override
     public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {
@@ -27,7 +35,7 @@ public class GrpcServerComponentProvider extends ComponentProvider {
 
     @Override
     public List<ServiceProviderContract> getContainerProviders(ApplicationContract app) {
-        return List.of(new GrpcServerServiceProvider());
+        return List.of();
     }
 
     @Override
@@ -42,6 +50,11 @@ public class GrpcServerComponentProvider extends ComponentProvider {
 
     @Override
     public List<HttpRouteProviderContract> getHttpProviders(ApplicationContract app) {
+        return List.of();
+    }
+
+    @Override
+    public List<GrpcRouteProviderContract> getGrpcProviders(ApplicationContract app) {
         return List.of();
     }
 }

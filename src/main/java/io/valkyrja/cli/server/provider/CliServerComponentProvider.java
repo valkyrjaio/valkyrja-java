@@ -10,6 +10,7 @@
 package io.valkyrja.cli.server.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
+import io.valkyrja.application.provider.abstract_.ComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
@@ -17,7 +18,7 @@ import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
-public class CliServerComponentProvider implements ComponentProviderContract {
+public class CliServerComponentProvider extends ComponentProvider {
 
     @Override
     public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {

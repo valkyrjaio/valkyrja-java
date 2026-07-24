@@ -62,14 +62,13 @@ public interface ComponentProviderContract {
     /**
      * Get the component's gRPC route providers.
      *
-     * <p>Defaulted to an empty list: gRPC is an optional protocol, so only components that actually
-     * contribute gRPC routes override this — every other component inherits the empty default
-     * rather than declaring a redundant override.
+     * <p>Abstract, like every other provider method here, so no protocol is privileged over
+     * another. Components that contribute to only some protocols should extend {@code
+     * io.valkyrja.application.provider.abstract_.ComponentProvider}, which supplies empty defaults,
+     * rather than repeating an empty implementation per protocol.
      *
      * @param app the application
      * @return list of gRPC route provider instances
      */
-    default List<GrpcRouteProviderContract> getGrpcProviders(ApplicationContract app) {
-        return List.of();
-    }
+    List<GrpcRouteProviderContract> getGrpcProviders(ApplicationContract app);
 }
