@@ -25,33 +25,33 @@ import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
-import io.valkyrja.grpc.routing.attribute.GrpcMethod;
-import io.valkyrja.grpc.routing.attribute.GrpcMiddleware;
-import io.valkyrja.grpc.routing.attribute.GrpcService;
+import io.valkyrja.grpc.routing.attribute.Method;
+import io.valkyrja.grpc.routing.attribute.Middleware;
+import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** Fixture gRPC service controller exercising the {@code AttributeRouteCollector}. */
-@GrpcService(service = "pkg.Greeter")
+@Service(service = "pkg.Greeter")
 public class GreeterController {
 
-    @GrpcMethod(name = "SayHello")
+    @Method(name = "SayHello")
     public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("hello");
     }
 
-    @GrpcMethod(name = "StreamHellos", clientStreaming = true, serverStreaming = true)
-    @GrpcMiddleware(name = MatchedMiddleware.class)
-    @GrpcMiddleware(name = DispatchedMiddleware.class)
-    @GrpcMiddleware(name = CaughtMiddleware.class)
-    @GrpcMiddleware(name = SendingMiddleware.class)
-    @GrpcMiddleware(name = TerminatedMiddleware.class)
+    @Method(name = "StreamHellos", clientStreaming = true, serverStreaming = true)
+    @Middleware(name = MatchedMiddleware.class)
+    @Middleware(name = DispatchedMiddleware.class)
+    @Middleware(name = CaughtMiddleware.class)
+    @Middleware(name = SendingMiddleware.class)
+    @Middleware(name = TerminatedMiddleware.class)
     public ServiceResponseContract streamHellos(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok();
     }
 
-    @GrpcMethod(name = "Boom")
+    @Method(name = "Boom")
     public ServiceResponseContract boom(ContainerContract container, RouteContract route) {
         throw new IllegalStateException("handler failure");
     }
@@ -61,12 +61,12 @@ public class GreeterController {
      * would. The collector must surface it unwrapped so it maps to {@code CANCELLED} rather than
      * {@code INTERNAL}.
      */
-    @GrpcMethod(name = "Cancelled")
+    @Method(name = "Cancelled")
     public ServiceResponseContract cancelled(ContainerContract container, RouteContract route) {
         throw new CancelledException("cancelled by test", CancellationReason.DEADLINE_EXCEEDED);
     }
 
-    /** Not annotated with {@link GrpcMethod}; must be skipped by the collector. */
+    /** Not annotated with {@link Method}; must be skipped by the collector. */
     public ServiceResponseContract notAnRpc(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok();
     }

@@ -10,20 +10,14 @@
 package io.valkyrja.grpc.routing.attribute;
 
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Attaches a middleware to a {@link GrpcMethod} route. The collector dispatches the class to the
- * matching stage by its middleware contract type, so one annotation serves every stage.
- */
+/** Container annotation for repeatable {@link Middleware}. */
 @Target(ElementType.METHOD)
-@Repeatable(GrpcMiddlewares.class)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GrpcMiddleware {
+public @interface Middlewares {
 
-    /** The middleware class, implementing one of the stage middleware contracts. */
-    Class<?> name();
+    Middleware[] value();
 }

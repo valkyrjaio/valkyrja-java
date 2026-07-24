@@ -16,9 +16,8 @@ import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
-import io.valkyrja.grpc.routing.attribute.GrpcMethod;
-import io.valkyrja.grpc.routing.attribute.GrpcMiddleware;
-import io.valkyrja.grpc.routing.attribute.GrpcService;
+import io.valkyrja.grpc.routing.attribute.Middleware;
+import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
@@ -29,9 +28,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 /**
- * Builds the service map by reflecting over {@link GrpcService}-annotated controller classes: each
- * {@link GrpcMethod} method becomes a {@code Route} keyed by {@code /service/name}, with the method
- * itself wired as the reflective handler and any {@link GrpcMiddleware} dispatched to its stage.
+ * Builds the service map by reflecting over {@link Service}-annotated controller classes: each
+ * {@link Method} method becomes a {@code Route} keyed by {@code /service/name}, with the method
+ * itself wired as the reflective handler and any {@link Middleware} dispatched to its stage.
  */
 public class AttributeRouteCollector implements RouteCollectorContract {
 
@@ -40,18 +39,19 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         List<RouteContract> routes = new ArrayList<>();
 
         for (Class<?> clazz : controllerClasses) {
-            GrpcService service = clazz.getAnnotation(GrpcService.class);
+            Service service = clazz.getAnnotation(Service.class);
             if (service == null) {
                 continue;
             }
 
             for (Method method : clazz.getMethods()) {
-                GrpcMethod grpcMethod = method.getAnnotation(GrpcMethod.class);
-                if (grpcMethod == null) {
+                io.valkyrja.grpc.routing.attribute.Method methodAttribute =
+                        method.getAnnotation(io.valkyrja.grpc.routing.attribute.Method.class);
+                if (methodAttribute == null) {
                     continue;
                 }
 
-                routes.add(buildRoute(service, grpcMethod, clazz, method));
+                routes.add(buildRoute(service, methodAttribute, clazz, method));
             }
         }
 
@@ -59,13 +59,16 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     protected RouteContract buildRoute(
-            GrpcService service, GrpcMethod grpcMethod, Class<?> clazz, Method method) {
-        String fullMethod = "/" + service.service() + "/" + grpcMethod.name();
+            Service service,
+            io.valkyrja.grpc.routing.attribute.Method methodAttribute,
+            Class<?> clazz,
+            Method method) {
+        String fullMethod = "/" + service.service() + "/" + methodAttribute.name();
 
         RouteContract route =
                 new Route(fullMethod, handlerFor(clazz, method))
-                        .withClientStreaming(grpcMethod.clientStreaming())
-                        .withServerStreaming(grpcMethod.serverStreaming());
+                        .withClientStreaming(methodAttribute.clientStreaming())
+                        .withServerStreaming(methodAttribute.serverStreaming());
 
         return applyMiddleware(route, method);
     }
@@ -96,9 +99,9 @@ public class AttributeRouteCollector implements RouteCollectorContract {
 
     @SuppressWarnings("unchecked")
     protected RouteContract applyMiddleware(RouteContract route, Method method) {
-        GrpcMiddleware[] middlewares = method.getAnnotationsByType(GrpcMiddleware.class);
+        Middleware[] middlewares = method.getAnnotationsByType(Middleware.class);
 
-        for (GrpcMiddleware middleware : middlewares) {
+        for (Middleware middleware : middlewares) {
             Class<?> middlewareClass = middleware.name();
 
             if (RouteMatchedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {

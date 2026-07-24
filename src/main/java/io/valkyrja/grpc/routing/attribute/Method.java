@@ -16,13 +16,13 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a method as a gRPC RPC handler. The scan builds a {@code Route} keyed by {@code
- * /service/name} (service coming from the enclosing {@link GrpcService}). The annotated method is
+ * /service/name} (service coming from the enclosing {@link Service}). The annotated method is
  * invoked as the handler with {@code (ContainerContract, RouteContract)}, returning a {@code
  * ServiceResponse}.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GrpcMethod {
+public @interface Method {
 
     /** The RPC method name, e.g. {@code "SayHello"}. */
     String name();

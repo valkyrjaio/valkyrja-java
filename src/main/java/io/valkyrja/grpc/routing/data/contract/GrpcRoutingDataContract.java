@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * The cached service map generated ahead of time (by Sindri) from {@code @GrpcService} controllers,
+ * The cached service map generated ahead of time (by Sindri) from {@code @Service} controllers,
  * keyed by fully-qualified method name. Parallels HTTP's {@code HttpRoutingDataContract} and CLI's
  * {@code CliRoutingDataContract}.
  */

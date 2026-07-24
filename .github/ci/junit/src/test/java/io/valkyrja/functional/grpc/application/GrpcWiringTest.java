@@ -22,7 +22,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * End-to-end wiring: a {@code GrpcConfig} whose component provider registers a {@code @GrpcService}
+ * End-to-end wiring: a {@code GrpcConfig} whose component provider registers a {@code @Service}
  * controller boots the full stack (providers → container → service map → Router → ServiceHandler)
  * and dispatches a call.
  */
