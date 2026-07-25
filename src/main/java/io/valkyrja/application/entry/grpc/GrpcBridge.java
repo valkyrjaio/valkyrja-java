@@ -162,6 +162,11 @@ public final class GrpcBridge {
      * lapsed deadline. Runs off the serialized listener path, so it can transition the token while
      * a synchronous handler is executing.
      *
+     * <p>Note: {@link Context}'s listener also fires on normal completion, so this cancels the
+     * token once the call ends regardless of outcome. That is harmless today because the token is
+     * consumed only while the handler runs; a future stage that inspects the token after the
+     * response is sent would need to distinguish a genuine cancel from ordinary completion.
+     *
      * @param token the shared cancellation token
      * @param context the call's context
      */
