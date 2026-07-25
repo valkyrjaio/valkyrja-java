@@ -20,7 +20,7 @@ import io.valkyrja.cli.interaction.input.Input;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
@@ -61,7 +61,7 @@ final class RouterTest {
                         routeMatchedHandler,
                         routeNotMatchedHandler,
                         routeDispatchedHandler,
-                        mock(ExitedHandlerContract.class));
+                        mock(ProcessExitingHandlerContract.class));
     }
 
     @Test

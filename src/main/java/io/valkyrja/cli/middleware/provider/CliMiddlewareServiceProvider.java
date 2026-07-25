@@ -10,14 +10,14 @@
 package io.valkyrja.cli.middleware.provider;
 
 import io.valkyrja.application.data.contract.CliConfigContract;
-import io.valkyrja.cli.middleware.handler.ExitedHandler;
 import io.valkyrja.cli.middleware.handler.InputReceivedHandler;
+import io.valkyrja.cli.middleware.handler.ProcessExitingHandler;
 import io.valkyrja.cli.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.cli.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.cli.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.cli.middleware.handler.ThrowableCaughtHandler;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
@@ -43,7 +43,8 @@ public class CliMiddlewareServiceProvider implements ServiceProviderContract {
                         CliMiddlewareServiceProvider::publishRouteNotMatchedHandler,
                 RouteDispatchedHandlerContract.class,
                         CliMiddlewareServiceProvider::publishRouteDispatchedHandler,
-                ExitedHandlerContract.class, CliMiddlewareServiceProvider::publishExitedHandler);
+                ProcessExitingHandlerContract.class,
+                        CliMiddlewareServiceProvider::publishProcessExitingHandler);
     }
 
     public static void publishInputReceivedHandler(ContainerContract container) {
@@ -86,10 +87,11 @@ public class CliMiddlewareServiceProvider implements ServiceProviderContract {
                         container, config.routeDispatchedMiddleware().toArray(new Class[0])));
     }
 
-    public static void publishExitedHandler(ContainerContract container) {
+    public static void publishProcessExitingHandler(ContainerContract container) {
         CliConfigContract config = container.getSingleton(CliConfigContract.class);
         container.setSingleton(
-                ExitedHandlerContract.class,
-                new ExitedHandler(container, config.exitedMiddleware().toArray(new Class[0])));
+                ProcessExitingHandlerContract.class,
+                new ProcessExitingHandler(
+                        container, config.processExitingMiddleware().toArray(new Class[0])));
     }
 }

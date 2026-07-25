@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.data.contract.CliConfigContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
@@ -49,13 +49,13 @@ final class CliMiddlewareServiceProviderTest {
         CliMiddlewareServiceProvider.publishRouteMatchedHandler(container);
         CliMiddlewareServiceProvider.publishRouteNotMatchedHandler(container);
         CliMiddlewareServiceProvider.publishRouteDispatchedHandler(container);
-        CliMiddlewareServiceProvider.publishExitedHandler(container);
+        CliMiddlewareServiceProvider.publishProcessExitingHandler(container);
 
         assertNotNull(container.getSingleton(InputReceivedHandlerContract.class));
         assertNotNull(container.getSingleton(ThrowableCaughtHandlerContract.class));
         assertNotNull(container.getSingleton(RouteMatchedHandlerContract.class));
         assertNotNull(container.getSingleton(RouteNotMatchedHandlerContract.class));
         assertNotNull(container.getSingleton(RouteDispatchedHandlerContract.class));
-        assertNotNull(container.getSingleton(ExitedHandlerContract.class));
+        assertNotNull(container.getSingleton(ProcessExitingHandlerContract.class));
     }
 }

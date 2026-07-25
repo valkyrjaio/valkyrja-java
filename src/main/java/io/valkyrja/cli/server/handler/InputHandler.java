@@ -13,8 +13,8 @@ import io.valkyrja.cli.interaction.data.contract.CliInteractionConfigContract;
 import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.server.handler.contract.InputHandlerContract;
@@ -28,7 +28,7 @@ public class InputHandler implements InputHandlerContract {
     protected final RouterContract router;
     protected final InputReceivedHandlerContract inputReceivedHandler;
     protected final ThrowableCaughtHandlerContract throwableCaughtHandler;
-    protected final ExitedHandlerContract exitedHandler;
+    protected final ProcessExitingHandlerContract processExitingHandler;
     protected final CliInteractionConfigContract interactionConfig;
 
     public InputHandler(
@@ -36,13 +36,13 @@ public class InputHandler implements InputHandlerContract {
             RouterContract router,
             InputReceivedHandlerContract inputReceivedHandler,
             ThrowableCaughtHandlerContract throwableCaughtHandler,
-            ExitedHandlerContract exitedHandler,
+            ProcessExitingHandlerContract processExitingHandler,
             CliInteractionConfigContract interactionConfig) {
         this.container = container;
         this.router = router;
         this.inputReceivedHandler = inputReceivedHandler;
         this.throwableCaughtHandler = throwableCaughtHandler;
-        this.exitedHandler = exitedHandler;
+        this.processExitingHandler = processExitingHandler;
         this.interactionConfig = interactionConfig;
     }
 
@@ -60,7 +60,7 @@ public class InputHandler implements InputHandlerContract {
 
     @Override
     public void exit(InputContract input, OutputContract output) {
-        exitedHandler.exited(input, output);
+        processExitingHandler.processExiting(input, output);
     }
 
     @Override

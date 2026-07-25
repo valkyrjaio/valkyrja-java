@@ -17,11 +17,11 @@ import io.valkyrja.container.manager.Container;
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
-import io.valkyrja.cli.middleware.handler.ExitedHandler;
+import io.valkyrja.cli.middleware.handler.ProcessExitingHandler;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link ExitedHandler}. */
-final class ExitedHandlerTest {
+/** Test the {@link ProcessExitingHandler}. */
+final class ProcessExitingHandlerTest {
 
     @Test
     void runsWithAndWithoutMiddleware() {
@@ -30,11 +30,11 @@ final class ExitedHandlerTest {
 
         assertDoesNotThrow(
                 () ->
-                        new ExitedHandler(new Container())
-                                .exited(mock(InputContract.class), mock(OutputContract.class)));
+                        new ProcessExitingHandler(new Container())
+                                .processExiting(mock(InputContract.class), mock(OutputContract.class)));
         assertDoesNotThrow(
                 () ->
-                        new ExitedHandler(container, PassThroughMiddleware.class)
-                                .exited(mock(InputContract.class), mock(OutputContract.class)));
+                        new ProcessExitingHandler(container, PassThroughMiddleware.class)
+                                .processExiting(mock(InputContract.class), mock(OutputContract.class)));
     }
 }

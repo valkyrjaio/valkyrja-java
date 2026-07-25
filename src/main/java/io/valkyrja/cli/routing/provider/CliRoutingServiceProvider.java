@@ -11,7 +11,7 @@ package io.valkyrja.cli.routing.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
@@ -50,7 +50,7 @@ public class CliRoutingServiceProvider implements ServiceProviderContract {
                         container.getSingleton(RouteMatchedHandlerContract.class),
                         container.getSingleton(RouteNotMatchedHandlerContract.class),
                         container.getSingleton(RouteDispatchedHandlerContract.class),
-                        container.getSingleton(ExitedHandlerContract.class)));
+                        container.getSingleton(ProcessExitingHandlerContract.class)));
     }
 
     public static void publishRouteCollection(ContainerContract container) {

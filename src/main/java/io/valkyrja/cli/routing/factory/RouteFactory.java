@@ -23,7 +23,7 @@ public abstract class RouteFactory {
                 route.getRouteMatchedMiddleware(),
                 route.getRouteDispatchedMiddleware(),
                 route.getThrowableCaughtMiddleware(),
-                route.getExitedMiddleware(),
+                route.getProcessExitingMiddleware(),
                 route.getArguments(),
                 route.getOptions());
     }

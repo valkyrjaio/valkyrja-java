@@ -11,7 +11,7 @@ package io.valkyrja.cli.routing.data;
 
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.ThrowableCaughtMiddlewareContract;
@@ -38,7 +38,7 @@ public class Route implements RouteContract {
     protected List<Class<? extends RouteMatchedMiddlewareContract>> routeMatchedMiddleware;
     protected List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware;
     protected List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware;
-    protected List<Class<? extends ExitedMiddlewareContract>> exitedMiddleware;
+    protected List<Class<? extends ProcessExitingMiddlewareContract>> processExitingMiddleware;
     protected List<ArgumentParameterContract> arguments;
     protected List<OptionParameterContract> options;
 
@@ -67,7 +67,7 @@ public class Route implements RouteContract {
             List<Class<? extends RouteMatchedMiddlewareContract>> routeMatchedMiddleware,
             List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
             List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
-            List<Class<? extends ExitedMiddlewareContract>> exitedMiddleware,
+            List<Class<? extends ProcessExitingMiddlewareContract>> processExitingMiddleware,
             List<ArgumentParameterContract> arguments,
             List<OptionParameterContract> options) {
         this.name = name;
@@ -77,7 +77,7 @@ public class Route implements RouteContract {
         this.routeMatchedMiddleware = new ArrayList<>(routeMatchedMiddleware);
         this.routeDispatchedMiddleware = new ArrayList<>(routeDispatchedMiddleware);
         this.throwableCaughtMiddleware = new ArrayList<>(throwableCaughtMiddleware);
-        this.exitedMiddleware = new ArrayList<>(exitedMiddleware);
+        this.processExitingMiddleware = new ArrayList<>(processExitingMiddleware);
         this.arguments = new ArrayList<>(arguments);
         this.options = new ArrayList<>(options);
     }
@@ -91,7 +91,7 @@ public class Route implements RouteContract {
                 routeMatchedMiddleware,
                 routeDispatchedMiddleware,
                 throwableCaughtMiddleware,
-                exitedMiddleware,
+                processExitingMiddleware,
                 arguments,
                 options);
     }
@@ -294,24 +294,24 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public List<Class<? extends ExitedMiddlewareContract>> getExitedMiddleware() {
-        return exitedMiddleware;
+    public List<Class<? extends ProcessExitingMiddlewareContract>> getProcessExitingMiddleware() {
+        return processExitingMiddleware;
     }
 
     @Override
-    public RouteContract withExitedMiddleware(
-            List<Class<? extends ExitedMiddlewareContract>> middleware) {
+    public RouteContract withProcessExitingMiddleware(
+            List<Class<? extends ProcessExitingMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.exitedMiddleware = new ArrayList<>(middleware);
+        copy.processExitingMiddleware = new ArrayList<>(middleware);
         return copy;
     }
 
     @Override
-    public RouteContract withAddedExitedMiddleware(
-            List<Class<? extends ExitedMiddlewareContract>> middleware) {
+    public RouteContract withAddedProcessExitingMiddleware(
+            List<Class<? extends ProcessExitingMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.exitedMiddleware = new ArrayList<>(this.exitedMiddleware);
-        copy.exitedMiddleware.addAll(middleware);
+        copy.processExitingMiddleware = new ArrayList<>(this.processExitingMiddleware);
+        copy.processExitingMiddleware.addAll(middleware);
         return copy;
     }
 

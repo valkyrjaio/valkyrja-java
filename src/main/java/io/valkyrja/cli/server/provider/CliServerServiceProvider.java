@@ -10,8 +10,8 @@
 package io.valkyrja.cli.server.provider;
 
 import io.valkyrja.cli.interaction.data.contract.CliInteractionConfigContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.server.handler.InputHandler;
@@ -36,7 +36,7 @@ public class CliServerServiceProvider implements ServiceProviderContract {
                         container.getSingleton(RouterContract.class),
                         container.getSingleton(InputReceivedHandlerContract.class),
                         container.getSingleton(ThrowableCaughtHandlerContract.class),
-                        container.getSingleton(ExitedHandlerContract.class),
+                        container.getSingleton(ProcessExitingHandlerContract.class),
                         container.getSingleton(CliInteractionConfigContract.class)));
     }
 }

@@ -40,7 +40,7 @@ final class CliConfigTest {
         assertTrue(config.routeNotMatchedMiddleware().isEmpty());
         assertTrue(config.routeDispatchedMiddleware().isEmpty());
         assertTrue(config.throwableCaughtMiddleware().isEmpty());
-        assertTrue(config.exitedMiddleware().isEmpty());
+        assertTrue(config.processExitingMiddleware().isEmpty());
         assertFalse(config.providers().isEmpty());
         assertInstanceOf(CliWithHttpApplicationComponentProvider.class, config.providers().get(0));
         assertTrue(config.callbacks().isEmpty());

@@ -13,8 +13,8 @@ import io.valkyrja.application.data.contract.CliConfigContract;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.CliWithHttpApplicationComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
-import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.InputReceivedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteNotMatchedMiddlewareContract;
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  * @param routeNotMatchedMiddleware middleware run when no route is matched
  * @param routeDispatchedMiddleware middleware run after a route is dispatched
  * @param throwableCaughtMiddleware middleware run when a throwable is caught
- * @param exitedMiddleware middleware run when the application exits
+ * @param processExitingMiddleware middleware run when the application exits
  * @param providers registered component application providers
  * @param callbacks custom initialization callbacks invoked during bootstrapping
  */
@@ -62,7 +62,7 @@ public record CliConfig(
         List<Class<? extends RouteNotMatchedMiddlewareContract>> routeNotMatchedMiddleware,
         List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
         List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
-        List<Class<? extends ExitedMiddlewareContract>> exitedMiddleware,
+        List<Class<? extends ProcessExitingMiddlewareContract>> processExitingMiddleware,
         List<ComponentProviderContract> providers,
         List<Consumer<ApplicationContract>> callbacks)
         implements CliConfigContract {
@@ -74,7 +74,7 @@ public record CliConfig(
         routeNotMatchedMiddleware = List.copyOf(routeNotMatchedMiddleware);
         routeDispatchedMiddleware = List.copyOf(routeDispatchedMiddleware);
         throwableCaughtMiddleware = List.copyOf(throwableCaughtMiddleware);
-        exitedMiddleware = List.copyOf(exitedMiddleware);
+        processExitingMiddleware = List.copyOf(processExitingMiddleware);
         providers = List.copyOf(providers);
         callbacks = List.copyOf(callbacks);
     }

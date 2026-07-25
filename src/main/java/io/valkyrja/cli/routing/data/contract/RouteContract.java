@@ -11,7 +11,7 @@ package io.valkyrja.cli.routing.data.contract;
 
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.ThrowableCaughtMiddlewareContract;
@@ -86,12 +86,13 @@ public interface RouteContract {
     RouteContract withAddedThrowableCaughtMiddleware(
             List<Class<? extends ThrowableCaughtMiddlewareContract>> middleware);
 
-    List<Class<? extends ExitedMiddlewareContract>> getExitedMiddleware();
+    List<Class<? extends ProcessExitingMiddlewareContract>> getProcessExitingMiddleware();
 
-    RouteContract withExitedMiddleware(List<Class<? extends ExitedMiddlewareContract>> middleware);
+    RouteContract withProcessExitingMiddleware(
+            List<Class<? extends ProcessExitingMiddlewareContract>> middleware);
 
-    RouteContract withAddedExitedMiddleware(
-            List<Class<? extends ExitedMiddlewareContract>> middleware);
+    RouteContract withAddedProcessExitingMiddleware(
+            List<Class<? extends ProcessExitingMiddlewareContract>> middleware);
 
     BiFunction<ContainerContract, RouteContract, OutputContract> getHandler();
 

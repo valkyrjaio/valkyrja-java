@@ -10,7 +10,7 @@
 package io.valkyrja.cli.routing.collector;
 
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.ThrowableCaughtMiddlewareContract;
@@ -136,10 +136,12 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                                 route.withAddedThrowableCaughtMiddleware(list);
             }
 
-            if (ExitedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
-                List<Class<? extends ExitedMiddlewareContract>> list = new ArrayList<>();
-                list.add((Class<? extends ExitedMiddlewareContract>) middlewareClass);
-                route = (io.valkyrja.cli.routing.data.Route) route.withAddedExitedMiddleware(list);
+            if (ProcessExitingMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
+                List<Class<? extends ProcessExitingMiddlewareContract>> list = new ArrayList<>();
+                list.add((Class<? extends ProcessExitingMiddlewareContract>) middlewareClass);
+                route =
+                        (io.valkyrja.cli.routing.data.Route)
+                                route.withAddedProcessExitingMiddleware(list);
             }
         }
 

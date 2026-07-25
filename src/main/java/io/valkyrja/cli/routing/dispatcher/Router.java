@@ -13,7 +13,7 @@ import io.valkyrja.cli.interaction.argument.contract.ArgumentContract;
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
@@ -36,7 +36,7 @@ public class Router implements RouterContract {
     protected final RouteMatchedHandlerContract routeMatchedHandler;
     protected final RouteNotMatchedHandlerContract routeNotMatchedHandler;
     protected final RouteDispatchedHandlerContract routeDispatchedHandler;
-    protected final ExitedHandlerContract exitedHandler;
+    protected final ProcessExitingHandlerContract processExitingHandler;
 
     public Router(
             ContainerContract container,
@@ -46,7 +46,7 @@ public class Router implements RouterContract {
             RouteMatchedHandlerContract routeMatchedHandler,
             RouteNotMatchedHandlerContract routeNotMatchedHandler,
             RouteDispatchedHandlerContract routeDispatchedHandler,
-            ExitedHandlerContract exitedHandler) {
+            ProcessExitingHandlerContract processExitingHandler) {
         this.container = container;
         this.collection = collection;
         this.outputFactory = outputFactory;
@@ -54,7 +54,7 @@ public class Router implements RouterContract {
         this.routeMatchedHandler = routeMatchedHandler;
         this.routeNotMatchedHandler = routeNotMatchedHandler;
         this.routeDispatchedHandler = routeDispatchedHandler;
-        this.exitedHandler = exitedHandler;
+        this.processExitingHandler = processExitingHandler;
     }
 
     @Override
