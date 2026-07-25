@@ -7,11 +7,21 @@
  * file that was distributed with this source code.
  */
 
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     java
     id("com.vanniktech.maven.publish") version "0.30.0"
+    id("com.github.ben-manes.versions") version "0.54.0"
+    id("se.patrikerdes.use-latest-versions") version "0.2.19"
+}
+
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
 }
 
 group = "io.valkyrja"
@@ -35,6 +45,10 @@ dependencies {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
+    rejectVersionIf { isNonStable(candidate.version) }
 }
 
 mavenPublishing {

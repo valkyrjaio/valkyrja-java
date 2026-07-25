@@ -12,6 +12,7 @@ jobs:
     with:
       dependencies: |
         [
+          {"name": "Framework",   "directory": "."},
           {"name": "Spotless",    "directory": ".github/ci/spotless"},
           {"name": "ArchUnit",    "directory": ".github/ci/archunit"},
           {"name": "ErrorProne",  "directory": ".github/ci/errorprone"},
