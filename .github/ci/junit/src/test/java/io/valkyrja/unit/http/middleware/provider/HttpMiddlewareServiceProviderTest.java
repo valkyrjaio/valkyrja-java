@@ -20,7 +20,7 @@ import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContra
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 
 import io.valkyrja.http.middleware.provider.HttpMiddlewareServiceProvider;
@@ -51,7 +51,7 @@ final class HttpMiddlewareServiceProviderTest {
         HttpMiddlewareServiceProvider.publishRouteNotMatchedHandler(container);
         HttpMiddlewareServiceProvider.publishRouteDispatchedHandler(container);
         HttpMiddlewareServiceProvider.publishSendingResponseHandler(container);
-        HttpMiddlewareServiceProvider.publishTerminatedHandler(container);
+        HttpMiddlewareServiceProvider.publishResponseSentHandler(container);
 
         assertNotNull(container.getSingleton(RequestReceivedHandlerContract.class));
         assertNotNull(container.getSingleton(ThrowableCaughtHandlerContract.class));
@@ -59,6 +59,6 @@ final class HttpMiddlewareServiceProviderTest {
         assertNotNull(container.getSingleton(RouteNotMatchedHandlerContract.class));
         assertNotNull(container.getSingleton(RouteDispatchedHandlerContract.class));
         assertNotNull(container.getSingleton(SendingResponseHandlerContract.class));
-        assertNotNull(container.getSingleton(TerminatedHandlerContract.class));
+        assertNotNull(container.getSingleton(ResponseSentHandlerContract.class));
     }
 }

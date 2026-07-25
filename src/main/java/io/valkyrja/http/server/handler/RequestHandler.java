@@ -19,12 +19,12 @@ import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.throwable.exception.HttpResponseException;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.handler.RequestReceivedHandler;
+import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
-import io.valkyrja.http.middleware.handler.TerminatedHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.dispatcher.Router;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
@@ -37,7 +37,7 @@ public class RequestHandler implements RequestHandlerContract {
     protected RequestReceivedHandlerContract requestReceivedHandler;
     protected ThrowableCaughtHandlerContract throwableCaughtHandler;
     protected SendingResponseHandlerContract sendingResponseHandler;
-    protected TerminatedHandlerContract terminatedHandler;
+    protected ResponseSentHandlerContract responseSentHandler;
     protected boolean debug;
 
     public RequestHandler() {
@@ -51,7 +51,7 @@ public class RequestHandler implements RequestHandlerContract {
                 new RequestReceivedHandler(container),
                 new ThrowableCaughtHandler(container),
                 new SendingResponseHandler(container),
-                new TerminatedHandler(container),
+                new ResponseSentHandler(container),
                 false);
     }
 
@@ -61,14 +61,14 @@ public class RequestHandler implements RequestHandlerContract {
             RequestReceivedHandlerContract requestReceivedHandler,
             ThrowableCaughtHandlerContract throwableCaughtHandler,
             SendingResponseHandlerContract sendingResponseHandler,
-            TerminatedHandlerContract terminatedHandler,
+            ResponseSentHandlerContract responseSentHandler,
             boolean debug) {
         this.container = container;
         this.router = router;
         this.requestReceivedHandler = requestReceivedHandler;
         this.throwableCaughtHandler = throwableCaughtHandler;
         this.sendingResponseHandler = sendingResponseHandler;
-        this.terminatedHandler = terminatedHandler;
+        this.responseSentHandler = responseSentHandler;
         this.debug = debug;
     }
 
@@ -95,7 +95,7 @@ public class RequestHandler implements RequestHandlerContract {
 
     @Override
     public void terminate(ServerRequestContract request, ResponseContract response) {
-        terminatedHandler.terminated(request, response);
+        responseSentHandler.responseSent(request, response);
     }
 
     @Override

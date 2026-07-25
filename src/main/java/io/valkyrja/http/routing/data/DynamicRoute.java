@@ -12,10 +12,10 @@ package io.valkyrja.http.routing.data;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.ParameterContract;
@@ -45,7 +45,7 @@ public class DynamicRoute extends Route implements DynamicRouteContract {
             List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
             List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
             List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware,
-            List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware,
+            List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware,
             @Nullable RequestStructContract requestStruct,
             @Nullable ResponseStructContract responseStruct) {
         super(
@@ -57,7 +57,7 @@ public class DynamicRoute extends Route implements DynamicRouteContract {
                 routeDispatchedMiddleware,
                 throwableCaughtMiddleware,
                 sendingResponseMiddleware,
-                terminatedMiddleware,
+                responseSentMiddleware,
                 requestStruct,
                 responseStruct);
         this.regex = regex;
@@ -146,7 +146,7 @@ public class DynamicRoute extends Route implements DynamicRouteContract {
                 routeDispatchedMiddleware,
                 throwableCaughtMiddleware,
                 sendingResponseMiddleware,
-                terminatedMiddleware,
+                responseSentMiddleware,
                 requestStruct,
                 responseStruct);
     }

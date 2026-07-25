@@ -14,8 +14,8 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.http.server.handler.RequestHandler;
@@ -59,7 +59,7 @@ public class HttpServerServiceProvider implements ServiceProviderContract {
                         container.getSingleton(RequestReceivedHandlerContract.class),
                         throwableCaught,
                         container.getSingleton(SendingResponseHandlerContract.class),
-                        container.getSingleton(TerminatedHandlerContract.class),
+                        container.getSingleton(ResponseSentHandlerContract.class),
                         app.getDebugMode()));
     }
 

@@ -12,10 +12,10 @@ package io.valkyrja.http.routing.data.contract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
 import io.valkyrja.http.struct.response.contract.ResponseStructContract;
@@ -81,13 +81,13 @@ public interface RouteContract {
     RouteContract withAddedSendingResponseMiddleware(
             Class<? extends SendingResponseMiddlewareContract>... middleware);
 
-    List<Class<? extends TerminatedMiddlewareContract>> getTerminatedMiddleware();
+    List<Class<? extends ResponseSentMiddlewareContract>> getResponseSentMiddleware();
 
-    RouteContract withTerminatedMiddleware(
-            Class<? extends TerminatedMiddlewareContract>... middleware);
+    RouteContract withResponseSentMiddleware(
+            Class<? extends ResponseSentMiddlewareContract>... middleware);
 
-    RouteContract withAddedTerminatedMiddleware(
-            Class<? extends TerminatedMiddlewareContract>... middleware);
+    RouteContract withAddedResponseSentMiddleware(
+            Class<? extends ResponseSentMiddlewareContract>... middleware);
 
     boolean hasRequestStruct();
 

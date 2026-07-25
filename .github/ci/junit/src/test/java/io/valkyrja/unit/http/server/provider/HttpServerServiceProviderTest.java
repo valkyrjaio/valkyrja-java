@@ -17,7 +17,7 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
@@ -50,7 +50,7 @@ final class HttpServerServiceProviderTest {
         container.setSingleton(
                 SendingResponseHandlerContract.class, mock(SendingResponseHandlerContract.class));
         container.setSingleton(
-                TerminatedHandlerContract.class, mock(TerminatedHandlerContract.class));
+                ResponseSentHandlerContract.class, mock(ResponseSentHandlerContract.class));
         container.setSingleton(LoggerContract.class, mock(LoggerContract.class));
 
         HttpServerServiceProvider.publishLogThrowableCaughtMiddleware(container);

@@ -14,11 +14,11 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.HttpApplicationComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.http.middleware.contract.RequestReceivedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.server.middleware.throwablecaught.LogThrowableCaughtMiddleware;
 import java.util.List;
@@ -43,7 +43,7 @@ public record HttpConfig(
         List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
         List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
         List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware,
-        List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware)
+        List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware)
         implements HttpConfigContract {
 
     public HttpConfig {
@@ -55,7 +55,7 @@ public record HttpConfig(
         routeDispatchedMiddleware = List.copyOf(routeDispatchedMiddleware);
         throwableCaughtMiddleware = List.copyOf(throwableCaughtMiddleware);
         sendingResponseMiddleware = List.copyOf(sendingResponseMiddleware);
-        terminatedMiddleware = List.copyOf(terminatedMiddleware);
+        responseSentMiddleware = List.copyOf(responseSentMiddleware);
     }
 
     public HttpConfig() {

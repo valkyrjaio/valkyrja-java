@@ -11,9 +11,10 @@ package io.valkyrja.http.middleware.handler.contract;
 
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 
-public interface TerminatedHandlerContract extends HandlerContract<TerminatedMiddlewareContract> {
+public interface ResponseSentHandlerContract
+        extends HandlerContract<ResponseSentMiddlewareContract> {
 
-    void terminated(ServerRequestContract request, ResponseContract response);
+    void responseSent(ServerRequestContract request, ResponseContract response);
 }

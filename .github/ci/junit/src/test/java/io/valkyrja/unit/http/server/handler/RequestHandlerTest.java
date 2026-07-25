@@ -29,7 +29,7 @@ import io.valkyrja.http.message.throwable.exception.HttpResponseException;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.http.server.handler.RequestHandler;
@@ -44,7 +44,7 @@ final class RequestHandlerTest {
     private RequestReceivedHandlerContract requestReceivedHandler;
     private ThrowableCaughtHandlerContract throwableCaughtHandler;
     private SendingResponseHandlerContract sendingResponseHandler;
-    private TerminatedHandlerContract terminatedHandler;
+    private ResponseSentHandlerContract responseSentHandler;
     private final ServerRequestContract request = mock(ServerRequestContract.class);
 
     @BeforeEach
@@ -54,7 +54,7 @@ final class RequestHandlerTest {
         requestReceivedHandler = mock(RequestReceivedHandlerContract.class);
         throwableCaughtHandler = mock(ThrowableCaughtHandlerContract.class);
         sendingResponseHandler = mock(SendingResponseHandlerContract.class);
-        terminatedHandler = mock(TerminatedHandlerContract.class);
+        responseSentHandler = mock(ResponseSentHandlerContract.class);
         when(requestReceivedHandler.requestReceived(any()))
                 .thenAnswer(inv -> new RequestReceivedResult(inv.getArgument(0), null));
         when(throwableCaughtHandler.throwableCaught(any(), any(), any()))
@@ -70,7 +70,7 @@ final class RequestHandlerTest {
                 requestReceivedHandler,
                 throwableCaughtHandler,
                 sendingResponseHandler,
-                terminatedHandler,
+                responseSentHandler,
                 debug);
     }
 
@@ -145,7 +145,7 @@ final class RequestHandlerTest {
         var handler = handler(false);
         assertDoesNotThrow(() -> handler.send(new EmptyResponse()));
         handler.terminate(request, new EmptyResponse());
-        verify(terminatedHandler).terminated(any(), any());
+        verify(responseSentHandler).responseSent(any(), any());
 
         assertDoesNotThrow(() -> handler.run(request));
     }

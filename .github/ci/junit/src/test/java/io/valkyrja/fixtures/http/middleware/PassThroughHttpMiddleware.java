@@ -16,7 +16,7 @@ import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.data.RouteMatchedResult;
@@ -25,7 +25,7 @@ import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContra
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
@@ -37,7 +37,7 @@ public final class PassThroughHttpMiddleware
                 RouteDispatchedMiddlewareContract,
                 ThrowableCaughtMiddlewareContract,
                 SendingResponseMiddlewareContract,
-                TerminatedMiddlewareContract {
+                ResponseSentMiddlewareContract {
 
     @Override
     public RequestReceivedResult requestReceived(
@@ -86,10 +86,10 @@ public final class PassThroughHttpMiddleware
     }
 
     @Override
-    public void terminated(
+    public void responseSent(
             ServerRequestContract request,
             ResponseContract response,
-            TerminatedHandlerContract handler) {
-        handler.terminated(request, response);
+            ResponseSentHandlerContract handler) {
+        handler.responseSent(request, response);
     }
 }

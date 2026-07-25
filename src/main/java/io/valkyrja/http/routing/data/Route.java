@@ -12,10 +12,10 @@ package io.valkyrja.http.routing.data;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingNoRequestStructException;
@@ -38,7 +38,7 @@ public class Route implements RouteContract {
     protected List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware;
     protected List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware;
     protected List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware;
-    protected List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware;
+    protected List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware;
     protected @Nullable RequestStructContract requestStruct;
     protected @Nullable ResponseStructContract responseStruct;
 
@@ -51,7 +51,7 @@ public class Route implements RouteContract {
             List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
             List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
             List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware,
-            List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware,
+            List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware,
             @Nullable RequestStructContract requestStruct,
             @Nullable ResponseStructContract responseStruct) {
         this.path = path;
@@ -62,7 +62,7 @@ public class Route implements RouteContract {
         this.routeDispatchedMiddleware = new ArrayList<>(routeDispatchedMiddleware);
         this.throwableCaughtMiddleware = new ArrayList<>(throwableCaughtMiddleware);
         this.sendingResponseMiddleware = new ArrayList<>(sendingResponseMiddleware);
-        this.terminatedMiddleware = new ArrayList<>(terminatedMiddleware);
+        this.responseSentMiddleware = new ArrayList<>(responseSentMiddleware);
         this.requestStruct = requestStruct;
         this.responseStruct = responseStruct;
     }
@@ -257,25 +257,25 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public List<Class<? extends TerminatedMiddlewareContract>> getTerminatedMiddleware() {
-        return List.copyOf(terminatedMiddleware);
+    public List<Class<? extends ResponseSentMiddlewareContract>> getResponseSentMiddleware() {
+        return List.copyOf(responseSentMiddleware);
     }
 
     @Override
     @SafeVarargs
-    public final RouteContract withTerminatedMiddleware(
-            Class<? extends TerminatedMiddlewareContract>... middleware) {
+    public final RouteContract withResponseSentMiddleware(
+            Class<? extends ResponseSentMiddlewareContract>... middleware) {
         Route copy = copy();
-        copy.terminatedMiddleware = new ArrayList<>(Arrays.asList(middleware));
+        copy.responseSentMiddleware = new ArrayList<>(Arrays.asList(middleware));
         return copy;
     }
 
     @Override
     @SafeVarargs
-    public final RouteContract withAddedTerminatedMiddleware(
-            Class<? extends TerminatedMiddlewareContract>... middleware) {
+    public final RouteContract withAddedResponseSentMiddleware(
+            Class<? extends ResponseSentMiddlewareContract>... middleware) {
         Route copy = copy();
-        copy.terminatedMiddleware.addAll(Arrays.asList(middleware));
+        copy.responseSentMiddleware.addAll(Arrays.asList(middleware));
         return copy;
     }
 
@@ -331,7 +331,7 @@ public class Route implements RouteContract {
                 routeDispatchedMiddleware,
                 throwableCaughtMiddleware,
                 sendingResponseMiddleware,
-                terminatedMiddleware,
+                responseSentMiddleware,
                 requestStruct,
                 responseStruct);
     }

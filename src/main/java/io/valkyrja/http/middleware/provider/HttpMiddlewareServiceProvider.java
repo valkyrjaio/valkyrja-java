@@ -13,18 +13,18 @@ import io.valkyrja.application.data.contract.HttpConfigContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.http.middleware.handler.RequestReceivedHandler;
+import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
-import io.valkyrja.http.middleware.handler.TerminatedHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -47,8 +47,8 @@ public class HttpMiddlewareServiceProvider implements ServiceProviderContract {
                         HttpMiddlewareServiceProvider::publishRouteDispatchedHandler,
                 SendingResponseHandlerContract.class,
                         HttpMiddlewareServiceProvider::publishSendingResponseHandler,
-                TerminatedHandlerContract.class,
-                        HttpMiddlewareServiceProvider::publishTerminatedHandler);
+                ResponseSentHandlerContract.class,
+                        HttpMiddlewareServiceProvider::publishResponseSentHandler);
     }
 
     public static void publishRequestReceivedHandler(ContainerContract container) {
@@ -99,11 +99,11 @@ public class HttpMiddlewareServiceProvider implements ServiceProviderContract {
                         container, config.sendingResponseMiddleware().toArray(new Class[0])));
     }
 
-    public static void publishTerminatedHandler(ContainerContract container) {
+    public static void publishResponseSentHandler(ContainerContract container) {
         HttpConfigContract config = container.getSingleton(HttpConfigContract.class);
         container.setSingleton(
-                TerminatedHandlerContract.class,
-                new TerminatedHandler(
-                        container, config.terminatedMiddleware().toArray(new Class[0])));
+                ResponseSentHandlerContract.class,
+                new ResponseSentHandler(
+                        container, config.responseSentMiddleware().toArray(new Class[0])));
     }
 }

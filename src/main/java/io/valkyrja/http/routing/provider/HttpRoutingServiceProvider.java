@@ -13,11 +13,11 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.http.message.response.factory.contract.ResponseFactoryContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
@@ -68,7 +68,7 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
                         container.getSingleton(RouteNotMatchedHandlerContract.class),
                         container.getSingleton(RouteDispatchedHandlerContract.class),
                         container.getSingleton(SendingResponseHandlerContract.class),
-                        container.getSingleton(TerminatedHandlerContract.class)));
+                        container.getSingleton(ResponseSentHandlerContract.class)));
     }
 
     public static void publishRouteCollection(ContainerContract container) {

@@ -13,10 +13,10 @@ import io.valkyrja.http.message.enum_.StatusCode;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.RequestReceivedMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.server.generator.ResponseFileGenerator;
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class CacheResponseMiddleware
-        implements RequestReceivedMiddlewareContract, TerminatedMiddlewareContract {
+        implements RequestReceivedMiddlewareContract, ResponseSentMiddlewareContract {
 
     protected String filePath;
     protected boolean debug;
@@ -61,17 +61,17 @@ public class CacheResponseMiddleware
     }
 
     @Override
-    public void terminated(
+    public void responseSent(
             ServerRequestContract request,
             ResponseContract response,
-            TerminatedHandlerContract handler) {
+            ResponseSentHandlerContract handler) {
         if (!shouldNotCache(request, response)) {
             String cacheFilePath = getCachePathForRequest(request);
             ResponseFileGenerator generator = new ResponseFileGenerator(response, cacheFilePath);
             generator.generateFile();
         }
 
-        handler.terminated(request, response);
+        handler.responseSent(request, response);
     }
 
     protected boolean shouldNotCache(ServerRequestContract request, ResponseContract response) {

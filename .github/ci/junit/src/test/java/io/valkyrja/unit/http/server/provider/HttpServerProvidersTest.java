@@ -24,11 +24,11 @@ import io.valkyrja.http.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.http.middleware.handler.RequestReceivedHandler;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
-import io.valkyrja.http.middleware.handler.TerminatedHandler;
+import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.dispatcher.Router;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
@@ -103,7 +103,7 @@ final class HttpServerProvidersTest {
                 RequestReceivedHandlerContract.class, new RequestReceivedHandler(container));
         container.setSingleton(
                 SendingResponseHandlerContract.class, new SendingResponseHandler(container));
-        container.setSingleton(TerminatedHandlerContract.class, new TerminatedHandler(container));
+        container.setSingleton(ResponseSentHandlerContract.class, new ResponseSentHandler(container));
 
         HttpServerServiceProvider.publishRequestHandler(container);
 

@@ -104,9 +104,9 @@ final class RouteTest {
                         .getSendingResponseMiddleware()
                         .isEmpty());
         assertTrue(
-                route.withTerminatedMiddleware()
-                        .withAddedTerminatedMiddleware()
-                        .getTerminatedMiddleware()
+                route.withResponseSentMiddleware()
+                        .withAddedResponseSentMiddleware()
+                        .getResponseSentMiddleware()
                         .isEmpty());
     }
 

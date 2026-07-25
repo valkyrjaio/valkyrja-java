@@ -17,11 +17,11 @@ import io.valkyrja.fixtures.http.middleware.PassThroughHttpMiddleware;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
-import io.valkyrja.http.middleware.handler.TerminatedHandler;
+import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link TerminatedHandler}. */
-final class TerminatedHandlerTest {
+/** Test the {@link ResponseSentHandler}. */
+final class ResponseSentHandlerTest {
 
     @Test
     void runsWithAndWithoutMiddleware() {
@@ -31,14 +31,14 @@ final class TerminatedHandlerTest {
 
         assertDoesNotThrow(
                 () ->
-                        new TerminatedHandler(new Container())
-                                .terminated(
+                        new ResponseSentHandler(new Container())
+                                .responseSent(
                                         mock(ServerRequestContract.class),
                                         mock(ResponseContract.class)));
         assertDoesNotThrow(
                 () ->
-                        new TerminatedHandler(container, PassThroughHttpMiddleware.class)
-                                .terminated(
+                        new ResponseSentHandler(container, PassThroughHttpMiddleware.class)
+                                .responseSent(
                                         mock(ServerRequestContract.class),
                                         mock(ResponseContract.class)));
     }
