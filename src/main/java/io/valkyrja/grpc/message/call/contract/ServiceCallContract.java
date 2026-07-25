@@ -90,8 +90,11 @@ public interface ServiceCallContract {
     ServiceCallContract withRoute(RouteContract route);
 
     /**
-     * Wrap a source iterable so iteration checks cancellation between items, throwing {@code
-     * CancelledException} if the call is cancelled. A cooperation helper for user handlers.
+     * Wrap a source iterable so iteration checks cancellation between items, exiting iteration
+     * early (yielding no further items) once the call is cancelled. A cooperation helper for user
+     * handlers and the outbound drain: it stops yielding rather than throwing, so a cancelled
+     * stream ends cleanly. Handlers that want to fail loudly instead can call {@code
+     * getCancellation().throwIfCancelled()}.
      *
      * @param source the source iterable
      * @param <T> the item type

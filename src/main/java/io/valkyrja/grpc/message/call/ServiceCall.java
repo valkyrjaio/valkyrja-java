@@ -121,13 +121,15 @@ public class ServiceCall implements ServiceCallContract {
             return new Iterator<>() {
                 @Override
                 public boolean hasNext() {
-                    cancellation.throwIfCancelled();
-                    return delegate.hasNext();
+                    // Exit iteration early once the call is cancelled rather than throwing: the
+                    // outbound drain then simply stops yielding and the call is closed normally,
+                    // instead of a CancelledException escaping the transport listener. This mirrors
+                    // the cooperative drain model in the architecture GRPC.md spec.
+                    return !cancellation.isCancelled() && delegate.hasNext();
                 }
 
                 @Override
                 public T next() {
-                    cancellation.throwIfCancelled();
                     return delegate.next();
                 }
             };

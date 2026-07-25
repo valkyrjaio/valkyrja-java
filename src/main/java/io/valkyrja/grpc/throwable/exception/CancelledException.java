@@ -16,10 +16,10 @@ import org.jspecify.annotations.Nullable;
 /**
  * Thrown when work is performed on a cancelled call.
  *
- * <p>Raised by {@code CancellationToken.throwIfCancelled()} and by writes to a cancelled call's
- * response messages. It carries the {@link CancellationReason} so {@code ThrowableCaught}
- * middleware can map it to either {@code CANCELLED} or {@code DEADLINE_EXCEEDED}. Language-native
- * cancellation exceptions are converted to this type at the adapter boundary.
+ * <p>Raised by {@code CancellationToken.throwIfCancelled()} when a handler opts to fail loudly on
+ * cancellation. It carries the {@link CancellationReason} so {@code ThrowableCaught} middleware can
+ * map it to either {@code CANCELLED} or {@code DEADLINE_EXCEEDED}. Language-native cancellation
+ * exceptions are converted to this type at the adapter boundary.
  */
 public class CancelledException extends GrpcRuntimeException {
 

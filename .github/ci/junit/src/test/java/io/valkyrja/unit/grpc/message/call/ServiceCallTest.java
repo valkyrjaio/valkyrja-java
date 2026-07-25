@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.grpc.message.call.ServiceCall;
@@ -28,7 +27,6 @@ import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
 import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
-import io.valkyrja.grpc.throwable.exception.CancelledException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -101,7 +99,7 @@ final class ServiceCallTest {
     }
 
     @Test
-    void cancellableThrowsWhenCancelledBeforeIteration() {
+    void cancellableExitsEarlyWhenCancelledBeforeIteration() {
         CancellationToken token = new CancellationToken();
         token.cancel(CancellationReason.CLIENT_CANCELLED);
         ServiceCall call =
@@ -114,8 +112,9 @@ final class ServiceCallTest {
                         List.of("a"),
                         null);
 
+        // Cancelled before iteration: the drain yields nothing rather than throwing.
         Iterable<String> cancellable = call.cancellable(List.of("a", "b"));
-        assertThrows(CancelledException.class, () -> cancellable.iterator().hasNext());
+        assertFalseHasNext(cancellable.iterator());
     }
 
     @Test
@@ -135,11 +134,12 @@ final class ServiceCallTest {
         assertTrue(it.hasNext());
         assertEquals("a", it.next());
         token.cancel(CancellationReason.DEADLINE_EXCEEDED);
-        assertThrows(CancelledException.class, it::hasNext);
+        // Cancellation mid-drain ends iteration early — no further items, no exception.
+        assertFalse(it.hasNext());
     }
 
     @Test
-    void cancellableNextThrowsWhenCancelled() {
+    void cancellableDrainsFullyWhenNeverCancelled() {
         CancellationToken token = new CancellationToken();
         ServiceCall call =
                 new ServiceCall(
@@ -150,9 +150,16 @@ final class ServiceCallTest {
                         Peer.insecure("x"),
                         List.of(),
                         null);
-        Iterator<String> it = call.cancellable(List.of("a")).iterator();
-        token.cancel(CancellationReason.CLIENT_CANCELLED);
-        assertThrows(CancelledException.class, it::next);
+
+        List<String> collected = new ArrayList<>();
+        for (String item : call.cancellable(List.of("a", "b"))) {
+            collected.add(item);
+        }
+        assertEquals(List.of("a", "b"), collected);
+    }
+
+    private static void assertFalseHasNext(Iterator<?> it) {
+        assertFalse(it.hasNext());
     }
 
     @Test
