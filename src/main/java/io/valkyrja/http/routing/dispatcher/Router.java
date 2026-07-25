@@ -18,17 +18,17 @@ import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.message.response.factory.ResponseFactory;
 import io.valkyrja.http.message.response.factory.contract.ResponseFactoryContract;
 import io.valkyrja.http.middleware.data.RouteMatchedResult;
+import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
-import io.valkyrja.http.middleware.handler.TerminatedHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
@@ -47,7 +47,7 @@ public class Router implements RouterContract {
     protected RouteNotMatchedHandlerContract routeNotMatchedHandler;
     protected RouteDispatchedHandlerContract routeDispatchedHandler;
     protected SendingResponseHandlerContract sendingResponseHandler;
-    protected TerminatedHandlerContract terminatedHandler;
+    protected ResponseSentHandlerContract responseSentHandler;
 
     public Router() {
         this(new Container());
@@ -63,7 +63,7 @@ public class Router implements RouterContract {
                 new RouteNotMatchedHandler(container),
                 new RouteDispatchedHandler(container),
                 new SendingResponseHandler(container),
-                new TerminatedHandler(container));
+                new ResponseSentHandler(container));
     }
 
     public Router(
@@ -75,7 +75,7 @@ public class Router implements RouterContract {
             RouteNotMatchedHandlerContract routeNotMatchedHandler,
             RouteDispatchedHandlerContract routeDispatchedHandler,
             SendingResponseHandlerContract sendingResponseHandler,
-            TerminatedHandlerContract terminatedHandler) {
+            ResponseSentHandlerContract responseSentHandler) {
         this.container = container;
         this.matcher = matcher;
         this.responseFactory = responseFactory;
@@ -84,7 +84,7 @@ public class Router implements RouterContract {
         this.routeNotMatchedHandler = routeNotMatchedHandler;
         this.routeDispatchedHandler = routeDispatchedHandler;
         this.sendingResponseHandler = sendingResponseHandler;
-        this.terminatedHandler = terminatedHandler;
+        this.responseSentHandler = responseSentHandler;
     }
 
     @Override
@@ -141,7 +141,7 @@ public class Router implements RouterContract {
         routeDispatchedHandler.add(route.getRouteDispatchedMiddleware().toArray(new Class[0]));
         throwableCaughtHandler.add(route.getThrowableCaughtMiddleware().toArray(new Class[0]));
         sendingResponseHandler.add(route.getSendingResponseMiddleware().toArray(new Class[0]));
-        terminatedHandler.add(route.getTerminatedMiddleware().toArray(new Class[0]));
+        responseSentHandler.add(route.getResponseSentMiddleware().toArray(new Class[0]));
 
         container.setSingleton(RouteContract.class, route);
     }

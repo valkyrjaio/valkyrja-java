@@ -24,7 +24,7 @@ import io.valkyrja.http.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
-import io.valkyrja.http.middleware.handler.TerminatedHandler;
+import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.http.routing.data.Route;
 import io.valkyrja.http.routing.data.contract.RouteContract;
@@ -105,11 +105,11 @@ final class MiddlewareHandlerTest {
     }
 
     @Test
-    void terminatedChain() {
-        assertDoesNotThrow(() -> new TerminatedHandler(container).terminated(request, response));
+    void responseSentChain() {
+        assertDoesNotThrow(() -> new ResponseSentHandler(container).responseSent(request, response));
         assertDoesNotThrow(
                 () ->
-                        new TerminatedHandler(container, PassThroughHttpMiddleware.class)
-                                .terminated(request, response));
+                        new ResponseSentHandler(container, PassThroughHttpMiddleware.class)
+                                .responseSent(request, response));
     }
 }

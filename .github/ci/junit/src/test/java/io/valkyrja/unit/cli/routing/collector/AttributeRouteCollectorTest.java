@@ -60,7 +60,7 @@ final class AttributeRouteCollectorTest {
         assertEquals(1, route.getRouteMatchedMiddleware().size());
         assertEquals(1, route.getRouteDispatchedMiddleware().size());
         assertEquals(1, route.getThrowableCaughtMiddleware().size());
-        assertEquals(1, route.getExitedMiddleware().size());
+        assertEquals(1, route.getProcessExitingMiddleware().size());
     }
 
     @Test

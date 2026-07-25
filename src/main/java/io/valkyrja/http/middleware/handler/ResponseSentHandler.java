@@ -12,25 +12,25 @@ package io.valkyrja.http.middleware.handler;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.handler.abstract_.Handler;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 
-public class TerminatedHandler extends Handler<TerminatedMiddlewareContract>
-        implements TerminatedHandlerContract {
+public class ResponseSentHandler extends Handler<ResponseSentMiddlewareContract>
+        implements ResponseSentHandlerContract {
 
     @SafeVarargs
-    public TerminatedHandler(
+    public ResponseSentHandler(
             ContainerContract container,
-            Class<? extends TerminatedMiddlewareContract>... middleware) {
+            Class<? extends ResponseSentMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 
     @Override
-    public void terminated(ServerRequestContract request, ResponseContract response) {
-        Class<? extends TerminatedMiddlewareContract> next = this.next;
+    public void responseSent(ServerRequestContract request, ResponseContract response) {
+        Class<? extends ResponseSentMiddlewareContract> next = this.next;
         if (next != null) {
-            getMiddleware(next).terminated(request, response, this);
+            getMiddleware(next).responseSent(request, response, this);
         }
     }
 }

@@ -30,5 +30,5 @@ public @interface Route {
 
     String[] throwableCaughtMiddleware() default {};
 
-    String[] exitedMiddleware() default {};
+    String[] processExitingMiddleware() default {};
 }

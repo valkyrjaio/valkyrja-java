@@ -11,25 +11,26 @@ package io.valkyrja.cli.middleware.handler;
 
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.handler.abstract_.Handler;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
-public class ExitedHandler extends Handler<ExitedMiddlewareContract>
-        implements ExitedHandlerContract {
+public class ProcessExitingHandler extends Handler<ProcessExitingMiddlewareContract>
+        implements ProcessExitingHandlerContract {
 
     @SafeVarargs
-    public ExitedHandler(
-            ContainerContract container, Class<? extends ExitedMiddlewareContract>... middleware) {
+    public ProcessExitingHandler(
+            ContainerContract container,
+            Class<? extends ProcessExitingMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 
     @Override
-    public void exited(InputContract input, OutputContract output) {
-        Class<? extends ExitedMiddlewareContract> next = this.next;
+    public void processExiting(InputContract input, OutputContract output) {
+        Class<? extends ProcessExitingMiddlewareContract> next = this.next;
         if (next != null) {
-            getMiddleware(next).exited(input, output, this);
+            getMiddleware(next).processExiting(input, output, this);
         }
     }
 }

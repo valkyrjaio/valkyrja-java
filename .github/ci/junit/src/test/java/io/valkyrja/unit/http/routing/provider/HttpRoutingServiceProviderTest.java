@@ -25,7 +25,7 @@ import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContra
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
@@ -83,7 +83,7 @@ final class HttpRoutingServiceProviderTest {
                 RouteDispatchedHandlerContract.class, mock(RouteDispatchedHandlerContract.class));
         container.setSingleton(
                 SendingResponseHandlerContract.class, mock(SendingResponseHandlerContract.class));
-        container.setSingleton(TerminatedHandlerContract.class, mock(TerminatedHandlerContract.class));
+        container.setSingleton(ResponseSentHandlerContract.class, mock(ResponseSentHandlerContract.class));
         container.setSingleton(UrlContract.class, mock(UrlContract.class));
 
         HttpRoutingServiceProvider.publishRouter(container);

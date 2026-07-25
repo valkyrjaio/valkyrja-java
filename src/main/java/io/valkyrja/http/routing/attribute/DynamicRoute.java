@@ -10,10 +10,10 @@
 package io.valkyrja.http.routing.attribute;
 
 import io.valkyrja.http.message.enum_.RequestMethod;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
 import io.valkyrja.http.struct.response.contract.ResponseStructContract;
@@ -44,7 +44,7 @@ public @interface DynamicRoute {
 
     Class<? extends SendingResponseMiddlewareContract>[] sendingResponseMiddleware() default {};
 
-    Class<? extends TerminatedMiddlewareContract>[] terminatedMiddleware() default {};
+    Class<? extends ResponseSentMiddlewareContract>[] responseSentMiddleware() default {};
 
     Class<? extends RequestStructContract> requestStruct() default RequestStructContract.class;
 

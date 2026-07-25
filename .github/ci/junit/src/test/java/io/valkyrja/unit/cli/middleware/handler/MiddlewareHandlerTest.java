@@ -17,7 +17,7 @@ import io.valkyrja.fixtures.cli.middleware.PassThroughMiddleware;
 import io.valkyrja.cli.interaction.input.Input;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.handler.ExitedHandler;
+import io.valkyrja.cli.middleware.handler.ProcessExitingHandler;
 import io.valkyrja.cli.middleware.handler.InputReceivedHandler;
 import io.valkyrja.cli.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.cli.middleware.handler.RouteMatchedHandler;
@@ -118,11 +118,11 @@ final class MiddlewareHandlerTest {
     }
 
     @Test
-    void exitedRunsWithAndWithoutMiddleware() {
-        assertDoesNotThrow(() -> new ExitedHandler(container).exited(input, output));
+    void processExitingRunsWithAndWithoutMiddleware() {
+        assertDoesNotThrow(() -> new ProcessExitingHandler(container).processExiting(input, output));
         assertDoesNotThrow(
                 () ->
-                        new ExitedHandler(container, PassThroughMiddleware.class)
-                                .exited(input, output));
+                        new ProcessExitingHandler(container, PassThroughMiddleware.class)
+                                .processExiting(input, output));
     }
 }

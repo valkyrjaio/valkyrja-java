@@ -11,9 +11,10 @@ package io.valkyrja.cli.middleware.contract;
 
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 
-public interface ExitedMiddlewareContract {
+public interface ProcessExitingMiddlewareContract {
 
-    void exited(InputContract input, OutputContract output, ExitedHandlerContract handler);
+    void processExiting(
+            InputContract input, OutputContract output, ProcessExitingHandlerContract handler);
 }

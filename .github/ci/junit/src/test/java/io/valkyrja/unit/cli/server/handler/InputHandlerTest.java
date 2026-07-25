@@ -23,7 +23,7 @@ import io.valkyrja.cli.interaction.input.Input;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.Output;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
@@ -41,7 +41,7 @@ final class InputHandlerTest {
     private RouterContract router;
     private InputReceivedHandlerContract inputReceivedHandler;
     private ThrowableCaughtHandlerContract throwableCaughtHandler;
-    private ExitedHandlerContract exitedHandler;
+    private ProcessExitingHandlerContract processExitingHandler;
     private final Input input = new Input();
 
     @BeforeEach
@@ -50,7 +50,7 @@ final class InputHandlerTest {
         router = mock(RouterContract.class);
         inputReceivedHandler = mock(InputReceivedHandlerContract.class);
         throwableCaughtHandler = mock(ThrowableCaughtHandlerContract.class);
-        exitedHandler = mock(ExitedHandlerContract.class);
+        processExitingHandler = mock(ProcessExitingHandlerContract.class);
     }
 
     @AfterEach
@@ -64,7 +64,7 @@ final class InputHandlerTest {
                 router,
                 inputReceivedHandler,
                 throwableCaughtHandler,
-                exitedHandler,
+                processExitingHandler,
                 mock(CliInteractionConfigContract.class));
     }
 
@@ -103,7 +103,7 @@ final class InputHandlerTest {
         when(router.dispatch(any())).thenReturn(new Output());
 
         assertDoesNotThrow(() -> handler().run(input));
-        verify(exitedHandler).exited(any(), any());
+        verify(processExitingHandler).processExiting(any(), any());
     }
 
     @Test
@@ -116,11 +116,11 @@ final class InputHandlerTest {
     }
 
     @Test
-    void exitDelegatesToExitedHandler() {
+    void exitDelegatesToProcessExitingHandler() {
         var output = new Output();
 
         handler().exit(input, output);
 
-        verify(exitedHandler).exited(input, output);
+        verify(processExitingHandler).processExiting(input, output);
     }
 }

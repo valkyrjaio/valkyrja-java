@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
-import io.valkyrja.cli.middleware.handler.contract.ExitedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
@@ -61,7 +61,7 @@ final class CliRoutingServiceProviderTest {
                 RouteNotMatchedHandlerContract.class, mock(RouteNotMatchedHandlerContract.class));
         container.setSingleton(
                 RouteDispatchedHandlerContract.class, mock(RouteDispatchedHandlerContract.class));
-        container.setSingleton(ExitedHandlerContract.class, mock(ExitedHandlerContract.class));
+        container.setSingleton(ProcessExitingHandlerContract.class, mock(ProcessExitingHandlerContract.class));
 
         CliRoutingServiceProvider.publishRouter(container);
 

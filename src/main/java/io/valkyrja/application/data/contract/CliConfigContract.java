@@ -9,8 +9,8 @@
 
 package io.valkyrja.application.data.contract;
 
-import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.InputReceivedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteNotMatchedMiddlewareContract;
@@ -33,5 +33,5 @@ public interface CliConfigContract extends ConfigContract {
 
     List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware();
 
-    List<Class<? extends ExitedMiddlewareContract>> exitedMiddleware();
+    List<Class<? extends ProcessExitingMiddlewareContract>> processExitingMiddleware();
 }

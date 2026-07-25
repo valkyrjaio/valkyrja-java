@@ -19,7 +19,7 @@ import io.valkyrja.cli.interaction.message.Message;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.contract.ExitedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.ThrowableCaughtMiddlewareContract;
@@ -106,7 +106,7 @@ final class RouteTest {
         List<Class<? extends RouteMatchedMiddlewareContract>> matched = List.of();
         List<Class<? extends RouteDispatchedMiddlewareContract>> dispatched = List.of();
         List<Class<? extends ThrowableCaughtMiddlewareContract>> caught = List.of();
-        List<Class<? extends ExitedMiddlewareContract>> exited = List.of();
+        List<Class<? extends ProcessExitingMiddlewareContract>> processExiting = List.of();
 
         var route =
                 route().withRouteMatchedMiddleware(matched)
@@ -115,12 +115,12 @@ final class RouteTest {
                         .withAddedRouteDispatchedMiddleware(dispatched)
                         .withThrowableCaughtMiddleware(caught)
                         .withAddedThrowableCaughtMiddleware(caught)
-                        .withExitedMiddleware(exited)
-                        .withAddedExitedMiddleware(exited);
+                        .withProcessExitingMiddleware(processExiting)
+                        .withAddedProcessExitingMiddleware(processExiting);
 
         assertTrue(route.getRouteMatchedMiddleware().isEmpty());
         assertTrue(route.getRouteDispatchedMiddleware().isEmpty());
         assertTrue(route.getThrowableCaughtMiddleware().isEmpty());
-        assertTrue(route.getExitedMiddleware().isEmpty());
+        assertTrue(route.getProcessExitingMiddleware().isEmpty());
     }
 }

@@ -9,10 +9,10 @@
 
 package io.valkyrja.http.routing.collector;
 
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.routing.attribute.DynamicRoute;
 import io.valkyrja.http.routing.attribute.DynamicRoutes;
@@ -128,7 +128,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                 Arrays.asList(annotation.routeDispatchedMiddleware()),
                 Arrays.asList(annotation.throwableCaughtMiddleware()),
                 Arrays.asList(annotation.sendingResponseMiddleware()),
-                Arrays.asList(annotation.terminatedMiddleware()),
+                Arrays.asList(annotation.responseSentMiddleware()),
                 buildRequestStruct(annotation.requestStruct()),
                 buildResponseStruct(annotation.responseStruct()));
     }
@@ -152,7 +152,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                 Arrays.asList(annotation.routeDispatchedMiddleware()),
                 Arrays.asList(annotation.throwableCaughtMiddleware()),
                 Arrays.asList(annotation.sendingResponseMiddleware()),
-                Arrays.asList(annotation.terminatedMiddleware()),
+                Arrays.asList(annotation.responseSentMiddleware()),
                 buildRequestStruct(annotation.requestStruct()),
                 buildResponseStruct(annotation.responseStruct()));
     }
@@ -261,10 +261,10 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                                 (Class<? extends SendingResponseMiddlewareContract>)
                                         middlewareClass);
             }
-            if (TerminatedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
+            if (ResponseSentMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
                 route =
-                        route.withAddedTerminatedMiddleware(
-                                (Class<? extends TerminatedMiddlewareContract>) middlewareClass);
+                        route.withAddedResponseSentMiddleware(
+                                (Class<? extends ResponseSentMiddlewareContract>) middlewareClass);
             }
         }
 

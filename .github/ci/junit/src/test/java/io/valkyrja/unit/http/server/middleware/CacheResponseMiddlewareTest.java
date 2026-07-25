@@ -26,7 +26,7 @@ import io.valkyrja.http.message.response.Response;
 import io.valkyrja.http.message.uri.Uri;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.server.middleware.CacheResponseMiddleware;
 import java.io.File;
 import java.io.IOException;
@@ -66,26 +66,26 @@ final class CacheResponseMiddlewareTest {
     }
 
     @Test
-    void terminatedCachesSuccessfulResponse(@TempDir Path dir) {
+    void responseSentCachesSuccessfulResponse(@TempDir Path dir) {
         var cache = new ExposedCache(dir.toString());
         var request = request();
-        var handler = mock(TerminatedHandlerContract.class);
+        var handler = mock(ResponseSentHandlerContract.class);
 
-        cache.terminated(request, Response.create("body", StatusCode.OK, new HeaderCollection()), handler);
+        cache.responseSent(request, Response.create("body", StatusCode.OK, new HeaderCollection()), handler);
 
         assertTrue(new File(cache.pathFor(request)).exists());
-        verify(handler).terminated(any(), any());
+        verify(handler).responseSent(any(), any());
     }
 
     @Test
-    void terminatedSkipsCachingServerErrors(@TempDir Path dir) {
+    void responseSentSkipsCachingServerErrors(@TempDir Path dir) {
         var cache = new ExposedCache(dir.toString());
         var request = request();
 
-        cache.terminated(
+        cache.responseSent(
                 request,
                 Response.create("err", StatusCode.INTERNAL_SERVER_ERROR, new HeaderCollection()),
-                mock(TerminatedHandlerContract.class));
+                mock(ResponseSentHandlerContract.class));
 
         assertFalse(new File(cache.pathFor(request)).exists());
     }
@@ -164,14 +164,14 @@ final class CacheResponseMiddlewareTest {
     }
 
     @Test
-    void terminatedSkipsCachingWhenCacheFileAlreadyExists(@TempDir Path dir) {
+    void responseSentSkipsCachingWhenCacheFileAlreadyExists(@TempDir Path dir) {
         var cache = new ExposedCache(dir.toString());
         var request = request();
-        var handler = mock(TerminatedHandlerContract.class);
+        var handler = mock(ResponseSentHandlerContract.class);
 
-        cache.terminated(request, Response.create("a", StatusCode.OK, new HeaderCollection()), handler);
+        cache.responseSent(request, Response.create("a", StatusCode.OK, new HeaderCollection()), handler);
         // Second call: the cache file now exists, so shouldNotCache returns via the exists() operand.
-        cache.terminated(request, Response.create("b", StatusCode.OK, new HeaderCollection()), handler);
+        cache.responseSent(request, Response.create("b", StatusCode.OK, new HeaderCollection()), handler);
 
         assertTrue(new java.io.File(cache.pathFor(request)).exists());
     }

@@ -10,11 +10,11 @@
 package io.valkyrja.application.data.contract;
 
 import io.valkyrja.http.middleware.contract.RequestReceivedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import java.util.List;
 
@@ -33,5 +33,5 @@ public interface HttpConfigContract extends ConfigContract {
 
     List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware();
 
-    List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware();
+    List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware();
 }

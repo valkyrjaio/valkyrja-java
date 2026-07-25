@@ -30,7 +30,7 @@ import io.valkyrja.http.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
-import io.valkyrja.http.middleware.handler.TerminatedHandler;
+import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.data.Route;
@@ -58,7 +58,7 @@ final class RouterTest {
                 new RouteNotMatchedHandler(container),
                 new RouteDispatchedHandler(container),
                 new SendingResponseHandler(container),
-                new TerminatedHandler(container));
+                new ResponseSentHandler(container));
     }
 
     private static ServerRequestContract request(String path, RequestMethod method) {
@@ -134,7 +134,7 @@ final class RouterTest {
                         new RouteNotMatchedHandler(container),
                         new RouteDispatchedHandler(container),
                         new SendingResponseHandler(container),
-                        new TerminatedHandler(container));
+                        new ResponseSentHandler(container));
 
         var response = router.dispatchRoute(request("/users", RequestMethod.GET), route);
 

@@ -160,7 +160,7 @@ After the response is finalized, before it is written to the output. Global and
 then per-route (assuming a route was found) middleware here handles final
 modifications: CORS headers, response compression, cache-control headers.
 
-### Stage 7 — Terminated (always)
+### Stage 7 — ResponseSent (always)
 
 After the response has been sent to the client. Global and then per-route
 (assuming a route was found) middleware here handles work that is invisible to
@@ -169,7 +169,7 @@ dispatching queued events, cache writes. The `CacheResponseMiddleware` saves
 successful responses to disk at this stage, making future identical requests
 instantaneous if you include it.
 
-After `Terminated` middleware completes, the process finishes. Sessions are
+After `ResponseSent` middleware completes, the process finishes. Sessions are
 closed, FastCGI or Litespeed finish-request hooks are called if available.
 
 ## CLI: Handling the Command
@@ -189,9 +189,9 @@ exactly:
 | `RouteDispatched` | `RouteDispatched` | After dispatch                                              |
 | `SendingResponse` | NONE              | There is no equivalent as output can be written at any time |
 | `ThrowableCaught` | `ThrowableCaught` | When a throwable is caught                                  |
-| `Terminated`      | `Exited`          | After output is written; before process exits               |
+| `ResponseSent`    | `ProcessExiting`  | After output is written; before process exits               |
 
-After `Exited` middleware completes, `InputHandler` writes the output's messages
+After `ProcessExiting` middleware completes, `InputHandler` writes the output's messages
 to stdout and calls `Exiter::exit()` with the `ExitCode` integer value from the
 output object.
 
@@ -241,7 +241,7 @@ index.php / bin/cli
                                 ├── [on throw] Stage 5: ThrowableCaught
                                 ├── Stage 6: SendingResponse  [HTTP only]
                                 ├── Send response / write output
-                                └── Stage 7: Terminated / Exited
+                                └── Stage 7: ResponseSent / ProcessExiting
 ```
 
 ### HTTP Lifecycle
@@ -274,7 +274,7 @@ flowchart TD
     N --> L
     T --> L
     L --> P[Write response to output buffer]
-    P --> Q[Stage 7 - Terminated]
+    P --> Q[Stage 7 - ResponseSent]
     Q --> R([Process ends])
 ```
 
@@ -306,7 +306,7 @@ flowchart TD
     N -->|throwable| T
     N --> M
     T --> M
-    M --> P[Stage 6 - Exited]
+    M --> P[Stage 6 - ProcessExiting]
     P --> Q["Exiter::exit(ExitCode)"]
     Q --> R([Process ends])
 ```

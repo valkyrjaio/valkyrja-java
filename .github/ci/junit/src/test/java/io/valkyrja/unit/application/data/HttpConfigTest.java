@@ -45,6 +45,6 @@ final class HttpConfigTest {
         assertEquals(
                 LogThrowableCaughtMiddleware.class, config.throwableCaughtMiddleware().get(0));
         assertTrue(config.sendingResponseMiddleware().isEmpty());
-        assertTrue(config.terminatedMiddleware().isEmpty());
+        assertTrue(config.responseSentMiddleware().isEmpty());
     }
 }
