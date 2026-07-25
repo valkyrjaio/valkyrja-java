@@ -66,6 +66,27 @@ public class GreeterController {
         throw new CancelledException("cancelled by test", CancellationReason.DEADLINE_EXCEEDED);
     }
 
+    /** Throws an {@link Error}; the collector must rethrow it unwrapped, not as a RuntimeException. */
+    @Method(name = "ThrowsError")
+    public ServiceResponseContract throwsError(ContainerContract container, RouteContract route) {
+        throw new AssertionError("error from handler");
+    }
+
+    /**
+     * Throws a checked exception (via a sneaky throw, since the handler signature declares none);
+     * the collector wraps such a cause in a RuntimeException.
+     */
+    @Method(name = "Sneaky")
+    public ServiceResponseContract sneaky(ContainerContract container, RouteContract route) {
+        sneakyThrow(new java.io.IOException("checked from handler"));
+        return ServiceResponse.ok();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Throwable> void sneakyThrow(Throwable throwable) throws E {
+        throw (E) throwable;
+    }
+
     /** Not annotated with {@link Method}; must be skipped by the collector. */
     public ServiceResponseContract notAnRpc(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok();

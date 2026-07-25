@@ -83,6 +83,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                 // Surface the handler's own throwable (e.g. a framework-thrown CancelledException)
                 // rather than the reflection wrapper, so ServiceHandler can map it to the correct
                 // status instead of a blanket INTERNAL.
+                // getCause() is the handler's own throwable — always present on an
+                // InvocationTargetException — so there is no null case to defend against.
                 Throwable cause = e.getCause();
                 if (cause instanceof RuntimeException runtimeException) {
                     throw runtimeException;
@@ -90,7 +92,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                 if (cause instanceof Error error) {
                     throw error;
                 }
-                throw new RuntimeException(cause != null ? cause : e);
+                throw new RuntimeException(cause);
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }

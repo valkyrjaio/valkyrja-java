@@ -10,6 +10,7 @@
 package io.valkyrja.unit.grpc.routing.collector;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,6 +21,7 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.collector.AttributeRouteCollector;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
+import io.valkyrja.fixtures.grpc.NoDefaultConstructorController;
 import io.valkyrja.fixtures.grpc.GreeterController;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +49,8 @@ final class AttributeRouteCollectorTest {
     @Test
     void skipsMethodsWithoutGrpcMethod() {
         Map<String, RouteContract> routes = collect(GreeterController.class);
-        // Four annotated methods; notAnRpc() is excluded.
-        assertEquals(4, routes.size());
+        // Six annotated methods; notAnRpc() is excluded.
+        assertEquals(6, routes.size());
     }
 
     @Test
@@ -140,6 +142,31 @@ final class AttributeRouteCollectorTest {
     @Test
     void collectsAcrossMultipleClasses() {
         Map<String, RouteContract> routes = collect(GreeterController.class, String.class);
-        assertEquals(4, routes.size());
+        assertEquals(6, routes.size());
+    }
+
+    @Test
+    void reflectiveHandlerRethrowsErrorsUnwrapped() {
+        RouteContract route = collect(GreeterController.class).get("/pkg.Greeter/ThrowsError");
+        Container container = new Container();
+        assertThrows(AssertionError.class, () -> route.getHandler().apply(container, route));
+    }
+
+    @Test
+    void reflectiveHandlerWrapsCheckedCauses() {
+        RouteContract route = collect(GreeterController.class).get("/pkg.Greeter/Sneaky");
+        Container container = new Container();
+        RuntimeException thrown =
+                assertThrows(
+                        RuntimeException.class, () -> route.getHandler().apply(container, route));
+        assertInstanceOf(java.io.IOException.class, thrown.getCause());
+    }
+
+    @Test
+    void reflectiveHandlerWrapsInstantiationFailure() {
+        RouteContract route =
+                collect(NoDefaultConstructorController.class).get("/pkg.NoCtor/Ping");
+        Container container = new Container();
+        assertThrows(RuntimeException.class, () -> route.getHandler().apply(container, route));
     }
 }
