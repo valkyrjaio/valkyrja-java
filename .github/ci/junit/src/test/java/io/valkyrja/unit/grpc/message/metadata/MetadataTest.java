@@ -79,6 +79,38 @@ final class MetadataTest {
     }
 
     @Test
+    void binaryKeyRejectsANonByteArrayValue() {
+        // A String under a -bin key would later throw a ClassCastException deep in the wire write;
+        // reject it at the boundary instead.
+        IllegalArgumentException thrown =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> new Metadata().with("trace-bin", "not-bytes"));
+        assertTrue(thrown.getMessage().contains("byte[]"));
+    }
+
+    @Test
+    void asciiKeyRejectsAByteArrayValue() {
+        // A byte[] under a non -bin key would otherwise be sent to the client as its array toString.
+        IllegalArgumentException thrown =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> new Metadata().withAdded("trace", new byte[] {1, 2}));
+        assertTrue(thrown.getMessage().contains("-bin"));
+    }
+
+    @Test
+    void asciiKeyRejectsANonStringValue() {
+        assertThrows(
+                IllegalArgumentException.class, () -> new Metadata().with("count", 42));
+    }
+
+    @Test
+    void aNullValueIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new Metadata().with("k", null));
+    }
+
+    @Test
     void operationsAreImmutable() {
         MetadataContract base = new Metadata().with("k", "a");
         base.with("k", "b");

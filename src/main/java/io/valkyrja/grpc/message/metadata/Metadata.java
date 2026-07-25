@@ -40,10 +40,51 @@ public class Metadata implements MetadataContract {
         Map<String, List<Object>> copy = new LinkedHashMap<>();
 
         for (Map.Entry<String, List<Object>> entry : values.entrySet()) {
-            copy.put(normalize(entry.getKey()), new ArrayList<>(entry.getValue()));
+            String key = normalize(entry.getKey());
+            List<Object> validated = new ArrayList<>();
+            for (Object value : entry.getValue()) {
+                validateValue(key, value);
+                validated.add(value);
+            }
+            copy.put(key, validated);
         }
 
         this.values = copy;
+    }
+
+    /**
+     * Enforce the metadata value union at the boundary: a {@code -bin} key carries {@code byte[]},
+     * every other key carries a {@code String}. Validating on construction (the single point every
+     * {@code with*} operation flows through) means {@code toGrpcMetadata} can trust the types
+     * instead of a mismatched value throwing a {@code ClassCastException} — or silently sending a
+     * {@code "[B@…"} array toString — deep inside the wire write.
+     *
+     * @param normalizedKey the already-normalized key
+     * @param value the value to validate
+     * @throws IllegalArgumentException if the value type does not match the key's kind
+     */
+    private static void validateValue(String normalizedKey, @Nullable Object value) {
+        if (normalizedKey.endsWith(BINARY_SUFFIX)) {
+            if (!(value instanceof byte[])) {
+                throw new IllegalArgumentException(
+                        "Binary metadata key '"
+                                + normalizedKey
+                                + "' requires a byte[] value, but got "
+                                + typeName(value)
+                                + ".");
+            }
+        } else if (!(value instanceof String)) {
+            throw new IllegalArgumentException(
+                    "ASCII metadata key '"
+                            + normalizedKey
+                            + "' requires a String value, but got "
+                            + typeName(value)
+                            + "; use a '-bin' suffixed key to carry binary values.");
+        }
+    }
+
+    private static String typeName(@Nullable Object value) {
+        return value == null ? "null" : value.getClass().getName();
     }
 
     @Override
