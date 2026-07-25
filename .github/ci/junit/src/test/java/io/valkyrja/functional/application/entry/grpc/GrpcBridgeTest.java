@@ -176,6 +176,25 @@ final class GrpcBridgeTest {
     }
 
     @Test
+    void wireCancellationFiresTheTokenOffTheSerializedListenerPath() {
+        Context.CancellableContext context = Context.current().withCancellation();
+        CancellationToken token = new CancellationToken();
+
+        GrpcBridge.wireCancellation(token, context);
+        context.cancel(new RuntimeException("client gone"));
+
+        assertTrue(token.isCancelled());
+        assertEquals(CancellationReason.CLIENT_CANCELLED, token.getReason());
+    }
+
+    @Test
+    void peerReportsUnknownAddressTypeForANullRemote() {
+        ServerCall<byte[], byte[]> call = mockCall(new SocketAddressAndSession(null, null));
+
+        assertEquals(AddressType.UNKNOWN, GrpcBridge.peer(call).getAddressType());
+    }
+
+    @Test
     void cancellationReasonClassifiesDeadlineExpiryVersusClientCancel() {
         assertEquals(
                 CancellationReason.DEADLINE_EXCEEDED,
@@ -304,6 +323,8 @@ final class GrpcBridgeTest {
         for (int i = 0; i <= 1000; i++) {
             listener.onMessage(new byte[] {1});
         }
+        // A half-close after the overflow must not run the pipeline against the closed call.
+        listener.onHalfClose();
 
         verify(call)
                 .close(
@@ -312,6 +333,7 @@ final class GrpcBridgeTest {
                                         status.getCode()
                                                 == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
                         any());
+        verify(call, never()).sendHeaders(any());
     }
 
     @Test

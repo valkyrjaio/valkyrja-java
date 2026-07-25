@@ -106,15 +106,24 @@ public final class GrpcBridge {
             // before half-close) has something to fire.
             CancellationToken token = new CancellationToken();
 
+            // Fire the token from context cancellation. Listener callbacks (onCancel) are
+            // serialized per call, so onCancel cannot preempt a handler running inside onHalfClose;
+            // the context is cancelled off that serialized path (deadline scheduler / transport
+            // thread), so a cooperative handler polling throwIfCancelled() actually observes it
+            // mid-flight. onCancel below remains as a belt-and-suspenders fallback.
+            wireCancellation(token, Context.current());
+
             // Ask for one message at a time so the transport applies backpressure instead of the
             // client flooding the server.
             call.request(1);
             List<Object> messages = new ArrayList<>();
+            boolean[] rejected = {false};
 
             return new ServerCall.Listener<>() {
                 @Override
                 public void onMessage(byte[] message) {
                     if (messages.size() >= MAX_INBOUND_MESSAGES) {
+                        rejected[0] = true;
                         call.close(
                                 io.grpc.Status.RESOURCE_EXHAUSTED.withDescription(
                                         "Inbound message limit exceeded."),
@@ -128,6 +137,12 @@ public final class GrpcBridge {
 
                 @Override
                 public void onHalfClose() {
+                    // The overflow path already closed the call; don't run the pipeline against a
+                    // closed call (the handler would run for nothing and the write would throw).
+                    if (rejected[0]) {
+                        return;
+                    }
+
                     ServiceCallContract serviceCall =
                             buildCall(call, headers, fullMethodName, messages, token);
                     WorkerGrpc.dispatch(
@@ -136,12 +151,24 @@ public final class GrpcBridge {
 
                 @Override
                 public void onCancel() {
-                    // A cancel callback covers both client cancellation and deadline expiry (the
-                    // library cancels the call when the deadline lapses).
                     token.cancel(cancellationReason(Context.current().getDeadline()));
                 }
             };
         };
+    }
+
+    /**
+     * Fire the token when the call's context is cancelled — a client cancel, a reset stream, or a
+     * lapsed deadline. Runs off the serialized listener path, so it can transition the token while
+     * a synchronous handler is executing.
+     *
+     * @param token the shared cancellation token
+     * @param context the call's context
+     */
+    public static void wireCancellation(CancellationToken token, Context context) {
+        context.addListener(
+                cancelled -> token.cancel(cancellationReason(cancelled.getDeadline())),
+                Runnable::run);
     }
 
     /**
