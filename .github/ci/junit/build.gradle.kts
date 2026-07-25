@@ -38,6 +38,7 @@ sourceSets {
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
     compileOnly("org.jspecify:jspecify:1.0.0")
+    implementation("io.grpc:grpc-api:1.69.0")
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
     testImplementation("org.mockito:mockito-core:5.23.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
