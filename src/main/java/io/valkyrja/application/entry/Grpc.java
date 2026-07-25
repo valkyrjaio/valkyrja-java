@@ -41,7 +41,7 @@ public class Grpc extends App {
 
     /**
      * Bootstrap and handle a single call, returning the response after the full pipeline (including
-     * {@code Terminated}).
+     * {@code ResponseSent}).
      *
      * @param config the gRPC configuration
      * @param call the inbound call

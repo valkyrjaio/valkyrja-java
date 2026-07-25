@@ -11,10 +11,10 @@ package io.valkyrja.grpc.routing.collector;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.grpc.routing.attribute.Middleware;
 import io.valkyrja.grpc.routing.attribute.Service;
@@ -136,11 +136,11 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                                                 middlewareClass));
             }
 
-            if (TerminatedMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
+            if (ResponseSentMiddlewareContract.class.isAssignableFrom(middlewareClass)) {
                 route =
-                        route.withAddedTerminatedMiddleware(
+                        route.withAddedResponseSentMiddleware(
                                 List.of(
-                                        (Class<? extends TerminatedMiddlewareContract>)
+                                        (Class<? extends ResponseSentMiddlewareContract>)
                                                 middlewareClass));
             }
         }

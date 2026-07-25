@@ -30,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * <p>The two-question cancellation check lives here in {@link #checkCancellation} so every
  * request-processing stage inherits it — the pre-check runs before delegating to the wrapped
  * middleware and the post-check on its return. The always-run stages ({@code SendingResponse},
- * {@code Terminated}) deliberately skip the check: per the fast-exit path they run even for
+ * {@code ResponseSent}) deliberately skip the check: per the fast-exit path they run even for
  * cancelled calls.
  */
 public abstract class Handler<M> implements HandlerContract<M> {

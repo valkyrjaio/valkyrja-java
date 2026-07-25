@@ -84,15 +84,15 @@ final class AttributeRouteCollectorTest {
                 List.of(GreeterController.SendingMiddleware.class),
                 route.getSendingResponseMiddleware());
         assertEquals(
-                List.of(GreeterController.TerminatedMiddleware.class),
-                route.getTerminatedMiddleware());
+                List.of(GreeterController.ResponseSentMiddleware.class),
+                route.getResponseSentMiddleware());
     }
 
     @Test
     void unaryRouteHasNoMiddleware() {
         RouteContract route = collect(GreeterController.class).get("/pkg.Greeter/SayHello");
         assertTrue(route.getRouteMatchedMiddleware().isEmpty());
-        assertTrue(route.getTerminatedMiddleware().isEmpty());
+        assertTrue(route.getResponseSentMiddleware().isEmpty());
     }
 
     @Test

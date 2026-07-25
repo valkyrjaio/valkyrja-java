@@ -22,7 +22,7 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
@@ -51,7 +51,7 @@ final class RouteTest {
 
     private interface Sending extends SendingResponseMiddlewareContract {}
 
-    private interface Terminated extends TerminatedMiddlewareContract {}
+    private interface ResponseSent extends ResponseSentMiddlewareContract {}
 
     @Test
     void parsesServiceAndMethodName() {
@@ -158,13 +158,13 @@ final class RouteTest {
     }
 
     @Test
-    void terminatedMiddleware() {
-        RouteContract route = route().withTerminatedMiddleware(List.of(Terminated.class));
-        assertEquals(List.of(Terminated.class), route.getTerminatedMiddleware());
+    void responseSentMiddleware() {
+        RouteContract route = route().withResponseSentMiddleware(List.of(ResponseSent.class));
+        assertEquals(List.of(ResponseSent.class), route.getResponseSentMiddleware());
         assertEquals(
                 2,
-                route.withAddedTerminatedMiddleware(List.of(Terminated.class))
-                        .getTerminatedMiddleware()
+                route.withAddedResponseSentMiddleware(List.of(ResponseSent.class))
+                        .getResponseSentMiddleware()
                         .size());
     }
 

@@ -13,8 +13,8 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.grpc.middleware.handler.contract.CallReceivedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.grpc.server.handler.ServiceHandler;
@@ -42,7 +42,7 @@ public class GrpcServerServiceProvider implements ServiceProviderContract {
                         container.getSingleton(CallReceivedHandlerContract.class),
                         container.getSingleton(ThrowableCaughtHandlerContract.class),
                         container.getSingleton(SendingResponseHandlerContract.class),
-                        container.getSingleton(TerminatedHandlerContract.class),
+                        container.getSingleton(ResponseSentHandlerContract.class),
                         app.getDebugMode()));
     }
 }

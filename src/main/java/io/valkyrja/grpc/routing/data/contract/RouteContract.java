@@ -11,10 +11,10 @@ package io.valkyrja.grpc.routing.data.contract;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -155,11 +155,11 @@ public interface RouteContract {
     RouteContract withAddedSendingResponseMiddleware(
             List<Class<? extends SendingResponseMiddlewareContract>> middleware);
 
-    List<Class<? extends TerminatedMiddlewareContract>> getTerminatedMiddleware();
+    List<Class<? extends ResponseSentMiddlewareContract>> getResponseSentMiddleware();
 
-    RouteContract withTerminatedMiddleware(
-            List<Class<? extends TerminatedMiddlewareContract>> middleware);
+    RouteContract withResponseSentMiddleware(
+            List<Class<? extends ResponseSentMiddlewareContract>> middleware);
 
-    RouteContract withAddedTerminatedMiddleware(
-            List<Class<? extends TerminatedMiddlewareContract>> middleware);
+    RouteContract withAddedResponseSentMiddleware(
+            List<Class<? extends ResponseSentMiddlewareContract>> middleware);
 }

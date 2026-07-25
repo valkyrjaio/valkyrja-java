@@ -32,7 +32,7 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.middleware.data.CallReceivedResult;
 import io.valkyrja.grpc.middleware.handler.contract.CallReceivedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.grpc.server.handler.ServiceHandler;
@@ -52,7 +52,7 @@ final class ServiceHandlerTest {
     @Mock private CallReceivedHandlerContract callReceivedHandler;
     @Mock private ThrowableCaughtHandlerContract throwableCaughtHandler;
     @Mock private SendingResponseHandlerContract sendingResponseHandler;
-    @Mock private TerminatedHandlerContract terminatedHandler;
+    @Mock private ResponseSentHandlerContract responseSentHandler;
 
     private ContainerContract container;
 
@@ -68,7 +68,7 @@ final class ServiceHandlerTest {
                 callReceivedHandler,
                 throwableCaughtHandler,
                 sendingResponseHandler,
-                terminatedHandler,
+                responseSentHandler,
                 debug);
     }
 
@@ -159,13 +159,13 @@ final class ServiceHandlerTest {
     }
 
     @Test
-    void terminateRunsTerminatedStage() {
+    void terminateRunsResponseSentStage() {
         ServiceCallContract call = call(new CancellationToken());
         ServiceResponseContract response = ServiceResponse.ok();
 
         handler(false).terminate(call, response);
 
-        verify(terminatedHandler).terminated(call, response);
+        verify(responseSentHandler).responseSent(call, response);
     }
 
     @Test

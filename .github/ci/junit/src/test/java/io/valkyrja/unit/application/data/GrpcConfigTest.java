@@ -41,7 +41,7 @@ final class GrpcConfigTest {
         assertTrue(config.routeDispatchedMiddleware().isEmpty());
         assertTrue(config.throwableCaughtMiddleware().isEmpty());
         assertTrue(config.sendingResponseMiddleware().isEmpty());
-        assertTrue(config.terminatedMiddleware().isEmpty());
+        assertTrue(config.responseSentMiddleware().isEmpty());
         assertTrue(config.callbacks().isEmpty());
     }
 

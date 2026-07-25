@@ -18,16 +18,16 @@ import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.handler.CallReceivedHandler;
 import io.valkyrja.grpc.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.grpc.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.grpc.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.grpc.middleware.handler.SendingResponseHandler;
-import io.valkyrja.grpc.middleware.handler.TerminatedHandler;
+import io.valkyrja.grpc.middleware.handler.ResponseSentHandler;
 import io.valkyrja.grpc.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.routing.collection.RouteCollection;
 import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.dispatcher.Router;
@@ -36,7 +36,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Proves per-route {@code SendingResponse} and {@code Terminated} middleware actually fire: the
+ * Proves per-route {@code SendingResponse} and {@code ResponseSent} middleware actually fire: the
  * {@code Router} registers them onto the stage handlers, and the {@code ServiceHandler} invokes the
  * same shared handler instances.
  */
@@ -57,27 +57,27 @@ final class PerRouteMiddlewareTest {
         }
     }
 
-    public static final class RecordingTerminated implements TerminatedMiddlewareContract {
+    public static final class RecordingResponseSent implements ResponseSentMiddlewareContract {
         static boolean ran;
 
         @Override
-        public void terminated(
+        public void responseSent(
                 ServiceCallContract call,
                 ServiceResponseContract response,
-                TerminatedHandlerContract handler) {
+                ResponseSentHandlerContract handler) {
             ran = true;
-            handler.terminated(call, response);
+            handler.responseSent(call, response);
         }
     }
 
     @Test
-    void perRouteSendingAndTerminatedMiddlewareFire() {
+    void perRouteSendingAndResponseSentMiddlewareFire() {
         RecordingSending.ran = false;
-        RecordingTerminated.ran = false;
+        RecordingResponseSent.ran = false;
 
         ContainerContract container = new Container();
         container.setSingleton(RecordingSending.class, new RecordingSending());
-        container.setSingleton(RecordingTerminated.class, new RecordingTerminated());
+        container.setSingleton(RecordingResponseSent.class, new RecordingResponseSent());
 
         // Stage handlers shared between Router and ServiceHandler.
         CallReceivedHandler callReceivedHandler = new CallReceivedHandler(container);
@@ -86,7 +86,7 @@ final class PerRouteMiddlewareTest {
         RouteDispatchedHandler routeDispatchedHandler = new RouteDispatchedHandler(container);
         ThrowableCaughtHandler throwableCaughtHandler = new ThrowableCaughtHandler(container);
         SendingResponseHandler sendingResponseHandler = new SendingResponseHandler(container);
-        TerminatedHandler terminatedHandler = new TerminatedHandler(container);
+        ResponseSentHandler responseSentHandler = new ResponseSentHandler(container);
 
         Router router =
                 new Router(
@@ -96,14 +96,14 @@ final class PerRouteMiddlewareTest {
                                         new Route(METHOD, (c, r) -> ServiceResponse.ok("hi"))
                                                 .withSendingResponseMiddleware(
                                                         List.of(RecordingSending.class))
-                                                .withTerminatedMiddleware(
-                                                        List.of(RecordingTerminated.class))),
+                                                .withResponseSentMiddleware(
+                                                        List.of(RecordingResponseSent.class))),
                         routeMatchedHandler,
                         routeNotMatchedHandler,
                         routeDispatchedHandler,
                         throwableCaughtHandler,
                         sendingResponseHandler,
-                        terminatedHandler);
+                        responseSentHandler);
 
         ServiceHandler serviceHandler =
                 new ServiceHandler(
@@ -112,7 +112,7 @@ final class PerRouteMiddlewareTest {
                         callReceivedHandler,
                         throwableCaughtHandler,
                         sendingResponseHandler,
-                        terminatedHandler,
+                        responseSentHandler,
                         false);
 
         ServiceCallContract call = ServiceCall.unary(METHOD, "req");
@@ -122,6 +122,6 @@ final class PerRouteMiddlewareTest {
         serviceHandler.terminate(call, response);
 
         assertTrue(RecordingSending.ran, "per-route SendingResponse middleware should fire");
-        assertTrue(RecordingTerminated.ran, "per-route Terminated middleware should fire");
+        assertTrue(RecordingResponseSent.ran, "per-route ResponseSent middleware should fire");
     }
 }

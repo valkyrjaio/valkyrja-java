@@ -12,30 +12,30 @@ package io.valkyrja.grpc.middleware.handler;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.handler.abstract_.Handler;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 
 /**
- * Walks the {@code Terminated} chain after the response has been written to the wire. This stage
+ * Walks the {@code ResponseSent} chain after the response has been written to the wire. This stage
  * always runs — including on the cancellation fast-exit path — so it does not apply the
  * cancellation short-circuit.
  */
-public class TerminatedHandler extends Handler<TerminatedMiddlewareContract>
-        implements TerminatedHandlerContract {
+public class ResponseSentHandler extends Handler<ResponseSentMiddlewareContract>
+        implements ResponseSentHandlerContract {
 
     @SafeVarargs
-    public TerminatedHandler(
+    public ResponseSentHandler(
             ContainerContract container,
-            Class<? extends TerminatedMiddlewareContract>... middleware) {
+            Class<? extends ResponseSentMiddlewareContract>... middleware) {
         super(container, middleware);
     }
 
     @Override
-    public void terminated(ServiceCallContract call, ServiceResponseContract response) {
-        Class<? extends TerminatedMiddlewareContract> next = this.next;
+    public void responseSent(ServiceCallContract call, ServiceResponseContract response) {
+        Class<? extends ResponseSentMiddlewareContract> next = this.next;
         if (next != null) {
-            getMiddleware(next).terminated(call, response, this);
+            getMiddleware(next).responseSent(call, response, this);
         }
     }
 }

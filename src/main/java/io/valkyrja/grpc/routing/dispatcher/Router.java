@@ -14,11 +14,11 @@ import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.middleware.data.RouteMatchedResult;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
@@ -41,7 +41,7 @@ public class Router implements RouterContract {
     protected final RouteDispatchedHandlerContract routeDispatchedHandler;
     protected final ThrowableCaughtHandlerContract throwableCaughtHandler;
     protected final SendingResponseHandlerContract sendingResponseHandler;
-    protected final TerminatedHandlerContract terminatedHandler;
+    protected final ResponseSentHandlerContract responseSentHandler;
 
     public Router(
             ContainerContract container,
@@ -51,7 +51,7 @@ public class Router implements RouterContract {
             RouteDispatchedHandlerContract routeDispatchedHandler,
             ThrowableCaughtHandlerContract throwableCaughtHandler,
             SendingResponseHandlerContract sendingResponseHandler,
-            TerminatedHandlerContract terminatedHandler) {
+            ResponseSentHandlerContract responseSentHandler) {
         this.container = container;
         this.collection = collection;
         this.routeMatchedHandler = routeMatchedHandler;
@@ -59,7 +59,7 @@ public class Router implements RouterContract {
         this.routeDispatchedHandler = routeDispatchedHandler;
         this.throwableCaughtHandler = throwableCaughtHandler;
         this.sendingResponseHandler = sendingResponseHandler;
-        this.terminatedHandler = terminatedHandler;
+        this.responseSentHandler = responseSentHandler;
     }
 
     @Override
@@ -109,6 +109,6 @@ public class Router implements RouterContract {
         routeDispatchedHandler.add(route.getRouteDispatchedMiddleware().toArray(new Class[0]));
         throwableCaughtHandler.add(route.getThrowableCaughtMiddleware().toArray(new Class[0]));
         sendingResponseHandler.add(route.getSendingResponseMiddleware().toArray(new Class[0]));
-        terminatedHandler.add(route.getTerminatedMiddleware().toArray(new Class[0]));
+        responseSentHandler.add(route.getResponseSentMiddleware().toArray(new Class[0]));
     }
 }

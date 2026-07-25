@@ -16,8 +16,8 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.message.status.Status;
 import io.valkyrja.grpc.middleware.data.CallReceivedResult;
 import io.valkyrja.grpc.middleware.handler.contract.CallReceivedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.grpc.server.handler.contract.ServiceHandlerContract;
@@ -32,9 +32,9 @@ import io.valkyrja.grpc.throwable.exception.CancelledException;
  * ThrowableCaught}. The one gRPC-specific addition is the entry-point cancellation pre-check in
  * {@link #dispatchRouter} — the only location where no response yet exists.
  *
- * <p>The {@code SendingResponse} and {@code Terminated} handlers are shared with the {@code Router}
- * (both resolve the same container singletons) so per-route middleware the router registers onto
- * those stages actually fires here.
+ * <p>The {@code SendingResponse} and {@code ResponseSent} handlers are shared with the {@code
+ * Router} (both resolve the same container singletons) so per-route middleware the router registers
+ * onto those stages actually fires here.
  */
 public class ServiceHandler implements ServiceHandlerContract {
 
@@ -43,7 +43,7 @@ public class ServiceHandler implements ServiceHandlerContract {
     protected final CallReceivedHandlerContract callReceivedHandler;
     protected final ThrowableCaughtHandlerContract throwableCaughtHandler;
     protected final SendingResponseHandlerContract sendingResponseHandler;
-    protected final TerminatedHandlerContract terminatedHandler;
+    protected final ResponseSentHandlerContract responseSentHandler;
     protected final boolean debug;
 
     public ServiceHandler(
@@ -52,14 +52,14 @@ public class ServiceHandler implements ServiceHandlerContract {
             CallReceivedHandlerContract callReceivedHandler,
             ThrowableCaughtHandlerContract throwableCaughtHandler,
             SendingResponseHandlerContract sendingResponseHandler,
-            TerminatedHandlerContract terminatedHandler,
+            ResponseSentHandlerContract responseSentHandler,
             boolean debug) {
         this.container = container;
         this.router = router;
         this.callReceivedHandler = callReceivedHandler;
         this.throwableCaughtHandler = throwableCaughtHandler;
         this.sendingResponseHandler = sendingResponseHandler;
-        this.terminatedHandler = terminatedHandler;
+        this.responseSentHandler = responseSentHandler;
         this.debug = debug;
     }
 
@@ -89,7 +89,7 @@ public class ServiceHandler implements ServiceHandlerContract {
 
     @Override
     public void terminate(ServiceCallContract call, ServiceResponseContract response) {
-        terminatedHandler.terminated(call, response);
+        responseSentHandler.responseSent(call, response);
     }
 
     @Override

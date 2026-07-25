@@ -11,9 +11,10 @@ package io.valkyrja.grpc.middleware.handler.contract;
 
 import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 
-public interface TerminatedHandlerContract extends HandlerContract<TerminatedMiddlewareContract> {
+public interface ResponseSentHandlerContract
+        extends HandlerContract<ResponseSentMiddlewareContract> {
 
-    void terminated(ServiceCallContract call, ServiceResponseContract response);
+    void responseSent(ServiceCallContract call, ServiceResponseContract response);
 }

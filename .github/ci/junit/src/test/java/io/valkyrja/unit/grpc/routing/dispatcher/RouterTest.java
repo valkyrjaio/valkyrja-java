@@ -32,7 +32,7 @@ import io.valkyrja.grpc.middleware.handler.contract.RouteDispatchedHandlerContra
 import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.collection.RouteCollection;
 import io.valkyrja.grpc.routing.data.Route;
@@ -57,7 +57,7 @@ final class RouterTest {
     @Mock private RouteDispatchedHandlerContract routeDispatchedHandler;
     @Mock private ThrowableCaughtHandlerContract throwableCaughtHandler;
     @Mock private SendingResponseHandlerContract sendingResponseHandler;
-    @Mock private TerminatedHandlerContract terminatedHandler;
+    @Mock private ResponseSentHandlerContract responseSentHandler;
 
     private final RouteCollection collection = new RouteCollection();
     private Router router;
@@ -73,7 +73,7 @@ final class RouterTest {
                         routeDispatchedHandler,
                         throwableCaughtHandler,
                         sendingResponseHandler,
-                        terminatedHandler);
+                        responseSentHandler);
     }
 
     private ServiceCallContract call(CancellationToken token) {

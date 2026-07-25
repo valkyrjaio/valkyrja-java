@@ -17,13 +17,13 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.grpc.middleware.data.RouteMatchedResult;
 import io.valkyrja.grpc.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.attribute.Method;
 import io.valkyrja.grpc.routing.attribute.Middleware;
@@ -46,7 +46,7 @@ public class GreeterController {
     @Middleware(name = DispatchedMiddleware.class)
     @Middleware(name = CaughtMiddleware.class)
     @Middleware(name = SendingMiddleware.class)
-    @Middleware(name = TerminatedMiddleware.class)
+    @Middleware(name = ResponseSentMiddleware.class)
     public ServiceResponseContract streamHellos(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok();
     }
@@ -111,18 +111,18 @@ public class GreeterController {
         }
     }
 
-    public static final class TerminatedMiddleware implements TerminatedMiddlewareContract {
+    public static final class ResponseSentMiddleware implements ResponseSentMiddlewareContract {
 
         /** Counts terminations so tests can assert the stage ran. Reset per test. */
         public static final AtomicInteger calls = new AtomicInteger();
 
         @Override
-        public void terminated(
+        public void responseSent(
                 ServiceCallContract call,
                 ServiceResponseContract response,
-                TerminatedHandlerContract handler) {
+                ResponseSentHandlerContract handler) {
             calls.incrementAndGet();
-            handler.terminated(call, response);
+            handler.responseSent(call, response);
         }
     }
 }

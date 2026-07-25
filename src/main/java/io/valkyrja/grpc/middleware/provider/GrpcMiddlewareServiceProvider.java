@@ -13,18 +13,18 @@ import io.valkyrja.application.data.contract.GrpcConfigContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.grpc.middleware.handler.CallReceivedHandler;
+import io.valkyrja.grpc.middleware.handler.ResponseSentHandler;
 import io.valkyrja.grpc.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.grpc.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.grpc.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.grpc.middleware.handler.SendingResponseHandler;
-import io.valkyrja.grpc.middleware.handler.TerminatedHandler;
 import io.valkyrja.grpc.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.grpc.middleware.handler.contract.CallReceivedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -52,8 +52,8 @@ public class GrpcMiddlewareServiceProvider implements ServiceProviderContract {
                         GrpcMiddlewareServiceProvider::publishThrowableCaughtHandler,
                 SendingResponseHandlerContract.class,
                         GrpcMiddlewareServiceProvider::publishSendingResponseHandler,
-                TerminatedHandlerContract.class,
-                        GrpcMiddlewareServiceProvider::publishTerminatedHandler);
+                ResponseSentHandlerContract.class,
+                        GrpcMiddlewareServiceProvider::publishResponseSentHandler);
     }
 
     public static void publishCallReceivedHandler(ContainerContract container) {
@@ -104,11 +104,11 @@ public class GrpcMiddlewareServiceProvider implements ServiceProviderContract {
                         container, config.sendingResponseMiddleware().toArray(new Class[0])));
     }
 
-    public static void publishTerminatedHandler(ContainerContract container) {
+    public static void publishResponseSentHandler(ContainerContract container) {
         GrpcConfigContract config = container.getSingleton(GrpcConfigContract.class);
         container.setSingleton(
-                TerminatedHandlerContract.class,
-                new TerminatedHandler(
-                        container, config.terminatedMiddleware().toArray(new Class[0])));
+                ResponseSentHandlerContract.class,
+                new ResponseSentHandler(
+                        container, config.responseSentMiddleware().toArray(new Class[0])));
     }
 }

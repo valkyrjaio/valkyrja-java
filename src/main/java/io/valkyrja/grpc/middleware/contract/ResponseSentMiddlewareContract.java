@@ -11,13 +11,13 @@ package io.valkyrja.grpc.middleware.contract;
 
 import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 
 /** Middleware run after the response has been fully written to the wire. */
-public interface TerminatedMiddlewareContract {
+public interface ResponseSentMiddlewareContract {
 
-    void terminated(
+    void responseSent(
             ServiceCallContract call,
             ServiceResponseContract response,
-            TerminatedHandlerContract handler);
+            ResponseSentHandlerContract handler);
 }

@@ -11,10 +11,10 @@ package io.valkyrja.grpc.routing.data;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.routing.throwable.exception.GrpcRoutingInvalidMethodException;
@@ -38,7 +38,7 @@ public class Route implements RouteContract {
     protected List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware;
     protected List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware;
     protected List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware;
-    protected List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware;
+    protected List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware;
 
     public Route(
             String method,
@@ -72,7 +72,7 @@ public class Route implements RouteContract {
             List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
             List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
             List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware,
-            List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware) {
+            List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware) {
         this.method = method;
         this.service = service;
         this.methodName = methodName;
@@ -87,7 +87,7 @@ public class Route implements RouteContract {
         this.routeDispatchedMiddleware = List.copyOf(routeDispatchedMiddleware);
         this.throwableCaughtMiddleware = List.copyOf(throwableCaughtMiddleware);
         this.sendingResponseMiddleware = List.copyOf(sendingResponseMiddleware);
-        this.terminatedMiddleware = List.copyOf(terminatedMiddleware);
+        this.responseSentMiddleware = List.copyOf(responseSentMiddleware);
     }
 
     protected Route copy() {
@@ -104,7 +104,7 @@ public class Route implements RouteContract {
                 routeDispatchedMiddleware,
                 throwableCaughtMiddleware,
                 sendingResponseMiddleware,
-                terminatedMiddleware);
+                responseSentMiddleware);
     }
 
     @Override
@@ -280,26 +280,26 @@ public class Route implements RouteContract {
     }
 
     @Override
-    public List<Class<? extends TerminatedMiddlewareContract>> getTerminatedMiddleware() {
-        return terminatedMiddleware;
+    public List<Class<? extends ResponseSentMiddlewareContract>> getResponseSentMiddleware() {
+        return responseSentMiddleware;
     }
 
     @Override
-    public RouteContract withTerminatedMiddleware(
-            List<Class<? extends TerminatedMiddlewareContract>> middleware) {
+    public RouteContract withResponseSentMiddleware(
+            List<Class<? extends ResponseSentMiddlewareContract>> middleware) {
         Route copy = copy();
-        copy.terminatedMiddleware = List.copyOf(middleware);
+        copy.responseSentMiddleware = List.copyOf(middleware);
         return copy;
     }
 
     @Override
-    public RouteContract withAddedTerminatedMiddleware(
-            List<Class<? extends TerminatedMiddlewareContract>> middleware) {
+    public RouteContract withAddedResponseSentMiddleware(
+            List<Class<? extends ResponseSentMiddlewareContract>> middleware) {
         Route copy = copy();
-        List<Class<? extends TerminatedMiddlewareContract>> merged =
-                new ArrayList<>(this.terminatedMiddleware);
+        List<Class<? extends ResponseSentMiddlewareContract>> merged =
+                new ArrayList<>(this.responseSentMiddleware);
         merged.addAll(middleware);
-        copy.terminatedMiddleware = List.copyOf(merged);
+        copy.responseSentMiddleware = List.copyOf(merged);
         return copy;
     }
 

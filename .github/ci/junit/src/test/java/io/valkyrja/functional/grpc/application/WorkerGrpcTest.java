@@ -69,13 +69,13 @@ final class WorkerGrpcTest {
     }
 
     @Test
-    void dispatchRunsTerminatedEvenWhenTheWriterThrows() {
+    void dispatchRunsResponseSentEvenWhenTheWriterThrows() {
         ApplicationContract app = WorkerGrpc.bootstrap(config());
         ContainerData data = (ContainerData) app.getContainer().getData();
 
-        // A wire write that blows up must not skip the Terminated stage, or per-call resources
+        // A wire write that blows up must not skip the ResponseSent stage, or per-call resources
         // leak and observers never see the call complete.
-        GreeterController.TerminatedMiddleware.calls.set(0);
+        GreeterController.ResponseSentMiddleware.calls.set(0);
         assertThrows(
                 IllegalStateException.class,
                 () ->
@@ -87,7 +87,7 @@ final class WorkerGrpcTest {
                                     throw new IllegalStateException("wire write failed");
                                 }));
 
-        assertEquals(1, GreeterController.TerminatedMiddleware.calls.get());
+        assertEquals(1, GreeterController.ResponseSentMiddleware.calls.get());
     }
 
     @Test

@@ -10,11 +10,11 @@
 package io.valkyrja.application.data.contract;
 
 import io.valkyrja.grpc.middleware.contract.CallReceivedMiddlewareContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import java.util.List;
 
@@ -34,5 +34,5 @@ public interface GrpcConfigContract extends ConfigContract {
 
     List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware();
 
-    List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware();
+    List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware();
 }

@@ -12,11 +12,11 @@ package io.valkyrja.grpc.routing.provider;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.collection.RouteCollection;
 import io.valkyrja.grpc.routing.collection.contract.RouteCollectionContract;
@@ -53,7 +53,7 @@ public class GrpcRoutingServiceProvider implements ServiceProviderContract {
                         container.getSingleton(RouteDispatchedHandlerContract.class),
                         container.getSingleton(ThrowableCaughtHandlerContract.class),
                         container.getSingleton(SendingResponseHandlerContract.class),
-                        container.getSingleton(TerminatedHandlerContract.class)));
+                        container.getSingleton(ResponseSentHandlerContract.class)));
     }
 
     public static void publishRouteCollection(ContainerContract container) {

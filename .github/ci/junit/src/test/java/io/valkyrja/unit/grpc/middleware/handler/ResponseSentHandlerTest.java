@@ -23,25 +23,25 @@ import io.valkyrja.grpc.message.metadata.Metadata;
 import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
-import io.valkyrja.grpc.middleware.handler.TerminatedHandler;
-import io.valkyrja.grpc.middleware.handler.contract.TerminatedHandlerContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
+import io.valkyrja.grpc.middleware.handler.ResponseSentHandler;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link TerminatedHandler} — an always-run stage with no cancellation short-circuit. */
-final class TerminatedHandlerTest {
+/** Test the {@link ResponseSentHandler} — an always-run stage with no cancellation short-circuit. */
+final class ResponseSentHandlerTest {
 
     static int ranCount;
 
-    static final class Recording implements TerminatedMiddlewareContract {
+    static final class Recording implements ResponseSentMiddlewareContract {
         @Override
-        public void terminated(
+        public void responseSent(
                 ServiceCallContract call,
                 ServiceResponseContract response,
-                TerminatedHandlerContract handler) {
+                ResponseSentHandlerContract handler) {
             ranCount++;
-            handler.terminated(call, response);
+            handler.responseSent(call, response);
         }
     }
 
@@ -59,17 +59,17 @@ final class TerminatedHandlerTest {
 
     @Test
     void emptyChainDoesNothing() {
-        TerminatedHandler handler = new TerminatedHandler(new Container());
+        ResponseSentHandler handler = new ResponseSentHandler(new Container());
         assertDoesNotThrow(
-                () -> handler.terminated(call(new CancellationToken()), ServiceResponse.ok()));
+                () -> handler.responseSent(call(new CancellationToken()), ServiceResponse.ok()));
     }
 
     @Test
     void passThroughRunsMiddleware() {
         ranCount = 0;
-        TerminatedHandler handler =
-                new TerminatedHandler(containerWith(new Recording()), Recording.class);
-        handler.terminated(call(new CancellationToken()), ServiceResponse.ok());
+        ResponseSentHandler handler =
+                new ResponseSentHandler(containerWith(new Recording()), Recording.class);
+        handler.responseSent(call(new CancellationToken()), ServiceResponse.ok());
         assertTrue(ranCount > 0);
     }
 
@@ -78,9 +78,9 @@ final class TerminatedHandlerTest {
         ranCount = 0;
         CancellationToken token = new CancellationToken();
         token.cancel(CancellationReason.DEADLINE_EXCEEDED);
-        TerminatedHandler handler =
-                new TerminatedHandler(containerWith(new Recording()), Recording.class);
-        handler.terminated(call(token), ServiceResponse.ok());
+        ResponseSentHandler handler =
+                new ResponseSentHandler(containerWith(new Recording()), Recording.class);
+        handler.responseSent(call(token), ServiceResponse.ok());
         assertTrue(ranCount > 0);
     }
 }

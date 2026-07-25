@@ -40,7 +40,7 @@ import java.util.function.Consumer;
  * <p>{@link #bootstrap} performs the full application bootstrap and force-resolves the service map
  * so it lives in the frozen parent container. {@link #dispatch} creates an isolated {@link
  * ChildContainer} per call so state never bleeds between calls; the adapter's {@code writer} runs
- * between {@code SendingResponse} and {@code Terminated}, matching the wire order.
+ * between {@code SendingResponse} and {@code ResponseSent}, matching the wire order.
  *
  * <p>All methods are {@code public static} so the lifecycle can be reproduced without extending
  * this class — useful for runtimes that already have their own class hierarchy.
@@ -68,12 +68,12 @@ public abstract class WorkerGrpc extends App {
      *
      * <p>Resolves the {@link ServiceHandlerContract}, runs the pipeline through {@code
      * SendingResponse}, hands the response to {@code writer} to write to the wire, then runs {@code
-     * Terminated}.
+     * ResponseSent}.
      *
      * @param app the frozen parent application (returned by {@link #bootstrap})
      * @param data the container data snapshot captured after {@link #bootstrap}
      * @param call the inbound call
-     * @param writer writes the response to the wire (invoked before {@code Terminated})
+     * @param writer writes the response to the wire (invoked before {@code ResponseSent})
      */
     public static void dispatch(
             ApplicationContract app,
@@ -93,7 +93,7 @@ public abstract class WorkerGrpc extends App {
         try {
             writer.accept(response);
         } finally {
-            // Terminated middleware must run even when the wire write blows up, so per-call
+            // ResponseSent middleware must run even when the wire write blows up, so per-call
             // resources are released and observers still see the call complete.
             handler.terminate(call, response);
         }

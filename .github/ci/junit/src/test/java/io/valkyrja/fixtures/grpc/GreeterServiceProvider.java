@@ -36,9 +36,9 @@ public class GreeterServiceProvider implements ServiceProviderContract {
                         c -> c.setSingleton(
                                 GreeterController.SendingMiddleware.class,
                                 new GreeterController.SendingMiddleware()),
-                GreeterController.TerminatedMiddleware.class,
+                GreeterController.ResponseSentMiddleware.class,
                         c -> c.setSingleton(
-                                GreeterController.TerminatedMiddleware.class,
-                                new GreeterController.TerminatedMiddleware()));
+                                GreeterController.ResponseSentMiddleware.class,
+                                new GreeterController.ResponseSentMiddleware()));
     }
 }

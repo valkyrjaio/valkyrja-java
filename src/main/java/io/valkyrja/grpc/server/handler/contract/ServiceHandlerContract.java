@@ -17,10 +17,10 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
  * InputHandler}.
  *
  * <p>Orchestrates the pipeline — {@code CallReceived} → {@code Router} → {@code ThrowableCaught}
- * (via {@link #handle}), then {@code SendingResponse} (via {@link #sending}) and {@code Terminated}
- * (via {@link #terminate}). The wire write itself is the adapter's job and happens between {@link
- * #sending} and {@link #terminate}; {@link #run} bundles handle+sending so the adapter can write
- * the returned response and then call {@link #terminate}.
+ * (via {@link #handle}), then {@code SendingResponse} (via {@link #sending}) and {@code
+ * ResponseSent} (via {@link #terminate}). The wire write itself is the adapter's job and happens
+ * between {@link #sending} and {@link #terminate}; {@link #run} bundles handle+sending so the
+ * adapter can write the returned response and then call {@link #terminate}.
  */
 public interface ServiceHandlerContract {
 
@@ -44,7 +44,7 @@ public interface ServiceHandlerContract {
     ServiceResponseContract sending(ServiceCallContract call, ServiceResponseContract response);
 
     /**
-     * Run the {@code Terminated} stage after the response has been written to the wire.
+     * Run the {@code ResponseSent} stage after the response has been written to the wire.
      *
      * @param call the inbound call
      * @param response the response that was written

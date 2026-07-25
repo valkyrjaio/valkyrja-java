@@ -14,11 +14,11 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.GrpcApplicationComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.grpc.middleware.contract.CallReceivedMiddlewareContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.TerminatedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import java.util.List;
 import java.util.function.Consumer;
@@ -42,7 +42,7 @@ public record GrpcConfig(
         List<Class<? extends RouteDispatchedMiddlewareContract>> routeDispatchedMiddleware,
         List<Class<? extends ThrowableCaughtMiddlewareContract>> throwableCaughtMiddleware,
         List<Class<? extends SendingResponseMiddlewareContract>> sendingResponseMiddleware,
-        List<Class<? extends TerminatedMiddlewareContract>> terminatedMiddleware)
+        List<Class<? extends ResponseSentMiddlewareContract>> responseSentMiddleware)
         implements GrpcConfigContract {
 
     public GrpcConfig {
@@ -54,7 +54,7 @@ public record GrpcConfig(
         routeDispatchedMiddleware = List.copyOf(routeDispatchedMiddleware);
         throwableCaughtMiddleware = List.copyOf(throwableCaughtMiddleware);
         sendingResponseMiddleware = List.copyOf(sendingResponseMiddleware);
-        terminatedMiddleware = List.copyOf(terminatedMiddleware);
+        responseSentMiddleware = List.copyOf(responseSentMiddleware);
     }
 
     public GrpcConfig() {
