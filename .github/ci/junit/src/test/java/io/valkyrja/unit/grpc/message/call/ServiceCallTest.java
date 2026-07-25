@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.grpc.message.call.ServiceCall;
@@ -59,6 +60,53 @@ final class ServiceCallTest {
         Iterator<Object> it = call.getMessages().iterator();
         assertEquals("hello", it.next());
         assertFalse(it.hasNext());
+    }
+
+    @Test
+    void aBufferedCallIsNotStreamingAndRejectsSend() {
+        ServiceCall call = ServiceCall.unary(METHOD, "hello");
+        assertFalse(call.isStreaming());
+        assertThrows(IllegalStateException.class, () -> call.send("out"));
+    }
+
+    @Test
+    void aCallWithASinkIsStreamingAndPushesThroughIt() {
+        List<Object> sent = new ArrayList<>();
+        ServiceCall call =
+                new ServiceCall(
+                        METHOD,
+                        new Metadata(),
+                        Deadline.none(),
+                        new CancellationToken(),
+                        Peer.insecure("x"),
+                        List.of(),
+                        null,
+                        sent::add);
+
+        assertTrue(call.isStreaming());
+        call.send("a");
+        call.send("b");
+        assertEquals(List.of("a", "b"), sent);
+    }
+
+    @Test
+    void withRoutePreservesTheStreamingSink() {
+        List<Object> sent = new ArrayList<>();
+        ServiceCall call =
+                new ServiceCall(
+                        METHOD,
+                        new Metadata(),
+                        Deadline.none(),
+                        new CancellationToken(),
+                        Peer.insecure("x"),
+                        List.of(),
+                        null,
+                        sent::add);
+
+        ServiceCallContract routed = call.withRoute(route());
+        assertTrue(routed.isStreaming());
+        routed.send("z");
+        assertEquals(List.of("z"), sent);
     }
 
     @Test

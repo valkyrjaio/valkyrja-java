@@ -21,6 +21,7 @@ import io.valkyrja.grpc.message.peer.contract.PeerContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -39,6 +40,9 @@ public class ServiceCall implements ServiceCallContract {
     protected final PeerContract peer;
     protected final Iterable<Object> messages;
     protected final @Nullable RouteContract route;
+
+    /** The outbound push sink for a streaming-model call; null for a buffered call. */
+    protected final @Nullable Consumer<Object> sink;
 
     public ServiceCall(String method, Iterable<Object> messages) {
         this(
@@ -59,6 +63,18 @@ public class ServiceCall implements ServiceCallContract {
             PeerContract peer,
             Iterable<Object> messages,
             @Nullable RouteContract route) {
+        this(method, metadata, deadline, cancellation, peer, messages, route, null);
+    }
+
+    public ServiceCall(
+            String method,
+            MetadataContract metadata,
+            DeadlineContract deadline,
+            CancellationTokenContract cancellation,
+            PeerContract peer,
+            Iterable<Object> messages,
+            @Nullable RouteContract route,
+            @Nullable Consumer<Object> sink) {
         this.method = method;
         this.metadata = metadata;
         this.deadline = deadline;
@@ -66,6 +82,7 @@ public class ServiceCall implements ServiceCallContract {
         this.peer = peer;
         this.messages = messages;
         this.route = route;
+        this.sink = sink;
     }
 
     @Override
@@ -110,7 +127,23 @@ public class ServiceCall implements ServiceCallContract {
 
     @Override
     public ServiceCallContract withRoute(RouteContract route) {
-        return new ServiceCall(method, metadata, deadline, cancellation, peer, messages, route);
+        return new ServiceCall(
+                method, metadata, deadline, cancellation, peer, messages, route, sink);
+    }
+
+    @Override
+    public boolean isStreaming() {
+        return sink != null;
+    }
+
+    @Override
+    public void send(Object message) {
+        if (sink == null) {
+            throw new IllegalStateException(
+                    "send() is only available on a streaming (bidirectional) call; a buffered call"
+                            + " returns its messages on the ServiceResponse instead.");
+        }
+        sink.accept(message);
     }
 
     @Override

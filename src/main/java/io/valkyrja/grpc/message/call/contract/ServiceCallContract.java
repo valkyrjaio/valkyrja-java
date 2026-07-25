@@ -61,11 +61,34 @@ public interface ServiceCallContract {
     PeerContract getPeer();
 
     /**
-     * Get the decoded inbound messages.
+     * Get the decoded inbound messages. Under the buffered model this is the fixed list captured
+     * before dispatch; under the streaming model it is a live stream whose iteration blocks until
+     * each message arrives and ends when the client half-closes.
      *
      * @return the messages
      */
     Iterable<Object> getMessages();
+
+    /**
+     * Whether this call was dispatched under the streaming model (a bidirectional method). When
+     * true, {@link #getMessages} is a live inbound stream and {@link #send} pushes outbound
+     * messages while the handler runs; when false (the buffered model) the handler instead returns
+     * a single {@code ServiceResponse} carrying its messages.
+     *
+     * @return true if dispatched under the streaming model
+     */
+    boolean isStreaming();
+
+    /**
+     * Push one outbound message to the client from within the handler (streaming model only). Sends
+     * are serialized; the framework fires {@code SendingResponse} middleware once, on the first
+     * send (stream open). Not for buffered calls — those return their messages on the {@code
+     * ServiceResponse} instead.
+     *
+     * @param message the outbound message
+     * @throws IllegalStateException if this call is not streaming
+     */
+    void send(Object message);
 
     /**
      * Get the resolved route, or null if the call has not yet been routed (or no route matched).
