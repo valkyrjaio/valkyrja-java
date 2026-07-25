@@ -247,6 +247,34 @@ final class GrpcBridgeTest {
     }
 
     @Test
+    void writeOverwritesAHandlerSetStatusDetailsTrailer() {
+        ServerCall<byte[], byte[]> call = mockCall();
+        ServiceCallContract serviceCall = ServiceCall.unary("/pkg.Svc/M", "req");
+        ServiceResponse response =
+                (ServiceResponse)
+                        ServiceResponse.of(Status.internal("boom", "authoritative".getBytes()))
+                                .withTrailingMetadata(
+                                        new Metadata()
+                                                .with(
+                                                        "grpc-status-details-bin",
+                                                        "handler-set".getBytes()));
+
+        ArgumentCaptor<io.grpc.Metadata> trailers = ArgumentCaptor.forClass(io.grpc.Metadata.class);
+        GrpcBridge.write(call, serviceCall, response);
+        verify(call).close(any(), trailers.capture());
+
+        List<byte[]> details = new java.util.ArrayList<>();
+        trailers.getValue()
+                .getAll(
+                        io.grpc.Metadata.Key.of(
+                                "grpc-status-details-bin", io.grpc.Metadata.BINARY_BYTE_MARSHALLER))
+                .forEach(details::add);
+        // Only the Status's own details survive; the handler-set duplicate was discarded.
+        assertEquals(1, details.size());
+        assertArrayEquals("authoritative".getBytes(), details.get(0));
+    }
+
+    @Test
     void toAndFromGrpcMetadataCarryAsciiAndBinary() {
         Metadata metadata =
                 (Metadata) new Metadata().with("x", "v").with("y-bin", "binary".getBytes());

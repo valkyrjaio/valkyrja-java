@@ -282,10 +282,13 @@ public final class GrpcBridge {
         io.grpc.Metadata trailers = toGrpcMetadata(response.getTrailingMetadata());
         byte[] details = response.getStatus().getDetails();
         if (details != null) {
-            trailers.put(
+            io.grpc.Metadata.Key<byte[]> detailsKey =
                     io.grpc.Metadata.Key.of(
-                            "grpc-status-details-bin", io.grpc.Metadata.BINARY_BYTE_MARSHALLER),
-                    details);
+                            "grpc-status-details-bin", io.grpc.Metadata.BINARY_BYTE_MARSHALLER);
+            // The Status's own details are authoritative: overwrite any handler-set trailer under
+            // the same key rather than appending a second value the client would ignore.
+            trailers.discardAll(detailsKey);
+            trailers.put(detailsKey, details);
         }
 
         call.close(status, trailers);
