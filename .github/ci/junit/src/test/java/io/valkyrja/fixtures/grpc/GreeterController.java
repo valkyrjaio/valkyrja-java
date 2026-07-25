@@ -51,6 +51,22 @@ public class GreeterController {
         return ServiceResponse.ok();
     }
 
+    /**
+     * Bidirectional streaming echo: reads each inbound message from the live stream and pushes it
+     * straight back through the outbound sink, then returns a terminal OK. Exercises the streaming
+     * dispatch model.
+     */
+    @Method(name = "Echo", clientStreaming = true, serverStreaming = true)
+    @Middleware(name = SendingMiddleware.class)
+    @Middleware(name = ResponseSentMiddleware.class)
+    public ServiceResponseContract echo(ContainerContract container, RouteContract route) {
+        ServiceCallContract call = container.getSingleton(ServiceCallContract.class);
+        for (Object message : call.getMessages()) {
+            call.send(message);
+        }
+        return ServiceResponse.ok();
+    }
+
     @Method(name = "Boom")
     public ServiceResponseContract boom(ContainerContract container, RouteContract route) {
         throw new IllegalStateException("handler failure");
@@ -123,11 +139,16 @@ public class GreeterController {
     }
 
     public static final class SendingMiddleware implements SendingResponseMiddlewareContract {
+
+        /** Counts sending-response invocations so tests can assert the stage ran. Reset per test. */
+        public static final AtomicInteger calls = new AtomicInteger();
+
         @Override
         public ServiceResponseContract sendingResponse(
                 ServiceCallContract call,
                 ServiceResponseContract response,
                 SendingResponseHandlerContract handler) {
+            calls.incrementAndGet();
             return handler.sendingResponse(call, response);
         }
     }

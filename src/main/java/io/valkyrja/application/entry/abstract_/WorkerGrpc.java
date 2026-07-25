@@ -16,10 +16,14 @@ import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
+import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
+import io.valkyrja.grpc.message.stream.OutboundStream;
 import io.valkyrja.grpc.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.grpc.server.handler.contract.ServiceHandlerContract;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * gRPC entry point for persistent worker runtimes (grpc-netty, servlet containers, etc.).
@@ -97,6 +101,77 @@ public abstract class WorkerGrpc extends App {
             // resources are released and observers still see the call complete.
             handler.terminate(call, response);
         }
+    }
+
+    /**
+     * Handle a single streaming-model (bidirectional) call. Unlike {@link #dispatch}, the handler
+     * is invoked immediately (not after half-close) and emits messages through the call's push sink
+     * while it reads live inbound; the adapter runs this on a per-call virtual thread.
+     *
+     * <p>The pipeline still runs once per call: {@code SendingResponse} fires once at stream open
+     * (the first emit, or the close when the handler emits nothing) against an OK shell whose
+     * initial metadata becomes the response headers; the handler's returned terminal response
+     * supplies the final status and trailing metadata; and {@code ResponseSent} fires once at
+     * close.
+     *
+     * @param app the frozen parent application (returned by {@link #bootstrap})
+     * @param data the container data snapshot captured after {@link #bootstrap}
+     * @param callFactory builds the streaming {@link ServiceCallContract} around the supplied
+     *     outbound sink (so the call carries its live inbound stream and push sink)
+     * @param outbound the transport-side outbound stream
+     */
+    public static void dispatchStreaming(
+            ApplicationContract app,
+            ContainerData data,
+            Function<Consumer<Object>, ServiceCallContract> callFactory,
+            OutboundStream outbound) {
+        ContainerContract childContainer = getChildContainer(app, data);
+        ApplicationContract childApp = getChildApplication(app, childContainer);
+
+        bootstrapChildContainer(childApp, childContainer);
+
+        ServiceHandlerContract handler = childContainer.getSingleton(ServiceHandlerContract.class);
+
+        AtomicReference<ServiceCallContract> callRef = new AtomicReference<>();
+        boolean[] opened = {false};
+
+        ServiceCallContract call =
+                callFactory.apply(
+                        message -> {
+                            openStream(handler, callRef.get(), outbound, opened);
+                            outbound.sendMessage(message);
+                        });
+        callRef.set(call);
+
+        ServiceResponseContract terminal = handler.handle(call);
+
+        // Open the stream once even if the handler emitted nothing, so SendingResponse always fires
+        // before the close and the open/close pairing stays symmetric.
+        openStream(handler, call, outbound, opened);
+
+        try {
+            outbound.close(terminal);
+        } finally {
+            handler.terminate(call, terminal);
+        }
+    }
+
+    /**
+     * Commit the stream's initial headers exactly once. {@code SendingResponse} governs the
+     * headers; at open the final status is unknown, so it runs against an OK shell whose initial
+     * metadata is sent as the response headers.
+     */
+    private static void openStream(
+            ServiceHandlerContract handler,
+            ServiceCallContract call,
+            OutboundStream outbound,
+            boolean[] opened) {
+        if (opened[0]) {
+            return;
+        }
+        opened[0] = true;
+        ServiceResponseContract shell = handler.sending(call, ServiceResponse.ok());
+        outbound.sendHeaders(shell.getInitialMetadata());
     }
 
     /**

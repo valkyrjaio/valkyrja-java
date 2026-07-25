@@ -50,7 +50,7 @@ final class AttributeRouteCollectorTest {
     void skipsMethodsWithoutGrpcMethod() {
         Map<String, RouteContract> routes = collect(GreeterController.class);
         // Six annotated methods; notAnRpc() is excluded.
-        assertEquals(6, routes.size());
+        assertEquals(7, routes.size());
     }
 
     @Test
@@ -142,7 +142,7 @@ final class AttributeRouteCollectorTest {
     @Test
     void collectsAcrossMultipleClasses() {
         Map<String, RouteContract> routes = collect(GreeterController.class, String.class);
-        assertEquals(6, routes.size());
+        assertEquals(7, routes.size());
     }
 
     @Test
