@@ -37,18 +37,25 @@ import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.fixtures.grpc.GreeterComponentProvider;
 import io.valkyrja.grpc.message.call.ServiceCall;
 import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
+import io.valkyrja.grpc.message.cancellation.CancellationToken;
 import io.valkyrja.grpc.message.deadline.Deadline;
+import io.valkyrja.grpc.message.enum_.AddressType;
+import io.valkyrja.grpc.message.enum_.CancellationReason;
 import io.valkyrja.grpc.message.metadata.Metadata;
+import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
+import io.valkyrja.grpc.message.peer.contract.PeerContract;
 import io.valkyrja.grpc.message.response.ServiceResponse;
+import io.valkyrja.grpc.message.status.Status;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLSession;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 /** Test the {@link GrpcBridge} grpc-java translation layer. */
 final class GrpcBridgeTest {
@@ -81,6 +88,21 @@ final class GrpcBridgeTest {
         return mock(ServerCall.class);
     }
 
+    private ServerCall<byte[], byte[]> mockCall(SocketAddressAndSession attributes) {
+        ServerCall<byte[], byte[]> call = mockCall();
+        Attributes.Builder builder = Attributes.newBuilder();
+        if (attributes.remote() != null) {
+            builder.set(Grpc.TRANSPORT_ATTR_REMOTE_ADDR, attributes.remote());
+        }
+        if (attributes.session() != null) {
+            builder.set(Grpc.TRANSPORT_ATTR_SSL_SESSION, attributes.session());
+        }
+        when(call.getAttributes()).thenReturn(builder.build());
+        return call;
+    }
+
+    private record SocketAddressAndSession(InetSocketAddress remote, SSLSession session) {}
+
     @Test
     void registryLookupBuildsAByteMethodDefinition() {
         ApplicationContract app = WorkerGrpc.bootstrap(config());
@@ -96,22 +118,73 @@ final class GrpcBridgeTest {
     }
 
     @Test
-    void buildCallPopulatesTheServiceCall() {
-        ServerCall<byte[], byte[]> call = mockCall();
-        when(call.getAttributes())
-                .thenReturn(
-                        Attributes.newBuilder()
-                                .set(
-                                        Grpc.TRANSPORT_ATTR_REMOTE_ADDR,
-                                        new InetSocketAddress("1.2.3.4", 4242))
-                                .build());
+    void buildCallCarriesHeadersDeadlineTokenAndPeer() {
+        ServerCall<byte[], byte[]> call =
+                mockCall(
+                        new SocketAddressAndSession(
+                                new InetSocketAddress("1.2.3.4", 4242), null));
+        io.grpc.Metadata headers = new io.grpc.Metadata();
+        headers.put(
+                io.grpc.Metadata.Key.of("authorization", io.grpc.Metadata.ASCII_STRING_MARSHALLER),
+                "token");
 
         ServiceCallContract serviceCall =
-                GrpcBridge.buildCall(call, "pkg.Svc/M", List.of("a".getBytes()));
+                GrpcBridge.buildCall(
+                        call, headers, "pkg.Svc/M", List.of("a".getBytes()),
+                        new CancellationToken());
 
         assertEquals("/pkg.Svc/M", serviceCall.getMethod());
+        assertEquals("token", serviceCall.getMetadata().get("authorization"));
         assertNotNull(serviceCall.getPeer());
         assertTrue(serviceCall.getMessages().iterator().hasNext());
+    }
+
+    @Test
+    void peerReportsTlsAndIpv4() {
+        ServerCall<byte[], byte[]> call =
+                mockCall(
+                        new SocketAddressAndSession(
+                                new InetSocketAddress("1.2.3.4", 80), mock(SSLSession.class)));
+
+        PeerContract peer = GrpcBridge.peer(call);
+
+        assertEquals(AddressType.IPV4, peer.getAddressType());
+        assertEquals("tls", peer.getAuthContext().getType());
+    }
+
+    @Test
+    void peerReportsInsecureIpv6() throws Exception {
+        ServerCall<byte[], byte[]> call =
+                mockCall(
+                        new SocketAddressAndSession(
+                                new InetSocketAddress(InetAddress.getByName("::1"), 80), null));
+
+        PeerContract peer = GrpcBridge.peer(call);
+
+        assertEquals(AddressType.IPV6, peer.getAddressType());
+        assertEquals("insecure", peer.getAuthContext().getType());
+    }
+
+    @Test
+    void peerReportsUnknownAddressTypeForAnUnresolvedAddress() {
+        ServerCall<byte[], byte[]> call =
+                mockCall(
+                        new SocketAddressAndSession(
+                                InetSocketAddress.createUnresolved("host", 80), null));
+
+        assertEquals(AddressType.UNKNOWN, GrpcBridge.peer(call).getAddressType());
+    }
+
+    @Test
+    void cancellationReasonClassifiesDeadlineExpiryVersusClientCancel() {
+        assertEquals(
+                CancellationReason.DEADLINE_EXCEEDED,
+                GrpcBridge.cancellationReason(io.grpc.Deadline.after(-1, TimeUnit.SECONDS)));
+        assertEquals(
+                CancellationReason.CLIENT_CANCELLED,
+                GrpcBridge.cancellationReason(io.grpc.Deadline.after(1, TimeUnit.HOURS)));
+        assertEquals(
+                CancellationReason.CLIENT_CANCELLED, GrpcBridge.cancellationReason(null));
     }
 
     @Test
@@ -121,7 +194,7 @@ final class GrpcBridgeTest {
 
     @Test
     void deadlineReflectsAContextDeadline() throws Exception {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        var executor = java.util.concurrent.Executors.newSingleThreadScheduledExecutor();
         try {
             Deadline deadline =
                     Context.current()
@@ -135,34 +208,37 @@ final class GrpcBridgeTest {
     }
 
     @Test
-    void writeSendsHeadersMessagesAndStatus() {
+    void writeSendsHeadersMessagesStatusAndDetails() {
         ServerCall<byte[], byte[]> call = mockCall();
         ServiceCallContract serviceCall = ServiceCall.unary("/pkg.Svc/M", "req");
         ServiceResponse response =
                 (ServiceResponse)
-                        ServiceResponse.ok("hi".getBytes())
+                        ServiceResponse.of(Status.internal("boom", "detail".getBytes()))
+                                .withMessages(List.of("hi".getBytes()))
                                 .withInitialMetadata(new Metadata().with("x", "v"));
 
+        ArgumentCaptor<io.grpc.Metadata> trailers = ArgumentCaptor.forClass(io.grpc.Metadata.class);
         GrpcBridge.write(call, serviceCall, response);
 
         verify(call).sendHeaders(any());
         verify(call).sendMessage(any());
         verify(call)
-                .close(
-                        argThat(status -> status.getCode() == io.grpc.Status.Code.OK),
-                        any());
+                .close(argThat(status -> status.getCode() == io.grpc.Status.Code.INTERNAL), trailers.capture());
+        assertTrue(trailers.getValue().keys().contains("grpc-status-details-bin"));
     }
 
     @Test
-    void toGrpcMetadataSkipsBinaryKeys() {
+    void toAndFromGrpcMetadataCarryAsciiAndBinary() {
         Metadata metadata =
                 (Metadata) new Metadata().with("x", "v").with("y-bin", "binary".getBytes());
 
         io.grpc.Metadata grpcMetadata = GrpcBridge.toGrpcMetadata(metadata);
-
-        // The binary key is iterated but skipped; only the ASCII key survives.
         assertTrue(grpcMetadata.keys().contains("x"));
-        assertFalse(grpcMetadata.keys().contains("y-bin"));
+        assertTrue(grpcMetadata.keys().contains("y-bin"));
+
+        MetadataContract roundTrip = GrpcBridge.fromGrpcMetadata(grpcMetadata);
+        assertEquals("v", roundTrip.get("x"));
+        assertArrayEquals("binary".getBytes(), (byte[]) roundTrip.get("y-bin"));
     }
 
     @Test
@@ -194,25 +270,48 @@ final class GrpcBridgeTest {
     }
 
     @Test
-    void handlerBuffersMessagesAndDispatchesOnHalfClose() {
+    void handlerBuffersUnderFlowControlAndDispatchesOnHalfClose() {
         ApplicationContract app = WorkerGrpc.bootstrap(config());
         ContainerData data = (ContainerData) app.getContainer().getData();
-        ServerCall<byte[], byte[]> call = mockCall();
-        when(call.getAttributes()).thenReturn(Attributes.EMPTY);
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
 
         ServerCallHandler<byte[], byte[]> handler =
                 GrpcBridge.handler(app, data, "pkg.Greeter/Missing");
         ServerCall.Listener<byte[]> listener = handler.startCall(call, new io.grpc.Metadata());
         listener.onMessage("ignored".getBytes());
         listener.onHalfClose();
+        listener.onCancel();
 
-        verify(call).request(Integer.MAX_VALUE);
+        verify(call, org.mockito.Mockito.atLeastOnce()).request(1);
         // The unknown method dispatches to UNIMPLEMENTED — closed, no message written.
         verify(call)
                 .close(
                         argThat(status -> status.getCode() == io.grpc.Status.Code.UNIMPLEMENTED),
                         any());
         verify(call, never()).sendMessage(any());
+    }
+
+    @Test
+    void handlerRejectsWhenTheInboundBufferOverflows() {
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call = mockCall();
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/StreamHellos")
+                        .startCall(call, new io.grpc.Metadata());
+        for (int i = 0; i <= 1000; i++) {
+            listener.onMessage(new byte[] {1});
+        }
+
+        verify(call)
+                .close(
+                        argThat(
+                                status ->
+                                        status.getCode()
+                                                == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
+                        any());
     }
 
     @Test

@@ -9,6 +9,8 @@
 
 package io.valkyrja.application.entry.grpc;
 
+import io.grpc.Context;
+import io.grpc.Grpc;
 import io.grpc.HandlerRegistry;
 import io.grpc.MethodDescriptor;
 import io.grpc.ServerCall;
@@ -21,28 +23,42 @@ import io.valkyrja.grpc.message.call.ServiceCall;
 import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
 import io.valkyrja.grpc.message.cancellation.CancellationToken;
 import io.valkyrja.grpc.message.deadline.Deadline;
+import io.valkyrja.grpc.message.enum_.AddressType;
+import io.valkyrja.grpc.message.enum_.CancellationReason;
 import io.valkyrja.grpc.message.metadata.Metadata;
 import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
+import io.valkyrja.grpc.message.peer.AuthContext;
 import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.Inet6Address;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLSession;
 
 /**
  * The transport-agnostic grpc-java bridge: it turns any inbound gRPC method into a call on {@link
- * WorkerGrpc#dispatch}. Depends only on the {@code io.grpc.*} API, so it is shared verbatim by
- * every grpc-java transport (Netty, servlet, …).
+ * WorkerGrpc#dispatch}. Depends only on the {@code io.grpc.*} API (an optional/compileOnly
+ * dependency of core), so it is shared verbatim by every grpc-java transport (Netty, servlet, …).
  *
  * <p>Messages cross the boundary as raw {@code byte[]} — the framework stays worker-agnostic and
  * never references generated protobuf types; user handlers decode and encode as needed.
  */
 public final class GrpcBridge {
+
+    /**
+     * Upper bound on the messages buffered for one call before it is rejected. The framework
+     * buffers the full inbound stream before dispatching, so an unbounded client-streaming call
+     * would otherwise exhaust memory; this caps it and returns {@code RESOURCE_EXHAUSTED}.
+     */
+    private static final int MAX_INBOUND_MESSAGES = 1000;
 
     private GrpcBridge() {}
 
@@ -74,7 +90,8 @@ public final class GrpcBridge {
     }
 
     /**
-     * A call handler that buffers inbound messages, dispatches on half-close, and writes the
+     * A call handler that buffers inbound messages under flow control, propagates cancellation and
+     * deadline expiry to a {@link CancellationToken}, dispatches on half-close, and writes the
      * response back to the wire.
      *
      * @param app the frozen parent application
@@ -85,47 +102,110 @@ public final class GrpcBridge {
     public static ServerCallHandler<byte[], byte[]> handler(
             ApplicationContract app, ContainerData data, String fullMethodName) {
         return (call, headers) -> {
-            call.request(Integer.MAX_VALUE);
+            // Created up front and shared with the listener so cancellation (which can arrive
+            // before half-close) has something to fire.
+            CancellationToken token = new CancellationToken();
+
+            // Ask for one message at a time so the transport applies backpressure instead of the
+            // client flooding the server.
+            call.request(1);
             List<Object> messages = new ArrayList<>();
 
             return new ServerCall.Listener<>() {
                 @Override
                 public void onMessage(byte[] message) {
+                    if (messages.size() >= MAX_INBOUND_MESSAGES) {
+                        call.close(
+                                io.grpc.Status.RESOURCE_EXHAUSTED.withDescription(
+                                        "Inbound message limit exceeded."),
+                                new io.grpc.Metadata());
+                        return;
+                    }
+
                     messages.add(message);
+                    call.request(1);
                 }
 
                 @Override
                 public void onHalfClose() {
-                    ServiceCallContract serviceCall = buildCall(call, fullMethodName, messages);
+                    ServiceCallContract serviceCall =
+                            buildCall(call, headers, fullMethodName, messages, token);
                     WorkerGrpc.dispatch(
                             app, data, serviceCall, response -> write(call, serviceCall, response));
+                }
+
+                @Override
+                public void onCancel() {
+                    // A cancel callback covers both client cancellation and deadline expiry (the
+                    // library cancels the call when the deadline lapses).
+                    token.cancel(cancellationReason(Context.current().getDeadline()));
                 }
             };
         };
     }
 
     /**
+     * Classify a cancel callback: an expired deadline is {@code DEADLINE_EXCEEDED}, anything else
+     * (an explicit client cancel, a reset stream) is {@code CLIENT_CANCELLED}.
+     *
+     * @param deadline the call's deadline, or null when none was set
+     * @return the cancellation reason
+     */
+    public static CancellationReason cancellationReason(io.grpc.Deadline deadline) {
+        return deadline != null && deadline.isExpired()
+                ? CancellationReason.DEADLINE_EXCEEDED
+                : CancellationReason.CLIENT_CANCELLED;
+    }
+
+    /**
      * Build a {@link ServiceCall} from the native call, keying the framework method with a leading
-     * slash ({@code /package.Service/Method}).
+     * slash ({@code /package.Service/Method}) and carrying the inbound headers, deadline, shared
+     * cancellation token, and peer.
      *
      * @param call the native server call
+     * @param headers the inbound metadata
      * @param fullMethodName the grpc method name (no leading slash)
      * @param messages the buffered inbound messages
+     * @param token the shared cancellation token
      * @return the service call
      */
     public static ServiceCallContract buildCall(
-            ServerCall<byte[], byte[]> call, String fullMethodName, List<Object> messages) {
-        String address =
-                String.valueOf(call.getAttributes().get(io.grpc.Grpc.TRANSPORT_ATTR_REMOTE_ADDR));
-
+            ServerCall<byte[], byte[]> call,
+            io.grpc.Metadata headers,
+            String fullMethodName,
+            List<Object> messages,
+            CancellationToken token) {
         return new ServiceCall(
                 "/" + fullMethodName,
-                new Metadata(),
+                fromGrpcMetadata(headers),
                 deadline(),
-                new CancellationToken(),
-                Peer.insecure(address),
+                token,
+                peer(call),
                 messages,
                 null);
+    }
+
+    /**
+     * Describe the calling peer: its address (and {@link AddressType}) and whether the transport is
+     * secured with TLS.
+     *
+     * @param call the native server call
+     * @return the peer
+     */
+    public static Peer peer(ServerCall<byte[], byte[]> call) {
+        SocketAddress remote = call.getAttributes().get(Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
+        SSLSession session = call.getAttributes().get(Grpc.TRANSPORT_ATTR_SSL_SESSION);
+        AuthContext auth = session != null ? new AuthContext("tls") : AuthContext.insecure();
+
+        return new Peer(String.valueOf(remote), addressType(remote), auth);
+    }
+
+    private static AddressType addressType(SocketAddress remote) {
+        if (remote instanceof InetSocketAddress inet && inet.getAddress() != null) {
+            return inet.getAddress() instanceof Inet6Address ? AddressType.IPV6 : AddressType.IPV4;
+        }
+
+        return AddressType.UNKNOWN;
     }
 
     /**
@@ -134,7 +214,7 @@ public final class GrpcBridge {
      * @return the deadline, or {@code Deadline.none()} when the client set none
      */
     public static Deadline deadline() {
-        io.grpc.Deadline grpcDeadline = io.grpc.Context.current().getDeadline();
+        io.grpc.Deadline grpcDeadline = Context.current().getDeadline();
 
         if (grpcDeadline == null) {
             return Deadline.none();
@@ -146,7 +226,8 @@ public final class GrpcBridge {
 
     /**
      * Write a {@link ServiceResponseContract} to the wire: initial headers, each message (drained
-     * through the per-step cancellation check), then the status and trailers.
+     * through the per-step cancellation check), then the status (with rich details as {@code
+     * grpc-status-details-bin} when present) and trailers.
      *
      * @param call the native server call
      * @param serviceCall the inbound call (for the cancellation check)
@@ -166,12 +247,21 @@ public final class GrpcBridge {
                 io.grpc.Status.fromCodeValue(response.getStatus().getCode().getValue())
                         .withDescription(response.getStatus().getMessage());
 
-        call.close(status, toGrpcMetadata(response.getTrailingMetadata()));
+        io.grpc.Metadata trailers = toGrpcMetadata(response.getTrailingMetadata());
+        byte[] details = response.getStatus().getDetails();
+        if (details != null) {
+            trailers.put(
+                    io.grpc.Metadata.Key.of(
+                            "grpc-status-details-bin", io.grpc.Metadata.BINARY_BYTE_MARSHALLER),
+                    details);
+        }
+
+        call.close(status, trailers);
     }
 
     /**
-     * Translate framework metadata to gRPC metadata (ASCII values only; binary handling is
-     * deferred).
+     * Translate framework metadata to gRPC metadata, carrying both ASCII and binary ({@code -bin})
+     * keys.
      *
      * @param metadata the framework metadata
      * @return the gRPC metadata
@@ -180,20 +270,55 @@ public final class GrpcBridge {
         io.grpc.Metadata grpcMetadata = new io.grpc.Metadata();
 
         for (var entry : metadata) {
-            if (metadata.isBinaryKey(entry.getKey())) {
-                continue;
-            }
-
-            io.grpc.Metadata.Key<String> key =
-                    io.grpc.Metadata.Key.of(
-                            entry.getKey(), io.grpc.Metadata.ASCII_STRING_MARSHALLER);
-
-            for (Object value : entry.getValue()) {
-                grpcMetadata.put(key, String.valueOf(value));
+            String name = entry.getKey();
+            if (metadata.isBinaryKey(name)) {
+                io.grpc.Metadata.Key<byte[]> key =
+                        io.grpc.Metadata.Key.of(name, io.grpc.Metadata.BINARY_BYTE_MARSHALLER);
+                for (Object value : entry.getValue()) {
+                    grpcMetadata.put(key, (byte[]) value);
+                }
+            } else {
+                io.grpc.Metadata.Key<String> key =
+                        io.grpc.Metadata.Key.of(name, io.grpc.Metadata.ASCII_STRING_MARSHALLER);
+                for (Object value : entry.getValue()) {
+                    grpcMetadata.put(key, String.valueOf(value));
+                }
             }
         }
 
         return grpcMetadata;
+    }
+
+    /**
+     * Translate inbound gRPC metadata to framework metadata, carrying both ASCII and binary ({@code
+     * -bin}) keys so handlers can read auth/tracing headers.
+     *
+     * @param headers the inbound gRPC metadata
+     * @return the framework metadata
+     */
+    public static MetadataContract fromGrpcMetadata(io.grpc.Metadata headers) {
+        MetadataContract metadata = new Metadata();
+
+        // A name returned by keys() always has values, so getAll is never null here.
+        for (String name : headers.keys()) {
+            if (name.endsWith(io.grpc.Metadata.BINARY_HEADER_SUFFIX)) {
+                for (byte[] value :
+                        headers.getAll(
+                                io.grpc.Metadata.Key.of(
+                                        name, io.grpc.Metadata.BINARY_BYTE_MARSHALLER))) {
+                    metadata = metadata.withAdded(name, value);
+                }
+            } else {
+                for (String value :
+                        headers.getAll(
+                                io.grpc.Metadata.Key.of(
+                                        name, io.grpc.Metadata.ASCII_STRING_MARSHALLER))) {
+                    metadata = metadata.withAdded(name, value);
+                }
+            }
+        }
+
+        return metadata;
     }
 
     /** Identity marshaller: gRPC message bytes pass through untouched. */
