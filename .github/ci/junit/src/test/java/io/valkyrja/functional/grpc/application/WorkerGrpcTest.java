@@ -42,6 +42,7 @@ final class WorkerGrpcTest {
                 "app/grpc/provider/data",
                 "app.grpc.provider.data",
                 50051,
+                1000,
                 List.of(new GreeterComponentProvider()),
                 List.of(),
                 List.of(),

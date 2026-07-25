@@ -34,6 +34,7 @@ public record GrpcConfig(
         String dataPath,
         String dataNamespace,
         Integer port,
+        Integer maxInboundMessages,
         List<ComponentProviderContract> providers,
         List<Consumer<ApplicationContract>> callbacks,
         List<Class<? extends CallReceivedMiddlewareContract>> callReceivedMiddleware,
@@ -46,6 +47,10 @@ public record GrpcConfig(
         implements GrpcConfigContract {
 
     public GrpcConfig {
+        maxInboundMessages =
+                maxInboundMessages == null
+                        ? GrpcConfigContract.DEFAULT_MAX_INBOUND_MESSAGES
+                        : maxInboundMessages;
         providers = List.copyOf(providers);
         callbacks = List.copyOf(callbacks);
         callReceivedMiddleware = List.copyOf(callReceivedMiddleware);
@@ -69,6 +74,7 @@ public record GrpcConfig(
                 "app/grpc/provider/data",
                 "app.grpc.provider.data",
                 50051,
+                GrpcConfigContract.DEFAULT_MAX_INBOUND_MESSAGES,
                 List.of(new GrpcApplicationComponentProvider()),
                 List.of(),
                 List.of(),

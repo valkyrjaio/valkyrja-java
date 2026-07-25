@@ -61,6 +61,10 @@ import org.mockito.ArgumentCaptor;
 final class GrpcBridgeTest {
 
     private GrpcConfig config() {
+        return config(1000);
+    }
+
+    private GrpcConfig config(int maxInboundMessages) {
         return new GrpcConfig(
                 "App",
                 System.getProperty("user.dir"),
@@ -72,6 +76,7 @@ final class GrpcBridgeTest {
                 "app/grpc/provider/data",
                 "app.grpc.provider.data",
                 50051,
+                maxInboundMessages,
                 List.of(new GreeterComponentProvider()),
                 List.of(),
                 List.of(),
@@ -362,6 +367,26 @@ final class GrpcBridgeTest {
                                                 == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
                         any());
         verify(call, never()).sendHeaders(any());
+    }
+
+    @Test
+    void handlerHonorsAConfiguredInboundLimit() {
+        // A GrpcConfig with a lower maxInboundMessages rejects sooner than the 1000 default.
+        ApplicationContract app = WorkerGrpc.bootstrap(config(2));
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call = mockCall();
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/StreamHellos")
+                        .startCall(call, new io.grpc.Metadata());
+        listener.onMessage(new byte[] {1});
+        listener.onMessage(new byte[] {1});
+        listener.onMessage(new byte[] {1});
+
+        verify(call)
+                .close(
+                        argThat(status -> status.getCode() == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
+                        any());
     }
 
     @Test

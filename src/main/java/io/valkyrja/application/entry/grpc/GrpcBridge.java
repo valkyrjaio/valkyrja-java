@@ -16,6 +16,7 @@ import io.grpc.MethodDescriptor;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerMethodDefinition;
+import io.valkyrja.application.data.contract.GrpcConfigContract;
 import io.valkyrja.application.entry.abstract_.WorkerGrpc;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.data.ContainerData;
@@ -52,13 +53,6 @@ import javax.net.ssl.SSLSession;
  * never references generated protobuf types; user handlers decode and encode as needed.
  */
 public final class GrpcBridge {
-
-    /**
-     * Upper bound on the messages buffered for one call before it is rejected. The framework
-     * buffers the full inbound stream before dispatching, so an unbounded client-streaming call
-     * would otherwise exhaust memory; this caps it and returns {@code RESOURCE_EXHAUSTED}.
-     */
-    private static final int MAX_INBOUND_MESSAGES = 1000;
 
     private GrpcBridge() {}
 
@@ -101,6 +95,12 @@ public final class GrpcBridge {
      */
     public static ServerCallHandler<byte[], byte[]> handler(
             ApplicationContract app, ContainerData data, String fullMethodName) {
+        // The full inbound stream is buffered before dispatch, so cap it (configurable via
+        // GrpcConfig) and reject an over-limit call with RESOURCE_EXHAUSTED rather than exhausting
+        // memory on an unbounded client-streaming call.
+        int maxInboundMessages =
+                app.getContainer().getSingleton(GrpcConfigContract.class).maxInboundMessages();
+
         return (call, headers) -> {
             // Created up front and shared with the listener so cancellation (which can arrive
             // before half-close) has something to fire.
@@ -122,7 +122,7 @@ public final class GrpcBridge {
             return new ServerCall.Listener<>() {
                 @Override
                 public void onMessage(byte[] message) {
-                    if (messages.size() >= MAX_INBOUND_MESSAGES) {
+                    if (messages.size() >= maxInboundMessages) {
                         rejected[0] = true;
                         call.close(
                                 io.grpc.Status.RESOURCE_EXHAUSTED.withDescription(

@@ -12,8 +12,11 @@ package io.valkyrja.unit.application.data;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.data.GrpcConfig;
+import io.valkyrja.application.data.contract.GrpcConfigContract;
 import io.valkyrja.application.provider.GrpcApplicationComponentProvider;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +32,47 @@ final class GrpcConfigTest {
         assertFalse(config.debugMode());
         assertEquals(1, config.providers().size());
         assertTrue(config.providers().get(0) instanceof GrpcApplicationComponentProvider);
+    }
+
+    @Test
+    void maxInboundMessagesDefaultsToOneThousand() {
+        assertEquals(1000, new GrpcConfig().maxInboundMessages());
+    }
+
+    @Test
+    void contractSuppliesTheDefaultInboundCapToImplementorsThatDoNotOverrideIt() {
+        // An implementor that only fills in the required members inherits the contract default.
+        GrpcConfigContract config = mock(GrpcConfigContract.class, CALLS_REAL_METHODS);
+        assertEquals(
+                GrpcConfigContract.DEFAULT_MAX_INBOUND_MESSAGES, config.maxInboundMessages());
+    }
+
+    @Test
+    void nullMaxInboundMessagesFallsBackToTheDefault() {
+        GrpcConfig config =
+                new GrpcConfig(
+                        "App",
+                        "dir",
+                        "1.0.0",
+                        "production",
+                        true,
+                        "UTC",
+                        "key",
+                        "path",
+                        "ns",
+                        50051,
+                        null,
+                        java.util.List.of(new GrpcApplicationComponentProvider()),
+                        java.util.List.of(),
+                        java.util.List.of(),
+                        java.util.List.of(),
+                        java.util.List.of(),
+                        java.util.List.of(),
+                        java.util.List.of(),
+                        java.util.List.of(),
+                        java.util.List.of());
+
+        assertEquals(1000, config.maxInboundMessages());
     }
 
     @Test
@@ -63,6 +107,7 @@ final class GrpcConfigTest {
                         "path",
                         "ns",
                         50051,
+                        1000,
                         providers,
                         java.util.List.of(),
                         java.util.List.of(),
