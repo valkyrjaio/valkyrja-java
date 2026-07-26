@@ -10,6 +10,7 @@
 package io.valkyrja.fixtures.application.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
+import io.valkyrja.application.provider.abstract_.ComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
@@ -18,7 +19,7 @@ import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
 /** Test component provider that nests CLI and HTTP component providers. */
-public final class ComponentProviderClass implements ComponentProviderContract {
+public final class ComponentProviderClass extends ComponentProvider {
 
     @Override
     public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {

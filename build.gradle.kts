@@ -40,6 +40,7 @@ repositories {
 
 dependencies {
     compileOnly("org.jspecify:jspecify:1.0.0")
+    compileOnly("io.grpc:grpc-api:1.69.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0")
 }
 

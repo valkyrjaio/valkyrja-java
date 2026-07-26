@@ -17,6 +17,7 @@ import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
+import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class Valkyrja implements ApplicationContract {
     protected List<ListenerProviderContract> eventProviders = List.of();
     protected List<CliRouteProviderContract> cliRouteProviders = List.of();
     protected List<HttpRouteProviderContract> httpRouteProviders = List.of();
+    protected List<GrpcRouteProviderContract> grpcRouteProviders = List.of();
 
     public Valkyrja(ContainerContract container) {
         this(container, new Config());
@@ -128,6 +130,21 @@ public class Valkyrja implements ApplicationContract {
         }
 
         return httpRouteProviders;
+    }
+
+    @Override
+    public List<GrpcRouteProviderContract> getGrpcProviders() {
+        if (!grpcRouteProviders.isEmpty()) {
+            return grpcRouteProviders;
+        }
+
+        grpcRouteProviders = new ArrayList<>();
+
+        for (ComponentProviderContract provider : getProviders()) {
+            grpcRouteProviders.addAll(provider.getGrpcProviders(this));
+        }
+
+        return grpcRouteProviders;
     }
 
     @Override

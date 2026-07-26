@@ -11,6 +11,7 @@ package io.valkyrja.application.entry.abstract_;
 
 import io.valkyrja.application.data.contract.CliConfigContract;
 import io.valkyrja.application.data.contract.ConfigContract;
+import io.valkyrja.application.data.contract.GrpcConfigContract;
 import io.valkyrja.application.data.contract.HttpConfigContract;
 import io.valkyrja.application.directory.Directory;
 import io.valkyrja.application.kernel.Valkyrja;
@@ -77,6 +78,10 @@ public abstract class App {
 
         if (config instanceof HttpConfigContract httpConfig) {
             container.setSingleton(HttpConfigContract.class, httpConfig);
+        }
+
+        if (config instanceof GrpcConfigContract grpcConfig) {
+            container.setSingleton(GrpcConfigContract.class, grpcConfig);
         }
 
         app.publishProviderCallbacks();
