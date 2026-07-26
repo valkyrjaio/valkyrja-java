@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -35,8 +36,9 @@ import org.junit.jupiter.api.Timeout;
  *
  * <p>Drives the adapter's own {@link TomcatHttp#server} — the exact server the blocking {@code
  * run(...)} builds — on an ephemeral port, then confirms an incoming request reaches the request
- * handler. Because the server is the adapter's own, the bound port is only non-zero if the adapter
- * opened its connector, so this also guards the connector wiring. The bootstrapped application is
+ * handler. It asserts on the connector the adapter itself registered (read via {@code
+ * findConnectors()}, never {@code getConnector()}, which would lazily create one) so a regression
+ * where the adapter forgets to open a connector fails the test. The bootstrapped application is
  * captured through the config callback so an observable handler can be bound before the request is
  * sent.
  */
@@ -51,8 +53,13 @@ final class TomcatHttpSmokeTest {
         Tomcat tomcat = TomcatHttp.server(EntryConfigFixture.httpOnPort(0, appRef::set));
         try {
             bindRecordingHandler(appRef.get(), dispatched);
-            int port = tomcat.getConnector().getLocalPort();
-            assertTrue(port > 0, "the adapter should have opened a bound connector");
+            // Read the connector the adapter itself registered — do NOT call tomcat.getConnector(),
+            // which would lazily create and start one on the running service and mask a regression
+            // where the adapter forgot to open a connector.
+            Connector[] connectors = tomcat.getService().findConnectors();
+            assertTrue(connectors.length > 0, "the adapter should have opened a connector");
+            int port = connectors[0].getLocalPort();
+            assertTrue(port > 0, "the connector should be bound to a port");
             send(port, dispatched);
         } finally {
             tomcat.stop();
