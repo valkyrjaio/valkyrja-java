@@ -89,8 +89,13 @@ public interface ServiceCallContract {
      * send (stream open). Not for buffered calls — those return their messages on the {@code
      * ServiceResponse} instead.
      *
+     * <p>Must be called from a single thread. The transport is not thread-safe, so a concurrent
+     * send is rejected fast (rather than silently corrupting the stream) — a handler that fans work
+     * out to multiple threads must funnel its emissions back through one.
+     *
      * @param message the outbound message
-     * @throws IllegalStateException if this call is not streaming
+     * @throws IllegalStateException if this call is not streaming, or if a concurrent {@code send}
+     *     is detected
      */
     void send(Object message);
 
