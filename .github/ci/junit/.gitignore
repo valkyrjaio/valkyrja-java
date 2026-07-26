@@ -9,3 +9,6 @@ Thumbs.db
 gradlew
 gradlew.bat
 build
+
+# Embedded Tomcat work dirs from entry smoke tests
+tomcat.*
