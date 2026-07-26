@@ -31,6 +31,10 @@ import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
 import io.valkyrja.grpc.message.peer.AuthContext;
 import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
+import io.valkyrja.grpc.message.stream.InboundMessageStream;
+import io.valkyrja.grpc.message.stream.OutboundStream;
+import io.valkyrja.grpc.routing.collection.contract.RouteCollectionContract;
+import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -95,11 +99,14 @@ public final class GrpcBridge {
      */
     public static ServerCallHandler<byte[], byte[]> handler(
             ApplicationContract app, ContainerData data, String fullMethodName) {
-        // The full inbound stream is buffered before dispatch, so cap it (configurable via
-        // GrpcConfig) and reject an over-limit call with RESOURCE_EXHAUSTED rather than exhausting
-        // memory on an unbounded client-streaming call.
+        // The buffered path caps and rejects; the streaming path uses this as a flow-control
+        // high-water mark. Configurable via GrpcConfig.
         int maxInboundMessages =
                 app.getContainer().getSingleton(GrpcConfigContract.class).maxInboundMessages();
+
+        // A bidirectional method (both streaming flags) is dispatched under the streaming model;
+        // everything else buffers and dispatches once on half-close.
+        boolean streaming = isBidirectional(app, "/" + fullMethodName);
 
         return (call, headers) -> {
             // Created up front and shared with the listener so cancellation (which can arrive
@@ -112,6 +119,11 @@ public final class GrpcBridge {
             // thread), so a cooperative handler polling throwIfCancelled() actually observes it
             // mid-flight. onCancel below remains as a belt-and-suspenders fallback.
             wireCancellation(token, Context.current());
+
+            if (streaming) {
+                return streamingListener(
+                        app, data, call, headers, fullMethodName, token, maxInboundMessages);
+            }
 
             // Ask for one message at a time so the transport applies backpressure instead of the
             // client flooding the server.
@@ -155,6 +167,107 @@ public final class GrpcBridge {
                 }
             };
         };
+    }
+
+    /** Whether the method's route is bidirectional (both streaming flags set). */
+    private static boolean isBidirectional(ApplicationContract app, String method) {
+        RouteCollectionContract collection =
+                app.getContainer().getSingleton(RouteCollectionContract.class);
+        if (!collection.has(method)) {
+            return false;
+        }
+        RouteContract route = collection.get(method);
+        return route.isClientStreaming() && route.isServerStreaming();
+    }
+
+    /**
+     * Build the listener for a bidirectional (streaming-model) call. The handler is dispatched
+     * immediately on a per-call virtual thread and reads a live inbound stream fed by the transport
+     * while it pushes outbound messages; the deadline, peer, and headers are captured here (on the
+     * transport thread, where the gRPC {@link Context} is bound) rather than on the virtual thread.
+     */
+    private static ServerCall.Listener<byte[]> streamingListener(
+            ApplicationContract app,
+            ContainerData data,
+            ServerCall<byte[], byte[]> call,
+            io.grpc.Metadata headers,
+            String fullMethodName,
+            CancellationToken token,
+            int maxInboundMessages) {
+        // Captured on the transport thread — Context-derived values must not be read on the worker.
+        MetadataContract metadata = fromGrpcMetadata(headers);
+        Deadline deadline = deadline();
+        Peer peer = peer(call);
+
+        // High-water flow control: allow up to the cap in flight, refilling one as the handler
+        // drains each message so the queue never outgrows the bound.
+        InboundMessageStream inbound = new InboundMessageStream(() -> call.request(1));
+        call.request(maxInboundMessages);
+
+        OutboundStream outbound = new ServerCallOutboundStream(call);
+
+        Thread.ofVirtual()
+                .name("grpc-stream-" + fullMethodName)
+                .start(
+                        () ->
+                                WorkerGrpc.dispatchStreaming(
+                                        app,
+                                        data,
+                                        sink ->
+                                                new ServiceCall(
+                                                        "/" + fullMethodName,
+                                                        metadata,
+                                                        deadline,
+                                                        token,
+                                                        peer,
+                                                        inbound,
+                                                        null,
+                                                        sink),
+                                        outbound));
+
+        return new ServerCall.Listener<>() {
+            @Override
+            public void onMessage(byte[] message) {
+                inbound.offer(message);
+            }
+
+            @Override
+            public void onHalfClose() {
+                inbound.complete();
+            }
+
+            @Override
+            public void onCancel() {
+                token.cancel(cancellationReason(Context.current().getDeadline()));
+                // Unblock the handler's read loop so the worker thread finishes and closes.
+                inbound.complete();
+            }
+        };
+    }
+
+    /** {@link OutboundStream} backed by a gRPC {@link ServerCall}. */
+    private static final class ServerCallOutboundStream implements OutboundStream {
+
+        private final ServerCall<byte[], byte[]> call;
+
+        ServerCallOutboundStream(ServerCall<byte[], byte[]> call) {
+            this.call = call;
+        }
+
+        @Override
+        public void sendHeaders(MetadataContract initialMetadata) {
+            call.sendHeaders(toGrpcMetadata(initialMetadata));
+        }
+
+        @Override
+        public void sendMessage(Object message) {
+            call.sendMessage((byte[]) message);
+        }
+
+        @Override
+        public void close(ServiceResponseContract terminal) {
+            sendStatus(call, terminal);
+        }
     }
 
     /**
@@ -275,6 +388,19 @@ public final class GrpcBridge {
             call.sendMessage((byte[]) message);
         }
 
+        sendStatus(call, response);
+    }
+
+    /**
+     * Close the call with a response's status and trailing metadata, attaching rich details as
+     * {@code grpc-status-details-bin} when present. Shared by the buffered {@link #write} and the
+     * streaming {@link OutboundStream#close}.
+     *
+     * @param call the native server call
+     * @param response the response carrying the terminal status and trailing metadata
+     */
+    public static void sendStatus(
+            ServerCall<byte[], byte[]> call, ServiceResponseContract response) {
         io.grpc.Status status =
                 io.grpc.Status.fromCodeValue(response.getStatus().getCode().getValue())
                         .withDescription(response.getStatus().getMessage());

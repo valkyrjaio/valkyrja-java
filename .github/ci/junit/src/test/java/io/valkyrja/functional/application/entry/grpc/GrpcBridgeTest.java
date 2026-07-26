@@ -17,8 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,9 +54,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSession;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.ArgumentCaptor;
 
 /** Test the {@link GrpcBridge} grpc-java translation layer. */
@@ -351,7 +355,7 @@ final class GrpcBridgeTest {
         ServerCall<byte[], byte[]> call = mockCall();
 
         ServerCall.Listener<byte[]> listener =
-                GrpcBridge.handler(app, data, "pkg.Greeter/StreamHellos")
+                GrpcBridge.handler(app, data, "pkg.Greeter/SayHello")
                         .startCall(call, new io.grpc.Metadata());
         for (int i = 0; i <= 1000; i++) {
             listener.onMessage(new byte[] {1});
@@ -377,7 +381,7 @@ final class GrpcBridgeTest {
         ServerCall<byte[], byte[]> call = mockCall();
 
         ServerCall.Listener<byte[]> listener =
-                GrpcBridge.handler(app, data, "pkg.Greeter/StreamHellos")
+                GrpcBridge.handler(app, data, "pkg.Greeter/SayHello")
                         .startCall(call, new io.grpc.Metadata());
         listener.onMessage(new byte[] {1});
         listener.onMessage(new byte[] {1});
@@ -387,6 +391,88 @@ final class GrpcBridgeTest {
                 .close(
                         argThat(status -> status.getCode() == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
                         any());
+    }
+
+    @Test
+    void handlerBuffersAClientStreamingMethodRatherThanStreamingIt() {
+        // Client-streaming (not bidirectional) takes the buffered path: buffer, dispatch on
+        // half-close, write one response.
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/Collect")
+                        .startCall(call, new io.grpc.Metadata());
+        listener.onMessage("a".getBytes());
+        listener.onMessage("b".getBytes());
+        listener.onHalfClose();
+
+        verify(call).sendHeaders(any());
+        verify(call).sendMessage(any());
+        verify(call).close(argThat(status -> status.getCode() == io.grpc.Status.Code.OK), any());
+    }
+
+    @Test
+    @Timeout(5)
+    void streamingOnCancelCompletesTheInboundSoTheWorkerThreadFinishes()
+            throws InterruptedException {
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
+                        .startCall(call, new io.grpc.Metadata());
+        // Cancel before any message: the inbound completes, the echo handler's read loop ends, and
+        // the worker thread finishes and closes the call rather than hanging on the deadline.
+        listener.onCancel();
+
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @Timeout(5)
+    void handlerStreamsBidirectionallyEchoingEachMessageThroughAWorkerThread()
+            throws InterruptedException {
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+
+        // The echo runs on a per-call virtual thread; latch on close to await its completion.
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
+                        .startCall(call, new io.grpc.Metadata());
+        listener.onMessage("a".getBytes());
+        listener.onMessage("b".getBytes());
+        listener.onHalfClose();
+
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
+        // Headers committed once at open, each inbound echoed back, closed OK.
+        verify(call).sendHeaders(any());
+        verify(call, times(2)).sendMessage(any());
+        verify(call).close(argThat(status -> status.getCode() == io.grpc.Status.Code.OK), any());
     }
 
     @Test

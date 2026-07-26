@@ -33,6 +33,19 @@ public final class InboundMessageStream implements Iterable<Object> {
     private static final Object END = new Object();
 
     private final BlockingQueue<Object> queue = new LinkedBlockingQueue<>();
+    private final Runnable onConsumed;
+
+    public InboundMessageStream() {
+        this(() -> {});
+    }
+
+    /**
+     * @param onConsumed run once each time the handler consumes a message — the adapter wires this
+     *     to request one more message from the transport, keeping the queue at its high-water mark.
+     */
+    public InboundMessageStream(Runnable onConsumed) {
+        this.onConsumed = onConsumed;
+    }
 
     /**
      * Feed one decoded message into the stream. Called from the transport thread as messages
@@ -88,6 +101,7 @@ public final class InboundMessageStream implements Iterable<Object> {
                 }
                 Object message = peeked;
                 peeked = null;
+                onConsumed.run();
                 return message;
             }
         };

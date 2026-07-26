@@ -64,6 +64,22 @@ final class InboundMessageStreamTest {
     }
 
     @Test
+    void firesTheConsumeCallbackOncePerDrainedMessageOnly() {
+        java.util.concurrent.atomic.AtomicInteger consumed =
+                new java.util.concurrent.atomic.AtomicInteger();
+        InboundMessageStream stream = new InboundMessageStream(consumed::incrementAndGet);
+        stream.offer("a");
+        stream.offer("b");
+        stream.complete();
+
+        for (Object ignored : stream) {
+            // drain
+        }
+        // Fired once per real message, not for the terminal sentinel.
+        assertEquals(2, consumed.get());
+    }
+
+    @Test
     void nextThrowsWhenExhausted() {
         InboundMessageStream stream = new InboundMessageStream();
         stream.complete();

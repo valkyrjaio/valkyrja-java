@@ -67,6 +67,12 @@ public class GreeterController {
         return ServiceResponse.ok();
     }
 
+    /** Client-streaming (not bidirectional): buffered like unary, so it takes the buffered path. */
+    @Method(name = "Collect", clientStreaming = true)
+    public ServiceResponseContract collect(ContainerContract container, RouteContract route) {
+        return ServiceResponse.ok("collected".getBytes());
+    }
+
     @Method(name = "Boom")
     public ServiceResponseContract boom(ContainerContract container, RouteContract route) {
         throw new IllegalStateException("handler failure");
