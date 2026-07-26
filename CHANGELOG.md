@@ -1,6 +1,12 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.2.0...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.3.0...26.x)
+
+## [v26.3.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.2.0...v26.3.0) - 2026-07-25
+
+* [GitHub] Update .github workflow refs to v26.11.0 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/41
+* [Gradle] Auto-update root build dependencies by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/42
+* [Grpc] Add gRPC as a first-class protocol alongside HTTP and CLI by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/37
 
 ## [v26.2.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.1.2...v26.2.0) - 2026-07-25
 
