@@ -163,7 +163,7 @@
         fields are safe.
     -->
     <Match>
-        <Package name="io.valkyrja.application.entry.tomcat" />
+        <Class name="~io\.valkyrja\.application\.entry\.tomcat\.TomcatHttp.*" />
         <Bug pattern="SE_BAD_FIELD" />
     </Match>
 
