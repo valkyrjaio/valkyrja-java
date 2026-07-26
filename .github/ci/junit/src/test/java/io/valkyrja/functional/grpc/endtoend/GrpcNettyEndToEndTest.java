@@ -95,6 +95,70 @@ final class GrpcNettyEndToEndTest {
     }
 
     @Test
+    void unaryCallReturnsTheSingleResponse() throws Exception {
+        Server server = startServer();
+        ManagedChannel channel =
+                NettyChannelBuilder.forAddress("localhost", server.getPort())
+                        .usePlaintext()
+                        .build();
+        try {
+            List<byte[]> responses = Collections.synchronizedList(new ArrayList<>());
+            AtomicReference<Status> status = new AtomicReference<>();
+            CountDownLatch done = new CountDownLatch(1);
+
+            ClientCall<byte[], byte[]> call =
+                    channel.newCall(
+                            method("pkg.Greeter/Ping", MethodDescriptor.MethodType.UNARY),
+                            CallOptions.DEFAULT);
+            call.start(collector(responses, status, done), new Metadata());
+            call.request(1);
+            call.sendMessage("ping".getBytes());
+            call.halfClose();
+
+            assertTrue(done.await(10, TimeUnit.SECONDS), "call did not complete");
+            assertEquals(Status.Code.OK, status.get().getCode());
+            assertEquals(1, responses.size());
+            assertArrayEquals("pong".getBytes(), responses.get(0));
+        } finally {
+            channel.shutdownNow();
+            server.shutdownNow();
+        }
+    }
+
+    @Test
+    void serverStreamingCallReturnsEveryMessageForOneRequest() throws Exception {
+        Server server = startServer();
+        ManagedChannel channel =
+                NettyChannelBuilder.forAddress("localhost", server.getPort())
+                        .usePlaintext()
+                        .build();
+        try {
+            List<byte[]> responses = Collections.synchronizedList(new ArrayList<>());
+            AtomicReference<Status> status = new AtomicReference<>();
+            CountDownLatch done = new CountDownLatch(1);
+
+            ClientCall<byte[], byte[]> call =
+                    channel.newCall(
+                            method("pkg.Greeter/Fanout", MethodDescriptor.MethodType.SERVER_STREAMING),
+                            CallOptions.DEFAULT);
+            call.start(collector(responses, status, done), new Metadata());
+            call.request(10);
+            call.sendMessage("go".getBytes());
+            call.halfClose();
+
+            assertTrue(done.await(10, TimeUnit.SECONDS), "call did not complete");
+            assertEquals(Status.Code.OK, status.get().getCode());
+            assertEquals(3, responses.size());
+            assertArrayEquals("x".getBytes(), responses.get(0));
+            assertArrayEquals("y".getBytes(), responses.get(1));
+            assertArrayEquals("z".getBytes(), responses.get(2));
+        } finally {
+            channel.shutdownNow();
+            server.shutdownNow();
+        }
+    }
+
+    @Test
     void bufferedClientStreamingCallReturnsTheHandlerResponse() throws Exception {
         Server server = startServer();
         ManagedChannel channel =

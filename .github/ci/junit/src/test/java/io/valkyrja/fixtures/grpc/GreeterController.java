@@ -30,6 +30,7 @@ import io.valkyrja.grpc.routing.attribute.Middleware;
 import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** Fixture gRPC service controller exercising the {@code AttributeRouteCollector}. */
@@ -39,6 +40,19 @@ public class GreeterController {
     @Method(name = "SayHello")
     public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("hello");
+    }
+
+    /** Unary (1 → 1): returns a single byte[] message, for the end-to-end unary verification. */
+    @Method(name = "Ping")
+    public ServiceResponseContract ping(ContainerContract container, RouteContract route) {
+        return ServiceResponse.ok("pong".getBytes());
+    }
+
+    /** Server-streaming (1 → N): buffered path returns several byte[] messages for one request. */
+    @Method(name = "Fanout", serverStreaming = true)
+    public ServiceResponseContract fanout(ContainerContract container, RouteContract route) {
+        return ServiceResponse.ok()
+                .withMessages(List.<Object>of("x".getBytes(), "y".getBytes(), "z".getBytes()));
     }
 
     @Method(name = "StreamHellos", clientStreaming = true, serverStreaming = true)
