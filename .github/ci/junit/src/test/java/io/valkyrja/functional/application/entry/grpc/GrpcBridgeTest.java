@@ -360,10 +360,13 @@ final class GrpcBridgeTest {
         for (int i = 0; i <= 1000; i++) {
             listener.onMessage(new byte[] {1});
         }
+        // Any further delivery after the overflow-close must be ignored, not re-close the call.
+        listener.onMessage(new byte[] {1});
         // A half-close after the overflow must not run the pipeline against the closed call.
         listener.onHalfClose();
 
-        verify(call)
+        // Closed exactly once (RESOURCE_EXHAUSTED) — the post-reject message did not close again.
+        verify(call, times(1))
                 .close(
                         argThat(
                                 status ->

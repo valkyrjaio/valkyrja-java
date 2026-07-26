@@ -134,6 +134,17 @@ public final class GrpcBridge {
             return new ServerCall.Listener<>() {
                 @Override
                 public void onMessage(byte[] message) {
+                    // Once the overflow path has closed the call, ignore any further delivery
+                    // rather
+                    // than re-evaluating the cap and closing a second time (an
+                    // IllegalStateException
+                    // from the transport). Unreachable while flow control stops requesting after
+                    // the
+                    // reject, but robust if that ever changes — mirrors the onHalfClose guard.
+                    if (rejected[0]) {
+                        return;
+                    }
+
                     if (messages.size() >= maxInboundMessages) {
                         rejected[0] = true;
                         call.close(
