@@ -22,16 +22,17 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 public class ArchitectureTest {
 
     @ArchTest
-    public static final ArchRule io_grpc_is_confined_to_the_bridge_package =
+    public static final ArchRule io_grpc_is_confined_to_the_entry_package =
             noClasses()
                     .that()
-                    .resideOutsideOfPackage("io.valkyrja.application.entry.grpc")
+                    .resideOutsideOfPackage("io.valkyrja.application.entry..")
                     .should()
                     .dependOnClassesThat()
                     .resideInAPackage("io.grpc..")
                     .because(
                             "the native gRPC library is an optional (compileOnly) dependency; only"
-                                + " the bridge may translate it, so core stays library-agnostic");
+                                + " the entry package — the bridge and the per-runtime worker"
+                                + " adapters — may touch it, so core stays library-agnostic");
 
     @ArchTest
     public static final ArchRule interfaces_should_reside_in_contract_packages =

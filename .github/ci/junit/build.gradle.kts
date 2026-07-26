@@ -46,6 +46,22 @@ dependencies {
     // framework dependency — the published artifact keeps io.grpc compileOnly.
     testImplementation("io.grpc:grpc-netty-shaded:1.69.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Runtime-entry SDKs for the optional worker adapters in application.entry.{jetty,netty,tomcat}.
+    // compileOnly so the main src (the adapters) compiles; testImplementation so the smoke tests can
+    // boot the real servers. Not framework dependencies — the published artifact keeps them
+    // compileOnly (non-transitive).
+    compileOnly("org.eclipse.jetty:jetty-server:12.1.11")
+    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
+    compileOnly("io.netty:netty-codec-http:4.2.16.Final")
+    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
+    compileOnly("io.grpc:grpc-servlet-jakarta:1.69.0")
+    compileOnly("io.grpc:grpc-netty-shaded:1.69.0")
+    testImplementation("org.eclipse.jetty:jetty-server:12.1.11")
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
+    testImplementation("io.netty:netty-codec-http:4.2.16.Final")
+    testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
+    testImplementation("io.grpc:grpc-servlet-jakarta:1.69.0")
 }
 
 fun isNonStable(version: String): Boolean {
@@ -72,15 +88,21 @@ tasks.jacocoTestReport {
     dependsOn(tasks.test)
     // Exclude non-unit-testable infra:
     //  - benchmark harnesses are performance tooling, not production logic.
-    //  - the Sun HttpServer entry adapters (ExchangeHttp/ExchangeCgiHttp) are Java-only bootstrap
-    //    glue with no PHP equivalent; their run() starts non-daemon server threads that cannot be
-    //    exercised from a unit test without leaking the server / hanging the test JVM.
+    //  - the worker-runtime entry adapters (exchange/jetty/netty/tomcat) are bootstrap glue whose
+    //    run() starts persistent, non-daemon servers that block forever (server.join() /
+    //    awaitTermination() / await()) with JVM shutdown hooks — they cannot be exercised to full
+    //    branch coverage from a unit test without leaking the server / hanging the test JVM. The
+    //    reusable logic they build on (WorkerHttp / WorkerGrpc / GrpcBridge) is covered directly,
+    //    and the adapters are exercised by the smoke tests. Package globs also drop the anonymous
+    //    inner classes the HTTP adapters generate (handlers / servlets / channel initializers).
     classDirectories.setFrom(
             classDirectories.files.map { dir ->
                 fileTree(dir) {
                     exclude("**/benchmark/**")
-                    exclude("**/application/entry/ExchangeHttp.class")
-                    exclude("**/application/entry/ExchangeCgiHttp.class")
+                    exclude("**/application/entry/exchange/**")
+                    exclude("**/application/entry/jetty/**")
+                    exclude("**/application/entry/netty/**")
+                    exclude("**/application/entry/tomcat/**")
                 }
             })
     reports {

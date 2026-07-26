@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.application.entry;
+package io.valkyrja.application.entry.exchange;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;

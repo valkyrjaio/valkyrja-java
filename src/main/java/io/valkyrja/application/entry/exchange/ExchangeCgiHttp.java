@@ -7,10 +7,11 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.application.entry;
+package io.valkyrja.application.entry.exchange;
 
 import com.sun.net.httpserver.HttpServer;
 import io.valkyrja.application.data.contract.HttpConfigContract;
+import io.valkyrja.application.entry.Http;
 import io.valkyrja.throwable.exception.RuntimeException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
