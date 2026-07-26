@@ -90,6 +90,42 @@ final class ServiceCallTest {
     }
 
     @Test
+    @org.junit.jupiter.api.Timeout(5)
+    void concurrentSendIsRejected() throws InterruptedException {
+        java.util.concurrent.CountDownLatch insideSink = new java.util.concurrent.CountDownLatch(1);
+        java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        java.util.function.Consumer<Object> blockingSink =
+                message -> {
+                    insideSink.countDown();
+                    try {
+                        release.await();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                };
+        ServiceCall call =
+                new ServiceCall(
+                        METHOD,
+                        new Metadata(),
+                        Deadline.none(),
+                        new CancellationToken(),
+                        Peer.insecure("x"),
+                        List.of(),
+                        null,
+                        blockingSink);
+
+        Thread first = new Thread(() -> call.send("a"));
+        first.start();
+        // The first send is parked inside the sink; a second, concurrent send must be rejected fast
+        // rather than racing the non-thread-safe transport.
+        assertTrue(insideSink.await(5, java.util.concurrent.TimeUnit.SECONDS));
+        assertThrows(IllegalStateException.class, () -> call.send("b"));
+
+        release.countDown();
+        first.join();
+    }
+
+    @Test
     void withRoutePreservesTheStreamingSink() {
         List<Object> sent = new ArrayList<>();
         ServiceCall call =

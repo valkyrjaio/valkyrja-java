@@ -21,6 +21,7 @@ import io.valkyrja.grpc.message.peer.contract.PeerContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
@@ -43,6 +44,9 @@ public class ServiceCall implements ServiceCallContract {
 
     /** The outbound push sink for a streaming-model call; null for a buffered call. */
     protected final @Nullable Consumer<Object> sink;
+
+    /** Guards against concurrent {@link #send} — the transport sink is not thread-safe. */
+    private final AtomicBoolean sending = new AtomicBoolean();
 
     public ServiceCall(String method, Iterable<Object> messages) {
         this(
@@ -143,7 +147,20 @@ public class ServiceCall implements ServiceCallContract {
                     "send() is only available on a streaming (bidirectional) call; a buffered call"
                             + " returns its messages on the ServiceResponse instead.");
         }
-        sink.accept(message);
+        // The transport sink is not thread-safe; concurrent sends would race the wire framing and
+        // corrupt the stream silently. Fail fast and loud instead so a handler emitting from more
+        // than one thread learns immediately, rather than debugging an intermittent broken stream.
+        if (!sending.compareAndSet(false, true)) {
+            throw new IllegalStateException(
+                    "Concurrent send() on a streaming call: a streaming handler must emit from a"
+                            + " single thread — sends are serialized and the transport is not"
+                            + " thread-safe.");
+        }
+        try {
+            sink.accept(message);
+        } finally {
+            sending.set(false);
+        }
     }
 
     @Override
