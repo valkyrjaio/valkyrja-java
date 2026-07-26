@@ -44,6 +44,14 @@ dependencies {
     compileOnly("io.grpc:grpc-api:1.69.0")
     errorprone("com.google.errorprone:error_prone_core:2.50.0")
     errorprone("com.uber.nullaway:nullaway:0.13.8")
+
+    // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
+    compileOnly("org.eclipse.jetty:jetty-server:12.1.11")
+    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
+    compileOnly("io.netty:netty-codec-http:4.2.16.Final")
+    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
+    compileOnly("io.grpc:grpc-servlet-jakarta:1.69.0")
+    compileOnly("io.grpc:grpc-netty-shaded:1.69.0")
 }
 
 fun isNonStable(version: String): Boolean {

@@ -41,6 +41,14 @@ dependencies {
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
+    compileOnly("org.eclipse.jetty:jetty-server:12.1.11")
+    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
+    compileOnly("io.netty:netty-codec-http:4.2.16.Final")
+    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
+    compileOnly("io.grpc:grpc-servlet-jakarta:1.69.0")
+    compileOnly("io.grpc:grpc-netty-shaded:1.69.0")
 }
 
 fun isNonStable(version: String): Boolean {

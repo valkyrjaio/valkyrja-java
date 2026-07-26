@@ -151,8 +151,20 @@
         CGI-specific entry point with a different signature.
     -->
     <Match>
-        <Class name="io.valkyrja.application.entry.ExchangeCgiHttp" />
+        <Class name="io.valkyrja.application.entry.exchange.ExchangeCgiHttp" />
         <Bug pattern="HSM_HIDING_METHOD" />
+    </Match>
+
+    <!--
+        Intentional framework design: the embedded Tomcat HTTP entry adapter registers an
+        anonymous HttpServlet (which implements Serializable) that captures the frozen
+        application and the container-data snapshot. The servlet is only ever invoked inside
+        the running worker process and is never serialized, so the captured non-serializable
+        fields are safe.
+    -->
+    <Match>
+        <Class name="~io\.valkyrja\.application\.entry\.tomcat\.TomcatHttp.*" />
+        <Bug pattern="SE_BAD_FIELD" />
     </Match>
 
     <!--
