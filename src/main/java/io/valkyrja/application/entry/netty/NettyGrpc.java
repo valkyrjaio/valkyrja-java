@@ -36,14 +36,7 @@ public class NettyGrpc extends WorkerGrpc {
      * @throws InterruptedException if the server thread is interrupted
      */
     public static void run(GrpcConfigContract config) throws IOException, InterruptedException {
-        ApplicationContract app = bootstrap(config);
-        ContainerData data = (ContainerData) app.getContainer().getData();
-
-        Server server =
-                NettyServerBuilder.forPort(config.port())
-                        .fallbackHandlerRegistry(GrpcBridge.registry(app, data))
-                        .build()
-                        .start();
+        Server server = server(config);
 
         // Drain in-flight calls on JVM termination (SIGTERM / Ctrl-C) instead of dropping them.
         Runtime.getRuntime()
@@ -59,5 +52,27 @@ public class NettyGrpc extends WorkerGrpc {
                                 }));
 
         server.awaitTermination();
+    }
+
+    /**
+     * Build and start the grpc-netty server, returning the running instance without blocking or
+     * installing a shutdown hook.
+     *
+     * <p>{@link #run} calls this, adds the JVM shutdown hook, and blocks on {@link
+     * Server#awaitTermination()}. Exposed separately so the server can be started, exercised, and
+     * stopped (e.g. from a test) via {@link Server#shutdownNow()}.
+     *
+     * @param config the gRPC configuration
+     * @return the started grpc-netty server
+     * @throws IOException if the server fails to bind
+     */
+    public static Server server(GrpcConfigContract config) throws IOException {
+        ApplicationContract app = bootstrap(config);
+        ContainerData data = (ContainerData) app.getContainer().getData();
+
+        return NettyServerBuilder.forPort(config.port())
+                .fallbackHandlerRegistry(GrpcBridge.registry(app, data))
+                .build()
+                .start();
     }
 }

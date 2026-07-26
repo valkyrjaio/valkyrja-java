@@ -10,6 +10,7 @@
 package io.valkyrja.application.entry.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
@@ -43,43 +44,74 @@ public class NettyHttp extends WorkerHttp {
      * @throws InterruptedException if the server thread is interrupted
      */
     public static void run(HttpConfigContract config) throws InterruptedException {
+        server(config).closeFuture().sync();
+    }
+
+    /**
+     * Bind and start the Netty server, returning the bound channel without blocking.
+     *
+     * <p>{@link #run} calls this and then blocks on the channel's close future. Exposed separately
+     * so the server can be started, exercised, and stopped (e.g. from a test) by closing the
+     * returned channel. The boss/worker event-loop groups are shut down when the channel closes —
+     * whether that is a worker shutdown or a test closing the channel — mirroring the {@code
+     * finally} in the blocking loop; if start-up fails before the channel is returned, they are
+     * shut down too.
+     *
+     * @param config the HTTP configuration
+     * @return the bound server channel
+     * @throws InterruptedException if the bind is interrupted
+     */
+    public static Channel server(HttpConfigContract config) throws InterruptedException {
         ApplicationContract app = bootstrap(config);
         ContainerData data = (ContainerData) app.getContainer().getData();
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
+        boolean started = false;
         try {
-            new ServerBootstrap()
-                    .group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(
-                            new ChannelInitializer<SocketChannel>() {
-                                @Override
-                                protected void initChannel(SocketChannel ch) {
-                                    ch.pipeline().addLast(new HttpServerCodec());
-                                    ch.pipeline().addLast(new HttpObjectAggregator(65_536));
-                                    ch.pipeline()
-                                            .addLast(
-                                                    new SimpleChannelInboundHandler<
-                                                            FullHttpRequest>() {
-                                                        @Override
-                                                        protected void channelRead0(
-                                                                ChannelHandlerContext ctx,
-                                                                FullHttpRequest req) {
-                                                            handle(app, data, getRequest(ctx, req));
-                                                        }
-                                                    });
-                                }
-                            })
-                    .bind(config.port())
-                    .sync()
-                    .channel()
-                    .closeFuture()
-                    .sync();
+            Channel channel =
+                    new ServerBootstrap()
+                            .group(bossGroup, workerGroup)
+                            .channel(NioServerSocketChannel.class)
+                            .childHandler(
+                                    new ChannelInitializer<SocketChannel>() {
+                                        @Override
+                                        protected void initChannel(SocketChannel ch) {
+                                            ch.pipeline().addLast(new HttpServerCodec());
+                                            ch.pipeline().addLast(new HttpObjectAggregator(65_536));
+                                            ch.pipeline()
+                                                    .addLast(
+                                                            new SimpleChannelInboundHandler<
+                                                                    FullHttpRequest>() {
+                                                                @Override
+                                                                protected void channelRead0(
+                                                                        ChannelHandlerContext ctx,
+                                                                        FullHttpRequest req) {
+                                                                    handle(
+                                                                            app,
+                                                                            data,
+                                                                            getRequest(ctx, req));
+                                                                }
+                                                            });
+                                        }
+                                    })
+                            .bind(config.port())
+                            .sync()
+                            .channel();
+            channel.closeFuture()
+                    .addListener(
+                            future -> {
+                                bossGroup.shutdownGracefully();
+                                workerGroup.shutdownGracefully();
+                            });
+            started = true;
+            return channel;
         } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            if (!started) {
+                bossGroup.shutdownGracefully();
+                workerGroup.shutdownGracefully();
+            }
         }
     }
 

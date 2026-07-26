@@ -38,6 +38,21 @@ public class TomcatHttp extends WorkerHttp {
      * @throws LifecycleException if Tomcat fails to start
      */
     public static void run(HttpConfigContract config) throws LifecycleException {
+        server(config).getServer().await();
+    }
+
+    /**
+     * Build and start the embedded Tomcat server, returning the running instance without blocking.
+     *
+     * <p>{@link #run} calls this and then blocks on {@code getServer().await()}. Exposed separately
+     * so the server can be started, exercised, and stopped (e.g. from a test) without the blocking
+     * await.
+     *
+     * @param config the HTTP configuration
+     * @return the started Tomcat server
+     * @throws LifecycleException if Tomcat fails to start
+     */
+    public static Tomcat server(HttpConfigContract config) throws LifecycleException {
         ApplicationContract app = bootstrap(config);
         ContainerData data = (ContainerData) app.getContainer().getData();
 
@@ -61,7 +76,7 @@ public class TomcatHttp extends WorkerHttp {
         ctx.addServletMappingDecoded("/*", "valkyrja");
 
         tomcat.start();
-        tomcat.getServer().await();
+        return tomcat;
     }
 
     /**

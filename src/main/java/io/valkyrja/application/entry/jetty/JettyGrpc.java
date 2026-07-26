@@ -37,6 +37,37 @@ public class JettyGrpc extends WorkerGrpc {
      * @throws Exception if Jetty fails to start
      */
     public static void run(GrpcConfigContract config) throws Exception {
+        Server server = server(config);
+
+        // Stop the embedded server on JVM termination (SIGTERM / Ctrl-C); stop() honors the stop
+        // timeout set in server() for the graceful window.
+        Runtime.getRuntime()
+                .addShutdownHook(
+                        new Thread(
+                                () -> {
+                                    try {
+                                        server.stop();
+                                    } catch (Exception e) {
+                                        // Best-effort shutdown; the JVM is exiting regardless.
+                                    }
+                                }));
+
+        server.join();
+    }
+
+    /**
+     * Build and start the embedded Jetty gRPC server, returning the running instance without
+     * blocking or installing a shutdown hook.
+     *
+     * <p>{@link #run} calls this, adds the JVM shutdown hook, and blocks on {@link Server#join()}.
+     * Exposed separately so the server can be started, exercised, and stopped (e.g. from a test)
+     * without the blocking join.
+     *
+     * @param config the gRPC configuration
+     * @return the started Jetty server
+     * @throws Exception if Jetty fails to start
+     */
+    public static Server server(GrpcConfigContract config) throws Exception {
         ApplicationContract app = bootstrap(config);
         ContainerData data = (ContainerData) app.getContainer().getData();
 
@@ -66,20 +97,6 @@ public class JettyGrpc extends WorkerGrpc {
         server.setStopTimeout(30_000L);
 
         server.start();
-
-        // Stop the embedded server on JVM termination (SIGTERM / Ctrl-C); stop() honors the stop
-        // timeout above for the graceful window.
-        Runtime.getRuntime()
-                .addShutdownHook(
-                        new Thread(
-                                () -> {
-                                    try {
-                                        server.stop();
-                                    } catch (Exception e) {
-                                        // Best-effort shutdown; the JVM is exiting regardless.
-                                    }
-                                }));
-
-        server.join();
+        return server;
     }
 }

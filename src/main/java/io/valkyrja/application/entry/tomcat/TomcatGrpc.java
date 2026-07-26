@@ -37,23 +37,7 @@ public class TomcatGrpc extends WorkerGrpc {
      * @throws LifecycleException if Tomcat fails to start
      */
     public static void run(GrpcConfigContract config) throws LifecycleException {
-        ApplicationContract app = bootstrap(config);
-        ContainerData data = (ContainerData) app.getContainer().getData();
-
-        ServletServerBuilder builder = new ServletServerBuilder();
-        builder.fallbackHandlerRegistry(GrpcBridge.registry(app, data));
-        Servlet grpcServlet = builder.buildServlet();
-
-        Tomcat tomcat = new Tomcat();
-        tomcat.setPort(config.port());
-        tomcat.getConnector();
-
-        Context ctx = tomcat.addContext("", null);
-        Wrapper wrapper = Tomcat.addServlet(ctx, "grpc", grpcServlet);
-        wrapper.setAsyncSupported(true);
-        ctx.addServletMappingDecoded("/*", "grpc");
-
-        tomcat.start();
+        Tomcat tomcat = server(config);
 
         // Stop the embedded server on JVM termination (SIGTERM / Ctrl-C): pause the connector to
         // stop accepting new connections, then stop and destroy the container.
@@ -77,5 +61,38 @@ public class TomcatGrpc extends WorkerGrpc {
                                 }));
 
         tomcat.getServer().await();
+    }
+
+    /**
+     * Build and start the embedded Tomcat gRPC server, returning the running instance without
+     * blocking or installing a shutdown hook.
+     *
+     * <p>{@link #run} calls this, adds the JVM shutdown hook, and blocks on {@code
+     * getServer().await()}. Exposed separately so the server can be started, exercised, and stopped
+     * (e.g. from a test) without the blocking await.
+     *
+     * @param config the gRPC configuration
+     * @return the started Tomcat server
+     * @throws LifecycleException if Tomcat fails to start
+     */
+    public static Tomcat server(GrpcConfigContract config) throws LifecycleException {
+        ApplicationContract app = bootstrap(config);
+        ContainerData data = (ContainerData) app.getContainer().getData();
+
+        ServletServerBuilder builder = new ServletServerBuilder();
+        builder.fallbackHandlerRegistry(GrpcBridge.registry(app, data));
+        Servlet grpcServlet = builder.buildServlet();
+
+        Tomcat tomcat = new Tomcat();
+        tomcat.setPort(config.port());
+        tomcat.getConnector();
+
+        Context ctx = tomcat.addContext("", null);
+        Wrapper wrapper = Tomcat.addServlet(ctx, "grpc", grpcServlet);
+        wrapper.setAsyncSupported(true);
+        ctx.addServletMappingDecoded("/*", "grpc");
+
+        tomcat.start();
+        return tomcat;
     }
 }

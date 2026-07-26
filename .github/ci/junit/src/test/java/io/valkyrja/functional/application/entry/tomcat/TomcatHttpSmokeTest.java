@@ -9,48 +9,59 @@
 
 package io.valkyrja.functional.application.entry.tomcat;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
-import io.valkyrja.application.data.HttpConfig;
-import io.valkyrja.application.entry.abstract_.WorkerHttp;
 import io.valkyrja.application.entry.tomcat.TomcatHttp;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.container.data.ContainerData;
+import io.valkyrja.fixtures.application.entry.EntryConfigFixture;
 import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.apache.catalina.Context;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.catalina.startup.Tomcat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Smoke test for the {@link TomcatHttp} adapter over a real embedded Tomcat server.
  *
- * <p>The blocking {@code run(...)} loop is not exercised directly (it calls {@code
- * tomcat.getServer().await()} and never returns); instead the adapter's request path — {@link
- * TomcatHttp#getRequest} feeding {@link WorkerHttp#handle} — is driven through a real, stoppable
- * server bound to an ephemeral port.
+ * <p>Drives the adapter's own {@link TomcatHttp#server} — the exact server the blocking {@code
+ * run(...)} builds — on an ephemeral port, then confirms an incoming request reaches the request
+ * handler. Because the server is the adapter's own, the bound port is only non-zero if the adapter
+ * opened its connector, so this also guards the connector wiring. The bootstrapped application is
+ * captured through the config callback so an observable handler can be bound before the request is
+ * sent.
  */
 @Timeout(20)
 final class TomcatHttpSmokeTest {
 
     @Test
-    void serverDispatchesAnIncomingRequestThroughTheAdapter(@TempDir Path baseDir) throws Exception {
-        ApplicationContract app = WorkerHttp.bootstrap(new HttpConfig());
+    void serverDispatchesAnIncomingRequestThroughTheAdapter() throws Exception {
+        AtomicReference<ApplicationContract> appRef = new AtomicReference<>();
         CountDownLatch dispatched = new CountDownLatch(1);
+
+        Tomcat tomcat = TomcatHttp.server(EntryConfigFixture.httpOnPort(0, appRef::set));
+        try {
+            bindRecordingHandler(appRef.get(), dispatched);
+            int port = tomcat.getConnector().getLocalPort();
+            assertTrue(port > 0, "the adapter should have opened a bound connector");
+            send(port, dispatched);
+        } finally {
+            tomcat.stop();
+            tomcat.destroy();
+        }
+    }
+
+    private static void bindRecordingHandler(ApplicationContract app, CountDownLatch dispatched) {
+        assertNotNull(app, "the bootstrap callback should have captured the application");
         RequestHandlerContract handler = mock(RequestHandlerContract.class);
         doAnswer(
                         invocation -> {
@@ -60,33 +71,6 @@ final class TomcatHttpSmokeTest {
                 .when(handler)
                 .run(any());
         app.getContainer().setSingleton(RequestHandlerContract.class, handler);
-        ContainerData data = (ContainerData) app.getContainer().getData();
-
-        Tomcat tomcat = new Tomcat();
-        tomcat.setBaseDir(baseDir.toString());
-        tomcat.setPort(0);
-        tomcat.getConnector();
-
-        Context ctx = tomcat.addContext("", baseDir.toString());
-        Tomcat.addServlet(
-                ctx,
-                "valkyrja",
-                new HttpServlet() {
-                    @Override
-                    protected void service(HttpServletRequest req, HttpServletResponse resp) {
-                        WorkerHttp.handle(app, data, TomcatHttp.getRequest(req, resp));
-                    }
-                });
-        ctx.addServletMappingDecoded("/*", "valkyrja");
-
-        tomcat.start();
-
-        try {
-            send(tomcat.getConnector().getLocalPort(), dispatched);
-        } finally {
-            tomcat.stop();
-            tomcat.destroy();
-        }
     }
 
     private static void send(int port, CountDownLatch dispatched) throws IOException, InterruptedException {

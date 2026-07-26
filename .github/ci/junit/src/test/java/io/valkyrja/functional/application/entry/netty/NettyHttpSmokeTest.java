@@ -9,28 +9,16 @@
 
 package io.valkyrja.functional.application.entry.netty;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.valkyrja.application.data.HttpConfig;
-import io.valkyrja.application.entry.abstract_.WorkerHttp;
 import io.valkyrja.application.entry.netty.NettyHttp;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.container.data.ContainerData;
+import io.valkyrja.fixtures.application.entry.EntryConfigFixture;
 import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,24 +27,40 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 /**
  * Smoke test for the {@link NettyHttp} adapter over a real Netty pipeline.
  *
- * <p>The blocking {@code run(...)} loop is not exercised directly (it blocks on the channel's close
- * future and never returns); instead the adapter's request path — {@link NettyHttp#getRequest}
- * feeding {@link WorkerHttp#handle} — is driven through a real, stoppable pipeline bound to an
- * ephemeral port.
+ * <p>Drives the adapter's own {@link NettyHttp#server} — the exact pipeline the blocking {@code
+ * run(...)} builds — on an ephemeral port, then confirms an incoming request reaches the request
+ * handler. The bootstrapped application is captured through the config callback so an observable
+ * handler can be bound before the request is sent; closing the returned channel shuts the event
+ * loops down.
  */
 @Timeout(20)
 final class NettyHttpSmokeTest {
 
     @Test
     void serverDispatchesAnIncomingRequestThroughTheAdapter() throws Exception {
-        ApplicationContract app = WorkerHttp.bootstrap(new HttpConfig());
+        AtomicReference<ApplicationContract> appRef = new AtomicReference<>();
         CountDownLatch dispatched = new CountDownLatch(1);
+
+        Channel channel = NettyHttp.server(EntryConfigFixture.httpOnPort(0, appRef::set));
+        try {
+            bindRecordingHandler(appRef.get(), dispatched);
+            int port = ((InetSocketAddress) channel.localAddress()).getPort();
+            assertTrue(port > 0, "the server should be listening on a bound port");
+            send(port, dispatched);
+        } finally {
+            channel.close().sync();
+        }
+    }
+
+    private static void bindRecordingHandler(ApplicationContract app, CountDownLatch dispatched) {
+        assertNotNull(app, "the bootstrap callback should have captured the application");
         RequestHandlerContract handler = mock(RequestHandlerContract.class);
         doAnswer(
                         invocation -> {
@@ -66,48 +70,6 @@ final class NettyHttpSmokeTest {
                 .when(handler)
                 .run(any());
         app.getContainer().setSingleton(RequestHandlerContract.class, handler);
-        ContainerData data = (ContainerData) app.getContainer().getData();
-
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try {
-            Channel channel =
-                    new ServerBootstrap()
-                            .group(bossGroup, workerGroup)
-                            .channel(NioServerSocketChannel.class)
-                            .childHandler(
-                                    new ChannelInitializer<SocketChannel>() {
-                                        @Override
-                                        protected void initChannel(SocketChannel ch) {
-                                            ch.pipeline().addLast(new HttpServerCodec());
-                                            ch.pipeline().addLast(new HttpObjectAggregator(65_536));
-                                            ch.pipeline()
-                                                    .addLast(
-                                                            new SimpleChannelInboundHandler<
-                                                                    FullHttpRequest>() {
-                                                                @Override
-                                                                protected void channelRead0(
-                                                                        ChannelHandlerContext ctx,
-                                                                        FullHttpRequest req) {
-                                                                    WorkerHttp.handle(
-                                                                            app,
-                                                                            data,
-                                                                            NettyHttp.getRequest(
-                                                                                    ctx, req));
-                                                                }
-                                                            });
-                                        }
-                                    })
-                            .bind(0)
-                            .sync()
-                            .channel();
-
-            int port = ((InetSocketAddress) channel.localAddress()).getPort();
-            send(port, dispatched);
-        } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-        }
     }
 
     private static void send(int port, CountDownLatch dispatched) throws IOException, InterruptedException {

@@ -9,16 +9,15 @@
 
 package io.valkyrja.functional.application.entry.jetty;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
-import io.valkyrja.application.data.HttpConfig;
-import io.valkyrja.application.entry.abstract_.WorkerHttp;
 import io.valkyrja.application.entry.jetty.JettyHttp;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.container.data.ContainerData;
+import io.valkyrja.fixtures.application.entry.EntryConfigFixture;
 import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,29 +25,41 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Response;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.util.Callback;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 /**
  * Smoke test for the {@link JettyHttp} adapter over a real embedded Jetty server.
  *
- * <p>The blocking {@code run(...)} loop is not exercised directly (it calls {@code server.join()}
- * and never returns); instead the adapter's request path — {@link JettyHttp#getRequest} feeding
- * {@link WorkerHttp#handle} — is driven through a real, stoppable server bound to an ephemeral port.
+ * <p>Drives the adapter's own {@link JettyHttp#server} — the exact server the blocking {@code
+ * run(...)} builds — on an ephemeral port, then confirms an incoming request reaches the request
+ * handler. The bootstrapped application is captured through the config callback so an observable
+ * handler can be bound before the request is sent.
  */
 @Timeout(20)
 final class JettyHttpSmokeTest {
 
     @Test
     void serverDispatchesAnIncomingRequestThroughTheAdapter() throws Exception {
-        ApplicationContract app = WorkerHttp.bootstrap(new HttpConfig());
+        AtomicReference<ApplicationContract> appRef = new AtomicReference<>();
         CountDownLatch dispatched = new CountDownLatch(1);
+
+        Server server = JettyHttp.server(EntryConfigFixture.httpOnPort(0, appRef::set));
+        try {
+            bindRecordingHandler(appRef.get(), dispatched);
+            int port = ((ServerConnector) server.getConnectors()[0]).getLocalPort();
+            assertTrue(port > 0, "the server should be listening on a bound port");
+            send(port, dispatched);
+        } finally {
+            server.stop();
+        }
+    }
+
+    private static void bindRecordingHandler(ApplicationContract app, CountDownLatch dispatched) {
+        assertNotNull(app, "the bootstrap callback should have captured the application");
         RequestHandlerContract handler = mock(RequestHandlerContract.class);
         doAnswer(
                         invocation -> {
@@ -58,26 +69,6 @@ final class JettyHttpSmokeTest {
                 .when(handler)
                 .run(any());
         app.getContainer().setSingleton(RequestHandlerContract.class, handler);
-        ContainerData data = (ContainerData) app.getContainer().getData();
-
-        Server server = new Server(0);
-        server.setHandler(
-                new Handler.Abstract() {
-                    @Override
-                    public boolean handle(Request request, Response response, Callback callback) {
-                        WorkerHttp.handle(app, data, JettyHttp.getRequest(request, response));
-                        callback.succeeded();
-                        return true;
-                    }
-                });
-        server.start();
-
-        try {
-            int port = ((ServerConnector) server.getConnectors()[0]).getLocalPort();
-            send(port, dispatched);
-        } finally {
-            server.stop();
-        }
     }
 
     private static void send(int port, CountDownLatch dispatched) throws IOException, InterruptedException {

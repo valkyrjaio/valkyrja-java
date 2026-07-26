@@ -43,12 +43,28 @@ public class ExchangeHttp extends WorkerHttp {
      * @throws IOException if the server socket cannot be opened
      */
     public static void run(HttpConfigContract config) throws IOException {
+        server(config);
+    }
+
+    /**
+     * Create and start the Sun HTTP server, returning the running instance.
+     *
+     * <p>{@link #run} calls this and discards the handle (the server's own non-daemon threads keep
+     * the JVM alive). Exposed separately so the server can be started, exercised, and stopped (e.g.
+     * from a test) via {@link HttpServer#stop(int)}.
+     *
+     * @param config the HTTP configuration
+     * @return the started Sun HTTP server
+     * @throws IOException if the server socket cannot be opened
+     */
+    public static HttpServer server(HttpConfigContract config) throws IOException {
         ApplicationContract app = bootstrap(config);
         ContainerData data = (ContainerData) app.getContainer().getData();
 
         HttpServer server = HttpServer.create(new InetSocketAddress(config.port()), 0);
         server.createContext("/", exchange -> handle(app, data, getRequest(exchange)));
         server.start();
+        return server;
     }
 
     /**

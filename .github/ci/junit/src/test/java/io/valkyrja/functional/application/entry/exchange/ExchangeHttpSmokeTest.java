@@ -9,42 +9,54 @@
 
 package io.valkyrja.functional.application.entry.exchange;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import com.sun.net.httpserver.HttpServer;
-import io.valkyrja.application.data.HttpConfig;
-import io.valkyrja.application.entry.abstract_.WorkerHttp;
 import io.valkyrja.application.entry.exchange.ExchangeHttp;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.container.data.ContainerData;
+import io.valkyrja.fixtures.application.entry.EntryConfigFixture;
 import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 /**
  * Smoke test for the {@link ExchangeHttp} adapter over a real JDK {@link HttpServer}.
  *
- * <p>The blocking {@code run(...)} loop is not exercised directly (it starts a non-daemon server
- * that never returns); instead the adapter's request path — {@link ExchangeHttp#getRequest} feeding
- * {@link WorkerHttp#handle} — is driven through a real, stoppable server bound to an ephemeral port.
+ * <p>Drives the adapter's own {@link ExchangeHttp#server} — the exact server the blocking {@code
+ * run(...)} builds — on an ephemeral port, then confirms an incoming request reaches the request
+ * handler. The bootstrapped application is captured through the config callback so an observable
+ * handler can be bound before the request is sent.
  */
 @Timeout(20)
 final class ExchangeHttpSmokeTest {
 
     @Test
     void serverDispatchesAnIncomingRequestThroughTheAdapter() throws Exception {
-        ApplicationContract app = WorkerHttp.bootstrap(new HttpConfig());
+        AtomicReference<ApplicationContract> appRef = new AtomicReference<>();
         CountDownLatch dispatched = new CountDownLatch(1);
+
+        HttpServer server = ExchangeHttp.server(EntryConfigFixture.httpOnPort(0, appRef::set));
+        try {
+            bindRecordingHandler(appRef.get(), dispatched);
+            send(server.getAddress().getPort(), dispatched);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    private static void bindRecordingHandler(ApplicationContract app, CountDownLatch dispatched) {
+        assertNotNull(app, "the bootstrap callback should have captured the application");
         RequestHandlerContract handler = mock(RequestHandlerContract.class);
         doAnswer(
                         invocation -> {
@@ -54,23 +66,6 @@ final class ExchangeHttpSmokeTest {
                 .when(handler)
                 .run(any());
         app.getContainer().setSingleton(RequestHandlerContract.class, handler);
-        ContainerData data = (ContainerData) app.getContainer().getData();
-
-        HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
-        server.createContext(
-                "/",
-                exchange -> {
-                    WorkerHttp.handle(app, data, ExchangeHttp.getRequest(exchange));
-                    exchange.sendResponseHeaders(200, -1);
-                    exchange.close();
-                });
-        server.start();
-
-        try {
-            send(server.getAddress().getPort(), dispatched);
-        } finally {
-            server.stop(0);
-        }
     }
 
     private static void send(int port, CountDownLatch dispatched) throws IOException, InterruptedException {

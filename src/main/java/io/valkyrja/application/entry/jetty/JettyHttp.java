@@ -37,6 +37,21 @@ public class JettyHttp extends WorkerHttp {
      * @throws Exception if Jetty fails to start
      */
     public static void run(HttpConfigContract config) throws Exception {
+        server(config).join();
+    }
+
+    /**
+     * Build and start the Jetty server, returning the running instance without blocking.
+     *
+     * <p>{@link #run} calls this and then blocks on {@link Server#join()}. Exposed separately so
+     * the server can be started, exercised, and stopped (e.g. from a test) without the blocking
+     * join.
+     *
+     * @param config the HTTP configuration
+     * @return the started Jetty server
+     * @throws Exception if Jetty fails to start
+     */
+    public static Server server(HttpConfigContract config) throws Exception {
         ApplicationContract app = bootstrap(config);
         ContainerData data = (ContainerData) app.getContainer().getData();
 
@@ -52,7 +67,7 @@ public class JettyHttp extends WorkerHttp {
                 });
 
         server.start();
-        server.join();
+        return server;
     }
 
     /**
