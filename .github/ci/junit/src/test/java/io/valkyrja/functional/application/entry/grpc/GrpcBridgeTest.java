@@ -444,6 +444,79 @@ final class GrpcBridgeTest {
 
     @Test
     @Timeout(5)
+    void streamingRequestsTheHighWaterUpFrontAndRefillsOnePerDrainedMessage()
+            throws InterruptedException {
+        ApplicationContract app = WorkerGrpc.bootstrap(config(1000));
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
+                        .startCall(call, new io.grpc.Metadata());
+        listener.onMessage("a".getBytes());
+        listener.onMessage("b".getBytes());
+        listener.onMessage("c".getBytes());
+        listener.onHalfClose();
+
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
+        // One up-front request for the whole high-water window, then one refill per drained message.
+        // That is what keeps the inbound queue bounded — it never grows past maxInboundMessages.
+        verify(call).request(1000);
+        verify(call, times(3)).request(1);
+    }
+
+    @Test
+    @Timeout(5)
+    void streamingCancelMidStreamAfterAMessageUnwindsTheHandlerAndCloses()
+            throws InterruptedException {
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+
+        CountDownLatch echoed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            echoed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .sendMessage(any());
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
+                        .startCall(call, new io.grpc.Metadata());
+        listener.onMessage("a".getBytes());
+        // Wait until the handler has drained and echoed "a" — it is now mid-stream, parked on the
+        // next read — then cancel before half-close.
+        assertTrue(echoed.await(5, TimeUnit.SECONDS));
+        listener.onCancel();
+
+        // The inbound completes, the handler unwinds, and the call closes — exactly one echo sent.
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
+        verify(call).sendMessage(any());
+    }
+
+    @Test
+    @Timeout(5)
     void handlerStreamsBidirectionallyEchoingEachMessageThroughAWorkerThread()
             throws InterruptedException {
         ApplicationContract app = WorkerGrpc.bootstrap(config());

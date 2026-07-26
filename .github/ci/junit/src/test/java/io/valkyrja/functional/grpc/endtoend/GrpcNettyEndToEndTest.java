@@ -11,6 +11,7 @@ package io.valkyrja.functional.grpc.endtoend;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.grpc.CallOptions;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
@@ -219,6 +221,60 @@ final class GrpcNettyEndToEndTest {
             assertArrayEquals("a".getBytes(), responses.get(0));
             assertArrayEquals("b".getBytes(), responses.get(1));
             assertArrayEquals("c".getBytes(), responses.get(2));
+        } finally {
+            channel.shutdownNow();
+            server.shutdownNow();
+        }
+    }
+
+    @Test
+    void bidirectionalStreamingInterleavesEachEchoBeforeTheNextSend() throws Exception {
+        Server server = startServer();
+        ManagedChannel channel =
+                NettyChannelBuilder.forAddress("localhost", server.getPort())
+                        .usePlaintext()
+                        .build();
+        try {
+            LinkedBlockingQueue<byte[]> echoes = new LinkedBlockingQueue<>();
+            AtomicReference<Status> status = new AtomicReference<>();
+            CountDownLatch done = new CountDownLatch(1);
+
+            ClientCall<byte[], byte[]> call =
+                    channel.newCall(
+                            method("pkg.Greeter/Echo", MethodDescriptor.MethodType.BIDI_STREAMING),
+                            CallOptions.DEFAULT);
+            call.start(
+                    new ClientCall.Listener<>() {
+                        @Override
+                        public void onMessage(byte[] message) {
+                            echoes.add(message);
+                        }
+
+                        @Override
+                        public void onClose(Status closeStatus, Metadata trailers) {
+                            status.set(closeStatus);
+                            done.countDown();
+                        }
+                    },
+                    new Metadata());
+            call.request(10);
+
+            // Ping-pong: each message's echo MUST arrive before the next is sent, and crucially
+            // before half-close. A buffered implementation cannot echo until half-close, so these
+            // polls would time out — proving the path genuinely interleaves rather than buffers.
+            call.sendMessage("a".getBytes());
+            byte[] firstEcho = echoes.poll(10, TimeUnit.SECONDS);
+            assertNotNull(firstEcho, "server did not echo before half-close — the path is not streaming");
+            assertArrayEquals("a".getBytes(), firstEcho);
+
+            call.sendMessage("b".getBytes());
+            byte[] secondEcho = echoes.poll(10, TimeUnit.SECONDS);
+            assertNotNull(secondEcho, "server did not echo the second message before half-close");
+            assertArrayEquals("b".getBytes(), secondEcho);
+
+            call.halfClose();
+            assertTrue(done.await(10, TimeUnit.SECONDS), "call did not complete");
+            assertEquals(Status.Code.OK, status.get().getCode());
         } finally {
             channel.shutdownNow();
             server.shutdownNow();

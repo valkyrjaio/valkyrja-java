@@ -65,6 +65,10 @@ public interface ServiceCallContract {
      * before dispatch; under the streaming model it is a live stream whose iteration blocks until
      * each message arrives and ends when the client half-closes.
      *
+     * <p>Under the streaming model the stream also ends on cancellation — half-close and cancel
+     * both terminate iteration identically. A handler that needs to tell an orderly end from a
+     * cancelled one inspects {@link #getCancellation()} after the loop.
+     *
      * @return the messages
      */
     Iterable<Object> getMessages();
