@@ -8,7 +8,6 @@
  */
 
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     java
@@ -53,7 +52,7 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
 
     coordinates(group.toString(), "valkyrja", version.toString())
