@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-package io.valkyrja.grpc.message.stream;
+package io.valkyrja.grpc.message.stream.contract;
 
 import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
@@ -21,7 +21,7 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
  * <p>All three methods are invoked from the single handler thread, so implementations need not be
  * thread-safe against each other.
  */
-public interface OutboundStream {
+public interface OutboundStreamContract {
 
     /**
      * Commit the initial response headers. Called exactly once, at stream open (the first emit, or

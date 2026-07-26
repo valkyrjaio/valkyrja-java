@@ -18,9 +18,10 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
-import io.valkyrja.grpc.message.stream.OutboundStream;
+import io.valkyrja.grpc.message.stream.contract.OutboundStreamContract;
 import io.valkyrja.grpc.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.grpc.server.handler.contract.ServiceHandlerContract;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -124,7 +125,7 @@ public abstract class WorkerGrpc extends App {
             ApplicationContract app,
             ContainerData data,
             Function<Consumer<Object>, ServiceCallContract> callFactory,
-            OutboundStream outbound) {
+            OutboundStreamContract outbound) {
         ContainerContract childContainer = getChildContainer(app, data);
         ApplicationContract childApp = getChildApplication(app, childContainer);
 
@@ -138,7 +139,12 @@ public abstract class WorkerGrpc extends App {
         ServiceCallContract call =
                 callFactory.apply(
                         message -> {
-                            openStream(handler, callRef.get(), outbound, opened);
+                            // callRef is set before the handler (and thus any emit) runs.
+                            openStream(
+                                    handler,
+                                    Objects.requireNonNull(callRef.get()),
+                                    outbound,
+                                    opened);
                             outbound.sendMessage(message);
                         });
         callRef.set(call);
@@ -164,7 +170,7 @@ public abstract class WorkerGrpc extends App {
     private static void openStream(
             ServiceHandlerContract handler,
             ServiceCallContract call,
-            OutboundStream outbound,
+            OutboundStreamContract outbound,
             boolean[] opened) {
         if (opened[0]) {
             return;

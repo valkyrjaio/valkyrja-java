@@ -32,7 +32,7 @@ import io.valkyrja.grpc.message.peer.AuthContext;
 import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.message.stream.InboundMessageStream;
-import io.valkyrja.grpc.message.stream.OutboundStream;
+import io.valkyrja.grpc.message.stream.contract.OutboundStreamContract;
 import io.valkyrja.grpc.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import java.io.ByteArrayInputStream;
@@ -134,13 +134,9 @@ public final class GrpcBridge {
             return new ServerCall.Listener<>() {
                 @Override
                 public void onMessage(byte[] message) {
-                    // Once the overflow path has closed the call, ignore any further delivery
-                    // rather
-                    // than re-evaluating the cap and closing a second time (an
-                    // IllegalStateException
-                    // from the transport). Unreachable while flow control stops requesting after
-                    // the
-                    // reject, but robust if that ever changes — mirrors the onHalfClose guard.
+                    // After the overflow path closes the call, ignore further delivery rather than
+                    // re-closing (an IllegalStateException from the transport). Unreachable while
+                    // flow control stops requesting post-reject, but mirrors the onHalfClose guard.
                     if (rejected[0]) {
                         return;
                     }
@@ -215,7 +211,7 @@ public final class GrpcBridge {
         InboundMessageStream inbound = new InboundMessageStream(() -> call.request(1));
         call.request(maxInboundMessages);
 
-        OutboundStream outbound = new ServerCallOutboundStream(call);
+        OutboundStreamContract outbound = new ServerCallOutboundStream(call);
 
         Thread.ofVirtual()
                 .name("grpc-stream-" + fullMethodName)
@@ -256,8 +252,8 @@ public final class GrpcBridge {
         };
     }
 
-    /** {@link OutboundStream} backed by a gRPC {@link ServerCall}. */
-    private static final class ServerCallOutboundStream implements OutboundStream {
+    /** {@link OutboundStreamContract} backed by a gRPC {@link ServerCall}. */
+    private static final class ServerCallOutboundStream implements OutboundStreamContract {
 
         private final ServerCall<byte[], byte[]> call;
 
@@ -405,7 +401,7 @@ public final class GrpcBridge {
     /**
      * Close the call with a response's status and trailing metadata, attaching rich details as
      * {@code grpc-status-details-bin} when present. Shared by the buffered {@link #write} and the
-     * streaming {@link OutboundStream#close}.
+     * streaming {@link OutboundStreamContract#close}.
      *
      * @param call the native server call
      * @param response the response carrying the terminal status and trailing metadata

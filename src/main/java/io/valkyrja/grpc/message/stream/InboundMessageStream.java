@@ -11,6 +11,8 @@ package io.valkyrja.grpc.message.stream;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.jspecify.annotations.Nullable;
@@ -29,10 +31,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class InboundMessageStream implements Iterable<Object> {
 
-    /** Sentinel enqueued by {@link #complete} to end iteration. */
-    private static final Object END = new Object();
+    /** A present value is a message; an empty {@link Optional} is the completion marker. */
+    private final BlockingQueue<Optional<Object>> queue = new LinkedBlockingQueue<>();
 
-    private final BlockingQueue<Object> queue = new LinkedBlockingQueue<>();
     private final Runnable onConsumed;
 
     public InboundMessageStream() {
@@ -54,7 +55,7 @@ public final class InboundMessageStream implements Iterable<Object> {
      * @param message the decoded message
      */
     public void offer(Object message) {
-        queue.add(message);
+        queue.add(Optional.of(message));
     }
 
     /**
@@ -62,7 +63,7 @@ public final class InboundMessageStream implements Iterable<Object> {
      * A blocked {@link Iterator#hasNext} unblocks and ends the iteration.
      */
     public void complete() {
-        queue.add(END);
+        queue.add(Optional.empty());
     }
 
     @Override
@@ -77,7 +78,7 @@ public final class InboundMessageStream implements Iterable<Object> {
                     return false;
                 }
                 if (peeked == null) {
-                    Object taken;
+                    Optional<Object> taken;
                     try {
                         taken = queue.take();
                     } catch (InterruptedException e) {
@@ -85,11 +86,11 @@ public final class InboundMessageStream implements Iterable<Object> {
                         done = true;
                         return false;
                     }
-                    if (taken == END) {
+                    if (taken.isEmpty()) {
                         done = true;
                         return false;
                     }
-                    peeked = taken;
+                    peeked = taken.get();
                 }
                 return true;
             }
@@ -99,7 +100,7 @@ public final class InboundMessageStream implements Iterable<Object> {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
-                Object message = peeked;
+                Object message = Objects.requireNonNull(peeked);
                 peeked = null;
                 onConsumed.run();
                 return message;

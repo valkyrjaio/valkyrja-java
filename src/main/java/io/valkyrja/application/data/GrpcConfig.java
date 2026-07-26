@@ -49,7 +49,7 @@ public record GrpcConfig(
     public GrpcConfig {
         maxInboundMessages =
                 maxInboundMessages == null
-                        ? GrpcConfigContract.DEFAULT_MAX_INBOUND_MESSAGES
+                        ? Integer.valueOf(GrpcConfigContract.DEFAULT_MAX_INBOUND_MESSAGES)
                         : maxInboundMessages;
         providers = List.copyOf(providers);
         callbacks = List.copyOf(callbacks);

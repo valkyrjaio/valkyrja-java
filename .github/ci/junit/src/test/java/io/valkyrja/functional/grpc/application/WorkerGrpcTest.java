@@ -27,7 +27,7 @@ import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
 import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.message.stream.InboundMessageStream;
-import io.valkyrja.grpc.message.stream.OutboundStream;
+import io.valkyrja.grpc.message.stream.contract.OutboundStreamContract;
 import io.valkyrja.fixtures.grpc.GreeterComponentProvider;
 import io.valkyrja.fixtures.grpc.GreeterController;
 import java.util.ArrayList;
@@ -193,7 +193,7 @@ final class WorkerGrpcTest {
     }
 
     /** Records what the streaming dispatch pushes to the transport. */
-    private static final class RecordingStream implements OutboundStream {
+    private static final class RecordingStream implements OutboundStreamContract {
         final List<Object> messages = new ArrayList<>();
         boolean headersSent;
         @Nullable ServiceResponseContract terminal;
