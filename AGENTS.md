@@ -9,3 +9,15 @@ Before doing any work in this repo, read **both** canonical agent guides:
 
 They define the architecture, naming, testing, 100% coverage, CI, and the
 branch/commit/push/PR workflow this repo follows.
+
+## Known coverage baseline
+
+JaCoCo reports **LINE 100%** but **BRANCH ~99.89%** — two long-standing, accepted
+missed branches that are **not regressions**. There is no
+`jacocoTestCoverageVerification` rule, so `./gradlew ci` still passes:
+
+- `io.valkyrja.log.logger.abstract_.Logger#log` — 1 branch
+- `io.valkyrja.cli.server.support.Exiter#exit` — 1 branch (+3 instructions)
+
+If a coverage check surfaces only these two, treat them as the baseline — not
+something your change introduced.
