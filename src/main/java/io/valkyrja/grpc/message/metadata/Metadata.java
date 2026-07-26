@@ -10,6 +10,8 @@
 package io.valkyrja.grpc.message.metadata;
 
 import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
+import io.valkyrja.grpc.throwable.exception.MetadataInvalidKeyException;
+import io.valkyrja.grpc.throwable.exception.MetadataInvalidValueException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -17,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -30,6 +33,13 @@ public class Metadata implements MetadataContract {
 
     protected static final String BINARY_SUFFIX = "-bin";
 
+    /**
+     * The valid gRPC metadata key charset (matched against the normalized, lower-cased key): one or
+     * more of a lowercase letter, digit, {@code -}, {@code _}, or {@code .}. Mirrors the set gRPC
+     * itself enforces, so a key accepted here is one the transport will accept.
+     */
+    private static final Pattern VALID_KEY = Pattern.compile("[a-z0-9._-]+");
+
     protected final Map<String, List<Object>> values;
 
     public Metadata() {
@@ -41,6 +51,7 @@ public class Metadata implements MetadataContract {
 
         for (Map.Entry<String, List<Object>> entry : values.entrySet()) {
             String key = normalize(entry.getKey());
+            validateKey(key);
             List<Object> validated = new ArrayList<>();
             for (Object value : entry.getValue()) {
                 validateValue(key, value);
@@ -53,6 +64,26 @@ public class Metadata implements MetadataContract {
     }
 
     /**
+     * Reject a key that is not a valid gRPC header name at the point of insertion — as HTTP does
+     * for header names — so a malformed key fails fast in the handler rather than throwing an
+     * opaque {@code IllegalArgumentException} from deep in the wire write when the response is
+     * sent.
+     *
+     * @param normalizedKey the already-normalized key
+     * @throws MetadataInvalidKeyException if the key is empty or contains characters outside the
+     *     gRPC key charset
+     */
+    private static void validateKey(String normalizedKey) {
+        if (!VALID_KEY.matcher(normalizedKey).matches()) {
+            throw new MetadataInvalidKeyException(
+                    "'"
+                            + normalizedKey
+                            + "' is not a valid metadata key; keys may contain only lowercase"
+                            + " letters, digits, '-', '_', and '.'.");
+        }
+    }
+
+    /**
      * Enforce the metadata value union at the boundary: a {@code -bin} key carries {@code byte[]},
      * every other key carries a {@code String}. Validating on construction (the single point every
      * {@code with*} operation flows through) means {@code toGrpcMetadata} can trust the types
@@ -61,12 +92,12 @@ public class Metadata implements MetadataContract {
      *
      * @param normalizedKey the already-normalized key
      * @param value the value to validate
-     * @throws IllegalArgumentException if the value type does not match the key's kind
+     * @throws MetadataInvalidValueException if the value type does not match the key's kind
      */
     private static void validateValue(String normalizedKey, @Nullable Object value) {
         if (normalizedKey.endsWith(BINARY_SUFFIX)) {
             if (!(value instanceof byte[])) {
-                throw new IllegalArgumentException(
+                throw new MetadataInvalidValueException(
                         "Binary metadata key '"
                                 + normalizedKey
                                 + "' requires a byte[] value, but got "
@@ -74,7 +105,7 @@ public class Metadata implements MetadataContract {
                                 + ".");
             }
         } else if (!(value instanceof String)) {
-            throw new IllegalArgumentException(
+            throw new MetadataInvalidValueException(
                     "ASCII metadata key '"
                             + normalizedKey
                             + "' requires a String value, but got "

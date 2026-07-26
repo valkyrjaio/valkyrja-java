@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.grpc.message.metadata.Metadata;
 import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
+import io.valkyrja.grpc.throwable.exception.MetadataInvalidKeyException;
+import io.valkyrja.grpc.throwable.exception.MetadataInvalidValueException;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -82,9 +84,9 @@ final class MetadataTest {
     void binaryKeyRejectsANonByteArrayValue() {
         // A String under a -bin key would later throw a ClassCastException deep in the wire write;
         // reject it at the boundary instead.
-        IllegalArgumentException thrown =
+        MetadataInvalidValueException thrown =
                 assertThrows(
-                        IllegalArgumentException.class,
+                        MetadataInvalidValueException.class,
                         () -> new Metadata().with("trace-bin", "not-bytes"));
         assertTrue(thrown.getMessage().contains("byte[]"));
     }
@@ -92,9 +94,9 @@ final class MetadataTest {
     @Test
     void asciiKeyRejectsAByteArrayValue() {
         // A byte[] under a non -bin key would otherwise be sent to the client as its array toString.
-        IllegalArgumentException thrown =
+        MetadataInvalidValueException thrown =
                 assertThrows(
-                        IllegalArgumentException.class,
+                        MetadataInvalidValueException.class,
                         () -> new Metadata().withAdded("trace", new byte[] {1, 2}));
         assertTrue(thrown.getMessage().contains("-bin"));
     }
@@ -102,12 +104,34 @@ final class MetadataTest {
     @Test
     void asciiKeyRejectsANonStringValue() {
         assertThrows(
-                IllegalArgumentException.class, () -> new Metadata().with("count", 42));
+                MetadataInvalidValueException.class, () -> new Metadata().with("count", 42));
     }
 
     @Test
     void aNullValueIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> new Metadata().with("k", null));
+        assertThrows(MetadataInvalidValueException.class, () -> new Metadata().with("k", null));
+    }
+
+    @Test
+    void rejectsAKeyWithInvalidCharactersAtInsertion() {
+        // A space is not a valid gRPC key char; fail fast here, not when writing the response.
+        MetadataInvalidKeyException thrown =
+                assertThrows(
+                        MetadataInvalidKeyException.class,
+                        () -> new Metadata().with("bad key", "v"));
+        assertTrue(thrown.getMessage().contains("bad key"));
+    }
+
+    @Test
+    void rejectsAnEmptyKey() {
+        assertThrows(MetadataInvalidKeyException.class, () -> new Metadata().withAdded("", "v"));
+    }
+
+    @Test
+    void normalizesAnUppercaseKeyRatherThanRejectingIt() {
+        // Uppercase is lower-cased on the way in (like gRPC does), so it stays valid.
+        MetadataContract metadata = new Metadata().with("Content-Type", "application/grpc");
+        assertTrue(metadata.has("content-type"));
     }
 
     @Test
