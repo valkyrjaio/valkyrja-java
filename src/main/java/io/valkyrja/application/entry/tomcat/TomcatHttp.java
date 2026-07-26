@@ -43,6 +43,10 @@ public class TomcatHttp extends WorkerHttp {
 
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(config.port());
+        // Force the default connector to be created; embedded Tomcat lazily creates it in
+        // getConnector(), and without it start() brings up a server with no connector that listens
+        // on nothing.
+        tomcat.getConnector();
 
         Context ctx = tomcat.addContext("", null);
         Tomcat.addServlet(
