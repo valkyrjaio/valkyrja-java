@@ -137,8 +137,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             DynamicRoute annotation, Class<?> clazz, Method method) {
         List<io.valkyrja.http.routing.data.Parameter> parameters = new ArrayList<>();
         for (Parameter param : annotation.parameters()) {
-            parameters.add(
-                    new io.valkyrja.http.routing.data.Parameter(param.name(), param.regex()));
+            parameters.add(annotationToDataParameter(param));
         }
 
         return new io.valkyrja.http.routing.data.DynamicRoute(
@@ -295,8 +294,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         }
 
         for (Parameter param : methodParams) {
-            parameters.add(
-                    new io.valkyrja.http.routing.data.Parameter(param.name(), param.regex()));
+            parameters.add(annotationToDataParameter(param));
         }
 
         return (io.valkyrja.http.routing.data.DynamicRoute)
@@ -314,6 +312,17 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                 parameter.isOptional(),
                 parameter.shouldCapture(),
                 parameter.getDefault(),
+                null);
+    }
+
+    protected io.valkyrja.http.routing.data.Parameter annotationToDataParameter(Parameter param) {
+        return new io.valkyrja.http.routing.data.Parameter(
+                param.name(),
+                param.regex(),
+                null,
+                param.isOptional(),
+                param.shouldCapture(),
+                null,
                 null);
     }
 }
