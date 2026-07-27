@@ -19,11 +19,6 @@ import org.junit.jupiter.api.Test;
 final class ExchangeHttpTest {
 
     @Test
-    void getRequestReturnsServerRequest() {
-        assertNotNull(ExchangeHttp.getRequest(null));
-    }
-
-    @Test
     void exchangeHttpIsInstantiable() {
         assertNotNull(new ExchangeHttp());
     }

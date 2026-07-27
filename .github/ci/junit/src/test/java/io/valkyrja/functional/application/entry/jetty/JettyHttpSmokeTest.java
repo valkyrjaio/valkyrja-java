@@ -9,22 +9,17 @@
 
 package io.valkyrja.functional.application.entry.jetty;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.entry.jetty.JettyHttp;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.fixtures.application.entry.EntryConfigFixture;
-import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import io.valkyrja.fixtures.application.entry.HttpSmokeClient;
+import io.valkyrja.fixtures.application.entry.WorkerHttpProbe;
+import io.valkyrja.http.message.enum_.RequestMethod;
+import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -35,52 +30,35 @@ import org.junit.jupiter.api.Timeout;
  * Smoke test for the {@link JettyHttp} adapter over a real embedded Jetty server.
  *
  * <p>Drives the adapter's own {@link JettyHttp#server} — the exact server the blocking {@code
- * run(...)} builds — on an ephemeral port, then confirms an incoming request reaches the request
- * handler. The bootstrapped application is captured through the config callback so an observable
- * handler can be bound before the request is sent.
+ * run(...)} builds — on an ephemeral port, then confirms a full round trip: the adapter marshals the
+ * incoming request (captured through the probe) and emits the framework response back through the
+ * Jetty response (the distinctive status and body are read off the socket).
  */
 @Timeout(20)
 final class JettyHttpSmokeTest {
 
     @Test
-    void serverDispatchesAnIncomingRequestThroughTheAdapter() throws Exception {
+    void serverMarshalsTheRequestAndEmitsTheResponse() throws Exception {
         AtomicReference<ApplicationContract> appRef = new AtomicReference<>();
-        CountDownLatch dispatched = new CountDownLatch(1);
 
         Server server = JettyHttp.server(EntryConfigFixture.httpOnPort(0, appRef::set));
         try {
-            bindRecordingHandler(appRef.get(), dispatched);
+            WorkerHttpProbe probe = WorkerHttpProbe.bind(appRef.get());
             int port = ((ServerConnector) server.getConnectors()[0]).getLocalPort();
-            assertTrue(port > 0, "the server should be listening on a bound port");
-            send(port, dispatched);
+
+            String response = HttpSmokeClient.get(port);
+
+            assertTrue(response.startsWith("HTTP/"), response);
+            assertTrue(response.contains(" " + WorkerHttpProbe.STATUS + " "), response);
+            assertTrue(response.contains(WorkerHttpProbe.BODY), response);
+
+            ServerRequestContract request = probe.capturedRequest();
+            assertNotNull(request, "the adapter did not dispatch the incoming request");
+            assertEquals(RequestMethod.GET, request.getMethod());
+            assertEquals("/", request.getUri().getPath());
+            assertEquals("1", request.getQueryParams().get("probe"));
         } finally {
             server.stop();
-        }
-    }
-
-    private static void bindRecordingHandler(ApplicationContract app, CountDownLatch dispatched) {
-        assertNotNull(app, "the bootstrap callback should have captured the application");
-        RequestHandlerContract handler = mock(RequestHandlerContract.class);
-        doAnswer(
-                        invocation -> {
-                            dispatched.countDown();
-                            return null;
-                        })
-                .when(handler)
-                .run(any());
-        app.getContainer().setSingleton(RequestHandlerContract.class, handler);
-    }
-
-    private static void send(int port, CountDownLatch dispatched) throws IOException, InterruptedException {
-        try (Socket socket = new Socket("localhost", port)) {
-            OutputStream out = socket.getOutputStream();
-            out.write(
-                    "GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n"
-                            .getBytes(StandardCharsets.US_ASCII));
-            out.flush();
-            assertTrue(
-                    dispatched.await(10, TimeUnit.SECONDS),
-                    "the adapter did not dispatch the incoming request");
         }
     }
 }

@@ -10,7 +10,9 @@
 package io.valkyrja.application.entry.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
@@ -18,22 +20,32 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpVersion;
 import io.valkyrja.application.data.contract.HttpConfigContract;
 import io.valkyrja.application.entry.abstract_.WorkerHttp;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
-import io.valkyrja.http.message.request.factory.RequestFactory;
+import io.valkyrja.http.message.response.contract.ResponseContract;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * HTTP entry point for the Netty worker runtime.
  *
  * <p>Bootstraps the application once, then registers a Netty pipeline that dispatches every
  * incoming request to an isolated {@link io.valkyrja.container.manager.ChildContainer} for the
- * lifetime of that request.
+ * lifetime of that request and writes the framework response back through the channel.
  */
 public class NettyHttp extends WorkerHttp {
 
@@ -88,10 +100,14 @@ public class NettyHttp extends WorkerHttp {
                                                                 protected void channelRead0(
                                                                         ChannelHandlerContext ctx,
                                                                         FullHttpRequest req) {
-                                                                    handle(
+                                                                    dispatch(
                                                                             app,
                                                                             data,
-                                                                            getRequest(ctx, req));
+                                                                            getRequest(ctx, req),
+                                                                            response ->
+                                                                                    emit(
+                                                                                            response,
+                                                                                            ctx));
                                                                 }
                                                             });
                                         }
@@ -116,17 +132,66 @@ public class NettyHttp extends WorkerHttp {
     }
 
     /**
-     * Get the HTTP request from a Netty channel context and request.
-     *
-     * <p>Override to populate the request from Netty metadata (headers, body, remote address, etc.)
-     * once the full request adapter exists.
+     * Get the framework request from a Netty channel context and request.
      *
      * @param ctx the Netty channel handler context
-     * @param request the incoming Netty HTTP request
+     * @param nettyRequest the incoming Netty HTTP request
      * @return the current server request
      */
     public static ServerRequestContract getRequest(
-            ChannelHandlerContext ctx, FullHttpRequest request) {
-        return RequestFactory.fromGlobals();
+            ChannelHandlerContext ctx, FullHttpRequest nettyRequest) {
+        String uri = nettyRequest.uri();
+        int queryStart = uri.indexOf('?');
+        String query = queryStart >= 0 ? uri.substring(queryStart + 1) : null;
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        for (Map.Entry<String, String> header : nettyRequest.headers()) {
+            headers.merge(
+                    header.getKey(), header.getValue(), (existing, next) -> existing + ", " + next);
+        }
+
+        SocketAddress remote = ctx.channel().remoteAddress();
+        String remoteAddr =
+                remote instanceof InetSocketAddress inet
+                        ? inet.getAddress().getHostAddress()
+                        : null;
+
+        return request(
+                nettyRequest.method().name(),
+                uri,
+                query,
+                nettyRequest.protocolVersion().text(),
+                remoteAddr,
+                headers,
+                nettyRequest.content().toString(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Write a framework response back out through the Netty channel, then close the connection.
+     *
+     * @param response the framework response
+     * @param ctx the Netty channel handler context to write through
+     */
+    public static void emit(ResponseContract response, ChannelHandlerContext ctx) {
+        byte[] body = response.getBody().getContents().getBytes(StandardCharsets.UTF_8);
+
+        FullHttpResponse nettyResponse =
+                new DefaultFullHttpResponse(
+                        HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.valueOf(
+                                response.getStatusCode().getValue(), response.getReasonPhrase()),
+                        Unpooled.wrappedBuffer(body));
+
+        response.getHeaders()
+                .getAll()
+                .values()
+                .forEach(
+                        header ->
+                                nettyResponse
+                                        .headers()
+                                        .add(header.getName(), header.getHeaderLine()));
+        nettyResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH, body.length);
+
+        ctx.writeAndFlush(nettyResponse).addListener(ChannelFutureListener.CLOSE);
     }
 }

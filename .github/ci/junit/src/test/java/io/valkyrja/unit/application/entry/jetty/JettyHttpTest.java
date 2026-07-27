@@ -18,11 +18,6 @@ import org.junit.jupiter.api.Test;
 final class JettyHttpTest {
 
     @Test
-    void getRequestReturnsServerRequest() {
-        assertNotNull(JettyHttp.getRequest(null, null));
-    }
-
-    @Test
     void isInstantiable() {
         assertNotNull(new JettyHttp());
     }
