@@ -240,6 +240,13 @@ public class OptionParameter extends Parameter implements OptionParameterContrac
         if (valueMode == OptionValueMode.DEFAULT) {
             valid = valid && options.size() <= 1;
         }
+        if (!validValues.isEmpty()) {
+            for (OptionContract option : options) {
+                if (!validValues.contains(option.getValue())) {
+                    return false;
+                }
+            }
+        }
         return valid;
     }
 

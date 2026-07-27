@@ -158,4 +158,54 @@ final class OptionParameterTest {
         assertTrue(param().areValuesValid());
         assertTrue(param().withValueMode(OptionValueMode.NONE).areValuesValid());
     }
+
+    @Test
+    void areValuesValidEnforcesValidValues() {
+        var validValue = new Option("verbose", "a", OptionType.LONG);
+        var validValue2 = new Option("verbose", "b", OptionType.LONG);
+        var invalidValue = new Option("verbose", "c", OptionType.LONG);
+
+        var param = param().withValidValues("a", "b");
+
+        // Empty valid values impose no constraint on the bound value
+        assertTrue(param().withOptions(invalidValue).areValuesValid());
+        // A provided value that is a member of the valid values passes
+        assertTrue(param.withOptions(validValue).areValuesValid());
+        // A provided value that is not a member of the valid values fails
+        assertFalse(param.withOptions(invalidValue).areValuesValid());
+        // ARRAY: every provided value must be a member of the valid values
+        assertTrue(
+                param.withValueMode(OptionValueMode.ARRAY)
+                        .withOptions(validValue, validValue2)
+                        .areValuesValid());
+        // ARRAY: a single invalid value among several fails
+        assertFalse(
+                param.withValueMode(OptionValueMode.ARRAY)
+                        .withOptions(validValue, validValue2, invalidValue)
+                        .areValuesValid());
+        // Non-empty valid values with no bound options impose no failure
+        assertTrue(param.areValuesValid());
+        // Interaction with REQUIRED: a required, member value passes
+        assertTrue(param.withMode(OptionMode.REQUIRED).withOptions(validValue).areValuesValid());
+        // Interaction with REQUIRED: a required, non-member value fails
+        assertFalse(param.withMode(OptionMode.REQUIRED).withOptions(invalidValue).areValuesValid());
+    }
+
+    @Test
+    void validateValuesThrowsOnInvalidValue() {
+        var invalid =
+                param().withValidValues("a", "b")
+                        .withOptions(new Option("verbose", "c", OptionType.LONG));
+
+        assertThrows(CliRoutingOptionValuesValidationException.class, invalid::validateValues);
+    }
+
+    @Test
+    void validateValuesPassesWithValidValue() {
+        var valid =
+                param().withValidValues("a", "b")
+                        .withOptions(new Option("verbose", "a", OptionType.LONG));
+
+        assertSame(valid, valid.validateValues());
+    }
 }
