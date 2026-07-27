@@ -9,6 +9,7 @@
 
 package io.valkyrja.unit.http.routing.collector;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,9 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.fixtures.http.routing.AnnotatedHttpController;
+import io.valkyrja.fixtures.http.routing.RoutingCombinationsHttpController;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.collector.AttributeRouteCollector;
+import io.valkyrja.http.routing.constant.Regex;
+import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import java.util.Map;
 import java.util.function.Function;
@@ -95,5 +99,39 @@ final class AttributeRouteCollectorTest {
 
         assertTrue(
                 routes.stream().anyMatch(route -> route.getName().equals("plain")));
+    }
+
+    @Test
+    void annotationPathProducesSameRegexAsDirectConstruction() {
+        var byName =
+                new AttributeRouteCollector()
+                        .getRoutes(RoutingCombinationsHttpController.class).stream()
+                        .collect(Collectors.toMap(RouteContract::getName, Function.identity()));
+
+        assertEquals(
+                Regex.START + Regex.PATH + "num" + Regex.PATH + "(?<id>" + Regex.NUM + ")"
+                        + Regex.END,
+                regexOf(byName, "combinations.num"));
+        assertEquals(
+                Regex.START + Regex.PATH + "slug" + Regex.PATH + "(?<slug>" + Regex.SLUG + ")"
+                        + Regex.END,
+                regexOf(byName, "combinations.slug"));
+        assertEquals(
+                Regex.START + Regex.PATH + "optional" + Regex.START_OPTIONAL_CAPTURE_GROUP
+                        + "(?<opt>" + Regex.ALPHA + ")?" + Regex.END,
+                regexOf(byName, "combinations.optional"));
+        assertEquals(
+                Regex.START + Regex.PATH + "nc" + Regex.PATH + "(?:" + Regex.ALPHA + ")" + Regex.END,
+                regexOf(byName, "combinations.nonCapture"));
+        assertEquals(
+                Regex.START + Regex.PATH + "multi" + Regex.PATH + "(?<x>" + Regex.NUM + ")"
+                        + Regex.PATH + "(?<y>" + Regex.ALPHA + ")" + Regex.END,
+                regexOf(byName, "combinations.multi"));
+    }
+
+    private static String regexOf(Map<String, RouteContract> byName, String name) {
+        var route = byName.get(name);
+        assertInstanceOf(DynamicRouteContract.class, route);
+        return ((DynamicRouteContract) route).getRegex();
     }
 }
