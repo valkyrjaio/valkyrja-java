@@ -16,10 +16,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.fixtures.cli.routing.AnnotatedController;
+import io.valkyrja.fixtures.cli.routing.CliRoutingCombinationsController;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.routing.collector.AttributeRouteCollector;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
+import io.valkyrja.cli.routing.enum_.ArgumentMode;
+import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
+import io.valkyrja.cli.routing.enum_.OptionMode;
+import io.valkyrja.cli.routing.enum_.OptionValueMode;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -102,5 +108,42 @@ final class AttributeRouteCollectorTest {
                         .getRoutes(io.valkyrja.fixtures.cli.routing.PlainController.class);
 
         assertTrue(routes.stream().anyMatch(route -> route.getName().equals("plain")));
+    }
+
+    @Test
+    void convertsArgumentAndOptionPermutations() {
+        var collected =
+                new AttributeRouteCollector().getRoutes(CliRoutingCombinationsController.class);
+
+        assertEquals(1, collected.size());
+        var route = collected.get(0);
+
+        // Required, single-value argument.
+        var required = route.getArgument("required");
+        assertEquals(ArgumentMode.REQUIRED, required.getMode());
+        assertEquals(ArgumentValueMode.DEFAULT, required.getValueMode());
+
+        // Optional, array argument.
+        var rest = route.getArgument("rest");
+        assertEquals(ArgumentMode.OPTIONAL, rest.getMode());
+        assertEquals(ArgumentValueMode.ARRAY, rest.getValueMode());
+
+        // Required, single-value option carrying short names, valid values, default, display name.
+        var format = route.getOption("format");
+        assertEquals(OptionMode.REQUIRED, format.getMode());
+        assertEquals(OptionValueMode.DEFAULT, format.getValueMode());
+        assertEquals(List.of("f"), format.getShortNames());
+        assertEquals(List.of("json", "xml"), format.getValidValues());
+        assertEquals("json", format.getDefaultValue());
+        assertEquals("fmt", format.getValueDisplayName());
+
+        // Valueless (NONE) flag option.
+        var flag = route.getOption("flag");
+        assertEquals(OptionMode.OPTIONAL, flag.getMode());
+        assertEquals(OptionValueMode.NONE, flag.getValueMode());
+
+        // Repeatable (ARRAY) option.
+        var tags = route.getOption("tags");
+        assertEquals(OptionValueMode.ARRAY, tags.getValueMode());
     }
 }
