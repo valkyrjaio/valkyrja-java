@@ -50,8 +50,11 @@ public abstract class Regex {
     public static final String ALPHA_NUM = "[a-zA-Z0-9]+";
     public static final String ALPHA_NUM_UNDERSCORE = "\\w+";
 
-    public static final String START = "/^";
-    public static final String END = "$/";
+    // Java-native anchors (java.util.regex.Pattern uses no PCRE delimiters, and these
+    // regexes are stored verbatim in the generated cache), unlike the PHP reference's
+    // delimiter-wrapped "/^...$/".
+    public static final String START = "^";
+    public static final String END = "$";
 
     public static final String START_CAPTURE_GROUP = "(";
     public static final String START_NON_CAPTURE_GROUP = "(?:";

@@ -12,7 +12,6 @@ package io.valkyrja.http.routing.matcher;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
-import io.valkyrja.http.routing.constant.Regex;
 import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.ParameterContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
@@ -62,8 +61,7 @@ public class Matcher implements MatcherContract {
             if (regex.isEmpty()) continue;
 
             try {
-                java.util.regex.Matcher matcher =
-                        Pattern.compile(toCompilablePattern(regex)).matcher(path);
+                java.util.regex.Matcher matcher = Pattern.compile(regex).matcher(path);
                 if (matcher.matches()) {
                     DynamicRouteContract dynamicRoute = collection.getByRegex(regex, requestMethod);
                     return processArguments(dynamicRoute, matcher);
@@ -73,25 +71,6 @@ public class Matcher implements MatcherContract {
         }
 
         return null;
-    }
-
-    /**
-     * Convert a stored regex to a Java-compilable pattern.
-     *
-     * <p>Regexes are stored in the shared PHP reference format, wrapped with PCRE-style delimiters
-     * ({@code /^...$/}). {@link Pattern} does not use delimiters, so it would otherwise treat the
-     * leading {@code /} and trailing {@code /} as literal characters and never match. This strips
-     * that delimiter framing to {@code ^...$}; regexes not in that framing (for example already
-     * delimiter-free) are returned unchanged.
-     */
-    protected String toCompilablePattern(String regex) {
-        if (regex.startsWith(Regex.START) && regex.endsWith(Regex.END)) {
-            return "^"
-                    + regex.substring(Regex.START.length(), regex.length() - Regex.END.length())
-                    + "$";
-        }
-
-        return regex;
     }
 
     protected DynamicRouteContract processArguments(
