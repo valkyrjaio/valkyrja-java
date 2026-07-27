@@ -18,11 +18,6 @@ import org.junit.jupiter.api.Test;
 final class TomcatHttpTest {
 
     @Test
-    void getRequestReturnsServerRequest() {
-        assertNotNull(TomcatHttp.getRequest(null, null));
-    }
-
-    @Test
     void isInstantiable() {
         assertNotNull(new TomcatHttp());
     }

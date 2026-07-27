@@ -14,10 +14,16 @@ import io.valkyrja.application.entry.abstract_.WorkerHttp;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
-import io.valkyrja.http.message.request.factory.RequestFactory;
+import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.throwable.exception.RuntimeException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
@@ -27,7 +33,7 @@ import org.apache.catalina.startup.Tomcat;
  *
  * <p>Bootstraps the application once, then registers a servlet that dispatches every incoming
  * request to an isolated {@link io.valkyrja.container.manager.ChildContainer} for the lifetime of
- * that request.
+ * that request and writes the framework response back through the servlet response.
  */
 public class TomcatHttp extends WorkerHttp {
 
@@ -70,7 +76,7 @@ public class TomcatHttp extends WorkerHttp {
                 new HttpServlet() {
                     @Override
                     protected void service(HttpServletRequest req, HttpServletResponse resp) {
-                        handle(app, data, getRequest(req, resp));
+                        dispatch(app, data, getRequest(req), response -> emit(response, resp));
                     }
                 });
         ctx.addServletMappingDecoded("/*", "valkyrja");
@@ -80,17 +86,73 @@ public class TomcatHttp extends WorkerHttp {
     }
 
     /**
-     * Get the HTTP request from a Tomcat servlet request/response pair.
-     *
-     * <p>Override to populate the request from servlet metadata (headers, body, remote address,
-     * etc.) once the full request adapter exists.
+     * Get the framework request from a Tomcat servlet request.
      *
      * @param request the incoming servlet request
-     * @param response the outgoing servlet response
      * @return the current server request
      */
-    public static ServerRequestContract getRequest(
-            HttpServletRequest request, HttpServletResponse response) {
-        return RequestFactory.fromGlobals();
+    public static ServerRequestContract getRequest(HttpServletRequest request) {
+        String queryString = request.getQueryString();
+        String requestUri =
+                queryString != null
+                        ? request.getRequestURI() + "?" + queryString
+                        : request.getRequestURI();
+
+        Map<String, String> headers = new LinkedHashMap<>();
+        Enumeration<String> names = request.getHeaderNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            headers.put(
+                    name, String.join(", ", java.util.Collections.list(request.getHeaders(name))));
+        }
+
+        return request(
+                request.getMethod(),
+                requestUri,
+                queryString,
+                request.getProtocol(),
+                request.getRemoteAddr(),
+                headers,
+                readBody(request));
+    }
+
+    /**
+     * Write a framework response back out through the Tomcat servlet response.
+     *
+     * @param response the framework response
+     * @param servletResponse the servlet response to write through
+     */
+    public static void emit(ResponseContract response, HttpServletResponse servletResponse) {
+        servletResponse.setStatus(response.getStatusCode().getValue());
+
+        response.getHeaders()
+                .getAll()
+                .values()
+                .forEach(
+                        header ->
+                                servletResponse.addHeader(
+                                        header.getName(), header.getHeaderLine()));
+
+        byte[] body = response.getBody().getContents().getBytes(StandardCharsets.UTF_8);
+
+        try {
+            servletResponse.getOutputStream().write(body);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage() != null ? e.getMessage() : "", e);
+        }
+    }
+
+    /**
+     * Read the raw request body from a Tomcat servlet request.
+     *
+     * @param request the incoming servlet request
+     * @return the raw request body
+     */
+    protected static String readBody(HttpServletRequest request) {
+        try {
+            return new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage() != null ? e.getMessage() : "", e);
+        }
     }
 }
