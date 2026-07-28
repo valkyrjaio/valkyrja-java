@@ -11,6 +11,7 @@ package io.valkyrja.cli.routing.dispatcher;
 
 import io.valkyrja.cli.interaction.argument.contract.ArgumentContract;
 import io.valkyrja.cli.interaction.input.contract.InputContract;
+import io.valkyrja.cli.interaction.option.contract.OptionContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
@@ -20,12 +21,15 @@ import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContrac
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
+import io.valkyrja.cli.routing.data.contract.OptionParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Router implements RouterContract {
 
@@ -66,7 +70,10 @@ public class Router implements RouterContract {
             return routeNotMatchedHandler.routeNotMatched(input, notFoundOutput);
         }
 
-        RouteContract route = bindArguments(input, collection.get(commandName));
+        RouteContract route = addParametersToRoute(input, collection.get(commandName));
+
+        // The command has been matched
+        routeMatched(route);
 
         Object afterMatched = routeMatchedHandler.routeMatched(input, route);
 
@@ -75,37 +82,93 @@ public class Router implements RouterContract {
         }
 
         RouteContract matchedRoute = (RouteContract) afterMatched;
+
+        // Set the command after middleware has potentially modified it in the service container
+        container.setSingleton(RouteContract.class, matchedRoute);
+
         OutputContract output = matchedRoute.getHandler().apply(container, matchedRoute);
 
         return routeDispatchedHandler.routeDispatched(input, output, matchedRoute);
     }
 
-    protected RouteContract bindArguments(InputContract input, RouteContract route) {
-        List<ArgumentContract> inputArgs = input.getArguments();
-        List<ArgumentParameterContract> schemas = route.getArguments();
+    /** Add the parameters from the input to the route. */
+    protected RouteContract addParametersToRoute(InputContract input, RouteContract route) {
+        return addOptionsToRoute(input, addArgumentsToRoute(input, route));
+    }
 
-        if (schemas.isEmpty() || inputArgs.isEmpty()) {
-            return route;
+    /** Add the arguments from the input to the route. */
+    protected RouteContract addArgumentsToRoute(InputContract input, RouteContract route) {
+        Map<Integer, ArgumentContract> arguments = new LinkedHashMap<>();
+        List<ArgumentContract> inputArguments = input.getArguments();
+
+        for (int index = 0; index < inputArguments.size(); index++) {
+            arguments.put(index, inputArguments.get(index));
         }
 
-        List<ArgumentParameterContract> bound = new ArrayList<>();
-        int inputIdx = 0;
+        List<ArgumentParameterContract> argumentParameters = route.getArguments();
+        List<ArgumentParameterContract> boundArgumentParameters = new ArrayList<>();
 
-        for (int i = 0; i < schemas.size(); i++) {
-            ArgumentParameterContract schema = schemas.get(i);
-            boolean isLast = i == schemas.size() - 1;
+        for (int key = 0; key < argumentParameters.size(); key++) {
+            ArgumentParameterContract argumentParameter = argumentParameters.get(key);
+            List<ArgumentContract> argumentParameterArguments = new ArrayList<>();
 
-            if (isLast && schema.getValueMode() == ArgumentValueMode.ARRAY) {
-                while (inputIdx < inputArgs.size()) {
-                    schema = schema.withAddedArguments(inputArgs.get(inputIdx++));
-                }
-            } else if (inputIdx < inputArgs.size()) {
-                schema = schema.withAddedArguments(inputArgs.get(inputIdx++));
+            // Array arguments must be last, and will take up all the remaining arguments from the
+            // input
+            if (argumentParameter.getValueMode() == ArgumentValueMode.ARRAY) {
+                argumentParameterArguments.addAll(arguments.values());
+
+                arguments.clear();
+            } else if (arguments.containsKey(key)) {
+                // If not an array type then we should match each argument in order of appearance
+                argumentParameterArguments.add(arguments.remove(key));
             }
 
-            bound.add(schema);
+            boundArgumentParameters.add(
+                    argumentParameter
+                            .withArguments(
+                                    argumentParameterArguments.toArray(new ArgumentContract[0]))
+                            .validateValues());
         }
 
-        return route.withArguments(bound.toArray(new ArgumentParameterContract[0]));
+        return route.withArguments(
+                boundArgumentParameters.toArray(new ArgumentParameterContract[0]));
+    }
+
+    /** Add the options from the input to the route. */
+    protected RouteContract addOptionsToRoute(InputContract input, RouteContract route) {
+        List<OptionContract> options = input.getOptions();
+        List<OptionParameterContract> optionParameters = route.getOptions();
+        List<OptionParameterContract> boundOptionParameters = new ArrayList<>();
+
+        for (OptionParameterContract optionParameter : optionParameters) {
+            List<OptionContract> optionParameterOptions = new ArrayList<>();
+
+            for (OptionContract option : options) {
+                // Add the option only if it matches the name or one of the short names
+                if (optionParameter.getName().equals(option.getName())
+                        || optionParameter.getShortNames().contains(option.getName())) {
+                    optionParameterOptions.add(option);
+                }
+            }
+
+            boundOptionParameters.add(
+                    optionParameter
+                            .withOptions(optionParameterOptions.toArray(new OptionContract[0]))
+                            .validateValues());
+        }
+
+        return route.withOptions(boundOptionParameters.toArray(new OptionParameterContract[0]));
+    }
+
+    /** Do various stuff after the route has been matched. */
+    @SuppressWarnings("unchecked")
+    protected void routeMatched(RouteContract route) {
+        routeMatchedHandler.add(route.getRouteMatchedMiddleware().toArray(new Class[0]));
+        routeDispatchedHandler.add(route.getRouteDispatchedMiddleware().toArray(new Class[0]));
+        throwableCaughtHandler.add(route.getThrowableCaughtMiddleware().toArray(new Class[0]));
+        processExitingHandler.add(route.getProcessExitingMiddleware().toArray(new Class[0]));
+
+        // Set the found command in the service container
+        container.setSingleton(RouteContract.class, route);
     }
 }

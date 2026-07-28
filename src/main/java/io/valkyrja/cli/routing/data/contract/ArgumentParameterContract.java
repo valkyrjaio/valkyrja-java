@@ -29,4 +29,7 @@ public interface ArgumentParameterContract extends ParameterContract {
     ArgumentParameterContract withArguments(ArgumentContract... arguments);
 
     ArgumentParameterContract withAddedArguments(ArgumentContract... arguments);
+
+    @Override
+    ArgumentParameterContract validateValues();
 }

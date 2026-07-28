@@ -12,7 +12,6 @@ package io.valkyrja.cli.routing.data;
 import io.valkyrja.cli.interaction.option.contract.OptionContract;
 import io.valkyrja.cli.routing.data.abstract_.Parameter;
 import io.valkyrja.cli.routing.data.contract.OptionParameterContract;
-import io.valkyrja.cli.routing.data.contract.ParameterContract;
 import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingInvalidOptionWithValueException;
@@ -251,7 +250,7 @@ public class OptionParameter extends Parameter implements OptionParameterContrac
     }
 
     @Override
-    public ParameterContract validateValues() {
+    public OptionParameterContract validateValues() {
         if (!areValuesValid()) {
             throw new CliRoutingOptionValuesValidationException(name + " is invalid");
         }

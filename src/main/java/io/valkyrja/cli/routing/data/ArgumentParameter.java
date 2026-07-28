@@ -12,7 +12,6 @@ package io.valkyrja.cli.routing.data;
 import io.valkyrja.cli.interaction.argument.contract.ArgumentContract;
 import io.valkyrja.cli.routing.data.abstract_.Parameter;
 import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
-import io.valkyrja.cli.routing.data.contract.ParameterContract;
 import io.valkyrja.cli.routing.enum_.ArgumentMode;
 import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingArgumentValuesValidationException;
@@ -125,7 +124,7 @@ public class ArgumentParameter extends Parameter implements ArgumentParameterCon
     }
 
     @Override
-    public ParameterContract validateValues() {
+    public ArgumentParameterContract validateValues() {
         if (!areValuesValid()) {
             throw new CliRoutingArgumentValuesValidationException(name + " is invalid");
         }
