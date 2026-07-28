@@ -53,4 +53,7 @@ public interface OptionParameterContract extends ParameterContract {
     OptionParameterContract withOptions(OptionContract... options);
 
     OptionParameterContract withAddedOptions(OptionContract... options);
+
+    @Override
+    OptionParameterContract validateValues();
 }
