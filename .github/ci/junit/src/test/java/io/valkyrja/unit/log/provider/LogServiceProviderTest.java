@@ -89,6 +89,8 @@ final class LogServiceProviderTest {
 
         container.register(new LogServiceProvider());
 
-        assertSame(container.getSingleton(FileLogger.class), container.getSingleton(LoggerContract.class));
+        assertSame(
+                container.getSingleton(FileLogger.class),
+                container.getSingleton(LoggerContract.class));
     }
 }
