@@ -23,6 +23,8 @@ import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.http.routing.collector.AttributeRouteCollector;
 import io.valkyrja.http.routing.collector.contract.RouteCollectorContract;
+import io.valkyrja.http.routing.data.HttpRoutingData;
+import io.valkyrja.http.routing.data.contract.HttpRoutingDataContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.dispatcher.Router;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
@@ -53,7 +55,8 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
                         HttpRoutingServiceProvider::publishAttributesRouteCollector,
                 ProcessorContract.class, HttpRoutingServiceProvider::publishProcessor,
                 RoutingResponseFactoryContract.class,
-                        HttpRoutingServiceProvider::publishResponseFactory);
+                        HttpRoutingServiceProvider::publishResponseFactory,
+                HttpRoutingDataContract.class, HttpRoutingServiceProvider::publishData);
     }
 
     public static void publishRouter(ContainerContract container) {
@@ -76,6 +79,36 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
         container.setSingleton(RouteCollectionContract.class, collection);
 
         ApplicationContract app = container.getSingleton(ApplicationContract.class);
+
+        // In debug mode the routes are collected from the providers and their controllers'
+        // annotations on every boot. Otherwise they are loaded from the generated routing data,
+        // whose handlers are direct method references (no controller reflection required).
+        if (app.getDebugMode()) {
+            publishData(container);
+
+            return;
+        }
+
+        HttpRoutingDataContract data = container.getSingleton(HttpRoutingDataContract.class);
+
+        collection.setFromData(
+                new HttpRoutingData(
+                        data.routes(), data.paths(), data.dynamicPaths(), data.regexes()));
+    }
+
+    /**
+     * Collect the routes from the application's HTTP route providers.
+     *
+     * <p>Gathers every provider's annotated controllers and explicitly declared routes, adds them
+     * to the published route collection, and publishes the resulting routing data. Doubling as the
+     * {@link HttpRoutingDataContract} publisher means an application that ships no generated
+     * routing data still resolves a fully collected data set on demand.
+     *
+     * @param container the container
+     */
+    public static void publishData(ContainerContract container) {
+        RouteCollectionContract collection = container.getSingleton(RouteCollectionContract.class);
+        ApplicationContract app = container.getSingleton(ApplicationContract.class);
         ProcessorContract processor = container.getSingleton(ProcessorContract.class);
 
         List<Class<?>> controllers = new ArrayList<>();
@@ -86,7 +119,7 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
             routes.addAll(provider.getRoutes());
         }
 
-        if (!controllers.isEmpty() && container.isSingleton(RouteCollectorContract.class)) {
+        if (!controllers.isEmpty()) {
             RouteCollectorContract collector = container.getSingleton(RouteCollectorContract.class);
             for (RouteContract route : collector.getRoutes(controllers.toArray(new Class[0]))) {
                 collection.add(route);
@@ -96,6 +129,8 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
         for (RouteContract route : routes) {
             collection.add(processor.route(route));
         }
+
+        container.setSingleton(HttpRoutingDataContract.class, collection.getData());
     }
 
     public static void publishMatcher(ContainerContract container) {
