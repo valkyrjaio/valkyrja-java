@@ -14,13 +14,13 @@ jobs:
   commit-message-check:
     name: Commit Message Check
     if: github.event_name == 'pull_request'
-    uses: valkyrjaio/.github/.github/workflows/_commit-message-check.yml@716065aae4466b95f0f80c9c5a5e2a92de620af6
+    uses: valkyrjaio/.github/.github/workflows/_commit-message-check.yml@983fb2adea0987861f9ec402e6e7a13638119f2c
     secrets: inherit
 
   trailing-newline-check:
     name: Trailing Newline Check
     if: github.event_name == 'pull_request'
-    uses: valkyrjaio/.github/.github/workflows/_trailing-newline-check.yml@716065aae4466b95f0f80c9c5a5e2a92de620af6
+    uses: valkyrjaio/.github/.github/workflows/_trailing-newline-check.yml@983fb2adea0987861f9ec402e6e7a13638119f2c
     permissions:
       pull-requests: write
       contents: read
@@ -28,7 +28,7 @@ jobs:
 
   spotless:
     name: Spotless
-    uses: valkyrjaio/.github/.github/workflows/_java-spotless.yml@716065aae4466b95f0f80c9c5a5e2a92de620af6
+    uses: valkyrjaio/.github/.github/workflows/_java-spotless.yml@983fb2adea0987861f9ec402e6e7a13638119f2c
     with:
       ci-directory: .github/ci/spotless
       paths: |
@@ -44,7 +44,7 @@ jobs:
 
   archunit:
     name: ArchUnit
-    uses: valkyrjaio/.github/.github/workflows/_java-archunit.yml@716065aae4466b95f0f80c9c5a5e2a92de620af6
+    uses: valkyrjaio/.github/.github/workflows/_java-archunit.yml@983fb2adea0987861f9ec402e6e7a13638119f2c
     with:
       ci-directory: .github/ci/archunit
       paths: |
@@ -59,7 +59,7 @@ jobs:
 
   errorprone:
     name: ErrorProne
-    uses: valkyrjaio/.github/.github/workflows/_java-errorprone.yml@716065aae4466b95f0f80c9c5a5e2a92de620af6
+    uses: valkyrjaio/.github/.github/workflows/_java-errorprone.yml@983fb2adea0987861f9ec402e6e7a13638119f2c
     with:
       ci-directory: .github/ci/errorprone
       paths: |
@@ -74,7 +74,7 @@ jobs:
 
   spotbugs:
     name: SpotBugs
-    uses: valkyrjaio/.github/.github/workflows/_java-spotbugs.yml@716065aae4466b95f0f80c9c5a5e2a92de620af6
+    uses: valkyrjaio/.github/.github/workflows/_java-spotbugs.yml@983fb2adea0987861f9ec402e6e7a13638119f2c
     with:
       ci-directory: .github/ci/spotbugs
       paths: |
@@ -89,7 +89,7 @@ jobs:
 
   junit:
     name: JUnit
-    uses: valkyrjaio/.github/.github/workflows/_java-junit.yml@716065aae4466b95f0f80c9c5a5e2a92de620af6
+    uses: valkyrjaio/.github/.github/workflows/_java-junit.yml@983fb2adea0987861f9ec402e6e7a13638119f2c
     with:
       ci-directory: .github/ci/junit
       paths: |
