@@ -39,10 +39,9 @@ import org.junit.jupiter.params.provider.MethodSource;
  * routing.
  *
  * <p>Mirrors the PHP reference {@code Tests\Functional\Cli\Interaction\Input\InputMappingTest}. One
- * axis differs by language rather than by intent: PHP's {@code $argv} leads with the script path,
- * so its caller is read from index 0 and its command name from index 1. Java's {@code
- * main(String[] args)} carries no program name, so the caller is always the supplied application
- * name and the command name is read from index 0.
+ * axis differs by language rather than by intent: {@code main(String[] args)} carries no program
+ * name, so the caller is always the supplied application name and the command name is read from
+ * index 0. See the argv-conventions table in the architecture guide.
  */
 final class InputMappingTest {
 
