@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.provider.ApplicationComponentProvider;
 import io.valkyrja.application.provider.CliApplicationComponentProvider;
+import io.valkyrja.log.provider.LogComponentProvider;
 import org.junit.jupiter.api.Test;
 
 final class CliApplicationComponentProviderTest {
@@ -25,8 +26,9 @@ final class CliApplicationComponentProviderTest {
     void componentProvidersIncludeApplicationAndCliStack() {
         var components = provider.getComponentProviders(null);
 
-        assertEquals(5, components.size());
+        assertEquals(6, components.size());
         assertInstanceOf(ApplicationComponentProvider.class, components.get(0));
+        assertInstanceOf(LogComponentProvider.class, components.get(5));
     }
 
     @Test

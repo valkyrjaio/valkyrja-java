@@ -20,6 +20,7 @@ import io.valkyrja.cli.server.provider.CliServerComponentProvider;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
+import io.valkyrja.log.provider.LogComponentProvider;
 import java.util.List;
 
 public class CliApplicationComponentProvider extends ComponentProvider {
@@ -31,7 +32,8 @@ public class CliApplicationComponentProvider extends ComponentProvider {
                 new CliInteractionComponentProvider(),
                 new CliMiddlewareComponentProvider(),
                 new CliRoutingComponentProvider(),
-                new CliServerComponentProvider());
+                new CliServerComponentProvider(),
+                new LogComponentProvider());
     }
 
     @Override
