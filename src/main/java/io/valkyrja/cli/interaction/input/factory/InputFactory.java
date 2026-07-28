@@ -35,9 +35,17 @@ public abstract class InputFactory {
         // the application name — and the first slot is the command name. Options are matched first
         // so an option spelled in that slot is parsed as one rather than swallowed as the command
         // name; the default command name then stands.
+        boolean endOfOptions = false;
+
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if (arg.startsWith("-")) {
+            if (!endOfOptions && arg.equals("--")) {
+                // POSIX end-of-options marker: the `--` itself is consumed, and every arg after
+                // it is an operand — never an option, however many dashes it starts with. A
+                // second `--` is therefore an ordinary operand.
+                endOfOptions = true;
+            } else if (!endOfOptions && !arg.equals("-") && arg.startsWith("-")) {
+                // A lone `-` is an operand by convention (it names standard input), not an option.
                 List<Option> parsed = OptionFactory.fromArg(arg);
                 options.addAll(parsed);
             } else if (i == 0) {

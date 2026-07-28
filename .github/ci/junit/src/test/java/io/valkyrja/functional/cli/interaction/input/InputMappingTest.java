@@ -94,8 +94,9 @@ final class InputMappingTest {
                                 tuple("a", "", OptionType.SHORT),
                                 tuple("b", "", OptionType.SHORT))),
                 // The value is split on the first `=` only, so everything after it is kept. The
-                // PHP reference splits on every `=` and keeps only the first segment ("a"),
-                // dropping the rest; retaining the whole value is the faithful mapping.
+                // PHP reference used to split on every `=` and keep only the first segment ("a"),
+                // dropping the rest; that truncation was fixed in valkyrja-php#935, so both ports
+                // now agree on the whole value.
                 Arguments.of(
                         "value containing equals",
                         new String[] {"cmd", "--expr=a=b"},
@@ -106,12 +107,8 @@ final class InputMappingTest {
     static Stream<Arguments> provideRejectedSpellings() {
         return Stream.of(
                 Arguments.of(
-                        "double dash terminator",
-                        new String[] {"cmd", "--"},
-                        CliInteractionInvalidNonEmptyValueException.class),
-                Arguments.of(
-                        "single dash",
-                        new String[] {"cmd", "-"},
+                        "empty long option name",
+                        new String[] {"cmd", "--=value"},
                         CliInteractionInvalidNonEmptyValueException.class),
                 Arguments.of(
                         "bundled short with value",
@@ -278,5 +275,75 @@ final class InputMappingTest {
 
         assertEquals(List.of("value"), argumentValues(input.getArguments()));
         assertEquals(List.of(tuple("name", "", OptionType.LONG)), optionTuples(input.getOptions()));
+    }
+
+    /**
+     * A bare {@code --} ends option parsing: it is consumed, and everything after it is an operand
+     * no matter how many dashes it starts with.
+     */
+    @Test
+    void testDoubleDashEndsOptionParsing() {
+        InputContract input =
+                InputFactory.fromGlobals(
+                        new String[] {"cmd", "--real", "--", "--not-an-option", "-x", "plain"},
+                        DEFAULT_CALLER,
+                        DEFAULT_COMMAND);
+
+        assertEquals("cmd", input.getCommandName());
+        assertEquals(
+                List.of("--not-an-option", "-x", "plain"), argumentValues(input.getArguments()));
+        assertEquals(List.of(tuple("real", "", OptionType.LONG)), optionTuples(input.getOptions()));
+    }
+
+    /** The {@code --} itself never becomes an operand, but a second one does. */
+    @Test
+    void testSecondDoubleDashIsAnOperand() {
+        InputContract input =
+                InputFactory.fromGlobals(
+                        new String[] {"cmd", "--", "--", "tail"}, DEFAULT_CALLER, DEFAULT_COMMAND);
+
+        assertEquals(List.of("--", "tail"), argumentValues(input.getArguments()));
+        assertEquals(List.of(), input.getOptions());
+    }
+
+    /**
+     * A lone {@code -} names standard input by convention, so it is an operand rather than an
+     * option — both before and after an end-of-options marker.
+     */
+    @Test
+    void testLoneDashIsAnOperand() {
+        InputContract input =
+                InputFactory.fromGlobals(
+                        new String[] {"cmd", "-", "--verbose", "--", "-"},
+                        DEFAULT_CALLER,
+                        DEFAULT_COMMAND);
+
+        assertEquals(List.of("-", "-"), argumentValues(input.getArguments()));
+        assertEquals(
+                List.of(tuple("verbose", "", OptionType.LONG)), optionTuples(input.getOptions()));
+    }
+
+    /**
+     * A {@code --} spelled in the command-name slot is still consumed, so the default command name
+     * stands and the following token becomes an operand.
+     */
+    @Test
+    void testDoubleDashInTheCommandNameSlot() {
+        InputContract input =
+                InputFactory.fromGlobals(
+                        new String[] {"--", "app:version"}, DEFAULT_CALLER, DEFAULT_COMMAND);
+
+        assertEquals(DEFAULT_COMMAND, input.getCommandName());
+        assertEquals(List.of("app:version"), argumentValues(input.getArguments()));
+    }
+
+    /** A lone {@code -} in the command-name slot fills it, since it is an operand. */
+    @Test
+    void testLoneDashInTheCommandNameSlot() {
+        InputContract input =
+                InputFactory.fromGlobals(new String[] {"-"}, DEFAULT_CALLER, DEFAULT_COMMAND);
+
+        assertEquals("-", input.getCommandName());
+        assertEquals(List.of(), input.getArguments());
     }
 }
