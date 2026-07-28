@@ -1,0 +1,33 @@
+/*
+ * This file is part of the Valkyrja Framework package.
+ *
+ * (c) Melech Mizrachi <melechmizrachi@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+package io.valkyrja.http.message.request.data;
+
+import io.valkyrja.http.message.file.contract.UploadedFileContract;
+import java.util.Map;
+
+/**
+ * The result of parsing a raw request body: the parsed form fields and the uploaded files.
+ *
+ * <p>Produced by {@link io.valkyrja.http.message.request.factory.RequestBodyFactory} and consumed
+ * by {@link io.valkyrja.http.message.request.factory.RequestFactory} to populate a request's parsed
+ * body and uploaded-file collections — the raw-runtime analog of the values PHP's SAPI exposes as
+ * {@code $_POST} and {@code $_FILES}.
+ *
+ * @param parsedBody the parsed form fields (empty when the body carries none)
+ * @param files the uploaded files (empty when the body carries none)
+ */
+public record ParsedRequestBody(
+        Map<String, Object> parsedBody, Map<String, UploadedFileContract> files) {
+
+    public ParsedRequestBody {
+        parsedBody = Map.copyOf(parsedBody);
+        files = Map.copyOf(files);
+    }
+}

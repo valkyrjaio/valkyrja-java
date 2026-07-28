@@ -206,27 +206,6 @@ final class WorkerHttpTest {
     }
 
     @Test
-    void parseQueryStringReturnsEmptyForNull() {
-        assertTrue(WorkerHttp.parseQueryString(null).isEmpty());
-    }
-
-    @Test
-    void parseQueryStringReturnsEmptyForBlank() {
-        assertTrue(WorkerHttp.parseQueryString("").isEmpty());
-    }
-
-    @Test
-    void parseQueryStringDecodesPairsAndToleratesGaps() {
-        // Leading '?', a valued pair, a valueless pair, an empty pair, and a percent-encoded value.
-        var query = WorkerHttp.parseQueryString("?a=1&flag&&b=two%20words");
-
-        assertEquals(3, query.size());
-        assertEquals("1", query.get("a"));
-        assertEquals("", query.get("flag"));
-        assertEquals("two words", query.get("b"));
-    }
-
-    @Test
     void getRequestReturnsServerRequest() {
         assertNotNull(WorkerHttp.getRequest());
     }

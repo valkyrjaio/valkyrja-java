@@ -18,11 +18,8 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.request.factory.RequestFactory;
 import io.valkyrja.http.message.response.contract.ResponseContract;
-import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
 import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -196,15 +193,10 @@ public abstract class WorkerHttp extends App {
     /**
      * Build a framework server request from a native runtime request's parts.
      *
-     * <p>Marshals the {@code $_SERVER}-style params via {@link #serverParams}, parses the query
-     * string into query params, lets {@link RequestFactory#fromGlobals} derive the cookies from the
-     * {@code Cookie} header, and attaches the raw body as the request stream — mirroring the PHP
-     * OpenSwoole / RoadRunner {@code getRequestFrom…Request} translation.
-     *
-     * <p>Parsed form body and uploaded files are left empty: unlike the PHP Swoole runtime (which
-     * pre-parses them), the raw servlet / socket runtimes expose only the raw body, which callers
-     * read through {@link ServerRequestContract#getBody()}. Content-type-aware body parsing is a
-     * separate concern.
+     * <p>Marshals the {@code $_SERVER}-style params via {@link #serverParams} and hands them with
+     * the raw body to {@link RequestFactory#fromGlobals}, which derives the query params, cookies,
+     * parsed body, and uploaded files and sets the raw body stream — mirroring the PHP OpenSwoole /
+     * RoadRunner {@code getRequestFrom…Request} translation.
      *
      * @param method the request method (e.g. {@code GET})
      * @param requestUri the request target (path, optionally with query string)
@@ -226,14 +218,7 @@ public abstract class WorkerHttp extends App {
         Map<String, String> server =
                 serverParams(method, requestUri, queryString, protocol, remoteAddr, headers);
 
-        ServerRequestContract request =
-                RequestFactory.fromGlobals(server, parseQueryString(queryString), null, null, null);
-
-        Stream stream = new Stream();
-        stream.write(body);
-        stream.rewind();
-
-        return (ServerRequestContract) request.withBody(stream);
+        return RequestFactory.fromGlobals(server, body);
     }
 
     /**
@@ -286,45 +271,6 @@ public abstract class WorkerHttp extends App {
         }
 
         return server;
-    }
-
-    /**
-     * Parse a raw query string into a query-params map.
-     *
-     * <p>Splits on {@code &}, decodes each {@code key=value} pair (percent- and {@code +}-decoded
-     * as {@code application/x-www-form-urlencoded}), and treats a pair with no {@code =} as an
-     * empty value.
-     *
-     * @param queryString the raw query string (with or without a leading {@code ?}), or {@code
-     *     null}
-     * @return the parsed query params (empty when the query string is absent or blank)
-     */
-    public static Map<String, Object> parseQueryString(@Nullable String queryString) {
-        Map<String, Object> query = new LinkedHashMap<>();
-
-        if (queryString == null || queryString.isEmpty()) {
-            return query;
-        }
-
-        if (queryString.charAt(0) == '?') {
-            queryString = queryString.substring(1);
-        }
-
-        for (String pair : queryString.split("&")) {
-            if (pair.isEmpty()) {
-                continue;
-            }
-
-            int equals = pair.indexOf('=');
-            String key = equals >= 0 ? pair.substring(0, equals) : pair;
-            String value = equals >= 0 ? pair.substring(equals + 1) : "";
-
-            query.put(
-                    URLDecoder.decode(key, StandardCharsets.UTF_8),
-                    URLDecoder.decode(value, StandardCharsets.UTF_8));
-        }
-
-        return query;
     }
 
     /**
