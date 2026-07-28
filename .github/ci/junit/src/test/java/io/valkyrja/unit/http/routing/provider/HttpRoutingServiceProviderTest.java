@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.factory.ResponseFactory;
 import io.valkyrja.http.message.response.factory.contract.ResponseFactoryContract;
@@ -30,7 +31,9 @@ import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContra
 import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.http.routing.collector.contract.RouteCollectorContract;
+import io.valkyrja.http.routing.data.HttpRoutingData;
 import io.valkyrja.http.routing.data.Route;
+import io.valkyrja.http.routing.data.contract.HttpRoutingDataContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.http.routing.matcher.contract.MatcherContract;
@@ -41,6 +44,7 @@ import io.valkyrja.http.routing.factory.contract.RoutingResponseFactoryContract;
 import io.valkyrja.http.routing.url.contract.UrlContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link HttpRoutingServiceProvider}. */
@@ -48,7 +52,7 @@ final class HttpRoutingServiceProviderTest {
 
     @Test
     void publishersExposeAllRoutingServices() {
-        assertEquals(7, new HttpRoutingServiceProvider().publishers().size());
+        assertEquals(8, new HttpRoutingServiceProvider().publishers().size());
     }
 
     @Test
@@ -96,7 +100,7 @@ final class HttpRoutingServiceProviderTest {
     }
 
     @Test
-    void publishRouteCollectionWithCollectorAndProviderRoutes() {
+    void publishRouteCollectionInDebugModeCollectsFromProviders() {
         var container = new Container();
         container.setSingleton(ProcessorContract.class, new Processor());
         var collector = mock(RouteCollectorContract.class);
@@ -105,6 +109,7 @@ final class HttpRoutingServiceProviderTest {
         container.setSingleton(RouteCollectorContract.class, collector);
 
         var app = mock(ApplicationContract.class);
+        when(app.getDebugMode()).thenReturn(true);
         var routeProvider = mock(HttpRouteProviderContract.class);
         when(routeProvider.getControllerClasses()).thenReturn(List.of(Object.class));
         when(routeProvider.getRoutes()).thenReturn(List.of(route("direct", "/direct")));
@@ -123,11 +128,12 @@ final class HttpRoutingServiceProviderTest {
     }
 
     @Test
-    void publishRouteCollectionWithoutControllersSkipsCollector() {
+    void publishRouteCollectionInDebugModeWithoutControllersSkipsCollector() {
         var container = new Container();
         container.setSingleton(ProcessorContract.class, new Processor());
 
         var app = mock(ApplicationContract.class);
+        when(app.getDebugMode()).thenReturn(true);
         var routeProvider = mock(HttpRouteProviderContract.class);
         when(routeProvider.getControllerClasses()).thenReturn(List.of());
         when(routeProvider.getRoutes()).thenReturn(List.of(route("direct", "/direct")));
@@ -140,23 +146,24 @@ final class HttpRoutingServiceProviderTest {
         assertTrue(collection.hasName("direct"));
     }
 
-
     @Test
-    void publishRouteCollectionWithControllersButNoCollectorSkipsCollection() {
+    void publishRouteCollectionOutsideDebugModeLoadsFromRoutingData() {
         var container = new Container();
-        container.setSingleton(ProcessorContract.class, new Processor());
-        // No RouteCollectorContract singleton is registered.
+
         var app = mock(ApplicationContract.class);
-        var routeProvider = mock(HttpRouteProviderContract.class);
-        when(routeProvider.getControllerClasses()).thenReturn(List.of(Object.class));
-        when(routeProvider.getRoutes()).thenReturn(List.of(route("direct", "/direct")));
-        when(app.getHttpProviders()).thenReturn(List.of(routeProvider));
         container.setSingleton(ApplicationContract.class, app);
+        container.setSingleton(
+                HttpRoutingDataContract.class,
+                new HttpRoutingData(
+                        Map.of("welcome", () -> route("welcome", "/")),
+                        Map.of(RequestMethod.GET.getValue(), Map.of("/", "welcome")),
+                        Map.of(),
+                        Map.of()));
 
         HttpRoutingServiceProvider.publishRouteCollection(container);
 
         var collection = container.getSingleton(RouteCollectionContract.class);
-        assertTrue(collection.hasName("direct"));
+        assertTrue(collection.hasName("welcome"));
+        assertTrue(collection.hasPath("/", RequestMethod.GET));
     }
-
 }
