@@ -62,14 +62,21 @@ final class CallReceivedHandlerTest {
         @Override
         public CallReceivedResult callReceived(
                 ServiceCallContract call, CallReceivedHandlerContract handler) {
-            ((CancellationToken) call.getCancellation()).cancel(CancellationReason.DEADLINE_EXCEEDED);
+            ((CancellationToken) call.getCancellation())
+                    .cancel(CancellationReason.DEADLINE_EXCEEDED);
             return new CallReceivedResult(call, null);
         }
     }
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     private ContainerContract containerWith(Object... instances) {

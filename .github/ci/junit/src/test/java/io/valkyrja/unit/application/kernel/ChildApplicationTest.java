@@ -16,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import io.valkyrja.application.data.Config;
 import io.valkyrja.application.kernel.ChildApplication;
-import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.kernel.Valkyrja;
-import io.valkyrja.fixtures.container.SingletonClass;
+import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.NativeChildContainer;
+import io.valkyrja.fixtures.container.SingletonClass;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;

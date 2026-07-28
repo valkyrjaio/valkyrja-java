@@ -49,8 +49,7 @@ final class CallableDispatchTest {
 
     @Test
     void toMapAndToString() {
-        var dispatch =
-                new CallableDispatch(CALLABLE, Map.of("a", 1), List.of(String.class));
+        var dispatch = new CallableDispatch(CALLABLE, Map.of("a", 1), List.of(String.class));
 
         var map = dispatch.toMap();
         assertEquals(CALLABLE.toString(), map.get("callable"));

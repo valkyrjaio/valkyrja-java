@@ -62,19 +62,16 @@ final class ListCommandTest {
         routes.put("/users", new Route("/users", "users.index", HANDLER));
         routes.put(
                 "/users/{id}",
-                new DynamicRoute(
-                        "/users/{id}",
-                        "users.show",
-                        "/users/(\\d+)",
-                        List.of(),
-                        HANDLER));
+                new DynamicRoute("/users/{id}", "users.show", "/users/(\\d+)", List.of(), HANDLER));
         when(collection.getAll(RequestMethod.ANY)).thenReturn(routes);
 
         var output = new ListCommand(collection, outputFactory).run();
 
         assertTrue(output.getMessages().stream().anyMatch(m -> m.getText().contains("/users")));
-        assertTrue(output.getMessages().stream().anyMatch(m -> m.getText().contains("users.index")));
-        assertTrue(output.getMessages().stream().anyMatch(m -> m.getText().contains("/users/(\\d+)")));
+        assertTrue(
+                output.getMessages().stream().anyMatch(m -> m.getText().contains("users.index")));
+        assertTrue(
+                output.getMessages().stream().anyMatch(m -> m.getText().contains("/users/(\\d+)")));
     }
 
     @Test
@@ -96,5 +93,4 @@ final class ListCommandTest {
 
         assertFalse(output.getMessages().stream().anyMatch(m -> m.getText().contains("Regex:")));
     }
-
 }

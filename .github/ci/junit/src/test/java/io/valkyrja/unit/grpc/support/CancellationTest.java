@@ -31,7 +31,13 @@ final class CancellationTest {
 
     private static ServiceCall call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     @Test
@@ -67,7 +73,8 @@ final class CancellationTest {
 
     @Test
     void passesThroughAlreadyCancelledResponse() {
-        ServiceResponseContract cancelled = ServiceResponse.cancelled(CancellationReason.CLIENT_CANCELLED);
+        ServiceResponseContract cancelled =
+                ServiceResponse.cancelled(CancellationReason.CLIENT_CANCELLED);
         ServiceResponseContract result =
                 Cancellation.checkAndFinalize(call(new CancellationToken()), cancelled);
         assertSame(cancelled, result);

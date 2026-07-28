@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.valkyrja.dispatch.data.abstract_.Dispatch;
 import java.util.Map;
-import io.valkyrja.dispatch.data.abstract_.Dispatch;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link Dispatch}. */

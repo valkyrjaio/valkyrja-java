@@ -30,9 +30,9 @@ import org.junit.jupiter.api.Timeout;
  * Smoke test for the {@link JettyHttp} adapter over a real embedded Jetty server.
  *
  * <p>Drives the adapter's own {@link JettyHttp#server} — the exact server the blocking {@code
- * run(...)} builds — on an ephemeral port, then confirms a full round trip: the adapter marshals the
- * incoming request (captured through the probe) and emits the framework response back through the
- * Jetty response (the distinctive status and body are read off the socket).
+ * run(...)} builds — on an ephemeral port, then confirms a full round trip: the adapter marshals
+ * the incoming request (captured through the probe) and emits the framework response back through
+ * the Jetty response (the distinctive status and body are read off the socket).
  */
 @Timeout(20)
 final class JettyHttpSmokeTest {

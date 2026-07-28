@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.valkyrja.fixtures.dispatch.DispatchableClass;
-import io.valkyrja.fixtures.dispatch.UnknownDispatchClass;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.dispatch.data.CallableDispatch;
 import io.valkyrja.dispatch.data.ClassDispatch;
@@ -24,6 +22,8 @@ import io.valkyrja.dispatch.data.MethodDispatch;
 import io.valkyrja.dispatch.data.PropertyDispatch;
 import io.valkyrja.dispatch.dispatcher.Dispatcher;
 import io.valkyrja.dispatch.throwable.exception.DispatchInvalidDispatchCapabilityException;
+import io.valkyrja.fixtures.dispatch.DispatchableClass;
+import io.valkyrja.fixtures.dispatch.UnknownDispatchClass;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,7 +36,10 @@ final class DispatcherTest {
 
     @Test
     void noArgConstructorUsesNewContainer() {
-        var result = new Dispatcher().dispatch(new MethodDispatch(DispatchableClass.class, "staticMethod", true));
+        var result =
+                new Dispatcher()
+                        .dispatch(
+                                new MethodDispatch(DispatchableClass.class, "staticMethod", true));
 
         assertEquals("static-result", result);
     }
@@ -45,14 +48,17 @@ final class DispatcherTest {
 
     @Test
     void dispatchesStaticMethod() {
-        var result = dispatcher.dispatch(new MethodDispatch(DispatchableClass.class, "staticMethod", true));
+        var result =
+                dispatcher.dispatch(
+                        new MethodDispatch(DispatchableClass.class, "staticMethod", true));
 
         assertEquals("static-result", result);
     }
 
     @Test
     void dispatchesInstanceMethod() {
-        var result = dispatcher.dispatch(new MethodDispatch(DispatchableClass.class, "instanceMethod"));
+        var result =
+                dispatcher.dispatch(new MethodDispatch(DispatchableClass.class, "instanceMethod"));
 
         assertEquals("instance-result", result);
     }
@@ -71,11 +77,7 @@ final class DispatcherTest {
         var nested = new ConstantDispatch("CONSTANT", DispatchableClass.class);
         var dispatch =
                 new MethodDispatch(
-                        DispatchableClass.class,
-                        "echo",
-                        false,
-                        Map.of("value", nested),
-                        List.of());
+                        DispatchableClass.class, "echo", false, Map.of("value", nested), List.of());
 
         assertEquals("echo:constant-value", dispatcher.dispatch(dispatch));
     }
@@ -149,14 +151,17 @@ final class DispatcherTest {
 
     @Test
     void dispatchesStaticProperty() {
-        var result = dispatcher.dispatch(new PropertyDispatch(DispatchableClass.class, "staticField", true));
+        var result =
+                dispatcher.dispatch(
+                        new PropertyDispatch(DispatchableClass.class, "staticField", true));
 
         assertEquals("static-field", result);
     }
 
     @Test
     void dispatchesInstanceProperty() {
-        var result = dispatcher.dispatch(new PropertyDispatch(DispatchableClass.class, "instanceField"));
+        var result =
+                dispatcher.dispatch(new PropertyDispatch(DispatchableClass.class, "instanceField"));
 
         assertEquals("instance-field", result);
     }
@@ -216,8 +221,7 @@ final class DispatcherTest {
         var dispatch = new ClassDispatch(DispatchableClass.class);
 
         // Non-empty external arguments are forwarded to the container.
-        assertInstanceOf(
-                DispatchableClass.class, dispatcher.dispatch(dispatch, Map.of("a", 1)));
+        assertInstanceOf(DispatchableClass.class, dispatcher.dispatch(dispatch, Map.of("a", 1)));
     }
 
     // -- callables --
@@ -268,5 +272,4 @@ final class DispatcherTest {
                 DispatchInvalidDispatchCapabilityException.class,
                 () -> dispatcher.dispatch(dispatch));
     }
-
 }

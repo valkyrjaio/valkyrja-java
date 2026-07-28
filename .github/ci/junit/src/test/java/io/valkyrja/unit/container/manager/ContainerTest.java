@@ -17,14 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
+import io.valkyrja.container.enum_.InvalidReferenceMode;
+import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.fixtures.container.ServiceClass;
 import io.valkyrja.fixtures.container.SingletonClass;
 import io.valkyrja.fixtures.container.provider.ProvidedClass;
 import io.valkyrja.fixtures.container.provider.ProvidedSecondaryClass;
 import io.valkyrja.fixtures.container.provider.ProviderClass;
-import io.valkyrja.container.enum_.InvalidReferenceMode;
-import io.valkyrja.container.manager.Container;
-import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -217,7 +217,11 @@ final class ContainerTest {
 
         assertThrows(
                 ContainerInvalidArgumentException.class,
-                () -> container.get(ServiceClass.class, Map.of(), InvalidReferenceMode.THROW_EXCEPTION));
+                () ->
+                        container.get(
+                                ServiceClass.class,
+                                Map.of(),
+                                InvalidReferenceMode.THROW_EXCEPTION));
     }
 
     @Test
@@ -244,5 +248,4 @@ final class ContainerTest {
                 ContainerInvalidArgumentException.class,
                 () -> container.getSingleton(SingletonClass.class));
     }
-
 }

@@ -118,7 +118,8 @@ final class CookieTest {
         assertTrue(
                 ((Cookie) new Cookie("s", "v").withHttpOnly(true)).toString().contains("httponly"));
         assertFalse(
-                ((Cookie) new Cookie("s", "v").withHttpOnly(false)).toString().contains("httponly"));
+                ((Cookie) new Cookie("s", "v").withHttpOnly(false))
+                        .toString()
+                        .contains("httponly"));
     }
-
 }

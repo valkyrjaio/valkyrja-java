@@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.data.GrpcConfig;
 import io.valkyrja.application.entry.Grpc;
+import io.valkyrja.fixtures.grpc.GreeterComponentProvider;
 import io.valkyrja.grpc.message.call.ServiceCall;
 import io.valkyrja.grpc.message.enum_.StatusCode;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
-import io.valkyrja.fixtures.grpc.GreeterComponentProvider;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

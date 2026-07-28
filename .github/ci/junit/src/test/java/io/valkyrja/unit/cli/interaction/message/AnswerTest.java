@@ -118,10 +118,8 @@ final class AnswerTest {
     void withAllowedResponsesDoesNotDuplicateDefault() {
         var answer = new Answer("yes").withAllowedResponses("yes", "no");
 
-        assertEquals(
-                1, answer.getAllowedResponses().stream().filter("yes"::equals).count());
+        assertEquals(1, answer.getAllowedResponses().stream().filter("yes"::equals).count());
     }
-
 
     @Test
     void isValidResponseFailsWhenCallableRejects() {
@@ -131,5 +129,4 @@ final class AnswerTest {
                         .withValidationCallable(response -> false)
                         .isValidResponse());
     }
-
 }

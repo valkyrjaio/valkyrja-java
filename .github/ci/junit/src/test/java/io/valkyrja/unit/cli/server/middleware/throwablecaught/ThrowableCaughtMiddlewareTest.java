@@ -71,8 +71,7 @@ final class ThrowableCaughtMiddlewareTest {
         var middleware = new OutputThrowableCaughtMiddleware();
         var throwable = new IllegalStateException("kaboom");
 
-        OutputContract result =
-                middleware.throwableCaught(new Input(), null, throwable, handler);
+        OutputContract result = middleware.throwableCaught(new Input(), null, throwable, handler);
 
         assertEquals(ExitCode.ERROR, result.getExitCode());
     }

@@ -10,6 +10,7 @@
 package io.valkyrja.unit.cli.interaction.message;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import io.valkyrja.cli.interaction.message.WarningMessage;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,6 @@ final class WarningMessageTest {
 
     @Test
     void appliesWarningFormatter() {
-        assertEquals(
-                "\033[30;43mwarn\033[39;49m", new WarningMessage("warn").getFormattedText());
+        assertEquals("\033[30;43mwarn\033[39;49m", new WarningMessage("warn").getFormattedText());
     }
 }

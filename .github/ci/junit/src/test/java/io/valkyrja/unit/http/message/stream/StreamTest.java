@@ -10,8 +10,8 @@
 package io.valkyrja.unit.http.message.stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -87,12 +87,13 @@ final class StreamTest {
 
     @Test
     void toStringSwallowsErrorsAndReturnsEmpty() {
-        var stream = new Stream() {
-            @Override
-            public void rewind() {
-                throw new RuntimeException("boom");
-            }
-        };
+        var stream =
+                new Stream() {
+                    @Override
+                    public void rewind() {
+                        throw new RuntimeException("boom");
+                    }
+                };
         stream.write("hello");
 
         assertEquals("", stream.toString());
@@ -168,7 +169,6 @@ final class StreamTest {
         assertEquals("", stream.toString());
     }
 
-
     @Test
     void metadataWithModeButNullTranslation() {
         var meta = new Stream(PhpWrapper.memory, Mode.WRITE, null).getMetadata();
@@ -186,7 +186,6 @@ final class StreamTest {
         assertEquals("HIllo world", stream.toString());
     }
 
-
     @Test
     void writeOverPositionPastEndDropsTrailing() {
         var stream = new Stream();
@@ -196,5 +195,4 @@ final class StreamTest {
 
         assertEquals("REPLACED", stream.toString());
     }
-
 }

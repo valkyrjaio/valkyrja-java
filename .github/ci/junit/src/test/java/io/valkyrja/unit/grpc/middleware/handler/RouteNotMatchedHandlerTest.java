@@ -35,8 +35,8 @@ import org.junit.jupiter.api.Test;
 /** Test the {@link RouteNotMatchedHandler}. */
 final class RouteNotMatchedHandlerTest {
 
-    static final ServiceResponseContract REPLACEMENT = ServiceResponse.of(
-            io.valkyrja.grpc.message.status.Status.notFound(null));
+    static final ServiceResponseContract REPLACEMENT =
+            ServiceResponse.of(io.valkyrja.grpc.message.status.Status.notFound(null));
 
     static boolean passThroughRan;
 
@@ -67,14 +67,21 @@ final class RouteNotMatchedHandlerTest {
                 ServiceCallContract call,
                 ServiceResponseContract response,
                 RouteNotMatchedHandlerContract handler) {
-            ((CancellationToken) call.getCancellation()).cancel(CancellationReason.DEADLINE_EXCEEDED);
+            ((CancellationToken) call.getCancellation())
+                    .cancel(CancellationReason.DEADLINE_EXCEEDED);
             return response;
         }
     }
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     @SuppressWarnings("unchecked")
@@ -106,7 +113,8 @@ final class RouteNotMatchedHandlerTest {
         RouteNotMatchedHandler handler =
                 new RouteNotMatchedHandler(containerWith(new Replace()), Replace.class);
         ServiceResponseContract result =
-                handler.routeNotMatched(call(new CancellationToken()), ServiceResponse.unimplemented());
+                handler.routeNotMatched(
+                        call(new CancellationToken()), ServiceResponse.unimplemented());
         assertSame(REPLACEMENT, result);
     }
 
@@ -129,7 +137,8 @@ final class RouteNotMatchedHandlerTest {
                 new RouteNotMatchedHandler(
                         containerWith(new CancelThenReturn()), CancelThenReturn.class);
         ServiceResponseContract result =
-                handler.routeNotMatched(call(new CancellationToken()), ServiceResponse.unimplemented());
+                handler.routeNotMatched(
+                        call(new CancellationToken()), ServiceResponse.unimplemented());
         assertEquals(StatusCode.DEADLINE_EXCEEDED, result.getStatus().getCode());
     }
 }

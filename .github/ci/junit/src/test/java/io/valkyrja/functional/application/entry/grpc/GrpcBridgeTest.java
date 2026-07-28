@@ -11,7 +11,6 @@ package io.valkyrja.functional.application.entry.grpc;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -122,16 +121,13 @@ final class GrpcBridgeTest {
                 registry.lookupMethod("pkg.Greeter/SayHello", null);
 
         assertNotNull(definition);
-        assertEquals(
-                "pkg.Greeter/SayHello", definition.getMethodDescriptor().getFullMethodName());
+        assertEquals("pkg.Greeter/SayHello", definition.getMethodDescriptor().getFullMethodName());
     }
 
     @Test
     void buildCallCarriesHeadersDeadlineTokenAndPeer() {
         ServerCall<byte[], byte[]> call =
-                mockCall(
-                        new SocketAddressAndSession(
-                                new InetSocketAddress("1.2.3.4", 4242), null));
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 4242), null));
         io.grpc.Metadata headers = new io.grpc.Metadata();
         headers.put(
                 io.grpc.Metadata.Key.of("authorization", io.grpc.Metadata.ASCII_STRING_MARSHALLER),
@@ -139,7 +135,10 @@ final class GrpcBridgeTest {
 
         ServiceCallContract serviceCall =
                 GrpcBridge.buildCall(
-                        call, headers, "pkg.Svc/M", List.of("a".getBytes()),
+                        call,
+                        headers,
+                        "pkg.Svc/M",
+                        List.of("a".getBytes()),
                         new CancellationToken());
 
         assertEquals("/pkg.Svc/M", serviceCall.getMethod());
@@ -211,8 +210,7 @@ final class GrpcBridgeTest {
         assertEquals(
                 CancellationReason.CLIENT_CANCELLED,
                 GrpcBridge.cancellationReason(io.grpc.Deadline.after(1, TimeUnit.HOURS)));
-        assertEquals(
-                CancellationReason.CLIENT_CANCELLED, GrpcBridge.cancellationReason(null));
+        assertEquals(CancellationReason.CLIENT_CANCELLED, GrpcBridge.cancellationReason(null));
     }
 
     @Test
@@ -251,7 +249,9 @@ final class GrpcBridgeTest {
         verify(call).sendHeaders(any());
         verify(call).sendMessage(any());
         verify(call)
-                .close(argThat(status -> status.getCode() == io.grpc.Status.Code.INTERNAL), trailers.capture());
+                .close(
+                        argThat(status -> status.getCode() == io.grpc.Status.Code.INTERNAL),
+                        trailers.capture());
         assertTrue(trailers.getValue().keys().contains("grpc-status-details-bin"));
     }
 
@@ -306,8 +306,7 @@ final class GrpcBridgeTest {
         }
         assertArrayEquals(
                 bytes,
-                GrpcBridge.ByteMarshaller.INSTANCE.parse(
-                        new java.io.ByteArrayInputStream(bytes)));
+                GrpcBridge.ByteMarshaller.INSTANCE.parse(new java.io.ByteArrayInputStream(bytes)));
     }
 
     @Test
@@ -370,8 +369,7 @@ final class GrpcBridgeTest {
                 .close(
                         argThat(
                                 status ->
-                                        status.getCode()
-                                                == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
+                                        status.getCode() == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
                         any());
         verify(call, never()).sendHeaders(any());
     }
@@ -392,7 +390,9 @@ final class GrpcBridgeTest {
 
         verify(call)
                 .close(
-                        argThat(status -> status.getCode() == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
+                        argThat(
+                                status ->
+                                        status.getCode() == io.grpc.Status.Code.RESOURCE_EXHAUSTED),
                         any());
     }
 
@@ -472,7 +472,8 @@ final class GrpcBridgeTest {
         listener.onHalfClose();
 
         assertTrue(closed.await(5, TimeUnit.SECONDS));
-        // One up-front request for the whole high-water window, then one refill per drained message.
+        // One up-front request for the whole high-water window, then one refill per drained
+        // message.
         // That is what keeps the inbound queue bounded — it never grows past maxInboundMessages.
         verify(call).request(1000);
         verify(call, times(3)).request(1);

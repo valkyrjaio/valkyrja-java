@@ -130,8 +130,7 @@ final class UploadedFileTest {
         var file = new UploadedFile(null, streamOf("data"), 4, null, null);
 
         assertThrows(
-                UploadedFileUnableToWriteFileException.class,
-                () -> file.moveTo(target.toString()));
+                UploadedFileUnableToWriteFileException.class, () -> file.moveTo(target.toString()));
     }
 
     @Test
@@ -146,8 +145,7 @@ final class UploadedFileTest {
             files.when(() -> Files.delete(source)).thenThrow(new IOException("locked"));
 
             assertThrows(
-                    UploadedFileMoveFailureException.class,
-                    () -> file.moveTo(target.toString()));
+                    UploadedFileMoveFailureException.class, () -> file.moveTo(target.toString()));
         }
     }
 
@@ -178,5 +176,4 @@ final class UploadedFileTest {
 
         assertEquals("data", Files.readString(target));
     }
-
 }

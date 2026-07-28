@@ -72,8 +72,7 @@ final class OptionParameterTest {
         var param = param();
 
         assertSame(OptionMode.REQUIRED, param.withMode(OptionMode.REQUIRED).getMode());
-        assertSame(
-                OptionValueMode.NONE, param.withValueMode(OptionValueMode.NONE).getValueMode());
+        assertSame(OptionValueMode.NONE, param.withValueMode(OptionValueMode.NONE).getValueMode());
     }
 
     @Test
@@ -143,9 +142,11 @@ final class OptionParameterTest {
     void valueModeNoneAllowsValuelessOptions() {
         var param = param().withValueMode(OptionValueMode.NONE);
 
-        assertEquals(1, param.withOptions(new Option("verbose", OptionType.LONG)).getOptions().size());
         assertEquals(
-                1, param.withAddedOptions(new Option("verbose", OptionType.LONG)).getOptions().size());
+                1, param.withOptions(new Option("verbose", OptionType.LONG)).getOptions().size());
+        assertEquals(
+                1,
+                param.withAddedOptions(new Option("verbose", OptionType.LONG)).getOptions().size());
     }
 
     @Test

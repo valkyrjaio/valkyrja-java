@@ -50,8 +50,8 @@ import org.junit.jupiter.params.provider.MethodSource;
  *   <li>PHP's SAPI hands the factory five pre-parsed globals ({@code $_SERVER}, query, body,
  *       cookies, files). The raw Java runtimes have no SAPI, so {@link RequestFactory#fromGlobals}
  *       takes the server params plus the raw body and derives the query from {@code QUERY_STRING},
- *       the cookies from the {@code Cookie} header, and the parsed body and uploaded files from
- *       the body keyed off its {@code Content-Type}.
+ *       the cookies from the {@code Cookie} header, and the parsed body and uploaded files from the
+ *       body keyed off its {@code Content-Type}.
  *   <li>PHP's param collections nest (its {@code parse_str} builds arrays from {@code a[b]=c}).
  *       Java's are flat and scalar-only, so the nesting assertions become flat-key ones.
  * </ul>
@@ -221,8 +221,7 @@ final class RequestMappingTest {
         assertEquals("/users/42/edit", uri.getPath());
         assertEquals("page=2&sort=name", uri.getQuery());
         assertEquals("", uri.getFragment());
-        assertEquals(
-                "https://example.com:8443/users/42/edit?page=2&sort=name", uri.toString());
+        assertEquals("https://example.com:8443/users/42/edit?page=2&sort=name", uri.toString());
         assertEquals("/users/42/edit?page=2&sort=name", request.getRequestTarget());
     }
 
@@ -278,8 +277,10 @@ final class RequestMappingTest {
         ServerRequest request =
                 RequestFactory.fromGlobals(
                         server(
-                                "HTTP_X_FORWARDED_PROTO", Scheme.HTTPS.getValue(),
-                                "HTTP_HOST", "example.com"),
+                                "HTTP_X_FORWARDED_PROTO",
+                                Scheme.HTTPS.getValue(),
+                                "HTTP_HOST",
+                                "example.com"),
                         null);
 
         assertEquals(Scheme.HTTPS, request.getUri().getScheme());
@@ -316,8 +317,7 @@ final class RequestMappingTest {
     void testParsedBodyMapsFromGlobals() {
         ServerRequest request =
                 RequestFactory.fromGlobals(
-                        server("CONTENT_TYPE", FORM_CONTENT_TYPE),
-                        "title=hello&count=3&note=a+b");
+                        server("CONTENT_TYPE", FORM_CONTENT_TYPE), "title=hello&count=3&note=a+b");
 
         ParamCollectionContract parsedBody = request.getParsedBody();
 
@@ -327,8 +327,7 @@ final class RequestMappingTest {
         assertEquals("a b", parsedBody.get("note"));
 
         // The fields keep the order they were spelled in the body.
-        assertEquals(
-                List.of("title", "count", "note"), List.copyOf(parsedBody.getAll().keySet()));
+        assertEquals(List.of("title", "count", "note"), List.copyOf(parsedBody.getAll().keySet()));
 
         // A missing parsed-body param reads back as an empty string, never null.
         assertEquals("", parsedBody.get("missing"));
@@ -458,16 +457,14 @@ final class RequestMappingTest {
     @Test
     void testCookiesMapFromCookieHeader() {
         ServerRequest request =
-                RequestFactory.fromGlobals(
-                        server("HTTP_COOKIE", "sid=abc123; theme=dark"), null);
+                RequestFactory.fromGlobals(server("HTTP_COOKIE", "sid=abc123; theme=dark"), null);
 
         ParamCollectionContract cookies = request.getCookieParams();
 
         assertEquals(Map.of("sid", "abc123", "theme", "dark"), cookies.getAll());
         assertEquals("abc123", cookies.get("sid"));
         assertEquals("dark", cookies.get("theme"));
-        assertEquals(
-                "sid=abc123; theme=dark", request.getHeaders().getHeaderLine("Cookie"));
+        assertEquals("sid=abc123; theme=dark", request.getHeaders().getHeaderLine("Cookie"));
     }
 
     /** A single uploaded file maps out of a multipart body onto an uploaded-file object. */
@@ -573,12 +570,9 @@ final class RequestMappingTest {
                                 .withHeaders(
                                         new HeaderCollection(
                                                 new Header(HeaderName.HOST, "original.test")));
-        request =
-                (ServerRequestContract)
-                        request.withUri(uriWithHost("original.test", 0), false);
+        request = (ServerRequestContract) request.withUri(uriWithHost("original.test", 0), false);
         // Re-assert the starting point: swapping in the same host leaves the header as it was.
-        assertEquals(
-                "original.test", request.getHeaders().getHeaderLine(HeaderName.HOST));
+        assertEquals("original.test", request.getHeaders().getHeaderLine(HeaderName.HOST));
 
         // A host without a port yields a bare host header.
         var swapped = request.withUri(uriWithHost("new.test", 0), false);
@@ -650,8 +644,7 @@ final class RequestMappingTest {
     @Test
     void testXmlHttpRequestFlagMapsFromHeader() {
         ServerRequest xhr =
-                RequestFactory.fromGlobals(
-                        server("HTTP_X_REQUESTED_WITH", "XMLHttpRequest"), null);
+                RequestFactory.fromGlobals(server("HTTP_X_REQUESTED_WITH", "XMLHttpRequest"), null);
         ServerRequest plain = RequestFactory.fromGlobals(Map.of(), null);
 
         assertTrue(xhr.isXmlHttpRequest());

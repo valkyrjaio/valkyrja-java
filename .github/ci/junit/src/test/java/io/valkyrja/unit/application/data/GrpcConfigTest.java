@@ -43,8 +43,7 @@ final class GrpcConfigTest {
     void contractSuppliesTheDefaultInboundCapToImplementorsThatDoNotOverrideIt() {
         // An implementor that only fills in the required members inherits the contract default.
         GrpcConfigContract config = mock(GrpcConfigContract.class, CALLS_REAL_METHODS);
-        assertEquals(
-                GrpcConfigContract.DEFAULT_MAX_INBOUND_MESSAGES, config.maxInboundMessages());
+        assertEquals(GrpcConfigContract.DEFAULT_MAX_INBOUND_MESSAGES, config.maxInboundMessages());
     }
 
     @Test

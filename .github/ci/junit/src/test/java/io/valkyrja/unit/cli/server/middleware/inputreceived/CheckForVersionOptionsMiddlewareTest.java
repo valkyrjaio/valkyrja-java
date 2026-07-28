@@ -47,5 +47,4 @@ final class CheckForVersionOptionsMiddlewareTest {
                                 new Input().withOptions(new Option("version", OptionType.LONG)),
                                 handler));
     }
-
 }

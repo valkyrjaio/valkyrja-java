@@ -53,7 +53,8 @@ final class ServiceResponseTest {
 
     @Test
     void unimplementedFactories() {
-        assertEquals(StatusCode.UNIMPLEMENTED, ServiceResponse.unimplemented().getStatus().getCode());
+        assertEquals(
+                StatusCode.UNIMPLEMENTED, ServiceResponse.unimplemented().getStatus().getCode());
         assertEquals("nope", ServiceResponse.unimplemented("nope").getStatus().getMessage());
     }
 
@@ -61,10 +62,14 @@ final class ServiceResponseTest {
     void cancelledMapsReasonToStatus() {
         assertEquals(
                 StatusCode.DEADLINE_EXCEEDED,
-                ServiceResponse.cancelled(CancellationReason.DEADLINE_EXCEEDED).getStatus().getCode());
+                ServiceResponse.cancelled(CancellationReason.DEADLINE_EXCEEDED)
+                        .getStatus()
+                        .getCode());
         assertEquals(
                 StatusCode.CANCELLED,
-                ServiceResponse.cancelled(CancellationReason.CLIENT_CANCELLED).getStatus().getCode());
+                ServiceResponse.cancelled(CancellationReason.CLIENT_CANCELLED)
+                        .getStatus()
+                        .getCode());
         assertEquals(StatusCode.CANCELLED, ServiceResponse.cancelled(null).getStatus().getCode());
     }
 

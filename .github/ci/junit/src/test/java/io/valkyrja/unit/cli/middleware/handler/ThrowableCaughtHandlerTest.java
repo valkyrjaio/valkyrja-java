@@ -12,12 +12,11 @@ package io.valkyrja.unit.cli.middleware.handler;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 
-import io.valkyrja.fixtures.cli.middleware.PassThroughMiddleware;
-import io.valkyrja.container.manager.Container;
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.cli.middleware.handler.ThrowableCaughtHandler;
+import io.valkyrja.container.manager.Container;
+import io.valkyrja.fixtures.cli.middleware.PassThroughMiddleware;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link ThrowableCaughtHandler}. */

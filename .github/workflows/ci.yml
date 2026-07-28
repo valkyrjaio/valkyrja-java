@@ -39,6 +39,7 @@ jobs:
           - '.github/ci/spotless/**'
           - '.github/workflows/ci.yml'
           - 'src/**/*.java'
+          - '.github/ci/junit/src/test/**/*.java'
     secrets: inherit
 
   archunit:

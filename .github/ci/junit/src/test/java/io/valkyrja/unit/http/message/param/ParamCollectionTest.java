@@ -79,7 +79,8 @@ final class ParamCollectionTest {
 
     @Test
     void baseFromArrayIsUnsupported() {
-        assertThrows(UnsupportedOperationException.class, () -> ParamCollection.fromArray(Map.of()));
+        assertThrows(
+                UnsupportedOperationException.class, () -> ParamCollection.fromArray(Map.of()));
     }
 
     @Test

@@ -76,10 +76,8 @@ final class ValueTest {
     void offsetMutationsAreUnsupported() {
         var value = new Value("a");
 
-        assertThrows(
-                HttpHeaderUnsupportedOffsetSetException.class, () -> value.offsetSet(0, "x"));
-        assertThrows(
-                HttpHeaderUnsupportedOffsetUnsetException.class, () -> value.offsetUnset(0));
+        assertThrows(HttpHeaderUnsupportedOffsetSetException.class, () -> value.offsetSet(0, "x"));
+        assertThrows(HttpHeaderUnsupportedOffsetUnsetException.class, () -> value.offsetUnset(0));
     }
 
     @Test
@@ -104,7 +102,6 @@ final class ValueTest {
         assertEquals("a", new Value("a", "").toString());
     }
 
-
     @Test
     void iteratorValidityFlipsAtEnd() {
         var value = new Value("a", "b");
@@ -117,5 +114,4 @@ final class ValueTest {
 
         assertEquals(2, count);
     }
-
 }

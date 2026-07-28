@@ -8,7 +8,6 @@
  */
 
 package io.valkyrja.unit.container.provider;
-import io.valkyrja.container.provider.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -16,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
+import io.valkyrja.container.provider.*;
 import org.junit.jupiter.api.Test;
 
 final class ContainerComponentProviderTest {

@@ -18,16 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.manager.NativeChildContainer;
+import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.fixtures.container.ServiceClass;
 import io.valkyrja.fixtures.container.SingletonClass;
 import io.valkyrja.fixtures.container.provider.BindingProviderClass;
 import io.valkyrja.fixtures.container.provider.ProvidedClass;
-import io.valkyrja.container.manager.Container;
-import io.valkyrja.container.manager.NativeChildContainer;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 
 /** Per-request child container with child-first reads and parent fallback via field access. */
 final class NativeChildContainerTest {
@@ -313,7 +313,6 @@ final class NativeChildContainerTest {
         assertInstanceOf(ProvidedClass.class, child.get(ProvidedClass.class));
     }
 
-
     @Test
     void getSingletonFromChildBinding() {
         child.bindSingleton(SingletonClass.class, SingletonClass::make);
@@ -321,5 +320,4 @@ final class NativeChildContainerTest {
         // Child has its own singleton binding → creates and caches without consulting the parent.
         assertInstanceOf(SingletonClass.class, child.getSingleton(SingletonClass.class));
     }
-
 }

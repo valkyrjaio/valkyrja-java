@@ -111,8 +111,6 @@ final class ListCommandTest {
         var output = command().run();
 
         assertEquals(ExitCode.ERROR, output.getExitCode());
-        assertTrue(
-                output.getMessages().stream()
-                        .anyMatch(m -> m.getText().contains("missing:")));
+        assertTrue(output.getMessages().stream().anyMatch(m -> m.getText().contains("missing:")));
     }
 }

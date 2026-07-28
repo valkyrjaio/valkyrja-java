@@ -29,11 +29,11 @@ import org.junit.jupiter.api.Timeout;
  * Smoke test for the {@link TomcatHttp} adapter over a real embedded Tomcat server.
  *
  * <p>Drives the adapter's own {@link TomcatHttp#server} — the exact server the blocking {@code
- * run(...)} builds — on an ephemeral port, then confirms a full round trip: the adapter marshals the
- * incoming request (captured through the probe) and emits the framework response back through the
- * servlet response (the distinctive status and body are read off the socket). Because the server is
- * the adapter's own, the bound port is only non-zero if the adapter opened its connector, so this
- * also guards the connector wiring.
+ * run(...)} builds — on an ephemeral port, then confirms a full round trip: the adapter marshals
+ * the incoming request (captured through the probe) and emits the framework response back through
+ * the servlet response (the distinctive status and body are read off the socket). Because the
+ * server is the adapter's own, the bound port is only non-zero if the adapter opened its connector,
+ * so this also guards the connector wiring.
  */
 @Timeout(20)
 final class TomcatHttpSmokeTest {

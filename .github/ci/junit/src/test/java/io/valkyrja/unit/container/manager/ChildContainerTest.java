@@ -18,17 +18,17 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.valkyrja.container.data.ContainerData;
+import io.valkyrja.container.manager.ChildContainer;
+import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.fixtures.container.ServiceClass;
 import io.valkyrja.fixtures.container.SingletonClass;
 import io.valkyrja.fixtures.container.provider.BindingProviderClass;
 import io.valkyrja.fixtures.container.provider.ProvidedClass;
-import io.valkyrja.container.data.ContainerData;
-import io.valkyrja.container.manager.ChildContainer;
-import io.valkyrja.container.manager.Container;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 
 /** Per-request child container delegating to the parent through the contract only. */
 final class ChildContainerTest {
@@ -310,5 +310,4 @@ final class ChildContainerTest {
                 ContainerInvalidArgumentException.class,
                 () -> child.getAliased(Runnable.class, Map.of()));
     }
-
 }

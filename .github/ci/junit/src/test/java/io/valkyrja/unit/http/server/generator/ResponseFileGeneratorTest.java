@@ -29,7 +29,9 @@ final class ResponseFileGeneratorTest {
     void generateFileContentsSerializesResponse() {
         var response =
                 Response.create(
-                        "hello body", StatusCode.OK, new HeaderCollection(new Header("X-Test", "v")));
+                        "hello body",
+                        StatusCode.OK,
+                        new HeaderCollection(new Header("X-Test", "v")));
         var generator = new ResponseFileGenerator(response, "/tmp/unused");
 
         var contents = generator.generateFileContents();

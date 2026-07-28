@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import io.valkyrja.dispatch.data.ClassDispatch;
+import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -52,8 +52,7 @@ final class ClassDispatchTest {
     @Test
     void toMapContainsClassArgumentsAndDependencies() {
         var dispatch =
-                new ClassDispatch(
-                        DispatchableClass.class, Map.of("a", 1), List.of(String.class));
+                new ClassDispatch(DispatchableClass.class, Map.of("a", 1), List.of(String.class));
 
         var map = dispatch.toMap();
 

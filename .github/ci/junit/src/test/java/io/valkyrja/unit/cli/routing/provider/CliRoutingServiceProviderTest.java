@@ -61,7 +61,8 @@ final class CliRoutingServiceProviderTest {
                 RouteNotMatchedHandlerContract.class, mock(RouteNotMatchedHandlerContract.class));
         container.setSingleton(
                 RouteDispatchedHandlerContract.class, mock(RouteDispatchedHandlerContract.class));
-        container.setSingleton(ProcessExitingHandlerContract.class, mock(ProcessExitingHandlerContract.class));
+        container.setSingleton(
+                ProcessExitingHandlerContract.class, mock(ProcessExitingHandlerContract.class));
 
         CliRoutingServiceProvider.publishRouter(container);
 
@@ -87,7 +88,8 @@ final class CliRoutingServiceProviderTest {
     void publishRouteCollectionUsesCollectorWhenControllersPresent() {
         var container = new Container();
         var app = mock(ApplicationContract.class);
-        var provider = mock(io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract.class);
+        var provider =
+                mock(io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract.class);
         when(provider.getControllerClasses()).thenReturn(List.of(Object.class));
         when(provider.getRoutes()).thenReturn(List.of());
         when(app.getCliProviders()).thenReturn(List.of(provider));

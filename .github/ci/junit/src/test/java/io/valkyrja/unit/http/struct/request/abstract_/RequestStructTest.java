@@ -48,8 +48,7 @@ final class RequestStructTest {
     @Test
     void queryStructSelectsConfiguredFields() {
         ServerRequestContract request =
-                new ServerRequest()
-                        .withQueryParams(new QueryParamCollection(Map.of("page", "2")));
+                new ServerRequest().withQueryParams(new QueryParamCollection(Map.of("page", "2")));
         var struct = new QueryStructClass();
 
         assertTrue(struct.getDataFromRequest(request).containsKey("page"));
@@ -93,12 +92,10 @@ final class RequestStructTest {
         assertTrue(new QueryStructClass().validate(new ServerRequest()).validateRules());
     }
 
-
     @Test
     void validateFailsWhenRulesDoNotPass() {
         var struct = new io.valkyrja.fixtures.http.struct.FailingValidationStructClass();
 
         assertFalse(struct.validate(new ServerRequest()).validateRules());
     }
-
 }

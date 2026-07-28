@@ -8,11 +8,11 @@
  */
 
 package io.valkyrja.unit.container.throwable.exception;
-import io.valkyrja.container.throwable.exception.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+import io.valkyrja.container.throwable.exception.*;
 import org.junit.jupiter.api.Test;
 
 final class ContainerInvalidPublishCallbackExceptionTest {

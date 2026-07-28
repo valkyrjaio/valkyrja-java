@@ -9,8 +9,8 @@
 
 package io.valkyrja.unit.http.message.enum_;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,5 +56,4 @@ final class StatusCodeTest {
         assertTrue(StatusCode.FOUND.isRedirect());
         assertFalse(StatusCode.BAD_REQUEST.isRedirect());
     }
-
 }

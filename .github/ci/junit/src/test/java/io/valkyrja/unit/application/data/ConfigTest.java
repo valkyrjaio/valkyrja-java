@@ -16,10 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.data.Config;
+import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.ApplicationComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
-import io.valkyrja.application.kernel.contract.ApplicationContract;
-import java.util.List;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 

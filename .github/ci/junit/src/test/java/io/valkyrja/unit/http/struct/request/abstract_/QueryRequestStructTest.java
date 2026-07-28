@@ -16,8 +16,8 @@ import io.valkyrja.fixtures.http.struct.QueryStructClass;
 import io.valkyrja.http.message.param.QueryParamCollection;
 import io.valkyrja.http.message.request.ServerRequest;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
-import java.util.Map;
 import io.valkyrja.http.struct.request.abstract_.QueryRequestStruct;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link QueryRequestStruct}. */

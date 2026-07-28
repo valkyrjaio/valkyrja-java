@@ -25,6 +25,7 @@ public final class BindingProviderClass implements ServiceProviderContract {
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
                 ProvidedClass.class,
-                container -> container.bind(ProvidedClass.class, (c, arguments) -> new ProvidedClass()));
+                container ->
+                        container.bind(ProvidedClass.class, (c, arguments) -> new ProvidedClass()));
     }
 }

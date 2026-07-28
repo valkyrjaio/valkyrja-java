@@ -21,24 +21,29 @@ public class GreeterServiceProvider implements ServiceProviderContract {
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
                 GreeterController.MatchedMiddleware.class,
-                        c -> c.setSingleton(
-                                GreeterController.MatchedMiddleware.class,
-                                new GreeterController.MatchedMiddleware()),
+                        c ->
+                                c.setSingleton(
+                                        GreeterController.MatchedMiddleware.class,
+                                        new GreeterController.MatchedMiddleware()),
                 GreeterController.DispatchedMiddleware.class,
-                        c -> c.setSingleton(
-                                GreeterController.DispatchedMiddleware.class,
-                                new GreeterController.DispatchedMiddleware()),
+                        c ->
+                                c.setSingleton(
+                                        GreeterController.DispatchedMiddleware.class,
+                                        new GreeterController.DispatchedMiddleware()),
                 GreeterController.CaughtMiddleware.class,
-                        c -> c.setSingleton(
-                                GreeterController.CaughtMiddleware.class,
-                                new GreeterController.CaughtMiddleware()),
+                        c ->
+                                c.setSingleton(
+                                        GreeterController.CaughtMiddleware.class,
+                                        new GreeterController.CaughtMiddleware()),
                 GreeterController.SendingMiddleware.class,
-                        c -> c.setSingleton(
-                                GreeterController.SendingMiddleware.class,
-                                new GreeterController.SendingMiddleware()),
+                        c ->
+                                c.setSingleton(
+                                        GreeterController.SendingMiddleware.class,
+                                        new GreeterController.SendingMiddleware()),
                 GreeterController.ResponseSentMiddleware.class,
-                        c -> c.setSingleton(
-                                GreeterController.ResponseSentMiddleware.class,
-                                new GreeterController.ResponseSentMiddleware()));
+                        c ->
+                                c.setSingleton(
+                                        GreeterController.ResponseSentMiddleware.class,
+                                        new GreeterController.ResponseSentMiddleware()));
     }
 }

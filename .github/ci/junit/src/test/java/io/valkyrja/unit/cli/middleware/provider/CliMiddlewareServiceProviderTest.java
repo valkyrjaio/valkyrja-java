@@ -14,15 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.data.contract.CliConfigContract;
-import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
-import io.valkyrja.container.manager.Container;
-
 import io.valkyrja.cli.middleware.provider.CliMiddlewareServiceProvider;
+import io.valkyrja.container.manager.Container;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link CliMiddlewareServiceProvider}. */

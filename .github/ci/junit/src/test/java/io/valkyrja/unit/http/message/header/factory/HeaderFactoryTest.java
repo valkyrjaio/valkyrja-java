@@ -89,7 +89,9 @@ final class HeaderFactoryTest {
         withOriginal.put("HTTP_X_FOO", "original");
         withOriginal.put("REDIRECT_HTTP_X_FOO", "redirected");
         // The REDIRECT_ duplicate is skipped because the original is present.
-        assertEquals("original", HeaderFactory.marshalHeaders(withOriginal).get("x-foo").getHeaderLine());
+        assertEquals(
+                "original",
+                HeaderFactory.marshalHeaders(withOriginal).get("x-foo").getHeaderLine());
     }
 
     @Test

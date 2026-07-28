@@ -33,8 +33,7 @@ final class ResponseStructMiddlewareTest {
 
     private final ResponseStructMiddleware middleware = new ResponseStructMiddleware();
     private final ServerRequestContract request = mock(ServerRequestContract.class);
-    private final RouteContract route =
-            new Route("/x", "x", (container, r) -> new EmptyResponse());
+    private final RouteContract route = new Route("/x", "x", (container, r) -> new EmptyResponse());
 
     private RouteDispatchedHandlerContract passThroughHandler() {
         var handler = mock(RouteDispatchedHandlerContract.class);
@@ -44,10 +43,13 @@ final class ResponseStructMiddlewareTest {
 
     @Test
     void restructuresJsonResponseWhenRouteHasResponseStruct() {
-        var json = new JsonResponse(Map.of("id", 7, "name", "bob"), StatusCode.OK, new HeaderCollection());
+        var json =
+                new JsonResponse(
+                        Map.of("id", 7, "name", "bob"), StatusCode.OK, new HeaderCollection());
         var routeWithStruct = route.withResponseStruct(new ResponseStructClass());
 
-        var result = middleware.routeDispatched(request, json, routeWithStruct, passThroughHandler());
+        var result =
+                middleware.routeDispatched(request, json, routeWithStruct, passThroughHandler());
 
         assertTrue(result.getBody().toString().contains("identifier"));
         assertTrue(result.getBody().toString().contains("full_name"));
@@ -58,7 +60,9 @@ final class ResponseStructMiddlewareTest {
         var response = new EmptyResponse();
         var routeWithStruct = route.withResponseStruct(new ResponseStructClass());
 
-        var result = middleware.routeDispatched(request, response, routeWithStruct, passThroughHandler());
+        var result =
+                middleware.routeDispatched(
+                        request, response, routeWithStruct, passThroughHandler());
 
         assertSame(response, result);
     }

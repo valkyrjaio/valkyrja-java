@@ -43,8 +43,7 @@ final class HeaderCollectionTest {
 
     @Test
     void getThrowsForMissing() {
-        assertThrows(
-                HttpHeaderInvalidHeaderNameException.class, () -> collection().get("missing"));
+        assertThrows(HttpHeaderInvalidHeaderNameException.class, () -> collection().get("missing"));
     }
 
     @Test
@@ -78,9 +77,12 @@ final class HeaderCollectionTest {
     void withHeadersReplacesAndWithoutHeadersRemoves() {
         var collection = collection();
 
-        assertEquals(1, ((HeaderCollection) collection.withHeaders(new Header("Only", "v"))).getAll().size());
-        assertFalse(
-                collection.withoutHeaders("content-type", "accept").has("content-type"));
+        assertEquals(
+                1,
+                ((HeaderCollection) collection.withHeaders(new Header("Only", "v")))
+                        .getAll()
+                        .size());
+        assertFalse(collection.withoutHeaders("content-type", "accept").has("content-type"));
         // Removing a header that is not present is a no-op.
         assertTrue(collection.withoutHeaders("missing").has("content-type"));
     }
@@ -115,6 +117,7 @@ final class HeaderCollectionTest {
         data.put("bad", "not a header");
 
         assertThrows(
-                HttpHeaderInvalidHeaderParamException.class, () -> HeaderCollection.fromArray(data));
+                HttpHeaderInvalidHeaderParamException.class,
+                () -> HeaderCollection.fromArray(data));
     }
 }

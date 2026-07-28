@@ -33,7 +33,8 @@ tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("
 
 spotless {
     java {
-        target("src/**/*.java")
+        // The JUnit build's tests are the repo's other Java source tree; format them too.
+        target("src/**/*.java", ".github/ci/junit/src/test/**/*.java")
         googleJavaFormat("1.27.0").aosp()
         licenseHeader(
             """/*

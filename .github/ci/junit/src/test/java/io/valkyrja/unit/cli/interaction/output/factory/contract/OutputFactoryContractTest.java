@@ -21,7 +21,6 @@ import io.valkyrja.cli.interaction.output.contract.PlainOutputContract;
 import io.valkyrja.cli.interaction.output.contract.StreamOutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import java.io.ByteArrayOutputStream;
-import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link OutputFactoryContract}. */

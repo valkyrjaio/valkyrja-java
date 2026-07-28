@@ -12,9 +12,9 @@ package io.valkyrja.unit.cli.interaction.output;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import io.valkyrja.cli.interaction.output.StreamOutput;
 import io.valkyrja.cli.interaction.message.Message;
+import io.valkyrja.cli.interaction.output.StreamOutput;
+import java.io.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link StreamOutput}. */

@@ -13,9 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import io.valkyrja.container.manager.Container;
-import io.valkyrja.http.message.response.factory.contract.ResponseFactoryContract;
-
 import io.valkyrja.http.message.provider.HttpMessageServiceProvider;
+import io.valkyrja.http.message.response.factory.contract.ResponseFactoryContract;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link HttpMessageServiceProvider}. */

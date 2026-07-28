@@ -10,6 +10,7 @@
 package io.valkyrja.unit.cli.interaction.message;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import io.valkyrja.cli.interaction.message.NewLine;
 import org.junit.jupiter.api.Test;
 

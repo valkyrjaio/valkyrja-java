@@ -13,12 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.ContainerInvalidPublishCallbackException;
 import io.valkyrja.fixtures.container.provider.InvalidDeferredProviderClass;
 import io.valkyrja.fixtures.container.provider.ProvidedClass;
 import io.valkyrja.fixtures.container.provider.ProvidedSecondaryClass;
 import io.valkyrja.fixtures.container.provider.ProviderClass;
-import io.valkyrja.container.manager.Container;
-import io.valkyrja.container.throwable.exception.ContainerInvalidPublishCallbackException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

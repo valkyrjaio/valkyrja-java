@@ -141,7 +141,9 @@ final class GrpcNettyEndToEndTest {
 
             ClientCall<byte[], byte[]> call =
                     channel.newCall(
-                            method("pkg.Greeter/Fanout", MethodDescriptor.MethodType.SERVER_STREAMING),
+                            method(
+                                    "pkg.Greeter/Fanout",
+                                    MethodDescriptor.MethodType.SERVER_STREAMING),
                             CallOptions.DEFAULT);
             call.start(collector(responses, status, done), new Metadata());
             call.request(10);
@@ -174,7 +176,9 @@ final class GrpcNettyEndToEndTest {
 
             ClientCall<byte[], byte[]> call =
                     channel.newCall(
-                            method("pkg.Greeter/Collect", MethodDescriptor.MethodType.CLIENT_STREAMING),
+                            method(
+                                    "pkg.Greeter/Collect",
+                                    MethodDescriptor.MethodType.CLIENT_STREAMING),
                             CallOptions.DEFAULT);
             call.start(collector(responses, status, done), new Metadata());
             call.request(2);
@@ -264,7 +268,8 @@ final class GrpcNettyEndToEndTest {
             // polls would time out — proving the path genuinely interleaves rather than buffers.
             call.sendMessage("a".getBytes());
             byte[] firstEcho = echoes.poll(10, TimeUnit.SECONDS);
-            assertNotNull(firstEcho, "server did not echo before half-close — the path is not streaming");
+            assertNotNull(
+                    firstEcho, "server did not echo before half-close — the path is not streaming");
             assertArrayEquals("a".getBytes(), firstEcho);
 
             call.sendMessage("b".getBytes());

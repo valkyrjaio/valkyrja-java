@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.http.message.response.EmptyResponse;
-import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.middleware.data.RouteMatchedResult;
+import io.valkyrja.http.routing.data.contract.RouteContract;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link RouteMatchedResult}. */

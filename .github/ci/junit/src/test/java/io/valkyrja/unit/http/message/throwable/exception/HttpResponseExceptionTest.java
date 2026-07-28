@@ -34,7 +34,8 @@ final class HttpResponseExceptionTest {
 
     @Test
     void derivesStatusFromResponse() {
-        var exception = new HttpResponseException(null, "msg", new HeaderCollection(), new EmptyResponse());
+        var exception =
+                new HttpResponseException(null, "msg", new HeaderCollection(), new EmptyResponse());
 
         assertEquals(StatusCode.NO_CONTENT, exception.getStatusCode());
         assertEquals("msg", exception.getMessage());

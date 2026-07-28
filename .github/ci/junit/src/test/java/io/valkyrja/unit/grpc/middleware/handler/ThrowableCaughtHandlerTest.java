@@ -71,14 +71,21 @@ final class ThrowableCaughtHandlerTest {
                 ServiceResponseContract response,
                 Throwable throwable,
                 ThrowableCaughtHandlerContract handler) {
-            ((CancellationToken) call.getCancellation()).cancel(CancellationReason.DEADLINE_EXCEEDED);
+            ((CancellationToken) call.getCancellation())
+                    .cancel(CancellationReason.DEADLINE_EXCEEDED);
             return response;
         }
     }
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     @SuppressWarnings("unchecked")
@@ -138,7 +145,8 @@ final class ThrowableCaughtHandlerTest {
                 new ThrowableCaughtHandler(
                         containerWith(new CancelThenReturn()), CancelThenReturn.class);
         ServiceResponseContract result =
-                handler.throwableCaught(call(new CancellationToken()), ServiceResponse.ok(), THROWABLE);
+                handler.throwableCaught(
+                        call(new CancellationToken()), ServiceResponse.ok(), THROWABLE);
         assertEquals(StatusCode.DEADLINE_EXCEEDED, result.getStatus().getCode());
     }
 }

@@ -11,8 +11,9 @@ package io.valkyrja.unit.cli.interaction.message;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import io.valkyrja.cli.interaction.message.Message;
+
 import io.valkyrja.cli.interaction.message.Banner;
+import io.valkyrja.cli.interaction.message.Message;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link Banner}. */

@@ -77,5 +77,4 @@ final class CheckGlobalInteractionOptionsMiddlewareTest {
         assertTrue(config.isQuiet());
         assertTrue(config.isSilent());
     }
-
 }

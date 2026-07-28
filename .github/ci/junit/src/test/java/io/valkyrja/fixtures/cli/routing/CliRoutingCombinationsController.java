@@ -18,9 +18,9 @@ import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
 
 /**
- * Annotated command exercising a matrix of argument and option modes/value-modes so the
- * annotation construction path can be asserted to convert every permutation into the
- * expected data-class parameters.
+ * Annotated command exercising a matrix of argument and option modes/value-modes so the annotation
+ * construction path can be asserted to convert every permutation into the expected data-class
+ * parameters.
  */
 @io.valkyrja.cli.routing.attribute.route.Name("combinations")
 public final class CliRoutingCombinationsController {

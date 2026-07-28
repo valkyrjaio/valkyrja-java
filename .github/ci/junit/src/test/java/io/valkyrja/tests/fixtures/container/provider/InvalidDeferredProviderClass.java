@@ -15,7 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/** Test provider that declares a publisher with no (null) callback — an invalid deferred provider. */
+/**
+ * Test provider that declares a publisher with no (null) callback — an invalid deferred provider.
+ */
 public final class InvalidDeferredProviderClass implements ServiceProviderContract {
 
     @Override

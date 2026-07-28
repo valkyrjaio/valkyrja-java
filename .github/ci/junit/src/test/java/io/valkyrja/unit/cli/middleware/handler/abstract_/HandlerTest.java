@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import io.valkyrja.cli.middleware.handler.abstract_.Handler;
 import io.valkyrja.container.manager.Container;
-import io.valkyrja.cli.middleware.handler.abstract_.Handler;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link Handler}. */

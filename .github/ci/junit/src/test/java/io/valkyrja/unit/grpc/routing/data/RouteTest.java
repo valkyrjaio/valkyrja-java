@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
@@ -77,8 +77,7 @@ final class RouteTest {
     @Test
     void rejectsMethodWithTrailingSlash() {
         assertThrows(
-                GrpcRoutingInvalidMethodException.class,
-                () -> new Route("/pkg.Greeter/", HANDLER));
+                GrpcRoutingInvalidMethodException.class, () -> new Route("/pkg.Greeter/", HANDLER));
     }
 
     @Test
@@ -206,8 +205,7 @@ final class RouteTest {
     @Test
     void middlewareListsAreImmutable() {
         // A "immutable" Route must not hand out a list callers can mutate underneath it.
-        Route route =
-                new Route("/pkg.Svc/M", (container, r) -> ServiceResponse.ok());
+        Route route = new Route("/pkg.Svc/M", (container, r) -> ServiceResponse.ok());
         RouteContract withMiddleware =
                 route.withAddedRouteMatchedMiddleware(List.of(Matched.class));
 

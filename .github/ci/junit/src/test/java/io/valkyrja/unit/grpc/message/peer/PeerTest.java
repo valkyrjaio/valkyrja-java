@@ -76,7 +76,8 @@ final class PeerTest {
     void authContextPropertiesAreUnmodifiable() {
         AuthContext auth = new AuthContext("tls", Map.of("a", List.of("b")), List.of(), null, null);
         assertThrows(
-                UnsupportedOperationException.class, () -> auth.getProperties().put("c", List.of()));
+                UnsupportedOperationException.class,
+                () -> auth.getProperties().put("c", List.of()));
     }
 
     @Test

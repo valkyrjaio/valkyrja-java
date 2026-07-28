@@ -175,8 +175,7 @@ final class InputMappingTest {
 
         assertEquals("app:copy", input.getCommandName());
         assertEquals(
-                List.of("source.txt", "target.txt", "third"),
-                argumentValues(input.getArguments()));
+                List.of("source.txt", "target.txt", "third"), argumentValues(input.getArguments()));
     }
 
     /** Options and positional arguments interleave without disturbing each other's order. */

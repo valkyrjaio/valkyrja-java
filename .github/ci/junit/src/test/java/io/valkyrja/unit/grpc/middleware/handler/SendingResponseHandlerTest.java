@@ -29,7 +29,9 @@ import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContra
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link SendingResponseHandler} — an always-run stage with no cancellation short-circuit. */
+/**
+ * Test the {@link SendingResponseHandler} — an always-run stage with no cancellation short-circuit.
+ */
 final class SendingResponseHandlerTest {
 
     static final ServiceResponseContract REPLACEMENT = ServiceResponse.ok("sent");
@@ -60,7 +62,13 @@ final class SendingResponseHandlerTest {
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     @SuppressWarnings("unchecked")
@@ -92,7 +100,9 @@ final class SendingResponseHandlerTest {
         ran = false;
         SendingResponseHandler handler =
                 new SendingResponseHandler(containerWith(new Replace()), Replace.class);
-        assertSame(REPLACEMENT, handler.sendingResponse(call(new CancellationToken()), ServiceResponse.ok()));
+        assertSame(
+                REPLACEMENT,
+                handler.sendingResponse(call(new CancellationToken()), ServiceResponse.ok()));
     }
 
     @Test

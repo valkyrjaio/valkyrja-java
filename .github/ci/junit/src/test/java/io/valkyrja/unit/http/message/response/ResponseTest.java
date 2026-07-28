@@ -62,7 +62,9 @@ final class ResponseTest {
     void statusCodeAndReasonPhrase() {
         var response = new Response();
 
-        assertEquals(StatusCode.NOT_FOUND, response.withStatusCode(StatusCode.NOT_FOUND).getStatusCode());
+        assertEquals(
+                StatusCode.NOT_FOUND,
+                response.withStatusCode(StatusCode.NOT_FOUND).getStatusCode());
         assertEquals("Custom", response.withReasonPhrase("Custom").getReasonPhrase());
         // Empty reason phrase falls back to the status code's phrase.
         assertEquals(StatusCode.OK.asPhrase(), response.withReasonPhrase("").getReasonPhrase());
@@ -77,7 +79,9 @@ final class ResponseTest {
 
         var withHeaders = response.withHeaders(headers);
         assertSame(headers, withHeaders.getHeaders());
-        assertEquals(ProtocolVersion.V2, response.withProtocolVersion(ProtocolVersion.V2).getProtocolVersion());
+        assertEquals(
+                ProtocolVersion.V2,
+                response.withProtocolVersion(ProtocolVersion.V2).getProtocolVersion());
         assertEquals("body", response.withBody(body).getBody().toString());
     }
 
@@ -95,7 +99,8 @@ final class ResponseTest {
     @Test
     void sendOutputsHttpLineHeadersAndBody() {
         var response =
-                Response.create("payload", StatusCode.OK, new HeaderCollection(new Header("X-Test", "v")));
+                Response.create(
+                        "payload", StatusCode.OK, new HeaderCollection(new Header("X-Test", "v")));
 
         var output = captureStdout(response::send);
 
@@ -106,7 +111,8 @@ final class ResponseTest {
 
     @Test
     void withReasonPhraseNullFallsBackToStatusPhrase() {
-        assertEquals(StatusCode.OK.asPhrase(), new Response().withReasonPhrase(null).getReasonPhrase());
+        assertEquals(
+                StatusCode.OK.asPhrase(), new Response().withReasonPhrase(null).getReasonPhrase());
     }
 
     @Test
@@ -126,5 +132,4 @@ final class ResponseTest {
             System.setOut(original);
         }
     }
-
 }

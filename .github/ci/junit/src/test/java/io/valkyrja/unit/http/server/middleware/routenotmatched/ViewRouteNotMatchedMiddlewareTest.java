@@ -23,8 +23,7 @@ final class ViewRouteNotMatchedMiddlewareTest {
 
     @Test
     void rendersErrorTemplateIntoResponseBody() {
-        var middleware =
-                new ViewRouteNotMatchedMiddleware((name, variables) -> "rendered:" + name);
+        var middleware = new ViewRouteNotMatchedMiddleware((name, variables) -> "rendered:" + name);
 
         var result =
                 middleware.routeNotMatched(

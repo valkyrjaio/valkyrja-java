@@ -16,13 +16,12 @@ import static org.mockito.Mockito.mock;
 import io.valkyrja.application.data.contract.HttpConfigContract;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
-
 import io.valkyrja.http.middleware.provider.HttpMiddlewareServiceProvider;
 import org.junit.jupiter.api.Test;
 

@@ -95,7 +95,9 @@ final class UriTest {
 
         assertEquals(Scheme.HTTPS, uri.withScheme(Scheme.HTTPS).getScheme());
         assertEquals("bob", uri.withUsername("bob").getUsername());
-        assertEquals("secret", ((UriContract) uri.withUsername("bob")).withPassword("secret").getPassword());
+        assertEquals(
+                "secret",
+                ((UriContract) uri.withUsername("bob")).withPassword("secret").getPassword());
         assertEquals("host", uri.withHost("host").getHost());
         assertEquals(9090, uri.withPort(9090).getPort());
         assertEquals("/other", uri.withPath("/other").getPath());

@@ -16,7 +16,6 @@ import io.valkyrja.log.enum_.LogLevel;
 import io.valkyrja.log.logger.abstract_.Logger;
 import io.valkyrja.log.throwable.exception.LogInvalidLogLevelException;
 import java.util.Map;
-import io.valkyrja.log.logger.abstract_.Logger;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link Logger}. */
