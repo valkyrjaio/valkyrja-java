@@ -31,13 +31,17 @@ public abstract class InputFactory {
         List<ArgumentContract> arguments = new ArrayList<>();
         List<OptionContract> options = new ArrayList<>();
 
+        // Unlike PHP's $argv, Java's args carry no leading program name, so the caller is never
+        // spelled here — it comes from the application name — and the first slot is the command
+        // name. Options are matched first so an option spelled in that slot is parsed as one
+        // rather than swallowed as the command name; the default command name then stands.
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if (i == 0) {
-                commandName = arg;
-            } else if (arg.startsWith("-")) {
+            if (arg.startsWith("-")) {
                 List<Option> parsed = OptionFactory.fromArg(arg);
                 options.addAll(parsed);
+            } else if (i == 0) {
+                commandName = arg;
             } else {
                 arguments.add(ArgumentFactory.fromArg(arg));
             }
