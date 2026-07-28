@@ -41,7 +41,7 @@ sourceSets {
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
     compileOnly("org.jspecify:jspecify:1.0.0")
-    compileOnly("io.grpc:grpc-api:1.69.0")
+    compileOnly("io.grpc:grpc-api:1.83.0")
     errorprone("com.google.errorprone:error_prone_core:2.50.0")
     errorprone("com.uber.nullaway:nullaway:0.13.8")
 
@@ -50,8 +50,8 @@ dependencies {
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
     compileOnly("io.netty:netty-codec-http:4.2.16.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
-    compileOnly("io.grpc:grpc-servlet-jakarta:1.69.0")
-    compileOnly("io.grpc:grpc-netty-shaded:1.69.0")
+    compileOnly("io.grpc:grpc-servlet-jakarta:1.83.0")
+    compileOnly("io.grpc:grpc-netty-shaded:1.83.0")
 }
 
 fun isNonStable(version: String): Boolean {
