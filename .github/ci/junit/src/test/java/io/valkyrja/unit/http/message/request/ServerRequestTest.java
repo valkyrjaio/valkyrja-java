@@ -65,7 +65,8 @@ final class ServerRequestTest {
 
     @Test
     void isXmlHttpRequest() {
-        var headers = new HeaderCollection(new Header(HeaderName.X_REQUESTED_WITH, "XMLHttpRequest"));
+        var headers =
+                new HeaderCollection(new Header(HeaderName.X_REQUESTED_WITH, "XMLHttpRequest"));
         var ajax =
                 new ServerRequest(
                         new Uri(),

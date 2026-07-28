@@ -45,7 +45,8 @@ final class MetadataTest {
 
     @Test
     void withReplacesExistingValues() {
-        MetadataContract metadata = new Metadata().withAdded("k", "a").withAdded("k", "b").with("k", "c");
+        MetadataContract metadata =
+                new Metadata().withAdded("k", "a").withAdded("k", "b").with("k", "c");
         assertEquals(List.of("c"), metadata.getAll("k"));
         assertEquals("c", metadata.get("k"));
     }
@@ -93,7 +94,8 @@ final class MetadataTest {
 
     @Test
     void asciiKeyRejectsAByteArrayValue() {
-        // A byte[] under a non -bin key would otherwise be sent to the client as its array toString.
+        // A byte[] under a non -bin key would otherwise be sent to the client as its array
+        // toString.
         MetadataInvalidValueException thrown =
                 assertThrows(
                         MetadataInvalidValueException.class,
@@ -103,8 +105,7 @@ final class MetadataTest {
 
     @Test
     void asciiKeyRejectsANonStringValue() {
-        assertThrows(
-                MetadataInvalidValueException.class, () -> new Metadata().with("count", 42));
+        assertThrows(MetadataInvalidValueException.class, () -> new Metadata().with("count", 42));
     }
 
     @Test
@@ -145,7 +146,8 @@ final class MetadataTest {
 
     @Test
     void toMapReflectsContentsAndIsUnmodifiable() {
-        MetadataContract metadata = new Metadata().withAdded("A", "1").withAdded("a", "2").with("b", "3");
+        MetadataContract metadata =
+                new Metadata().withAdded("A", "1").withAdded("a", "2").with("b", "3");
         Map<String, List<Object>> map = metadata.toMap();
         assertEquals(List.of("1", "2"), map.get("a"));
         assertEquals(List.of("3"), map.get("b"));
@@ -155,8 +157,7 @@ final class MetadataTest {
     @Test
     void getAllReturnedListIsUnmodifiable() {
         MetadataContract metadata = new Metadata().with("k", "a");
-        assertThrows(
-                UnsupportedOperationException.class, () -> metadata.getAll("k").add("b"));
+        assertThrows(UnsupportedOperationException.class, () -> metadata.getAll("k").add("b"));
     }
 
     @Test

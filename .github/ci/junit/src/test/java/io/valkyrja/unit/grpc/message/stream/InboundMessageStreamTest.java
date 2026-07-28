@@ -122,7 +122,9 @@ final class InboundMessageStreamTest {
         consumer.interrupt();
         consumer.join();
 
-        assertTrue(iterationEnded.get(), "iteration did not end after the parked thread was interrupted");
+        assertTrue(
+                iterationEnded.get(),
+                "iteration did not end after the parked thread was interrupted");
     }
 
     @Test

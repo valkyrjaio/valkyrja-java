@@ -10,8 +10,8 @@
 package io.valkyrja.unit.http.server.middleware;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -71,7 +71,8 @@ final class CacheResponseMiddlewareTest {
         var request = request();
         var handler = mock(ResponseSentHandlerContract.class);
 
-        cache.responseSent(request, Response.create("body", StatusCode.OK, new HeaderCollection()), handler);
+        cache.responseSent(
+                request, Response.create("body", StatusCode.OK, new HeaderCollection()), handler);
 
         assertTrue(new File(cache.pathFor(request)).exists());
         verify(handler).responseSent(any(), any());
@@ -169,9 +170,12 @@ final class CacheResponseMiddlewareTest {
         var request = request();
         var handler = mock(ResponseSentHandlerContract.class);
 
-        cache.responseSent(request, Response.create("a", StatusCode.OK, new HeaderCollection()), handler);
-        // Second call: the cache file now exists, so shouldNotCache returns via the exists() operand.
-        cache.responseSent(request, Response.create("b", StatusCode.OK, new HeaderCollection()), handler);
+        cache.responseSent(
+                request, Response.create("a", StatusCode.OK, new HeaderCollection()), handler);
+        // Second call: the cache file now exists, so shouldNotCache returns via the exists()
+        // operand.
+        cache.responseSent(
+                request, Response.create("b", StatusCode.OK, new HeaderCollection()), handler);
 
         assertTrue(new java.io.File(cache.pathFor(request)).exists());
     }

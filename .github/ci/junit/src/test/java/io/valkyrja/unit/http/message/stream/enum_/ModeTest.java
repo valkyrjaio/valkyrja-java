@@ -60,5 +60,4 @@ final class ModeTest {
         assertTrue(Mode.READ.isReadable());
         assertFalse(Mode.WRITE.isReadable());
     }
-
 }

@@ -44,8 +44,7 @@ final class RequestBodyFactoryTest {
 
     @Test
     void parseUrlEncodedBodyPopulatesParsedBody() {
-        var parsed =
-                RequestBodyFactory.parse("application/x-www-form-urlencoded", "a=1&b=2");
+        var parsed = RequestBodyFactory.parse("application/x-www-form-urlencoded", "a=1&b=2");
 
         assertEquals("1", parsed.parsedBody().get("a"));
         assertEquals("2", parsed.parsedBody().get("b"));

@@ -15,21 +15,21 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.fixtures.event.ArgumentsCapableEventClass;
-import io.valkyrja.fixtures.event.DispatchCollectableEventClass;
-import io.valkyrja.fixtures.event.EventClass;
-import io.valkyrja.fixtures.event.StoppableEventClass;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.event.collection.ListenerCollection;
 import io.valkyrja.event.data.Listener;
 import io.valkyrja.event.dispatcher.EventDispatcher;
+import io.valkyrja.fixtures.event.ArgumentsCapableEventClass;
+import io.valkyrja.fixtures.event.DispatchCollectableEventClass;
+import io.valkyrja.fixtures.event.EventClass;
+import io.valkyrja.fixtures.event.NonStoppingStoppableEventClass;
+import io.valkyrja.fixtures.event.StoppableEventClass;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
-import io.valkyrja.fixtures.event.NonStoppingStoppableEventClass;
 
 final class EventDispatcherTest {
 
@@ -54,7 +54,9 @@ final class EventDispatcherTest {
         collection.addListener(listener(DispatchCollectableEventClass.class, "listener"));
         var dispatcher = dispatcherWith(collection);
 
-        var event = (DispatchCollectableEventClass) dispatcher.dispatch(new DispatchCollectableEventClass());
+        var event =
+                (DispatchCollectableEventClass)
+                        dispatcher.dispatch(new DispatchCollectableEventClass());
         var byId =
                 (DispatchCollectableEventClass)
                         dispatcher.dispatchById(DispatchCollectableEventClass.class, Map.of());
@@ -66,7 +68,9 @@ final class EventDispatcherTest {
         // Three listeners → three dispatches.
         collection.addListener(listener(DispatchCollectableEventClass.class, "listener2"));
         collection.addListener(listener(DispatchCollectableEventClass.class, "listener3"));
-        var multi = (DispatchCollectableEventClass) dispatcher.dispatch(new DispatchCollectableEventClass());
+        var multi =
+                (DispatchCollectableEventClass)
+                        dispatcher.dispatch(new DispatchCollectableEventClass());
         assertEquals(List.of("test", "test", "test"), multi.getDispatches());
     }
 
@@ -80,16 +84,19 @@ final class EventDispatcherTest {
         assertSame(event, dispatcher.dispatchIfHasListeners(event));
         assertInstanceOf(
                 DispatchCollectableEventClass.class,
-                dispatcher.dispatchByIdIfHasListeners(DispatchCollectableEventClass.class, Map.of()));
+                dispatcher.dispatchByIdIfHasListeners(
+                        DispatchCollectableEventClass.class, Map.of()));
         assertFalse(dispatched.get());
 
         collection.addListener(listener(DispatchCollectableEventClass.class, "listener"));
 
         var dispatchedEvent =
-                (DispatchCollectableEventClass) dispatcher.dispatchIfHasListeners(new DispatchCollectableEventClass());
+                (DispatchCollectableEventClass)
+                        dispatcher.dispatchIfHasListeners(new DispatchCollectableEventClass());
         var dispatchedById =
                 (DispatchCollectableEventClass)
-                        dispatcher.dispatchByIdIfHasListeners(DispatchCollectableEventClass.class, Map.of());
+                        dispatcher.dispatchByIdIfHasListeners(
+                                DispatchCollectableEventClass.class, Map.of());
 
         assertTrue(dispatched.get());
         assertEquals(List.of("test"), dispatchedEvent.getDispatches());
@@ -135,7 +142,8 @@ final class EventDispatcherTest {
     void dispatchByIdArgumentsCapableEventReceivesArguments() {
         var dispatcher = new EventDispatcher();
 
-        var result = dispatcher.dispatchById(ArgumentsCapableEventClass.class, Map.of("key", "value"));
+        var result =
+                dispatcher.dispatchById(ArgumentsCapableEventClass.class, Map.of("key", "value"));
 
         assertInstanceOf(ArgumentsCapableEventClass.class, result);
         assertEquals(Map.of("key", "value"), ((ArgumentsCapableEventClass) result).getArguments());
@@ -155,5 +163,4 @@ final class EventDispatcherTest {
         // Propagation is never stopped, so every listener still dispatches.
         assertEquals(List.of("test", "test"), event.getDispatches());
     }
-
 }

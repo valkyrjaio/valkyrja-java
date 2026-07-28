@@ -8,10 +8,10 @@
  */
 
 package io.valkyrja.unit.container.enum_;
-import io.valkyrja.container.enum_.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.valkyrja.container.enum_.*;
 import org.junit.jupiter.api.Test;
 
 final class InvalidReferenceModeTest {

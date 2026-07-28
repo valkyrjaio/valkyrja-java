@@ -112,7 +112,8 @@ final class WorkerHttpTest {
         AtomicReference<ResponseContract> emitted = new AtomicReference<>();
         WorkerHttp.dispatch(app, data, request, emitted::set);
 
-        // The response emitted through the runtime is the one returned by the SendingResponse stage.
+        // The response emitted through the runtime is the one returned by the SendingResponse
+        // stage.
         assertSame(sent, emitted.get());
         // Order: handle, then SendingResponse, then emit (implicit via emitted), then ResponseSent.
         InOrder order = inOrder(handler, sendingResponseHandler);

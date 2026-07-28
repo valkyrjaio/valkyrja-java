@@ -9,12 +9,12 @@
 
 package io.valkyrja.fixtures.http.routing;
 
+import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.fixtures.http.middleware.PassThroughHttpMiddleware;
 import io.valkyrja.fixtures.http.struct.FailingRequestStructClass;
 import io.valkyrja.fixtures.http.struct.FailingResponseStructClass;
 import io.valkyrja.fixtures.http.struct.ParsedBodyStructClass;
 import io.valkyrja.fixtures.http.struct.ResponseStructClass;
-import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
@@ -89,7 +89,10 @@ public final class AnnotatedHttpController {
         return new EmptyResponse();
     }
 
-    @DynamicRoute(path = "/p/{a}/{b}", name = "params", parameters = {})
+    @DynamicRoute(
+            path = "/p/{a}/{b}",
+            name = "params",
+            parameters = {})
     @Parameter(name = "a", regex = "\\d+")
     @Parameter(name = "b", regex = "\\d+")
     public ResponseContract multiParams(ContainerContract container, RouteContract route) {

@@ -111,7 +111,8 @@ final class ResponseMappingTest {
      */
     @Test
     void testCustomReasonPhraseOverridesTheDefault() {
-        Response response = new Response(new Stream(), StatusCode.NOT_FOUND, new HeaderCollection());
+        Response response =
+                new Response(new Stream(), StatusCode.NOT_FOUND, new HeaderCollection());
         ResponseContract custom = response.withReasonPhrase("Totally Missing");
         ResponseContract restored = custom.withReasonPhrase("");
 
@@ -134,7 +135,8 @@ final class ResponseMappingTest {
 
         HeaderCollectionContract headers = response.getHeaders();
 
-        assertEquals(List.of("content-type", "cache-control"), List.copyOf(headers.getAll().keySet()));
+        assertEquals(
+                List.of("content-type", "cache-control"), List.copyOf(headers.getAll().keySet()));
         assertTrue(headers.has("CONTENT-TYPE"));
         assertEquals("application/json", headers.getHeaderLine("Content-Type"));
         assertEquals("no-cache, no-store", headers.getHeaderLine("cache-control"));

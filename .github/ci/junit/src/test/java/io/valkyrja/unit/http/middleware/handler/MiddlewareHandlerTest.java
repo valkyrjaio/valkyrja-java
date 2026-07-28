@@ -14,17 +14,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 
-import io.valkyrja.fixtures.http.middleware.PassThroughHttpMiddleware;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.fixtures.http.middleware.PassThroughHttpMiddleware;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.handler.RequestReceivedHandler;
+import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.http.middleware.handler.RouteNotMatchedHandler;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
-import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.http.routing.data.Route;
 import io.valkyrja.http.routing.data.contract.RouteContract;
@@ -64,7 +64,8 @@ final class MiddlewareHandlerTest {
 
     @Test
     void routeNotMatchedChain() {
-        assertSame(response, new RouteNotMatchedHandler(container).routeNotMatched(request, response));
+        assertSame(
+                response, new RouteNotMatchedHandler(container).routeNotMatched(request, response));
         assertSame(
                 response,
                 new RouteNotMatchedHandler(container, PassThroughHttpMiddleware.class)
@@ -97,7 +98,8 @@ final class MiddlewareHandlerTest {
         var throwable = new IllegalStateException("boom");
         assertSame(
                 response,
-                new ThrowableCaughtHandler(container).throwableCaught(request, response, throwable));
+                new ThrowableCaughtHandler(container)
+                        .throwableCaught(request, response, throwable));
         assertSame(
                 response,
                 new ThrowableCaughtHandler(container, PassThroughHttpMiddleware.class)
@@ -106,7 +108,8 @@ final class MiddlewareHandlerTest {
 
     @Test
     void responseSentChain() {
-        assertDoesNotThrow(() -> new ResponseSentHandler(container).responseSent(request, response));
+        assertDoesNotThrow(
+                () -> new ResponseSentHandler(container).responseSent(request, response));
         assertDoesNotThrow(
                 () ->
                         new ResponseSentHandler(container, PassThroughHttpMiddleware.class)

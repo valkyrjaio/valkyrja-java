@@ -31,8 +31,8 @@ import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.middleware.data.CallReceivedResult;
 import io.valkyrja.grpc.middleware.handler.contract.CallReceivedHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
+import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.grpc.server.handler.ServiceHandler;
@@ -74,14 +74,21 @@ final class ServiceHandlerTest {
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     @Test
     void handleDispatchesThroughCallReceivedAndRouter() {
         ServiceCallContract call = call(new CancellationToken());
         ServiceResponseContract routed = ServiceResponse.ok("routed");
-        when(callReceivedHandler.callReceived(any())).thenReturn(new CallReceivedResult(call, null));
+        when(callReceivedHandler.callReceived(any()))
+                .thenReturn(new CallReceivedResult(call, null));
         when(router.dispatch(any())).thenReturn(routed);
 
         assertSame(routed, handler(false).handle(call));
@@ -114,7 +121,8 @@ final class ServiceHandlerTest {
     @Test
     void thrownGenericThrowableMapsToInternalThenThrowableCaught() {
         ServiceCallContract call = call(new CancellationToken());
-        when(callReceivedHandler.callReceived(any())).thenReturn(new CallReceivedResult(call, null));
+        when(callReceivedHandler.callReceived(any()))
+                .thenReturn(new CallReceivedResult(call, null));
         when(router.dispatch(any())).thenThrow(new IllegalStateException("boom"));
         when(throwableCaughtHandler.throwableCaught(any(), any(), any()))
                 .thenAnswer(inv -> inv.getArgument(1));
@@ -127,7 +135,8 @@ final class ServiceHandlerTest {
     @Test
     void thrownCancelledExceptionMapsToCancellation() {
         ServiceCallContract call = call(new CancellationToken());
-        when(callReceivedHandler.callReceived(any())).thenReturn(new CallReceivedResult(call, null));
+        when(callReceivedHandler.callReceived(any()))
+                .thenReturn(new CallReceivedResult(call, null));
         when(router.dispatch(any()))
                 .thenThrow(new CancelledException("stop", CancellationReason.CLIENT_CANCELLED));
         when(throwableCaughtHandler.throwableCaught(any(), any(), any()))
@@ -141,7 +150,8 @@ final class ServiceHandlerTest {
     @Test
     void debugModeRethrowsInsteadOfMapping() {
         ServiceCallContract call = call(new CancellationToken());
-        when(callReceivedHandler.callReceived(any())).thenReturn(new CallReceivedResult(call, null));
+        when(callReceivedHandler.callReceived(any()))
+                .thenReturn(new CallReceivedResult(call, null));
         when(router.dispatch(any())).thenThrow(new IllegalStateException("boom"));
 
         assertThrows(RuntimeException.class, () -> handler(true).handle(call));
@@ -173,7 +183,8 @@ final class ServiceHandlerTest {
         ServiceCallContract call = call(new CancellationToken());
         ServiceResponseContract routed = ServiceResponse.ok("routed");
         ServiceResponseContract sent = ServiceResponse.ok("sent");
-        when(callReceivedHandler.callReceived(any())).thenReturn(new CallReceivedResult(call, null));
+        when(callReceivedHandler.callReceived(any()))
+                .thenReturn(new CallReceivedResult(call, null));
         when(router.dispatch(any())).thenReturn(routed);
         when(sendingResponseHandler.sendingResponse(any(), any())).thenReturn(sent);
 

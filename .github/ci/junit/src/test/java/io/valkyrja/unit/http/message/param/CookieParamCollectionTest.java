@@ -12,9 +12,8 @@ package io.valkyrja.unit.http.message.param;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashMap;
-
 import io.valkyrja.http.message.param.CookieParamCollection;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 

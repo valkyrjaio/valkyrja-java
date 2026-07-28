@@ -16,8 +16,8 @@ import static org.mockito.Mockito.mock;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
@@ -25,9 +25,8 @@ import io.valkyrja.http.server.middleware.CacheResponseMiddleware;
 import io.valkyrja.http.server.middleware.routematched.RequestStructMiddleware;
 import io.valkyrja.http.server.middleware.routematched.ResponseStructMiddleware;
 import io.valkyrja.http.server.middleware.throwablecaught.LogThrowableCaughtMiddleware;
-import io.valkyrja.log.logger.contract.LoggerContract;
-
 import io.valkyrja.http.server.provider.HttpServerServiceProvider;
+import io.valkyrja.log.logger.contract.LoggerContract;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link HttpServerServiceProvider}. */

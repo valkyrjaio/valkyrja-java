@@ -30,9 +30,9 @@ public final class EntryConfigFixture {
 
     /**
      * An {@link HttpConfig} with the framework defaults, bound to {@code port}, that runs {@code
-     * onBootstrap} against the application during bootstrap (via the config callbacks). Lets a smoke
-     * test capture the bootstrapped application so it can bind an observable request handler before
-     * driving a request.
+     * onBootstrap} against the application during bootstrap (via the config callbacks). Lets a
+     * smoke test capture the bootstrapped application so it can bind an observable request handler
+     * before driving a request.
      */
     public static HttpConfig httpOnPort(int port, Consumer<ApplicationContract> onBootstrap) {
         HttpConfig base = new HttpConfig();

@@ -15,12 +15,12 @@ import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.cli.middleware.provider.CliMiddlewareComponentProvider;
+import io.valkyrja.cli.middleware.provider.CliMiddlewareServiceProvider;
 import io.valkyrja.cli.routing.provider.CliRoutingCliRouteProvider;
 import io.valkyrja.cli.routing.provider.CliRoutingComponentProvider;
 import io.valkyrja.cli.routing.provider.CliRoutingServiceProvider;
 import io.valkyrja.cli.server.provider.CliServerComponentProvider;
 import io.valkyrja.cli.server.provider.CliServerServiceProvider;
-import io.valkyrja.cli.middleware.provider.CliMiddlewareServiceProvider;
 import org.junit.jupiter.api.Test;
 
 /** Test the cli component providers (middleware, routing, server). */
@@ -33,7 +33,8 @@ final class CliComponentProvidersTest {
         var provider = new CliMiddlewareComponentProvider();
 
         assertEquals(1, provider.getContainerProviders(app).size());
-        assertTrue(provider.getContainerProviders(app).get(0) instanceof CliMiddlewareServiceProvider);
+        assertTrue(
+                provider.getContainerProviders(app).get(0) instanceof CliMiddlewareServiceProvider);
         assertTrue(provider.getComponentProviders(app).isEmpty());
         assertTrue(provider.getEventProviders(app).isEmpty());
         assertTrue(provider.getCliProviders(app).isEmpty());

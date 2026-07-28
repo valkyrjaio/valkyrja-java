@@ -11,11 +11,11 @@ package io.valkyrja.unit.cli.interaction.output;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.valkyrja.cli.interaction.message.Message;
+import io.valkyrja.cli.interaction.output.PlainOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import io.valkyrja.cli.interaction.output.PlainOutput;
-import io.valkyrja.cli.interaction.message.Message;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link PlainOutput}. */

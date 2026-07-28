@@ -8,7 +8,6 @@
  */
 
 package io.valkyrja.unit.container.provider;
-import io.valkyrja.container.provider.*;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -18,6 +17,7 @@ import static org.mockito.Mockito.when;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.data.contract.ContainerDataContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.provider.*;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import java.util.List;
 import org.junit.jupiter.api.Test;

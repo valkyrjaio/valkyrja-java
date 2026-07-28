@@ -72,5 +72,4 @@ final class ComponentTest {
         assertEquals("token", new Component("token", "").toString());
         assertEquals("", new Component("", "value").toString());
     }
-
 }

@@ -57,7 +57,8 @@ final class ContainerTest {
 
     @Test
     void constructorFromDataPopulatesBindings() {
-        BiFunction<ContainerContract, Map<String, Object>, Object> factory = (c, a) -> new Service();
+        BiFunction<ContainerContract, Map<String, Object>, Object> factory =
+                (c, a) -> new Service();
         var data = new ContainerData(Map.of(), Map.of(), Map.of(Service.class, factory), Map.of());
 
         var container = new Container(data);
@@ -68,7 +69,8 @@ final class ContainerTest {
 
     @Test
     void setFromDataPopulatesBindings() {
-        BiFunction<ContainerContract, Map<String, Object>, Object> factory = (c, a) -> new Service();
+        BiFunction<ContainerContract, Map<String, Object>, Object> factory =
+                (c, a) -> new Service();
         var data = new ContainerData(Map.of(), Map.of(), Map.of(Service.class, factory), Map.of());
         var container = new Container();
 
@@ -112,11 +114,13 @@ final class ContainerTest {
     void getWithArgumentsOverloadPassesArguments() {
         var container = new Container();
         var received = new HashMap<String, Object>();
-        container.bind(Service.class, (c, args) -> {
-            received.putAll(args);
+        container.bind(
+                Service.class,
+                (c, args) -> {
+                    received.putAll(args);
 
-            return new Service();
-        });
+                    return new Service();
+                });
 
         assertNotNull(container.get(Service.class, Map.of("value", "passed")));
         assertEquals("passed", received.get("value"));
@@ -204,9 +208,7 @@ final class ContainerTest {
 
         assertThrows(
                 ContainerInvalidReferenceException.class,
-                () ->
-                        container.get(
-                                Service.class, Map.of(), InvalidReferenceMode.THROW_EXCEPTION));
+                () -> container.get(Service.class, Map.of(), InvalidReferenceMode.THROW_EXCEPTION));
     }
 
     // --- deferred publishing ------------------------------------------------
@@ -216,8 +218,7 @@ final class ContainerTest {
         var container = new Container();
         // A deferred callback that binds the service on first access.
         container.bind(Greeter.class, (c, a) -> new EnglishGreeter()); // unrelated existing binding
-        container
-                .getData(); // no-op touch
+        container.getData(); // no-op touch
         // register a callback directly via a provider-like publish
         container.bindSingleton(Service.class, (c, a) -> new Service());
 

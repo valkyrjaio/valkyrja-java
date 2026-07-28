@@ -26,7 +26,6 @@ import io.valkyrja.http.routing.throwable.exception.HttpRoutingNoRequestStructEx
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingNoResponseStructException;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
 import io.valkyrja.http.struct.response.contract.ResponseStructContract;
-import java.util.List;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
 
@@ -72,7 +71,9 @@ final class RouteTest {
 
     @Test
     void requestMethodMutations() {
-        var route = route().withRequestMethods(RequestMethod.POST).withAddedRequestMethods(RequestMethod.PUT);
+        var route =
+                route().withRequestMethods(RequestMethod.POST)
+                        .withAddedRequestMethods(RequestMethod.PUT);
 
         assertTrue(route.hasRequestMethod(RequestMethod.POST));
         assertTrue(route.hasRequestMethod(RequestMethod.PUT));
@@ -137,5 +138,4 @@ final class RouteTest {
         assertTrue(updated.hasRequestMethod(RequestMethod.GET));
         assertTrue(updated.hasRequestMethod(RequestMethod.POST));
     }
-
 }

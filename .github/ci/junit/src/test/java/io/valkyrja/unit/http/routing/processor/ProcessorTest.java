@@ -53,11 +53,7 @@ final class ProcessorTest {
     void buildsRegexForDynamicRouteWithCapturingParameter() {
         var dynamic =
                 new DynamicRoute(
-                        "/{id}",
-                        "show",
-                        "",
-                        List.of(new Parameter("id", "\\d+")),
-                        HANDLER);
+                        "/{id}", "show", "", List.of(new Parameter("id", "\\d+")), HANDLER);
 
         var processed = (DynamicRouteContract) processor.route(dynamic);
 
@@ -92,7 +88,8 @@ final class ProcessorTest {
     @Test
     void dynamicRouteWithoutPlaceholderIsReturnedUnchanged() {
         var dynamic =
-                new DynamicRoute("/static", "static", "", List.of(new Parameter("x", "\\d+")), HANDLER);
+                new DynamicRoute(
+                        "/static", "static", "", List.of(new Parameter("x", "\\d+")), HANDLER);
 
         assertEquals("/static", processor.route(dynamic).getPath());
     }
@@ -154,36 +151,73 @@ final class ProcessorTest {
     void capturingParameterTypeProducesExpectedRegex(String label, String typeRegex) {
         String regex = processRegex("/{value}", List.of(new Parameter("value", typeRegex)));
 
-        assertEquals(
-                Regex.START + Regex.PATH + "(?<value>" + typeRegex + ")" + Regex.END, regex);
+        assertEquals(Regex.START + Regex.PATH + "(?<value>" + typeRegex + ")" + Regex.END, regex);
     }
 
     @Test
     void parameterAtStartMiddleAndEndProduceExpectedRegex() {
         assertEquals(
-                Regex.START + Regex.PATH + "(?<name>" + Regex.ALPHA + ")" + Regex.PATH + "edit"
+                Regex.START
+                        + Regex.PATH
+                        + "(?<name>"
+                        + Regex.ALPHA
+                        + ")"
+                        + Regex.PATH
+                        + "edit"
                         + Regex.END,
                 processRegex("/{name}/edit", List.of(new Parameter("name", Regex.ALPHA))));
         assertEquals(
-                Regex.START + Regex.PATH + "user" + Regex.PATH + "(?<id>" + Regex.NUM + ")"
-                        + Regex.PATH + "edit" + Regex.END,
+                Regex.START
+                        + Regex.PATH
+                        + "user"
+                        + Regex.PATH
+                        + "(?<id>"
+                        + Regex.NUM
+                        + ")"
+                        + Regex.PATH
+                        + "edit"
+                        + Regex.END,
                 processRegex("/user/{id}/edit", List.of(new Parameter("id", Regex.NUM))));
         assertEquals(
-                Regex.START + Regex.PATH + "parameters" + Regex.PATH + "(?<name>" + Regex.ALPHA
-                        + ")" + Regex.END,
+                Regex.START
+                        + Regex.PATH
+                        + "parameters"
+                        + Regex.PATH
+                        + "(?<name>"
+                        + Regex.ALPHA
+                        + ")"
+                        + Regex.END,
                 processRegex("/parameters/{name}", List.of(new Parameter("name", Regex.ALPHA))));
     }
 
     @Test
     void multipleAndAdjacentParametersProduceExpectedRegex() {
         assertEquals(
-                Regex.START + Regex.PATH + "a" + Regex.PATH + "(?<x>" + Regex.NUM + ")" + Regex.PATH
-                        + "b" + Regex.PATH + "(?<y>" + Regex.ALPHA + ")" + Regex.END,
+                Regex.START
+                        + Regex.PATH
+                        + "a"
+                        + Regex.PATH
+                        + "(?<x>"
+                        + Regex.NUM
+                        + ")"
+                        + Regex.PATH
+                        + "b"
+                        + Regex.PATH
+                        + "(?<y>"
+                        + Regex.ALPHA
+                        + ")"
+                        + Regex.END,
                 processRegex(
                         "/a/{x}/b/{y}",
                         List.of(new Parameter("x", Regex.NUM), new Parameter("y", Regex.ALPHA))));
         assertEquals(
-                Regex.START + Regex.PATH + "(?<x>" + Regex.NUM + ")(?<y>" + Regex.ALPHA + ")"
+                Regex.START
+                        + Regex.PATH
+                        + "(?<x>"
+                        + Regex.NUM
+                        + ")(?<y>"
+                        + Regex.ALPHA
+                        + ")"
                         + Regex.END,
                 processRegex(
                         "/{x}{y}",
@@ -194,7 +228,11 @@ final class ProcessorTest {
     void modifierCombinationsProduceExpectedRegex() {
         // single optional
         assertEquals(
-                Regex.START + Regex.START_OPTIONAL_CAPTURE_GROUP + "(?<opt>" + Regex.ALPHA + ")?"
+                Regex.START
+                        + Regex.START_OPTIONAL_CAPTURE_GROUP
+                        + "(?<opt>"
+                        + Regex.ALPHA
+                        + ")?"
                         + Regex.END,
                 processRegex("/{opt?}", List.of(optional("opt", Regex.ALPHA))));
         // non-capture
@@ -203,22 +241,40 @@ final class ProcessorTest {
                 processRegex("/{nc}", List.of(nonCapture("nc", Regex.ALPHA))));
         // optional non-capture
         assertEquals(
-                Regex.START + Regex.START_OPTIONAL_CAPTURE_GROUP + "(?:" + Regex.ALPHA + ")?"
+                Regex.START
+                        + Regex.START_OPTIONAL_CAPTURE_GROUP
+                        + "(?:"
+                        + Regex.ALPHA
+                        + ")?"
                         + Regex.END,
                 processRegex("/{onc?}", List.of(optionalNonCapture("onc", Regex.ALPHA))));
         // multiple optionals
         assertEquals(
                 Regex.START
-                        + Regex.START_OPTIONAL_CAPTURE_GROUP + "(?<a>" + Regex.ALPHA + ")?"
-                        + Regex.START_OPTIONAL_CAPTURE_GROUP + "(?<b>" + Regex.ALPHA + ")?"
+                        + Regex.START_OPTIONAL_CAPTURE_GROUP
+                        + "(?<a>"
+                        + Regex.ALPHA
+                        + ")?"
+                        + Regex.START_OPTIONAL_CAPTURE_GROUP
+                        + "(?<b>"
+                        + Regex.ALPHA
+                        + ")?"
                         + Regex.END,
                 processRegex(
                         "/{a?}/{b?}",
                         List.of(optional("a", Regex.ALPHA), optional("b", Regex.ALPHA))));
         // mixed capture / non-capture
         assertEquals(
-                Regex.START + Regex.PATH + "(?<cap>" + Regex.ALPHA + ")" + Regex.PATH + "(?:"
-                        + Regex.NUM + ")" + Regex.END,
+                Regex.START
+                        + Regex.PATH
+                        + "(?<cap>"
+                        + Regex.ALPHA
+                        + ")"
+                        + Regex.PATH
+                        + "(?:"
+                        + Regex.NUM
+                        + ")"
+                        + Regex.END,
                 processRegex(
                         "/{cap}/{nc}",
                         List.of(new Parameter("cap", Regex.ALPHA), nonCapture("nc", Regex.NUM))));
@@ -230,7 +286,11 @@ final class ProcessorTest {
         String regex = processRegex("/{opt?}", List.of(new Parameter("opt", Regex.ALPHA)));
 
         assertEquals(
-                Regex.START + Regex.START_OPTIONAL_CAPTURE_GROUP + "(?<opt>" + Regex.ALPHA + ")?"
+                Regex.START
+                        + Regex.START_OPTIONAL_CAPTURE_GROUP
+                        + "(?<opt>"
+                        + Regex.ALPHA
+                        + ")?"
                         + Regex.END,
                 regex);
     }

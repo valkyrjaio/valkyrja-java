@@ -30,7 +30,8 @@ final class EventDataTest {
 
     @Test
     void retainsProvidedData() {
-        Map<Class<?>, Map<String, String>> events = Map.of(String.class, Map.of("listener", "listener"));
+        Map<Class<?>, Map<String, String>> events =
+                Map.of(String.class, Map.of("listener", "listener"));
         Map<String, ListenerContract> listeners =
                 Map.of("listener", new Listener(String.class, "listener", (c, a) -> null));
 

@@ -83,14 +83,12 @@ final class StreamFactoryTest {
 
     @Test
     void verifyResults() {
-        assertThrows(
-                HttpStreamStreamSeekException.class, () -> StreamFactory.verifySeekResult(1));
+        assertThrows(HttpStreamStreamSeekException.class, () -> StreamFactory.verifySeekResult(1));
         assertThrows(
                 HttpStreamStreamWriteException.class, () -> StreamFactory.verifyWriteResult(-1));
         assertThrows(
                 HttpStreamStreamReadException.class, () -> StreamFactory.verifyReadResult(null));
-        assertThrows(
-                HttpStreamStreamTellException.class, () -> StreamFactory.verifyTellResult(-1));
+        assertThrows(HttpStreamStreamTellException.class, () -> StreamFactory.verifyTellResult(-1));
         assertDoesNotThrow(() -> StreamFactory.verifySeekResult(0));
         assertDoesNotThrow(() -> StreamFactory.verifyReadResult("ok"));
         assertDoesNotThrow(() -> StreamFactory.verifyWriteResult(5));
@@ -128,7 +126,7 @@ final class StreamFactoryTest {
                         new Stream(
                                 io.valkyrja.http.message.stream.enum_.PhpWrapper.memory,
                                 io.valkyrja.http.message.stream.enum_.Mode.WRITE,
-                                io.valkyrja.http.message.stream.enum_.ModeTranslation.BINARY_SAFE)));
+                                io.valkyrja.http.message.stream.enum_.ModeTranslation
+                                        .BINARY_SAFE)));
     }
-
 }

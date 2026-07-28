@@ -9,8 +9,8 @@
 
 package io.valkyrja.fixtures.http.routing;
 
-import io.valkyrja.fixtures.http.middleware.RequestReceivedOnlyHttpMiddleware;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.fixtures.http.middleware.RequestReceivedOnlyHttpMiddleware;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.attribute.Route;

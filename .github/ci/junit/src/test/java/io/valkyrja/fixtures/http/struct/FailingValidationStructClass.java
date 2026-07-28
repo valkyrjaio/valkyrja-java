@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A struct that declares rules but whose {@code validateAllRules} fails — exercises the
- * {@code rules.isEmpty() || validateAllRules(rules)} false-of-second-operand branch.
+ * A struct that declares rules but whose {@code validateAllRules} fails — exercises the {@code
+ * rules.isEmpty() || validateAllRules(rules)} false-of-second-operand branch.
  */
 public final class FailingValidationStructClass extends ParsedBodyRequestStruct {
 

@@ -24,7 +24,8 @@ final class HttpRedirectResponseExceptionTest {
     @Test
     void buildsRedirectResponseWhenNoneProvided() {
         var exception =
-                new HttpRedirectResponseException(new Uri("/target"), null, new HeaderCollection(), null);
+                new HttpRedirectResponseException(
+                        new Uri("/target"), null, new HeaderCollection(), null);
 
         assertEquals(StatusCode.FOUND, exception.getStatusCode());
         assertEquals("/target", exception.getUri().getPath());
@@ -43,7 +44,8 @@ final class HttpRedirectResponseExceptionTest {
 
     @Test
     void defaultsUriToRootWhenNull() {
-        var exception = new HttpRedirectResponseException(null, StatusCode.MOVED_PERMANENTLY, null, null);
+        var exception =
+                new HttpRedirectResponseException(null, StatusCode.MOVED_PERMANENTLY, null, null);
 
         assertEquals("/", exception.getUri().getPath());
         assertEquals(StatusCode.MOVED_PERMANENTLY, exception.getStatusCode());

@@ -9,14 +9,12 @@
 
 package io.valkyrja.unit.http.middleware.handler;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 
-import io.valkyrja.fixtures.http.middleware.PassThroughHttpMiddleware;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.fixtures.http.middleware.PassThroughHttpMiddleware;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
-import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.handler.RequestReceivedHandler;
 import org.junit.jupiter.api.Test;
 
@@ -35,8 +33,7 @@ final class RequestReceivedHandlerTest {
     @Test
     void runsMiddlewareChain() {
         var container = new Container();
-        container.setSingleton(
-                PassThroughHttpMiddleware.class, new PassThroughHttpMiddleware());
+        container.setSingleton(PassThroughHttpMiddleware.class, new PassThroughHttpMiddleware());
         var request = mock(ServerRequestContract.class);
 
         var result =

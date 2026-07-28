@@ -11,14 +11,14 @@ package io.valkyrja.fixtures.cli.middleware;
 
 import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.InputReceivedMiddlewareContract;
+import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.cli.middleware.contract.ThrowableCaughtMiddlewareContract;
-import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
+import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
@@ -70,7 +70,8 @@ public final class PassThroughMiddleware
     }
 
     @Override
-    public void processExiting(InputContract input, OutputContract output, ProcessExitingHandlerContract handler) {
+    public void processExiting(
+            InputContract input, OutputContract output, ProcessExitingHandlerContract handler) {
         handler.processExiting(input, output);
     }
 }

@@ -110,8 +110,7 @@ final class RouteCollectionTest {
     @Test
     void anyMethodRouteIsRegisteredForAllMethods() {
         var collection = new RouteCollection();
-        collection.add(
-                new Route("/wild", "wild", HANDLER).withRequestMethods(RequestMethod.ANY));
+        collection.add(new Route("/wild", "wild", HANDLER).withRequestMethods(RequestMethod.ANY));
 
         assertTrue(collection.hasPath("/wild", RequestMethod.POST));
         assertTrue(collection.hasPath("/wild", RequestMethod.DELETE));
@@ -148,5 +147,4 @@ final class RouteCollectionTest {
     void hasRegexFalseWhenMethodHasNoRegexes() {
         assertFalse(collection.hasRegex("/users/(\\d+)", RequestMethod.POST));
     }
-
 }

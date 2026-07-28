@@ -10,19 +10,19 @@
 package io.valkyrja.unit.grpc.routing.collector;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.fixtures.grpc.GreeterController;
+import io.valkyrja.fixtures.grpc.NoDefaultConstructorController;
 import io.valkyrja.grpc.message.enum_.CancellationReason;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.collector.AttributeRouteCollector;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
-import io.valkyrja.fixtures.grpc.NoDefaultConstructorController;
-import io.valkyrja.fixtures.grpc.GreeterController;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -75,7 +75,8 @@ final class AttributeRouteCollectorTest {
     void dispatchesEachMiddlewareToItsStage() {
         RouteContract route = collect(GreeterController.class).get("/pkg.Greeter/StreamHellos");
         assertEquals(
-                List.of(GreeterController.MatchedMiddleware.class), route.getRouteMatchedMiddleware());
+                List.of(GreeterController.MatchedMiddleware.class),
+                route.getRouteMatchedMiddleware());
         assertEquals(
                 List.of(GreeterController.DispatchedMiddleware.class),
                 route.getRouteDispatchedMiddleware());
@@ -117,8 +118,7 @@ final class AttributeRouteCollectorTest {
         RouteContract route = collect(GreeterController.class).get("/pkg.Greeter/Boom");
         Container container = new Container();
         // The handler's IllegalStateException must not be buried under a reflection wrapper.
-        assertThrows(
-                IllegalStateException.class, () -> route.getHandler().apply(container, route));
+        assertThrows(IllegalStateException.class, () -> route.getHandler().apply(container, route));
     }
 
     @Test
@@ -129,8 +129,7 @@ final class AttributeRouteCollectorTest {
         // of CANCELLED, silently defeating cooperative cancellation.
         CancelledException thrown =
                 assertThrows(
-                        CancelledException.class,
-                        () -> route.getHandler().apply(container, route));
+                        CancelledException.class, () -> route.getHandler().apply(container, route));
         assertEquals(CancellationReason.DEADLINE_EXCEEDED, thrown.getReason());
     }
 
@@ -164,8 +163,7 @@ final class AttributeRouteCollectorTest {
 
     @Test
     void reflectiveHandlerWrapsInstantiationFailure() {
-        RouteContract route =
-                collect(NoDefaultConstructorController.class).get("/pkg.NoCtor/Ping");
+        RouteContract route = collect(NoDefaultConstructorController.class).get("/pkg.NoCtor/Ping");
         Container container = new Container();
         assertThrows(RuntimeException.class, () -> route.getHandler().apply(container, route));
     }

@@ -20,7 +20,8 @@ import org.junit.jupiter.api.Test;
 
 final class HttpApplicationComponentProviderTest {
 
-    private final HttpApplicationComponentProvider provider = new HttpApplicationComponentProvider();
+    private final HttpApplicationComponentProvider provider =
+            new HttpApplicationComponentProvider();
 
     @Test
     void componentProvidersIncludeApplicationAndHttpStack() {

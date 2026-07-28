@@ -30,10 +30,10 @@ import org.junit.jupiter.api.Timeout;
  * Smoke test for the {@link NettyHttp} adapter over a real Netty pipeline.
  *
  * <p>Drives the adapter's own {@link NettyHttp#server} — the exact pipeline the blocking {@code
- * run(...)} builds — on an ephemeral port, then confirms a full round trip: the adapter marshals the
- * incoming request (captured through the probe) and emits the framework response back through the
- * channel (the distinctive status and body are read off the socket). Closing the returned channel
- * shuts the event loops down.
+ * run(...)} builds — on an ephemeral port, then confirms a full round trip: the adapter marshals
+ * the incoming request (captured through the probe) and emits the framework response back through
+ * the channel (the distinctive status and body are read off the socket). Closing the returned
+ * channel shuts the event loops down.
  */
 @Timeout(20)
 final class NettyHttpSmokeTest {

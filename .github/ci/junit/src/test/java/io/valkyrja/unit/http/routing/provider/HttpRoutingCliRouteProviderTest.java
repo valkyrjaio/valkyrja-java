@@ -19,7 +19,6 @@ import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.routing.cli.command.ListCommand;
-
 import io.valkyrja.http.routing.provider.HttpRoutingCliRouteProvider;
 import org.junit.jupiter.api.Test;
 

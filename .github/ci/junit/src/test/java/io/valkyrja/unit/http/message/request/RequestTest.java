@@ -14,12 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.http.message.enum_.RequestMethod;
-import io.valkyrja.http.message.uri.enum_.Scheme;
 import io.valkyrja.http.message.header.collection.HeaderCollection;
 import io.valkyrja.http.message.request.Request;
 import io.valkyrja.http.message.request.throwable.exception.HttpRequestInvalidRequestTargetException;
 import io.valkyrja.http.message.stream.Stream;
 import io.valkyrja.http.message.uri.Uri;
+import io.valkyrja.http.message.uri.enum_.Scheme;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link Request}. */
@@ -100,13 +100,17 @@ final class RequestTest {
                                         io.valkyrja.http.message.constant.HeaderName.HOST,
                                         "keep.com")));
 
-        var result = request.withUri(io.valkyrja.http.message.uri.factory.UriFactory.fromString("https://other.com/"), true);
+        var result =
+                request.withUri(
+                        io.valkyrja.http.message.uri.factory.UriFactory.fromString(
+                                "https://other.com/"),
+                        true);
 
         assertEquals(
                 "keep.com",
-                result.getHeaders().getHeaderLine(io.valkyrja.http.message.constant.HeaderName.HOST));
+                result.getHeaders()
+                        .getHeaderLine(io.valkyrja.http.message.constant.HeaderName.HOST));
     }
-
 
     @Test
     void withUriPreserveHostWithNoExistingHeaderAddsHost() {
@@ -117,5 +121,4 @@ final class RequestTest {
 
         assertEquals("new-host.com", updated.getHeaders().getHeaderLine("host"));
     }
-
 }

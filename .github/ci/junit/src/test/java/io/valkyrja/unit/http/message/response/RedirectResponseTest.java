@@ -34,7 +34,8 @@ final class RedirectResponseTest {
 
     private static ServerRequestContract requestWithReferer(String referer) {
         var request = mock(ServerRequestContract.class);
-        when(request.getUri()).thenReturn(new Uri("https://example.com/page".replace("https://", "")));
+        when(request.getUri())
+                .thenReturn(new Uri("https://example.com/page".replace("https://", "")));
         var headers = mock(HeaderCollectionContract.class);
         when(headers.getHeaderLine("Referer")).thenReturn(referer);
         when(request.getHeaders()).thenReturn(headers);
@@ -59,8 +60,7 @@ final class RedirectResponseTest {
 
     @Test
     void emptyUriProducesRootLocationHeader() {
-        var response =
-                new RedirectResponse(new Uri(), StatusCode.FOUND, new HeaderCollection());
+        var response = new RedirectResponse(new Uri(), StatusCode.FOUND, new HeaderCollection());
 
         assertTrue(response.getHeaders().getHeaderLine("location").contains("/"));
     }
@@ -114,21 +114,24 @@ final class RedirectResponseTest {
                 .thenReturn(
                         new io.valkyrja.http.message.uri.Uri(
                                 io.valkyrja.http.message.uri.enum_.Scheme.HTTPS,
-                                "", "", "example.com", 0, "/", "", ""));
+                                "",
+                                "",
+                                "example.com",
+                                0,
+                                "/",
+                                "",
+                                ""));
         var redirect = new RedirectResponse();
 
         when(headers.getHeaderLine("Referer")).thenReturn("");
         assertTrue(redirect.back(request).getHeaders().getHeaderLine("Location").endsWith("/"));
 
         when(headers.getHeaderLine("Referer")).thenReturn("https://example.com/page");
-        assertTrue(
-                redirect.back(request).getHeaders().getHeaderLine("Location").contains("/page"));
+        assertTrue(redirect.back(request).getHeaders().getHeaderLine("Location").contains("/page"));
 
         when(headers.getHeaderLine("Referer")).thenReturn("https://evil.com/page");
-        assertFalse(
-                redirect.back(request).getHeaders().getHeaderLine("Location").contains("evil"));
+        assertFalse(redirect.back(request).getHeaders().getHeaderLine("Location").contains("evil"));
     }
-
 
     @Test
     void backTreatsNullRefererAsRoot() {
@@ -139,7 +142,13 @@ final class RedirectResponseTest {
                 .thenReturn(
                         new io.valkyrja.http.message.uri.Uri(
                                 io.valkyrja.http.message.uri.enum_.Scheme.HTTPS,
-                                "", "", "example.com", 0, "/", "", ""));
+                                "",
+                                "",
+                                "example.com",
+                                0,
+                                "/",
+                                "",
+                                ""));
         when(headers.getHeaderLine("Referer")).thenReturn(null);
 
         assertTrue(
@@ -149,5 +158,4 @@ final class RedirectResponseTest {
                         .getHeaderLine("Location")
                         .endsWith("/"));
     }
-
 }

@@ -11,6 +11,7 @@ package io.valkyrja.unit.http.message.uri.enum_;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+
 import io.valkyrja.http.message.uri.enum_.Scheme;
 import org.junit.jupiter.api.Test;
 

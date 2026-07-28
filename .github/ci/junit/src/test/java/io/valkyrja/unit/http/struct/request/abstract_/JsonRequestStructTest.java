@@ -16,8 +16,8 @@ import io.valkyrja.fixtures.http.struct.JsonStructClass;
 import io.valkyrja.http.message.param.ParsedJsonParamCollection;
 import io.valkyrja.http.message.request.JsonServerRequest;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
-import java.util.Map;
 import io.valkyrja.http.struct.request.abstract_.JsonRequestStruct;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link JsonRequestStruct}. */

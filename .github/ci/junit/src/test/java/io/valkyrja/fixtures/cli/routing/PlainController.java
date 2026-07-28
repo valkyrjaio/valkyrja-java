@@ -9,9 +9,9 @@
 
 package io.valkyrja.fixtures.cli.routing;
 
-import io.valkyrja.fixtures.cli.middleware.InputReceivedOnlyMiddleware;
 import io.valkyrja.cli.routing.attribute.Route;
 import io.valkyrja.cli.routing.attribute.route.Middleware;
+import io.valkyrja.fixtures.cli.middleware.InputReceivedOnlyMiddleware;
 
 /** A cli controller with no class-level {@code @Name} and an unrelated middleware. */
 public final class PlainController {

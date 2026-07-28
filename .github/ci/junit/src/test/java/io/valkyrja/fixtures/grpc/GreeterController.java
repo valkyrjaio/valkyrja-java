@@ -14,16 +14,16 @@ import io.valkyrja.grpc.message.call.contract.ServiceCallContract;
 import io.valkyrja.grpc.message.enum_.CancellationReason;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
+import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.grpc.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.grpc.middleware.data.RouteMatchedResult;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.attribute.Method;
 import io.valkyrja.grpc.routing.attribute.Middleware;
@@ -102,7 +102,9 @@ public class GreeterController {
         throw new CancelledException("cancelled by test", CancellationReason.DEADLINE_EXCEEDED);
     }
 
-    /** Throws an {@link Error}; the collector must rethrow it unwrapped, not as a RuntimeException. */
+    /**
+     * Throws an {@link Error}; the collector must rethrow it unwrapped, not as a RuntimeException.
+     */
     @Method(name = "ThrowsError")
     public ServiceResponseContract throwsError(ContainerContract container, RouteContract route) {
         throw new AssertionError("error from handler");
@@ -131,7 +133,9 @@ public class GreeterController {
     public static final class MatchedMiddleware implements RouteMatchedMiddlewareContract {
         @Override
         public RouteMatchedResult routeMatched(
-                ServiceCallContract call, RouteContract route, RouteMatchedHandlerContract handler) {
+                ServiceCallContract call,
+                RouteContract route,
+                RouteMatchedHandlerContract handler) {
             return handler.routeMatched(call, route);
         }
     }
@@ -160,7 +164,9 @@ public class GreeterController {
 
     public static final class SendingMiddleware implements SendingResponseMiddlewareContract {
 
-        /** Counts sending-response invocations so tests can assert the stage ran. Reset per test. */
+        /**
+         * Counts sending-response invocations so tests can assert the stage ran. Reset per test.
+         */
         public static final AtomicInteger calls = new AtomicInteger();
 
         @Override

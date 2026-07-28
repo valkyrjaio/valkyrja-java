@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.fixtures.grpc.GreeterController;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.grpc.routing.collector.AttributeRouteCollector;
@@ -25,7 +26,6 @@ import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.routing.provider.GrpcRoutingServiceProvider;
 import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
-import io.valkyrja.fixtures.grpc.GreeterController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,8 @@ final class GrpcRoutingServiceProviderTest {
         return container;
     }
 
-    private GrpcRouteProviderContract provider(List<Class<?>> controllers, List<RouteContract> routes) {
+    private GrpcRouteProviderContract provider(
+            List<Class<?>> controllers, List<RouteContract> routes) {
         return new GrpcRouteProviderContract() {
             @Override
             public List<Class<?>> getControllerClasses() {
@@ -63,8 +64,7 @@ final class GrpcRoutingServiceProviderTest {
 
         GrpcRoutingServiceProvider.publishRouteCollection(container);
 
-        RouteCollectionContract collection =
-                container.getSingleton(RouteCollectionContract.class);
+        RouteCollectionContract collection = container.getSingleton(RouteCollectionContract.class);
         assertTrue(collection.has("/pkg.Greeter/SayHello"));
     }
 
@@ -75,8 +75,7 @@ final class GrpcRoutingServiceProviderTest {
 
         GrpcRoutingServiceProvider.publishRouteCollection(container);
 
-        RouteCollectionContract collection =
-                container.getSingleton(RouteCollectionContract.class);
+        RouteCollectionContract collection = container.getSingleton(RouteCollectionContract.class);
         assertTrue(collection.all().isEmpty());
     }
 
@@ -87,8 +86,7 @@ final class GrpcRoutingServiceProviderTest {
 
         GrpcRoutingServiceProvider.publishRouteCollection(container);
 
-        RouteCollectionContract collection =
-                container.getSingleton(RouteCollectionContract.class);
+        RouteCollectionContract collection = container.getSingleton(RouteCollectionContract.class);
         assertEquals(1, collection.all().size());
         assertTrue(collection.has("/pkg.A/M"));
     }

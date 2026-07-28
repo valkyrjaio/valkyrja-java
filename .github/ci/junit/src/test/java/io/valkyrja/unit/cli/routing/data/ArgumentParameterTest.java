@@ -71,9 +71,7 @@ final class ArgumentParameterTest {
 
     @Test
     void areValuesValidForRequiredAndDefault() {
-        var required =
-                new ArgumentParameter("n", "d")
-                        .withMode(ArgumentMode.REQUIRED);
+        var required = new ArgumentParameter("n", "d").withMode(ArgumentMode.REQUIRED);
         assertFalse(((ArgumentParameter) required).areValuesValid());
 
         var requiredWithArg = ((ArgumentParameter) required).withArguments(new Argument("a"));
@@ -97,9 +95,7 @@ final class ArgumentParameterTest {
         assertSame(valid, valid.validateValues());
 
         var invalid =
-                (ArgumentParameter)
-                        new ArgumentParameter("n", "d").withMode(ArgumentMode.REQUIRED);
-        assertThrows(
-                CliRoutingArgumentValuesValidationException.class, invalid::validateValues);
+                (ArgumentParameter) new ArgumentParameter("n", "d").withMode(ArgumentMode.REQUIRED);
+        assertThrows(CliRoutingArgumentValuesValidationException.class, invalid::validateValues);
     }
 }

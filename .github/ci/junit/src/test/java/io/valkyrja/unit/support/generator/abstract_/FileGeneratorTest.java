@@ -24,7 +24,8 @@ import org.junit.jupiter.api.io.TempDir;
 final class FileGeneratorTest {
 
     @Test
-    void generateFileWritesContentsAndCreatesParentDirectories(@TempDir Path dir) throws IOException {
+    void generateFileWritesContentsAndCreatesParentDirectories(@TempDir Path dir)
+            throws IOException {
         Path target = dir.resolve("nested/output.txt");
 
         new FileGeneratorClass(target.toString()).generateFile();

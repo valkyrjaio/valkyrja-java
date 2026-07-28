@@ -39,7 +39,8 @@ final class CookieFactoryTest {
         cookies.put("session", "abc");
         cookies.put("theme", "dark");
 
-        assertEquals("session=abc; theme=dark", CookieFactory.convertCookieArrayToHeaderString(cookies));
+        assertEquals(
+                "session=abc; theme=dark", CookieFactory.convertCookieArrayToHeaderString(cookies));
     }
 
     @Test

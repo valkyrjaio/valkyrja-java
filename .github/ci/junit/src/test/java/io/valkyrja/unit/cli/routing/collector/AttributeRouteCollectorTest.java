@@ -15,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import io.valkyrja.fixtures.cli.routing.AnnotatedController;
-import io.valkyrja.fixtures.cli.routing.CliRoutingCombinationsController;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.routing.collector.AttributeRouteCollector;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
@@ -25,6 +23,8 @@ import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.fixtures.cli.routing.AnnotatedController;
+import io.valkyrja.fixtures.cli.routing.CliRoutingCombinationsController;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -62,7 +62,8 @@ final class AttributeRouteCollectorTest {
 
         assertTrue(route.hasArgument("target"));
         assertTrue(route.hasOption("verbose"));
-        // PassThroughMiddleware implements all four contracts, so every middleware list is populated.
+        // PassThroughMiddleware implements all four contracts, so every middleware list is
+        // populated.
         assertEquals(1, route.getRouteMatchedMiddleware().size());
         assertEquals(1, route.getRouteDispatchedMiddleware().size());
         assertEquals(1, route.getThrowableCaughtMiddleware().size());
@@ -92,8 +93,7 @@ final class AttributeRouteCollectorTest {
         var route = routes.get("ctrl.fail");
         var container = mock(ContainerContract.class);
 
-        assertThrows(
-                RuntimeException.class, () -> route.getHandler().apply(container, route));
+        assertThrows(RuntimeException.class, () -> route.getHandler().apply(container, route));
     }
 
     @Test

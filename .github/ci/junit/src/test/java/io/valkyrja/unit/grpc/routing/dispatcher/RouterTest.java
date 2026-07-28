@@ -28,11 +28,11 @@ import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.middleware.data.RouteMatchedResult;
+import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.grpc.routing.collection.RouteCollection;
 import io.valkyrja.grpc.routing.data.Route;
@@ -78,10 +78,18 @@ final class RouterTest {
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                METHOD, new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                METHOD,
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
-    private Route route(java.util.function.BiFunction<ContainerContract, RouteContract, ServiceResponseContract> handler) {
+    private Route route(
+            java.util.function.BiFunction<ContainerContract, RouteContract, ServiceResponseContract>
+                    handler) {
         return new Route(METHOD, handler);
     }
 
@@ -122,7 +130,8 @@ final class RouterTest {
                             return ServiceResponse.ok();
                         });
         collection.add(route);
-        ServiceResponseContract shortCircuit = ServiceResponse.of(io.valkyrja.grpc.message.status.Status.permissionDenied(null));
+        ServiceResponseContract shortCircuit =
+                ServiceResponse.of(io.valkyrja.grpc.message.status.Status.permissionDenied(null));
 
         when(routeMatchedHandler.routeMatched(any(), any()))
                 .thenReturn(new RouteMatchedResult(route, shortCircuit));

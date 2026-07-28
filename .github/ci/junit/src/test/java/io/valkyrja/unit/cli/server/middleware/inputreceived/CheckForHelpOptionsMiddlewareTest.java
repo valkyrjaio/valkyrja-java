@@ -48,5 +48,4 @@ final class CheckForHelpOptionsMiddlewareTest {
                                 new Input().withOptions(new Option("help", OptionType.LONG)),
                                 handler));
     }
-
 }

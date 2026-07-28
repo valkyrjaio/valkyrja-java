@@ -38,8 +38,7 @@ final class ThrowableHandlerTest {
         var throwable = new java.lang.RuntimeException("boom");
 
         assertEquals(
-                ThrowableHandler.getTraceCode(throwable),
-                ThrowableHandler.getTraceCode(throwable));
+                ThrowableHandler.getTraceCode(throwable), ThrowableHandler.getTraceCode(throwable));
     }
 
     @Test

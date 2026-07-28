@@ -14,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.fixtures.event.EventClass;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.event.collection.ListenerCollection;
 import io.valkyrja.event.data.EventData;
 import io.valkyrja.event.data.Listener;
+import io.valkyrja.fixtures.event.EventClass;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -52,8 +52,11 @@ final class ListenerCollectionTest {
         assertEquals(
                 Map.of(EventClass.class, Map.of("listener", listener)),
                 collection.getEventsWithListeners());
-        assertEquals(Map.of("listener", listener), collection.getListenersForEvent(new EventClass()));
-        assertEquals(Map.of("listener", listener), collection.getListenersForEventById(EventClass.class));
+        assertEquals(
+                Map.of("listener", listener), collection.getListenersForEvent(new EventClass()));
+        assertEquals(
+                Map.of("listener", listener),
+                collection.getListenersForEventById(EventClass.class));
     }
 
     @Test
@@ -62,7 +65,9 @@ final class ListenerCollectionTest {
         var listener2 = listener("listener2");
         var data =
                 new EventData(
-                        Map.of(EventClass.class, Map.of("listener", "listener", "listener2", "listener2")),
+                        Map.of(
+                                EventClass.class,
+                                Map.of("listener", "listener", "listener2", "listener2")),
                         Map.of("listener", listener, "listener2", listener2));
 
         var collection = new ListenerCollection();
@@ -155,5 +160,4 @@ final class ListenerCollectionTest {
         // Listener id referenced by the event but absent from the listeners map → skipped.
         assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
     }
-
 }

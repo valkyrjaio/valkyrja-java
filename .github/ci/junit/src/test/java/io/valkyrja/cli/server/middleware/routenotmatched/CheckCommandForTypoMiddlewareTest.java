@@ -20,7 +20,6 @@ import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.cli.routing.collection.RouteCollection;
 import io.valkyrja.cli.routing.data.Route;
-import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -82,7 +81,8 @@ final class CheckCommandForTypoMiddlewareTest {
         var input = new io.valkyrja.cli.interaction.input.Input().withCommandName("lst");
         var output = new Output();
 
-        // matchedRoute stays null (no QuestionWriter selects), so the original output flows through.
+        // matchedRoute stays null (no QuestionWriter selects), so the original output flows
+        // through.
         var result = middleware().routeNotMatched(input, output, handler);
 
         // The offered question carries the callback lambda; invoke it to exercise that path.
@@ -147,5 +147,4 @@ final class CheckCommandForTypoMiddlewareTest {
 
         assertSame(output, middleware().routeNotMatched(input, output, handler));
     }
-
 }

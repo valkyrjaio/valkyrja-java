@@ -22,7 +22,8 @@ final class ResponseContractDefaultsTest {
     @Test
     void responseContractCreateIsUnsupported() {
         assertThrows(
-                UnsupportedOperationException.class, () -> ResponseContract.create("x", null, null));
+                UnsupportedOperationException.class,
+                () -> ResponseContract.create("x", null, null));
     }
 
     @Test

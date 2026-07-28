@@ -72,14 +72,21 @@ final class RouteDispatchedHandlerTest {
                 ServiceResponseContract response,
                 RouteContract route,
                 RouteDispatchedHandlerContract handler) {
-            ((CancellationToken) call.getCancellation()).cancel(CancellationReason.CLIENT_CANCELLED);
+            ((CancellationToken) call.getCancellation())
+                    .cancel(CancellationReason.CLIENT_CANCELLED);
             return response;
         }
     }
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     @SuppressWarnings("unchecked")
@@ -93,7 +100,8 @@ final class RouteDispatchedHandlerTest {
     void emptyChainReturnsResponseUnchanged() {
         RouteDispatchedHandler handler = new RouteDispatchedHandler(new Container());
         ServiceResponseContract response = ServiceResponse.ok();
-        assertSame(response, handler.routeDispatched(call(new CancellationToken()), response, ROUTE));
+        assertSame(
+                response, handler.routeDispatched(call(new CancellationToken()), response, ROUTE));
     }
 
     @Test
@@ -113,7 +121,8 @@ final class RouteDispatchedHandlerTest {
                 new RouteDispatchedHandler(containerWith(new Replace()), Replace.class);
         assertSame(
                 REPLACEMENT,
-                handler.routeDispatched(call(new CancellationToken()), ServiceResponse.ok(), ROUTE));
+                handler.routeDispatched(
+                        call(new CancellationToken()), ServiceResponse.ok(), ROUTE));
     }
 
     @Test

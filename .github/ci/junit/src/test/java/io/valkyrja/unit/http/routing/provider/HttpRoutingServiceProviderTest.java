@@ -22,11 +22,11 @@ import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.factory.ResponseFactory;
 import io.valkyrja.http.message.response.factory.contract.ResponseFactoryContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
@@ -36,13 +36,13 @@ import io.valkyrja.http.routing.data.Route;
 import io.valkyrja.http.routing.data.contract.HttpRoutingDataContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
+import io.valkyrja.http.routing.factory.contract.RoutingResponseFactoryContract;
 import io.valkyrja.http.routing.matcher.contract.MatcherContract;
 import io.valkyrja.http.routing.processor.Processor;
 import io.valkyrja.http.routing.processor.contract.ProcessorContract;
 import io.valkyrja.http.routing.provider.HttpRoutingServiceProvider;
-import io.valkyrja.http.routing.factory.contract.RoutingResponseFactoryContract;
-import io.valkyrja.http.routing.url.contract.UrlContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
+import io.valkyrja.http.routing.url.contract.UrlContract;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -87,7 +87,8 @@ final class HttpRoutingServiceProviderTest {
                 RouteDispatchedHandlerContract.class, mock(RouteDispatchedHandlerContract.class));
         container.setSingleton(
                 SendingResponseHandlerContract.class, mock(SendingResponseHandlerContract.class));
-        container.setSingleton(ResponseSentHandlerContract.class, mock(ResponseSentHandlerContract.class));
+        container.setSingleton(
+                ResponseSentHandlerContract.class, mock(ResponseSentHandlerContract.class));
         container.setSingleton(UrlContract.class, mock(UrlContract.class));
 
         HttpRoutingServiceProvider.publishRouter(container);

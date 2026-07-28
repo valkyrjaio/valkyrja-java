@@ -10,6 +10,7 @@
 package io.valkyrja.unit.cli.interaction.format;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import io.valkyrja.cli.interaction.enum_.Style;
 import io.valkyrja.cli.interaction.format.StyleFormat;
 import org.junit.jupiter.api.Test;

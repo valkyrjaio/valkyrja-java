@@ -65,8 +65,7 @@ final class VersionCommandTest {
         var output = command().run();
 
         assertTrue(
-                output.getMessages().stream()
-                        .anyMatch(m -> m.getText().contains("MyApp v1.2.3")));
+                output.getMessages().stream().anyMatch(m -> m.getText().contains("MyApp v1.2.3")));
     }
 
     @Test

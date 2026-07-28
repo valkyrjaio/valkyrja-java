@@ -111,10 +111,8 @@ final class HeaderTest {
     void offsetMutationsUnsupported() {
         var header = new Header("X-Test", "a");
 
-        assertThrows(
-                HttpHeaderUnsupportedOffsetSetException.class, () -> header.offsetSet(0, "x"));
-        assertThrows(
-                HttpHeaderUnsupportedOffsetUnsetException.class, () -> header.offsetUnset(0));
+        assertThrows(HttpHeaderUnsupportedOffsetSetException.class, () -> header.offsetSet(0, "x"));
+        assertThrows(HttpHeaderUnsupportedOffsetUnsetException.class, () -> header.offsetUnset(0));
     }
 
     @Test
@@ -126,7 +124,6 @@ final class HeaderTest {
     void headerLineSkipsEmptyValues() {
         assertEquals("a", new Header("x-test", "a", "").getHeaderLine());
     }
-
 
     @Test
     void iteratorValidityFlipsAtEnd() {
@@ -140,5 +137,4 @@ final class HeaderTest {
 
         assertEquals(2, count);
     }
-
 }

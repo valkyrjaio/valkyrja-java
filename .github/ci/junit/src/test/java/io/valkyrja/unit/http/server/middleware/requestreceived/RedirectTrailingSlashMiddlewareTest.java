@@ -16,16 +16,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
+import io.valkyrja.http.message.uri.Uri;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
 import io.valkyrja.http.server.middleware.requestreceived.RedirectTrailingSlashMiddleware;
-import io.valkyrja.http.message.uri.Uri;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link RedirectTrailingSlashMiddleware}. */
 final class RedirectTrailingSlashMiddlewareTest {
 
-    private final RedirectTrailingSlashMiddleware middleware = new RedirectTrailingSlashMiddleware();
+    private final RedirectTrailingSlashMiddleware middleware =
+            new RedirectTrailingSlashMiddleware();
 
     private static RequestReceivedHandlerContract passThroughHandler() {
         var handler = mock(RequestReceivedHandlerContract.class);

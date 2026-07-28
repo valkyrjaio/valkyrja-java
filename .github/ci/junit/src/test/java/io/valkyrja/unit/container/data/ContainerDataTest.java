@@ -8,11 +8,11 @@
  */
 
 package io.valkyrja.unit.container.data;
-import io.valkyrja.container.data.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.valkyrja.container.data.*;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import java.util.Map;
 import java.util.function.BiFunction;

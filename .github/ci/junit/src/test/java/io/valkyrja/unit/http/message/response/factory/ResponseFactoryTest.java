@@ -33,7 +33,8 @@ final class ResponseFactoryTest {
                 JsonResponseContract.class,
                 factory.createJsonResponse(Map.of("a", "b"), null, null));
         assertInstanceOf(
-                RedirectResponseContract.class, factory.createRedirectResponse("/here", null, null));
+                RedirectResponseContract.class,
+                factory.createRedirectResponse("/here", null, null));
     }
 
     @Test

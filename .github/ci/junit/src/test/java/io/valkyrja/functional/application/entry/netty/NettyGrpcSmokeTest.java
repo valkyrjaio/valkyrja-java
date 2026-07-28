@@ -24,8 +24,7 @@ import org.junit.jupiter.api.Timeout;
  *
  * <p>Drives the adapter's own {@link NettyGrpc#server} — the exact server the blocking {@code
  * run(...)} builds — on an ephemeral port, confirms it bound, then shuts it down. The full
- * request/response round trip is covered by {@code
- * functional/grpc/endtoend/GrpcNettyEndToEndTest}.
+ * request/response round trip is covered by {@code functional/grpc/endtoend/GrpcNettyEndToEndTest}.
  */
 @Timeout(20)
 final class NettyGrpcSmokeTest {

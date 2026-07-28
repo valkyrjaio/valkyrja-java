@@ -150,7 +150,11 @@ final class ServiceCallTest {
         MetadataContract metadata = new Metadata().with("k", "v");
         Deadline deadline = Deadline.fromTimeout(java.time.Duration.ofSeconds(1));
         CancellationToken token = new CancellationToken();
-        Peer peer = new Peer("1.2.3.4:5", AddressType.IPV4, io.valkyrja.grpc.message.peer.AuthContext.insecure());
+        Peer peer =
+                new Peer(
+                        "1.2.3.4:5",
+                        AddressType.IPV4,
+                        io.valkyrja.grpc.message.peer.AuthContext.insecure());
         List<Object> messages = List.of("a");
 
         ServiceCall call = new ServiceCall(METHOD, metadata, deadline, token, peer, messages, null);

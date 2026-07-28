@@ -59,7 +59,11 @@ final class JsonResponseTest {
         var jsonp = response().withCallback("myCallback");
 
         assertTrue(((JsonResponse) jsonp).getBody().toString().startsWith("/**/myCallback("));
-        assertTrue(((JsonResponse) jsonp).getHeaders().getHeaderLine("content-type").contains("javascript"));
+        assertTrue(
+                ((JsonResponse) jsonp)
+                        .getHeaders()
+                        .getHeaderLine("content-type")
+                        .contains("javascript"));
     }
 
     @Test
@@ -73,7 +77,11 @@ final class JsonResponseTest {
     void withoutCallbackRestoresJsonBody() {
         var restored = response().withCallback("cb").withoutCallback();
 
-        assertTrue(((JsonResponse) restored).getHeaders().getHeaderLine("content-type").contains("json"));
+        assertTrue(
+                ((JsonResponse) restored)
+                        .getHeaders()
+                        .getHeaderLine("content-type")
+                        .contains("json"));
     }
 
     @Test
@@ -95,7 +103,11 @@ final class JsonResponseTest {
         // Jackson fails on an empty bean (no serializable properties) by default.
         assertThrows(
                 RuntimeException.class,
-                () -> new JsonResponse(Map.of("bad", new Object()), StatusCode.OK, new HeaderCollection()));
+                () ->
+                        new JsonResponse(
+                                Map.of("bad", new Object()),
+                                StatusCode.OK,
+                                new HeaderCollection()));
     }
 
     @Test
@@ -106,5 +118,4 @@ final class JsonResponseTest {
 
         assertEquals(StatusCode.ACCEPTED, response.getStatusCode());
     }
-
 }

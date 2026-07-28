@@ -18,9 +18,11 @@ import io.valkyrja.application.data.GrpcConfig;
 import io.valkyrja.application.entry.abstract_.WorkerGrpc;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.data.ContainerData;
+import io.valkyrja.fixtures.grpc.GreeterComponentProvider;
+import io.valkyrja.fixtures.grpc.GreeterController;
 import io.valkyrja.grpc.message.call.ServiceCall;
-import io.valkyrja.grpc.message.deadline.Deadline;
 import io.valkyrja.grpc.message.cancellation.CancellationToken;
+import io.valkyrja.grpc.message.deadline.Deadline;
 import io.valkyrja.grpc.message.enum_.StatusCode;
 import io.valkyrja.grpc.message.metadata.Metadata;
 import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
@@ -28,8 +30,6 @@ import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.message.stream.InboundMessageStream;
 import io.valkyrja.grpc.message.stream.contract.OutboundStreamContract;
-import io.valkyrja.fixtures.grpc.GreeterComponentProvider;
-import io.valkyrja.fixtures.grpc.GreeterController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -128,7 +128,9 @@ final class WorkerGrpcTest {
         var childApp = WorkerGrpc.getChildApplication(app, child);
         WorkerGrpc.bootstrapChildContainer(childApp, child);
 
-        assertNotNull(child.getSingleton(io.valkyrja.grpc.server.handler.contract.ServiceHandlerContract.class));
+        assertNotNull(
+                child.getSingleton(
+                        io.valkyrja.grpc.server.handler.contract.ServiceHandlerContract.class));
     }
 
     @Test
@@ -144,7 +146,8 @@ final class WorkerGrpcTest {
         inbound.complete();
 
         RecordingStream outbound = new RecordingStream();
-        WorkerGrpc.dispatchStreaming(app, data, streamingCall("/pkg.Greeter/Echo", inbound), outbound);
+        WorkerGrpc.dispatchStreaming(
+                app, data, streamingCall("/pkg.Greeter/Echo", inbound), outbound);
 
         assertEquals(List.of("a", "b"), outbound.messages);
         assertTrue(outbound.headersSent);
@@ -169,7 +172,8 @@ final class WorkerGrpcTest {
         WorkerGrpc.dispatchStreaming(
                 app, data, streamingCall("/pkg.Greeter/StreamHellos", inbound), outbound);
 
-        // Nothing emitted, but the stream still opens (headers) and closes, and each stage fires once.
+        // Nothing emitted, but the stream still opens (headers) and closes, and each stage fires
+        // once.
         assertTrue(outbound.messages.isEmpty());
         assertTrue(outbound.headersSent);
         assertNotNull(outbound.terminal);
@@ -178,7 +182,8 @@ final class WorkerGrpcTest {
     }
 
     private static java.util.function.Function<
-                    java.util.function.Consumer<Object>, io.valkyrja.grpc.message.call.contract.ServiceCallContract>
+                    java.util.function.Consumer<Object>,
+                    io.valkyrja.grpc.message.call.contract.ServiceCallContract>
             streamingCall(String method, InboundMessageStream inbound) {
         return sink ->
                 new ServiceCall(

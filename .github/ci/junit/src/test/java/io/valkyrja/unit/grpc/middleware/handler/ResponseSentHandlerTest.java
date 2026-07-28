@@ -29,7 +29,9 @@ import io.valkyrja.grpc.middleware.handler.contract.ResponseSentHandlerContract;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link ResponseSentHandler} — an always-run stage with no cancellation short-circuit. */
+/**
+ * Test the {@link ResponseSentHandler} — an always-run stage with no cancellation short-circuit.
+ */
 final class ResponseSentHandlerTest {
 
     static int ranCount;
@@ -47,7 +49,13 @@ final class ResponseSentHandlerTest {
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     @SuppressWarnings("unchecked")

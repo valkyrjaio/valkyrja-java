@@ -12,20 +12,20 @@ package io.valkyrja.fixtures.http.middleware;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.RequestReceivedMiddlewareContract;
+import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteNotMatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.SendingResponseMiddlewareContract;
-import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.data.RouteMatchedResult;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
+import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
-import io.valkyrja.http.middleware.handler.contract.ResponseSentHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
@@ -55,7 +55,9 @@ public final class PassThroughHttpMiddleware
 
     @Override
     public RouteMatchedResult routeMatched(
-            ServerRequestContract request, RouteContract route, RouteMatchedHandlerContract handler) {
+            ServerRequestContract request,
+            RouteContract route,
+            RouteMatchedHandlerContract handler) {
         return handler.routeMatched(request, route);
     }
 

@@ -54,7 +54,8 @@ final class DynamicRouteTest {
     @Test
     void getParameterThrowsForUnknown() {
         assertThrows(
-                HttpRoutingInvalidRouteParameterException.class, () -> route().getParameter("nope"));
+                HttpRoutingInvalidRouteParameterException.class,
+                () -> route().getParameter("nope"));
         assertFalse(route().hasParameter("nope"));
     }
 
@@ -67,9 +68,7 @@ final class DynamicRouteTest {
         var replaced = route.withParameters(new Parameter("slug", "\\w+"));
         assertTrue(((DynamicRoute) replaced).hasParameter("slug"));
 
-        var added =
-                route.withAddedParameters(
-                        (ParameterContract) new Parameter("page", "\\d+"));
+        var added = route.withAddedParameters((ParameterContract) new Parameter("page", "\\d+"));
         assertEquals(2, ((DynamicRoute) added).getParameters().size());
     }
 

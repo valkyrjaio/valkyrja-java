@@ -75,8 +75,9 @@ final class MatcherTest {
                         "/users/{id}",
                         "users.show",
                         "/users/(?<id>\\d+)",
-                        List.of((io.valkyrja.http.routing.data.contract.ParameterContract)
-                                new Parameter("id", "\\d+").withCast(new Cast("int"))),
+                        List.of(
+                                (io.valkyrja.http.routing.data.contract.ParameterContract)
+                                        new Parameter("id", "\\d+").withCast(new Cast("int"))),
                         HANDLER);
         var matcher = new Matcher(collectionWith(dynamic));
 
@@ -92,8 +93,9 @@ final class MatcherTest {
                         "/items/{id}",
                         "items.show",
                         "/items/(?<id>\\d+)",
-                        List.of((io.valkyrja.http.routing.data.contract.ParameterContract)
-                                new Parameter("id", "\\d+")),
+                        List.of(
+                                (io.valkyrja.http.routing.data.contract.ParameterContract)
+                                        new Parameter("id", "\\d+")),
                         HANDLER);
         var matcher = new Matcher(collectionWith(dynamic));
 
@@ -153,8 +155,7 @@ final class MatcherTest {
     void dynamicRouteWithoutParametersThrows() {
         // The stored path key is "/users/{id}", so the request "/users/42" misses the static
         // lookup and falls through to the regex match, which then validates the parameter list.
-        var dynamic =
-                new DynamicRoute("/users/{id}", "x", "/users/(\\d+)", List.of(), HANDLER);
+        var dynamic = new DynamicRoute("/users/{id}", "x", "/users/(\\d+)", List.of(), HANDLER);
         var matcher = new Matcher(collectionWith(dynamic));
 
         assertThrows(
@@ -176,8 +177,7 @@ final class MatcherTest {
     void skipsEmptyRegexAndNonMatchingPath() {
         var collection = mock(RouteCollectionContract.class);
         when(collection.hasPath(any(), any())).thenReturn(false);
-        when(collection.getRegexes(any()))
-                .thenReturn(Map.of("", "empty", "/nomatch/(\\d+)", "n"));
+        when(collection.getRegexes(any())).thenReturn(Map.of("", "empty", "/nomatch/(\\d+)", "n"));
 
         assertNull(new Matcher(collection).match("/users/abc", RequestMethod.GET));
     }
@@ -238,7 +238,9 @@ final class MatcherTest {
 
     @Test
     void requestMethodFilteringForStaticRoute() {
-        var route = new Route("/only-get", "get-only-static", HANDLER).withRequestMethods(RequestMethod.GET);
+        var route =
+                new Route("/only-get", "get-only-static", HANDLER)
+                        .withRequestMethods(RequestMethod.GET);
         var matcher = new Matcher(collectionWith(route));
 
         var matched = matcher.match("/only-get", RequestMethod.GET);
@@ -260,8 +262,7 @@ final class MatcherTest {
                                         List.of(new Parameter("x", Regex.ALPHA)))));
 
         assertNotNull(matcher.match("/foo/", RequestMethod.GET));
-        assertInstanceOf(
-                DynamicRouteContract.class, matcher.match("/bar/abc/", RequestMethod.GET));
+        assertInstanceOf(DynamicRouteContract.class, matcher.match("/bar/abc/", RequestMethod.GET));
     }
 
     @Test

@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import io.valkyrja.dispatch.data.PropertyDispatch;
+import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link PropertyDispatch} data object. */

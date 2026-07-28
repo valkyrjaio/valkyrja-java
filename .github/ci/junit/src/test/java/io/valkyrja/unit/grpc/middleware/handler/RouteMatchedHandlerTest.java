@@ -47,7 +47,9 @@ final class RouteMatchedHandlerTest {
     static final class PassThrough implements RouteMatchedMiddlewareContract {
         @Override
         public RouteMatchedResult routeMatched(
-                ServiceCallContract call, RouteContract route, RouteMatchedHandlerContract handler) {
+                ServiceCallContract call,
+                RouteContract route,
+                RouteMatchedHandlerContract handler) {
             passThroughRan = true;
             return handler.routeMatched(call, route);
         }
@@ -56,7 +58,9 @@ final class RouteMatchedHandlerTest {
     static final class ShortCircuit implements RouteMatchedMiddlewareContract {
         @Override
         public RouteMatchedResult routeMatched(
-                ServiceCallContract call, RouteContract route, RouteMatchedHandlerContract handler) {
+                ServiceCallContract call,
+                RouteContract route,
+                RouteMatchedHandlerContract handler) {
             return new RouteMatchedResult(route, SHORT_CIRCUIT);
         }
     }
@@ -64,15 +68,24 @@ final class RouteMatchedHandlerTest {
     static final class CancelThenContinue implements RouteMatchedMiddlewareContract {
         @Override
         public RouteMatchedResult routeMatched(
-                ServiceCallContract call, RouteContract route, RouteMatchedHandlerContract handler) {
-            ((CancellationToken) call.getCancellation()).cancel(CancellationReason.CLIENT_CANCELLED);
+                ServiceCallContract call,
+                RouteContract route,
+                RouteMatchedHandlerContract handler) {
+            ((CancellationToken) call.getCancellation())
+                    .cancel(CancellationReason.CLIENT_CANCELLED);
             return new RouteMatchedResult(route, null);
         }
     }
 
     private ServiceCallContract call(CancellationToken token) {
         return new ServiceCall(
-                "/pkg.A/M", new Metadata(), Deadline.none(), token, Peer.insecure("x"), List.of(), null);
+                "/pkg.A/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("x"),
+                List.of(),
+                null);
     }
 
     @SuppressWarnings("unchecked")

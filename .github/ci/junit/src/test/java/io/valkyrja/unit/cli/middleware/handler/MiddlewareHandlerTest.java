@@ -13,12 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.valkyrja.fixtures.cli.middleware.PassThroughMiddleware;
 import io.valkyrja.cli.interaction.input.Input;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
-import io.valkyrja.cli.middleware.handler.ProcessExitingHandler;
 import io.valkyrja.cli.middleware.handler.InputReceivedHandler;
+import io.valkyrja.cli.middleware.handler.ProcessExitingHandler;
 import io.valkyrja.cli.middleware.handler.RouteDispatchedHandler;
 import io.valkyrja.cli.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.cli.middleware.handler.RouteNotMatchedHandler;
@@ -26,6 +25,7 @@ import io.valkyrja.cli.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.cli.routing.data.Route;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.fixtures.cli.middleware.PassThroughMiddleware;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -119,7 +119,8 @@ final class MiddlewareHandlerTest {
 
     @Test
     void processExitingRunsWithAndWithoutMiddleware() {
-        assertDoesNotThrow(() -> new ProcessExitingHandler(container).processExiting(input, output));
+        assertDoesNotThrow(
+                () -> new ProcessExitingHandler(container).processExiting(input, output));
         assertDoesNotThrow(
                 () ->
                         new ProcessExitingHandler(container, PassThroughMiddleware.class)

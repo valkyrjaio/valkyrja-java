@@ -89,7 +89,8 @@ final class MarshalUriFactoryTest {
         server.put("REQUEST_URI", "/path?q=1");
         server.put("QUERY_STRING", "q=1");
 
-        var uri = MarshalUriFactory.marshalUriFromServer(server, headers("host", "example.com:8080"));
+        var uri =
+                MarshalUriFactory.marshalUriFromServer(server, headers("host", "example.com:8080"));
 
         assertEquals("example.com", uri.getHost());
         assertEquals(8080, uri.getPort());

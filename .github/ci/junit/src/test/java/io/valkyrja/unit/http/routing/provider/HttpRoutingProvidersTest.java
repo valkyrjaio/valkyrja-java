@@ -26,8 +26,6 @@ import io.valkyrja.http.routing.provider.HttpRoutingCliRouteProvider;
 import io.valkyrja.http.routing.provider.HttpRoutingCliServiceProvider;
 import io.valkyrja.http.routing.provider.HttpRoutingComponentProvider;
 import io.valkyrja.http.routing.provider.HttpRoutingServiceProvider;
-import io.valkyrja.http.routing.data.Route;
-import io.valkyrja.http.routing.data.contract.RouteContract;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -54,8 +52,7 @@ final class HttpRoutingProvidersTest {
 
         assertInstanceOf(
                 HttpRoutingCliServiceProvider.class, provider.getContainerProviders(app).get(0));
-        assertInstanceOf(
-                HttpRoutingCliRouteProvider.class, provider.getCliProviders(app).get(0));
+        assertInstanceOf(HttpRoutingCliRouteProvider.class, provider.getCliProviders(app).get(0));
         assertTrue(provider.getComponentProviders(app).isEmpty());
         assertTrue(provider.getEventProviders(app).isEmpty());
         assertTrue(provider.getHttpProviders(app).isEmpty());
@@ -73,7 +70,10 @@ final class HttpRoutingProvidersTest {
     void cliRouteProviderListHandlerRunsListCommand() {
         var container = new Container();
         var collection = new io.valkyrja.http.routing.collection.RouteCollection();
-        var outputFactory = mock(io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract.class);
+        var outputFactory =
+                mock(
+                        io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract
+                                .class);
         when(outputFactory.createOutput()).thenReturn(new Output());
         container.setSingleton(ListCommand.class, new ListCommand(collection, outputFactory));
 

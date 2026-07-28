@@ -27,8 +27,7 @@ final class ClassDispatchCopyTest {
     @Test
     void copyReturnsEquivalentInstance() {
         var original =
-                new ClassDispatch(
-                        DispatchableClass.class, Map.of("a", 1), List.of(String.class));
+                new ClassDispatch(DispatchableClass.class, Map.of("a", 1), List.of(String.class));
 
         var copy = original.copy();
 

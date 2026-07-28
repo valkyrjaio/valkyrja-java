@@ -100,5 +100,4 @@ final class QuestionTest {
         // Non-null but blank line → trimmed-empty branch returns the default.
         assertEquals("yes", answered.getUserResponse());
     }
-
 }

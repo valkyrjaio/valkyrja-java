@@ -11,13 +11,13 @@ package io.valkyrja.unit.dispatch.data;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import io.valkyrja.dispatch.data.MethodDispatch;
+import io.valkyrja.fixtures.dispatch.DispatchableClass;
 import io.valkyrja.throwable.exception.InvalidArgumentException;
 import org.junit.jupiter.api.Test;
 
@@ -96,5 +96,4 @@ final class MethodDispatchTest {
                 () -> MethodDispatch.fromArray(DispatchableClass.class, " "));
         assertNotNull(MethodDispatch.fromArray(DispatchableClass.class, "instanceMethod"));
     }
-
 }

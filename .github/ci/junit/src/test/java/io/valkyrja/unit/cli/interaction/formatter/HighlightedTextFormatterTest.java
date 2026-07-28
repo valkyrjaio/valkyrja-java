@@ -10,6 +10,7 @@
 package io.valkyrja.unit.cli.interaction.formatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import io.valkyrja.cli.interaction.formatter.HighlightedTextFormatter;
 import org.junit.jupiter.api.Test;
 
