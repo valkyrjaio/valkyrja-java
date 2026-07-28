@@ -1,6 +1,27 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.3.0...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.4.0...26.x)
+
+## [v26.4.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.3.0...v26.4.0) - 2026-07-27
+
+* [Gradle] Use the vanniktech publishToMavenCentral() API without SonatypeHost by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/44
+* [Documentation] Note the accepted JaCoCo branch-coverage baseline in AGENTS.md by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/46
+* [Application] Fold the jetty, netty, and tomcat runtime entry adapters into the framework by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/45
+* [Cli] Enforce option valid values in areValuesValid by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/47
+* [Cli] Add routing attribute argument/option combination tests by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/49
+* [Http] Fix dynamic route matching and annotation parameter modifiers by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/48
+* [Application] Emit worker HTTP responses through the runtime and marshal native requests by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/50
+* [Http] Load routes from the generated routing data outside debug mode by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/52
+* [Cli] Bind options and validate parameters during route dispatch by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/53
+* [Http] Derive parsed body, uploaded files, and query from the raw body in fromGlobals by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/54
+* [Http][Cli] Add request, response, and CLI input message-mapping fidelity tests by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/55
+* [Gradle] Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/51
+* [Log] Publish the logger services and default to a file logger by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/56
+* [CI] Format the JUnit tests with Spotless by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/58
+* [Log] Resolve the log provider publishers through the container to fix a flaky test by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/59
+* [CI] Format the log provider test to satisfy Spotless by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/60
+* [Cli] Treat a bare double dash as the end-of-options marker and a lone dash as an operand by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/57
+* [GitHub] Update .github workflow refs to v26.12.0 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/61
 
 ## [v26.3.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.2.0...v26.3.0) - 2026-07-25
 
