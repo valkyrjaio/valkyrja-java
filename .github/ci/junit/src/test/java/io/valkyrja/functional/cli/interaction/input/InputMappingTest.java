@@ -94,8 +94,9 @@ final class InputMappingTest {
                                 tuple("a", "", OptionType.SHORT),
                                 tuple("b", "", OptionType.SHORT))),
                 // The value is split on the first `=` only, so everything after it is kept. The
-                // PHP reference splits on every `=` and keeps only the first segment ("a"),
-                // dropping the rest; retaining the whole value is the faithful mapping.
+                // PHP reference used to split on every `=` and keep only the first segment ("a"),
+                // dropping the rest; that truncation was fixed in valkyrja-php#935, so both ports
+                // now agree on the whole value.
                 Arguments.of(
                         "value containing equals",
                         new String[] {"cmd", "--expr=a=b"},
