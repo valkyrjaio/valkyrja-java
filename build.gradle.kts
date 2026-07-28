@@ -12,7 +12,7 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 plugins {
     java
     id("com.vanniktech.maven.publish") version "0.37.0"
-    id("com.github.ben-manes.versions") version "0.54.0"
+    id("com.github.ben-manes.versions") version "0.56.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
