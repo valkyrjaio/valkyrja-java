@@ -10,6 +10,8 @@
 package io.valkyrja.http.message.request.data;
 
 import io.valkyrja.http.message.file.contract.UploadedFileContract;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -27,7 +29,10 @@ public record ParsedRequestBody(
         Map<String, Object> parsedBody, Map<String, UploadedFileContract> files) {
 
     public ParsedRequestBody {
-        parsedBody = Map.copyOf(parsedBody);
-        files = Map.copyOf(files);
+        // Copied through a LinkedHashMap rather than Map.copyOf so the order the fields and files
+        // were spelled in the body survives onto the request; Map.copyOf makes no ordering
+        // guarantee, and every collection these feed preserves insertion order.
+        parsedBody = Collections.unmodifiableMap(new LinkedHashMap<>(parsedBody));
+        files = Collections.unmodifiableMap(new LinkedHashMap<>(files));
     }
 }
