@@ -57,15 +57,38 @@ final class LogServiceProviderTest {
         assertSame(fileLogger, container.getSingleton(LoggerContract.class));
     }
 
+    /**
+     * Registering the provider defers every publisher, so requesting a service runs its publisher
+     * on demand — and any publisher it depends on first.
+     *
+     * <p>The publishers are deliberately <em>not</em> invoked by iterating {@link
+     * LogServiceProvider#publishers()} directly: that map is a {@link java.util.Map#of Map.of},
+     * whose iteration order the JVM randomizes per run, and {@code publishLogger} reads the {@link
+     * FileLogger} singleton that {@code publishFileLogger} binds. Driving them in map order
+     * therefore fails whenever {@code LoggerContract} happens to come first. Going through the
+     * container is both order-independent and the path production actually takes.
+     */
     @Test
     void everyPublisherBindsItsServiceThroughTheContainer() {
         var container = new Container();
-        var provider = new LogServiceProvider();
 
-        provider.publishers().forEach((id, publisher) -> publisher.accept(container));
+        container.register(new LogServiceProvider());
 
         assertInstanceOf(LoggerContract.class, container.getSingleton(LoggerContract.class));
         assertInstanceOf(FileLogger.class, container.getSingleton(FileLogger.class));
         assertInstanceOf(NullLogger.class, container.getSingleton(NullLogger.class));
+    }
+
+    /**
+     * The deferred logger resolves to the same {@link FileLogger} instance the file-logger
+     * publisher bound, whichever order the container reaches them in.
+     */
+    @Test
+    void theDeferredLoggerIsTheSameInstanceAsTheFileLogger() {
+        var container = new Container();
+
+        container.register(new LogServiceProvider());
+
+        assertSame(container.getSingleton(FileLogger.class), container.getSingleton(LoggerContract.class));
     }
 }
