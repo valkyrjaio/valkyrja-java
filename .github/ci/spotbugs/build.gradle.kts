@@ -37,6 +37,12 @@ sourceSets {
             srcDirs("../../../src/main/java")
         }
     }
+    // The JUnit build's tests are the repo's other Java source tree; analyze them too.
+    test {
+        java {
+            srcDirs("../junit/src/test/java")
+        }
+    }
 }
 
 dependencies {
@@ -56,12 +62,37 @@ dependencies {
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.83.0")
     compileOnly("io.grpc:grpc-netty-shaded:1.83.0")
+
+    // Mirrors the JUnit build's test classpath — needed only so the tests compile here.
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
+    testImplementation("org.jspecify:jspecify:1.0.0")
+    testImplementation("io.grpc:grpc-api:1.83.0")
+    testImplementation("io.grpc:grpc-netty-shaded:1.83.0")
+    testImplementation("io.grpc:grpc-servlet-jakarta:1.83.0")
+    testImplementation("org.eclipse.jetty:jetty-server:12.1.11")
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
+    testImplementation("io.netty:netty-codec-http:4.2.16.Final")
+    testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
+}
+
+// Analyzing the tests is the point — running them is the JUnit build's job, so `check` still runs
+// spotbugsTest without executing the suite twice.
+tasks.test {
+    enabled = false
 }
 
 spotbugs {
     excludeFilter.set(layout.projectDirectory.file("spotbugs-exclude.xml"))
     effort.set(Effort.MAX)
     reportLevel.set(Confidence.LOW)
+}
+
+// The test tree gets its own filter so `src` stays strict — the JUnit/fixture idioms excluded for
+// the tests can never loosen the framework's own analysis.
+tasks.spotbugsTest {
+    excludeFilter.set(layout.projectDirectory.file("spotbugs-exclude-test.xml"))
 }
 
 fun isNonStable(version: String): Boolean {

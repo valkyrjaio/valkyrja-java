@@ -16,7 +16,7 @@ import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.middleware.handler.RouteMatchedHandler;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.container.manager.Container;
-import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddleware;
+import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddlewareFixture;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link RouteMatchedHandler}. */
@@ -35,12 +35,13 @@ final class RouteMatchedHandlerTest {
     @Test
     void runsMiddlewareChain() {
         var container = new Container();
-        container.setSingleton(PassThroughMiddleware.class, new PassThroughMiddleware());
+        container.setSingleton(
+                PassThroughMiddlewareFixture.class, new PassThroughMiddlewareFixture());
         var route = mock(RouteContract.class);
 
         assertSame(
                 route,
-                new RouteMatchedHandler(container, PassThroughMiddleware.class)
+                new RouteMatchedHandler(container, PassThroughMiddlewareFixture.class)
                         .routeMatched(mock(InputContract.class), route));
     }
 }

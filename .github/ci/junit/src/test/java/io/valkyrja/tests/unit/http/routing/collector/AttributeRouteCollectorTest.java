@@ -22,8 +22,8 @@ import io.valkyrja.http.routing.collector.AttributeRouteCollector;
 import io.valkyrja.http.routing.constant.Regex;
 import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
-import io.valkyrja.tests.fixtures.http.routing.AnnotatedHttpController;
-import io.valkyrja.tests.fixtures.http.routing.RoutingCombinationsHttpController;
+import io.valkyrja.tests.fixtures.http.routing.AnnotatedHttpControllerFixture;
+import io.valkyrja.tests.fixtures.http.routing.RoutingCombinationsHttpControllerFixture;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,7 +37,8 @@ final class AttributeRouteCollectorTest {
 
     @BeforeEach
     void setUp() {
-        var collected = new AttributeRouteCollector().getRoutes(AnnotatedHttpController.class);
+        var collected =
+                new AttributeRouteCollector().getRoutes(AnnotatedHttpControllerFixture.class);
         routes =
                 collected.stream()
                         .collect(Collectors.toMap(RouteContract::getName, Function.identity()));
@@ -96,7 +97,8 @@ final class AttributeRouteCollectorTest {
         var routes =
                 new AttributeRouteCollector()
                         .getRoutes(
-                                io.valkyrja.tests.fixtures.http.routing.PlainHttpController.class);
+                                io.valkyrja.tests.fixtures.http.routing.PlainHttpControllerFixture
+                                        .class);
 
         assertTrue(routes.stream().anyMatch(route -> route.getName().equals("plain")));
     }
@@ -105,7 +107,7 @@ final class AttributeRouteCollectorTest {
     void annotationPathProducesSameRegexAsDirectConstruction() {
         var byName =
                 new AttributeRouteCollector()
-                        .getRoutes(RoutingCombinationsHttpController.class).stream()
+                        .getRoutes(RoutingCombinationsHttpControllerFixture.class).stream()
                                 .collect(
                                         Collectors.toMap(
                                                 RouteContract::getName, Function.identity()));

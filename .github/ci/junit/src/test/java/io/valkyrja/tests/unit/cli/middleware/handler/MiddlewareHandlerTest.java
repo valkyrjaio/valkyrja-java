@@ -25,7 +25,7 @@ import io.valkyrja.cli.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.cli.routing.data.Route;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.container.manager.Container;
-import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddleware;
+import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddlewareFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +40,8 @@ final class MiddlewareHandlerTest {
     @BeforeEach
     void setUp() {
         container = new Container();
-        container.setSingleton(PassThroughMiddleware.class, new PassThroughMiddleware());
+        container.setSingleton(
+                PassThroughMiddlewareFixture.class, new PassThroughMiddlewareFixture());
     }
 
     @Test
@@ -50,7 +51,7 @@ final class MiddlewareHandlerTest {
 
     @Test
     void inputReceivedRunsThroughMiddleware() {
-        var handler = new InputReceivedHandler(container, PassThroughMiddleware.class);
+        var handler = new InputReceivedHandler(container, PassThroughMiddlewareFixture.class);
 
         assertSame(input, handler.inputReceived(input));
     }
@@ -58,7 +59,7 @@ final class MiddlewareHandlerTest {
     @Test
     void addAppendsMiddleware() {
         var handler = new InputReceivedHandler(container);
-        handler.add(PassThroughMiddleware.class);
+        handler.add(PassThroughMiddlewareFixture.class);
 
         assertSame(input, handler.inputReceived(input));
     }
@@ -70,7 +71,7 @@ final class MiddlewareHandlerTest {
 
     @Test
     void routeMatchedRunsThroughMiddleware() {
-        var handler = new RouteMatchedHandler(container, PassThroughMiddleware.class);
+        var handler = new RouteMatchedHandler(container, PassThroughMiddlewareFixture.class);
 
         assertSame(route, handler.routeMatched(input, route));
     }
@@ -80,7 +81,7 @@ final class MiddlewareHandlerTest {
         assertSame(output, new RouteNotMatchedHandler(container).routeNotMatched(input, output));
         assertSame(
                 output,
-                new RouteNotMatchedHandler(container, PassThroughMiddleware.class)
+                new RouteNotMatchedHandler(container, PassThroughMiddlewareFixture.class)
                         .routeNotMatched(input, output));
     }
 
@@ -91,7 +92,7 @@ final class MiddlewareHandlerTest {
                 new RouteDispatchedHandler(container).routeDispatched(input, output, route));
         assertSame(
                 output,
-                new RouteDispatchedHandler(container, PassThroughMiddleware.class)
+                new RouteDispatchedHandler(container, PassThroughMiddlewareFixture.class)
                         .routeDispatched(input, output, route));
     }
 
@@ -104,7 +105,7 @@ final class MiddlewareHandlerTest {
                 new ThrowableCaughtHandler(container).throwableCaught(input, output, throwable));
         assertSame(
                 output,
-                new ThrowableCaughtHandler(container, PassThroughMiddleware.class)
+                new ThrowableCaughtHandler(container, PassThroughMiddlewareFixture.class)
                         .throwableCaught(input, output, throwable));
     }
 
@@ -123,7 +124,7 @@ final class MiddlewareHandlerTest {
                 () -> new ProcessExitingHandler(container).processExiting(input, output));
         assertDoesNotThrow(
                 () ->
-                        new ProcessExitingHandler(container, PassThroughMiddleware.class)
+                        new ProcessExitingHandler(container, PassThroughMiddlewareFixture.class)
                                 .processExiting(input, output));
     }
 }

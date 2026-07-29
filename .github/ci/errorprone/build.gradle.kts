@@ -36,6 +36,12 @@ sourceSets {
             srcDirs("../../../src/main/java")
         }
     }
+    // The JUnit build's tests are the repo's other Java source tree; analyze them too.
+    test {
+        java {
+            srcDirs("../junit/src/test/java")
+        }
+    }
 }
 
 dependencies {
@@ -52,6 +58,29 @@ dependencies {
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.83.0")
     compileOnly("io.grpc:grpc-netty-shaded:1.83.0")
+
+    // Mirrors the JUnit build's test classpath — needed only so the tests compile here.
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
+    testImplementation("org.jspecify:jspecify:1.0.0")
+    testImplementation("io.grpc:grpc-api:1.83.0")
+    testImplementation("io.grpc:grpc-netty-shaded:1.83.0")
+    testImplementation("io.grpc:grpc-servlet-jakarta:1.83.0")
+    testImplementation("org.eclipse.jetty:jetty-server:12.1.11")
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
+    testImplementation("io.netty:netty-codec-http:4.2.16.Final")
+    testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
+}
+
+// Compiling the tests is the point — running them is the JUnit build's job, so `build` compiles
+// the test sources (Error Prone runs as part of that) without executing the suite twice.
+tasks.test {
+    enabled = false
+}
+
+tasks.named("check") {
+    dependsOn(tasks.compileTestJava)
 }
 
 fun isNonStable(version: String): Boolean {
@@ -70,5 +99,18 @@ tasks.withType<JavaCompile>().configureEach {
     options.errorprone {
         check("NullAway", CheckSeverity.ERROR)
         option("NullAway:AnnotatedPackages", "io.valkyrja")
+    }
+}
+
+// NullAway enforces a nullness contract on the framework's own API. The tests deliberately break
+// that contract — `new Stream().write(null)`, `StreamFactory.isModeWriteable(null)`,
+// `new Metadata().with("k", null)` — because that is the only way to reach the defensive guards
+// those methods exist to provide, and the canonical guide requires synthetic inputs to cover
+// guards normal input cannot reach. Enforcing NullAway here would mean deleting the tests that
+// hold branch coverage at 100%, so it is scoped to `src`; every other Error Prone check still
+// applies to the test tree.
+tasks.compileTestJava {
+    options.errorprone {
+        check("NullAway", CheckSeverity.OFF)
     }
 }

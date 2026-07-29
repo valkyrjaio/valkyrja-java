@@ -18,7 +18,7 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.event.collection.ListenerCollection;
 import io.valkyrja.event.data.EventData;
 import io.valkyrja.event.data.Listener;
-import io.valkyrja.tests.fixtures.event.EventClass;
+import io.valkyrja.tests.fixtures.event.EventFixture;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -30,7 +30,7 @@ final class ListenerCollectionTest {
             (container, arguments) -> null;
 
     private static Listener listener(String name) {
-        return new Listener(EventClass.class, name, HANDLER);
+        return new Listener(EventFixture.class, name, HANDLER);
     }
 
     @Test
@@ -46,17 +46,17 @@ final class ListenerCollectionTest {
 
         var data = collection.getData();
         assertSame(listener, data.listeners().get("listener"));
-        assertEquals(Map.of(EventClass.class, Map.of("listener", "listener")), data.events());
+        assertEquals(Map.of(EventFixture.class, Map.of("listener", "listener")), data.events());
         assertEquals(Map.of("listener", listener), collection.getListeners());
-        assertEquals(List.of(EventClass.class), collection.getEvents());
+        assertEquals(List.of(EventFixture.class), collection.getEvents());
         assertEquals(
-                Map.of(EventClass.class, Map.of("listener", listener)),
+                Map.of(EventFixture.class, Map.of("listener", listener)),
                 collection.getEventsWithListeners());
         assertEquals(
-                Map.of("listener", listener), collection.getListenersForEvent(new EventClass()));
+                Map.of("listener", listener), collection.getListenersForEvent(new EventFixture()));
         assertEquals(
                 Map.of("listener", listener),
-                collection.getListenersForEventById(EventClass.class));
+                collection.getListenersForEventById(EventFixture.class));
     }
 
     @Test
@@ -66,7 +66,7 @@ final class ListenerCollectionTest {
         var data =
                 new EventData(
                         Map.of(
-                                EventClass.class,
+                                EventFixture.class,
                                 Map.of("listener", "listener", "listener2", "listener2")),
                         Map.of("listener", listener, "listener2", listener2));
 
@@ -76,8 +76,9 @@ final class ListenerCollectionTest {
         assertEquals(2, collection.getListeners().size());
         assertSame(listener, collection.getListeners().get("listener"));
         assertSame(listener2, collection.getListeners().get("listener2"));
-        assertEquals(List.of(EventClass.class), collection.getEvents());
-        assertTrue(collection.getListenersForEventById(EventClass.class).containsKey("listener2"));
+        assertEquals(List.of(EventFixture.class), collection.getEvents());
+        assertTrue(
+                collection.getListenersForEventById(EventFixture.class).containsKey("listener2"));
 
         // Re-setting with empty data must REPLACE (clear), not merge.
         collection.setFromData(new EventData());
@@ -85,26 +86,26 @@ final class ListenerCollectionTest {
         assertTrue(collection.getListeners().isEmpty());
         assertTrue(collection.getEvents().isEmpty());
         assertTrue(collection.getEventsWithListeners().isEmpty());
-        assertTrue(collection.getListenersForEvent(new EventClass()).isEmpty());
-        assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
+        assertTrue(collection.getListenersForEvent(new EventFixture()).isEmpty());
+        assertTrue(collection.getListenersForEventById(EventFixture.class).isEmpty());
     }
 
     @Test
     void addAndRemoveListenerVariants() {
         var collection = new ListenerCollection();
         var listener = listener("listener");
-        var event = new EventClass();
+        var event = new EventFixture();
 
         assertFalse(collection.hasListener(listener));
         assertFalse(collection.hasListenerById("listener"));
         assertFalse(collection.hasListenersForEvent(event));
-        assertFalse(collection.hasListenersForEventById(EventClass.class));
+        assertFalse(collection.hasListenersForEventById(EventFixture.class));
 
         collection.addListener(listener);
         assertTrue(collection.hasListener(listener));
         assertTrue(collection.hasListenerById("listener"));
         assertTrue(collection.hasListenersForEvent(event));
-        assertTrue(collection.hasListenersForEventById(EventClass.class));
+        assertTrue(collection.hasListenersForEventById(EventFixture.class));
 
         collection.removeListener(listener);
         assertFalse(collection.hasListenerById("listener"));
@@ -119,18 +120,18 @@ final class ListenerCollectionTest {
         collection.removeListenersForEvent(event);
         assertFalse(collection.hasListenersForEvent(event));
 
-        collection.setListenersForEventById(EventClass.class, listener);
-        assertTrue(collection.hasListenersForEventById(EventClass.class));
+        collection.setListenersForEventById(EventFixture.class, listener);
+        assertTrue(collection.hasListenersForEventById(EventFixture.class));
 
-        collection.removeListenersForEventById(EventClass.class);
-        assertFalse(collection.hasListenersForEventById(EventClass.class));
+        collection.removeListenersForEventById(EventFixture.class);
+        assertFalse(collection.hasListenersForEventById(EventFixture.class));
     }
 
     @Test
     void getListenersForUnknownEventIsEmpty() {
         var collection = new ListenerCollection();
 
-        assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
+        assertTrue(collection.getListenersForEventById(EventFixture.class).isEmpty());
     }
 
     @Test
@@ -138,26 +139,26 @@ final class ListenerCollectionTest {
         var collection = new ListenerCollection();
 
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(
-                () -> collection.removeListenersForEventById(EventClass.class));
+                () -> collection.removeListenersForEventById(EventFixture.class));
     }
 
     @Test
     void emptyEventEntryReportsNoListeners() {
         var collection = new ListenerCollection();
-        collection.setFromData(new EventData(Map.of(EventClass.class, Map.of()), Map.of()));
+        collection.setFromData(new EventData(Map.of(EventFixture.class, Map.of()), Map.of()));
 
         // Event key present but no listener ids → non-null-but-empty branch.
-        assertFalse(collection.hasListenersForEventById(EventClass.class));
-        assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
+        assertFalse(collection.hasListenersForEventById(EventFixture.class));
+        assertTrue(collection.getListenersForEventById(EventFixture.class).isEmpty());
     }
 
     @Test
     void getListenersSkipsMissingListenerReferences() {
         var collection = new ListenerCollection();
         collection.setFromData(
-                new EventData(Map.of(EventClass.class, Map.of("ghost", "ghost")), Map.of()));
+                new EventData(Map.of(EventFixture.class, Map.of("ghost", "ghost")), Map.of()));
 
         // Listener id referenced by the event but absent from the listeners map → skipped.
-        assertTrue(collection.getListenersForEventById(EventClass.class).isEmpty());
+        assertTrue(collection.getListenersForEventById(EventFixture.class).isEmpty());
     }
 }

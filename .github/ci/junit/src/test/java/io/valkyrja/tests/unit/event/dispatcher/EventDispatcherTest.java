@@ -20,11 +20,11 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.event.collection.ListenerCollection;
 import io.valkyrja.event.data.Listener;
 import io.valkyrja.event.dispatcher.EventDispatcher;
-import io.valkyrja.tests.fixtures.event.ArgumentsCapableEventClass;
-import io.valkyrja.tests.fixtures.event.DispatchCollectableEventClass;
-import io.valkyrja.tests.fixtures.event.EventClass;
-import io.valkyrja.tests.fixtures.event.NonStoppingStoppableEventClass;
-import io.valkyrja.tests.fixtures.event.StoppableEventClass;
+import io.valkyrja.tests.fixtures.event.ArgumentsCapableEventFixture;
+import io.valkyrja.tests.fixtures.event.DispatchCollectableEventFixture;
+import io.valkyrja.tests.fixtures.event.EventFixture;
+import io.valkyrja.tests.fixtures.event.NonStoppingStoppableEventFixture;
+import io.valkyrja.tests.fixtures.event.StoppableEventFixture;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,26 +51,26 @@ final class EventDispatcherTest {
     @Test
     void dispatchInvokesListenersAndCollectsResults() {
         var collection = new ListenerCollection();
-        collection.addListener(listener(DispatchCollectableEventClass.class, "listener"));
+        collection.addListener(listener(DispatchCollectableEventFixture.class, "listener"));
         var dispatcher = dispatcherWith(collection);
 
         var event =
-                (DispatchCollectableEventClass)
-                        dispatcher.dispatch(new DispatchCollectableEventClass());
+                (DispatchCollectableEventFixture)
+                        dispatcher.dispatch(new DispatchCollectableEventFixture());
         var byId =
-                (DispatchCollectableEventClass)
-                        dispatcher.dispatchById(DispatchCollectableEventClass.class, Map.of());
+                (DispatchCollectableEventFixture)
+                        dispatcher.dispatchById(DispatchCollectableEventFixture.class, Map.of());
 
         assertTrue(dispatched.get());
         assertEquals(List.of("test"), event.getDispatches());
         assertEquals(List.of("test"), byId.getDispatches());
 
         // Three listeners → three dispatches.
-        collection.addListener(listener(DispatchCollectableEventClass.class, "listener2"));
-        collection.addListener(listener(DispatchCollectableEventClass.class, "listener3"));
+        collection.addListener(listener(DispatchCollectableEventFixture.class, "listener2"));
+        collection.addListener(listener(DispatchCollectableEventFixture.class, "listener3"));
         var multi =
-                (DispatchCollectableEventClass)
-                        dispatcher.dispatch(new DispatchCollectableEventClass());
+                (DispatchCollectableEventFixture)
+                        dispatcher.dispatch(new DispatchCollectableEventFixture());
         assertEquals(List.of("test", "test", "test"), multi.getDispatches());
     }
 
@@ -78,25 +78,25 @@ final class EventDispatcherTest {
     void dispatchIfHasListeners() {
         var collection = new ListenerCollection();
         var dispatcher = dispatcherWith(collection);
-        var event = new DispatchCollectableEventClass();
+        var event = new DispatchCollectableEventFixture();
 
         // No listeners → event returned unchanged, callback never runs.
         assertSame(event, dispatcher.dispatchIfHasListeners(event));
         assertInstanceOf(
-                DispatchCollectableEventClass.class,
+                DispatchCollectableEventFixture.class,
                 dispatcher.dispatchByIdIfHasListeners(
-                        DispatchCollectableEventClass.class, Map.of()));
+                        DispatchCollectableEventFixture.class, Map.of()));
         assertFalse(dispatched.get());
 
-        collection.addListener(listener(DispatchCollectableEventClass.class, "listener"));
+        collection.addListener(listener(DispatchCollectableEventFixture.class, "listener"));
 
         var dispatchedEvent =
-                (DispatchCollectableEventClass)
-                        dispatcher.dispatchIfHasListeners(new DispatchCollectableEventClass());
+                (DispatchCollectableEventFixture)
+                        dispatcher.dispatchIfHasListeners(new DispatchCollectableEventFixture());
         var dispatchedById =
-                (DispatchCollectableEventClass)
+                (DispatchCollectableEventFixture)
                         dispatcher.dispatchByIdIfHasListeners(
-                                DispatchCollectableEventClass.class, Map.of());
+                                DispatchCollectableEventFixture.class, Map.of());
 
         assertTrue(dispatched.get());
         assertEquals(List.of("test"), dispatchedEvent.getDispatches());
@@ -106,12 +106,12 @@ final class EventDispatcherTest {
     @Test
     void stoppableEventStopsAfterFirstListener() {
         var collection = new ListenerCollection();
-        collection.addListener(listener(StoppableEventClass.class, "listener"));
-        collection.addListener(listener(StoppableEventClass.class, "listener2"));
-        collection.addListener(listener(StoppableEventClass.class, "listener3"));
+        collection.addListener(listener(StoppableEventFixture.class, "listener"));
+        collection.addListener(listener(StoppableEventFixture.class, "listener2"));
+        collection.addListener(listener(StoppableEventFixture.class, "listener3"));
         var dispatcher = dispatcherWith(collection);
 
-        var event = (StoppableEventClass) dispatcher.dispatch(new StoppableEventClass());
+        var event = (StoppableEventFixture) dispatcher.dispatch(new StoppableEventFixture());
 
         // Three listeners, but propagation stops after the first dispatch.
         assertEquals(List.of("test"), event.getDispatches());
@@ -120,13 +120,13 @@ final class EventDispatcherTest {
     @Test
     void dispatchListenerOnNonCollectableEventDoesNotCollect() {
         var collection = new ListenerCollection();
-        collection.addListener(listener(EventClass.class, "listener"));
+        collection.addListener(listener(EventFixture.class, "listener"));
         var dispatcher = dispatcherWith(collection);
 
-        var event = dispatcher.dispatch(new EventClass());
+        var event = dispatcher.dispatch(new EventFixture());
 
         assertTrue(dispatched.get());
-        assertInstanceOf(EventClass.class, event);
+        assertInstanceOf(EventFixture.class, event);
     }
 
     @Test
@@ -143,22 +143,23 @@ final class EventDispatcherTest {
         var dispatcher = new EventDispatcher();
 
         var result =
-                dispatcher.dispatchById(ArgumentsCapableEventClass.class, Map.of("key", "value"));
+                dispatcher.dispatchById(ArgumentsCapableEventFixture.class, Map.of("key", "value"));
 
-        assertInstanceOf(ArgumentsCapableEventClass.class, result);
-        assertEquals(Map.of("key", "value"), ((ArgumentsCapableEventClass) result).getArguments());
+        assertInstanceOf(ArgumentsCapableEventFixture.class, result);
+        assertEquals(
+                Map.of("key", "value"), ((ArgumentsCapableEventFixture) result).getArguments());
     }
 
     @Test
     void nonStoppingStoppableEventRunsAllListeners() {
         var collection = new ListenerCollection();
-        collection.addListener(listener(NonStoppingStoppableEventClass.class, "listener"));
-        collection.addListener(listener(NonStoppingStoppableEventClass.class, "listener2"));
+        collection.addListener(listener(NonStoppingStoppableEventFixture.class, "listener"));
+        collection.addListener(listener(NonStoppingStoppableEventFixture.class, "listener2"));
         var dispatcher = dispatcherWith(collection);
 
         var event =
-                (NonStoppingStoppableEventClass)
-                        dispatcher.dispatch(new NonStoppingStoppableEventClass());
+                (NonStoppingStoppableEventFixture)
+                        dispatcher.dispatch(new NonStoppingStoppableEventFixture());
 
         // Propagation is never stopped, so every listener still dispatches.
         assertEquals(List.of("test", "test"), event.getDispatches());

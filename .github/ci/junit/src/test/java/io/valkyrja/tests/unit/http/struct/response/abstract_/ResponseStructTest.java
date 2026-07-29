@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.tests.fixtures.http.struct.ResponseStructClass;
+import io.valkyrja.tests.fixtures.http.struct.ResponseStructFixture;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ final class ResponseStructTest {
 
     @Test
     void mapsKeysToOutputNames() {
-        var struct = new ResponseStructClass();
+        var struct = new ResponseStructFixture();
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("id", 7);
         data.put("name", "bob");
@@ -36,7 +36,7 @@ final class ResponseStructTest {
 
     @Test
     void skipsMissingKeysUnlessIncludeAll() {
-        var struct = new ResponseStructClass();
+        var struct = new ResponseStructFixture();
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("id", 7);
 

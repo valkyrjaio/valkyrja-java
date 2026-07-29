@@ -42,7 +42,7 @@ import io.valkyrja.cli.routing.throwable.exception.CliRoutingArgumentValuesValid
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingInvalidOptionWithValueException;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingOptionValuesValidationException;
 import io.valkyrja.container.manager.Container;
-import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddleware;
+import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddlewareFixture;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -142,18 +142,18 @@ final class RouterTest {
     void dispatchRegistersRouteMiddlewareOnEachHandler() {
         collection.add(
                 new Route("list", "List", (c, r) -> new EmptyOutput())
-                        .withRouteMatchedMiddleware(List.of(PassThroughMiddleware.class))
-                        .withRouteDispatchedMiddleware(List.of(PassThroughMiddleware.class))
-                        .withThrowableCaughtMiddleware(List.of(PassThroughMiddleware.class))
-                        .withProcessExitingMiddleware(List.of(PassThroughMiddleware.class)));
+                        .withRouteMatchedMiddleware(List.of(PassThroughMiddlewareFixture.class))
+                        .withRouteDispatchedMiddleware(List.of(PassThroughMiddlewareFixture.class))
+                        .withThrowableCaughtMiddleware(List.of(PassThroughMiddlewareFixture.class))
+                        .withProcessExitingMiddleware(List.of(PassThroughMiddlewareFixture.class)));
         stopAfterBinding();
 
         router.dispatch(new Input().withCommandName("list"));
 
-        verify(routeMatchedHandler).add(PassThroughMiddleware.class);
-        verify(routeDispatchedHandler).add(PassThroughMiddleware.class);
-        verify(throwableCaughtHandler).add(PassThroughMiddleware.class);
-        verify(processExitingHandler).add(PassThroughMiddleware.class);
+        verify(routeMatchedHandler).add(PassThroughMiddlewareFixture.class);
+        verify(routeDispatchedHandler).add(PassThroughMiddlewareFixture.class);
+        verify(throwableCaughtHandler).add(PassThroughMiddlewareFixture.class);
+        verify(processExitingHandler).add(PassThroughMiddlewareFixture.class);
     }
 
     // Argument binding.

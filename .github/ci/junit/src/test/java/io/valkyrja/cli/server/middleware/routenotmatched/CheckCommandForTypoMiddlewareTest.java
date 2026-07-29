@@ -97,7 +97,7 @@ final class CheckCommandForTypoMiddlewareTest {
                                                                 .QuestionContract)
                                 .findFirst()
                                 .orElseThrow();
-        question.getCallable().apply(new Output(), new Answer("list"));
+        var ignored = question.getCallable().apply(new Output(), new Answer("list"));
     }
 
     @Test

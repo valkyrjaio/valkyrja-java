@@ -17,7 +17,7 @@ import io.valkyrja.application.entry.Grpc;
 import io.valkyrja.grpc.message.call.ServiceCall;
 import io.valkyrja.grpc.message.enum_.StatusCode;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
-import io.valkyrja.tests.fixtures.grpc.GreeterComponentProvider;
+import io.valkyrja.tests.fixtures.grpc.GreeterComponentProviderFixture;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,7 @@ final class GrpcWiringTest {
                 "app.grpc.provider.data",
                 50051,
                 1000,
-                List.of(new GreeterComponentProvider()),
+                List.of(new GreeterComponentProviderFixture()),
                 List.of(),
                 List.of(),
                 List.of(),

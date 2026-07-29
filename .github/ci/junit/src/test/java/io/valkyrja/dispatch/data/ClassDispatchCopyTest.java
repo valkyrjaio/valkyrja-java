@@ -12,7 +12,7 @@ package io.valkyrja.dispatch.data;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
-import io.valkyrja.tests.fixtures.dispatch.DispatchableClass;
+import io.valkyrja.tests.fixtures.dispatch.DispatchableFixture;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ final class ClassDispatchCopyTest {
     @Test
     void copyReturnsEquivalentInstance() {
         var original =
-                new ClassDispatch(DispatchableClass.class, Map.of("a", 1), List.of(String.class));
+                new ClassDispatch(DispatchableFixture.class, Map.of("a", 1), List.of(String.class));
 
         var copy = original.copy();
 

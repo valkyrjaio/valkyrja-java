@@ -23,8 +23,8 @@ import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
 import io.valkyrja.container.manager.contract.ContainerContract;
-import io.valkyrja.tests.fixtures.cli.routing.AnnotatedController;
-import io.valkyrja.tests.fixtures.cli.routing.CliRoutingCombinationsController;
+import io.valkyrja.tests.fixtures.cli.routing.AnnotatedControllerFixture;
+import io.valkyrja.tests.fixtures.cli.routing.CliRoutingCombinationsControllerFixture;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,7 +39,7 @@ final class AttributeRouteCollectorTest {
 
     @BeforeEach
     void setUp() {
-        var collected = new AttributeRouteCollector().getRoutes(AnnotatedController.class);
+        var collected = new AttributeRouteCollector().getRoutes(AnnotatedControllerFixture.class);
         routes =
                 collected.stream()
                         .collect(Collectors.toMap(RouteContract::getName, Function.identity()));
@@ -62,7 +62,7 @@ final class AttributeRouteCollectorTest {
 
         assertTrue(route.hasArgument("target"));
         assertTrue(route.hasOption("verbose"));
-        // PassThroughMiddleware implements all four contracts, so every middleware list is
+        // PassThroughMiddlewareFixture implements all four contracts, so every middleware list is
         // populated.
         assertEquals(1, route.getRouteMatchedMiddleware().size());
         assertEquals(1, route.getRouteDispatchedMiddleware().size());
@@ -105,7 +105,9 @@ final class AttributeRouteCollectorTest {
     void collectsControllerWithoutClassNameAndUnrelatedMiddleware() {
         var routes =
                 new AttributeRouteCollector()
-                        .getRoutes(io.valkyrja.tests.fixtures.cli.routing.PlainController.class);
+                        .getRoutes(
+                                io.valkyrja.tests.fixtures.cli.routing.PlainControllerFixture
+                                        .class);
 
         assertTrue(routes.stream().anyMatch(route -> route.getName().equals("plain")));
     }
@@ -113,7 +115,8 @@ final class AttributeRouteCollectorTest {
     @Test
     void convertsArgumentAndOptionPermutations() {
         var collected =
-                new AttributeRouteCollector().getRoutes(CliRoutingCombinationsController.class);
+                new AttributeRouteCollector()
+                        .getRoutes(CliRoutingCombinationsControllerFixture.class);
 
         assertEquals(1, collected.size());
         var route = collected.get(0);

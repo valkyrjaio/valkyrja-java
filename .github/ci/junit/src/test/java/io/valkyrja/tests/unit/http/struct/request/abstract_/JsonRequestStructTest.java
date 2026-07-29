@@ -16,7 +16,7 @@ import io.valkyrja.http.message.param.ParsedJsonParamCollection;
 import io.valkyrja.http.message.request.JsonServerRequest;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.struct.request.abstract_.JsonRequestStruct;
-import io.valkyrja.tests.fixtures.http.struct.JsonStructClass;
+import io.valkyrja.tests.fixtures.http.struct.JsonStructFixture;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +29,7 @@ final class JsonRequestStructTest {
                 new JsonServerRequest()
                         .withParsedJson(
                                 new ParsedJsonParamCollection(Map.of("name", "bob", "extra", "x")));
-        var struct = new JsonStructClass();
+        var struct = new JsonStructFixture();
 
         assertFalse(struct.getDataFromRequest(request).isEmpty());
         assertTrue(struct.determineIfRequestContainsExtraData(request));

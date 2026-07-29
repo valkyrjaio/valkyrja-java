@@ -21,9 +21,9 @@ import io.valkyrja.http.message.request.JsonServerRequest;
 import io.valkyrja.http.message.request.ServerRequest;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.struct.throwable.exception.HttpStructJsonServerRequestExpectedException;
-import io.valkyrja.tests.fixtures.http.struct.JsonStructClass;
-import io.valkyrja.tests.fixtures.http.struct.ParsedBodyStructClass;
-import io.valkyrja.tests.fixtures.http.struct.QueryStructClass;
+import io.valkyrja.tests.fixtures.http.struct.JsonStructFixture;
+import io.valkyrja.tests.fixtures.http.struct.ParsedBodyStructFixture;
+import io.valkyrja.tests.fixtures.http.struct.QueryStructFixture;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ final class RequestStructTest {
                         .withParsedBody(
                                 new ParsedBodyParamCollection(
                                         Map.of("name", "bob", "email", "e", "extra", "x")));
-        var struct = new ParsedBodyStructClass();
+        var struct = new ParsedBodyStructFixture();
 
         assertEquals(2, struct.getDataFromRequest(request).size());
         assertTrue(struct.determineIfRequestContainsExtraData(request));
@@ -49,7 +49,7 @@ final class RequestStructTest {
     void queryStructSelectsConfiguredFields() {
         ServerRequestContract request =
                 new ServerRequest().withQueryParams(new QueryParamCollection(Map.of("page", "2")));
-        var struct = new QueryStructClass();
+        var struct = new QueryStructFixture();
 
         assertTrue(struct.getDataFromRequest(request).containsKey("page"));
         assertFalse(struct.determineIfRequestContainsExtraData(request));
@@ -61,7 +61,7 @@ final class RequestStructTest {
                 new JsonServerRequest()
                         .withParsedJson(
                                 new ParsedJsonParamCollection(Map.of("name", "bob", "extra", "x")));
-        var struct = new JsonStructClass();
+        var struct = new JsonStructFixture();
 
         assertTrue(struct.getDataFromRequest(request).containsKey("name"));
         assertTrue(struct.determineIfRequestContainsExtraData(request));
@@ -72,7 +72,7 @@ final class RequestStructTest {
         ServerRequestContract request =
                 new ServerRequest()
                         .withParsedBody(new ParsedBodyParamCollection(Map.of("name", "bob")));
-        var struct = new io.valkyrja.tests.fixtures.http.struct.ValidatingStructClass();
+        var struct = new io.valkyrja.tests.fixtures.http.struct.ValidatingStructFixture();
 
         assertFalse(struct.getValidationRules(request).isEmpty());
         assertTrue(struct.validate(request).validateRules());
@@ -80,7 +80,7 @@ final class RequestStructTest {
 
     @Test
     void jsonStructRequiresJsonRequest() {
-        var struct = new JsonStructClass();
+        var struct = new JsonStructFixture();
 
         assertThrows(
                 HttpStructJsonServerRequestExpectedException.class,
@@ -89,12 +89,12 @@ final class RequestStructTest {
 
     @Test
     void validateRulesPassesWhenNoRulesDeclared() {
-        assertTrue(new QueryStructClass().validate(new ServerRequest()).validateRules());
+        assertTrue(new QueryStructFixture().validate(new ServerRequest()).validateRules());
     }
 
     @Test
     void validateFailsWhenRulesDoNotPass() {
-        var struct = new io.valkyrja.tests.fixtures.http.struct.FailingValidationStructClass();
+        var struct = new io.valkyrja.tests.fixtures.http.struct.FailingValidationStructFixture();
 
         assertFalse(struct.validate(new ServerRequest()).validateRules());
     }

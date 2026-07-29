@@ -25,7 +25,7 @@ import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.routing.provider.GrpcRoutingServiceProvider;
 import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
-import io.valkyrja.tests.fixtures.grpc.GreeterController;
+import io.valkyrja.tests.fixtures.grpc.GreeterControllerFixture;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +59,7 @@ final class GrpcRoutingServiceProviderTest {
     @Test
     void collectsControllersWhenACollectorIsRegistered() {
         ContainerContract container =
-                containerWith(provider(List.of(GreeterController.class), List.of()));
+                containerWith(provider(List.of(GreeterControllerFixture.class), List.of()));
         container.setSingleton(RouteCollectorContract.class, new AttributeRouteCollector());
 
         GrpcRoutingServiceProvider.publishRouteCollection(container);
@@ -71,7 +71,7 @@ final class GrpcRoutingServiceProviderTest {
     @Test
     void skipsControllersWhenNoCollectorIsRegistered() {
         ContainerContract container =
-                containerWith(provider(List.of(GreeterController.class), List.of()));
+                containerWith(provider(List.of(GreeterControllerFixture.class), List.of()));
 
         GrpcRoutingServiceProvider.publishRouteCollection(container);
 

@@ -18,8 +18,8 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.tests.fixtures.application.entry.EntryConfigFixture;
-import io.valkyrja.tests.fixtures.application.entry.HttpSmokeClient;
-import io.valkyrja.tests.fixtures.application.entry.WorkerHttpProbe;
+import io.valkyrja.tests.fixtures.application.entry.HttpSmokeClientFixture;
+import io.valkyrja.tests.fixtures.application.entry.WorkerHttpProbeFixture;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.catalina.startup.Tomcat;
 import org.junit.jupiter.api.Test;
@@ -44,15 +44,15 @@ final class TomcatHttpSmokeTest {
 
         Tomcat tomcat = TomcatHttp.server(EntryConfigFixture.httpOnPort(0, appRef::set));
         try {
-            WorkerHttpProbe probe = WorkerHttpProbe.bind(appRef.get());
+            WorkerHttpProbeFixture probe = WorkerHttpProbeFixture.bind(appRef.get());
             int port = tomcat.getConnector().getLocalPort();
             assertTrue(port > 0, "the adapter should have opened a bound connector");
 
-            String response = HttpSmokeClient.get(port);
+            String response = HttpSmokeClientFixture.get(port);
 
             assertTrue(response.startsWith("HTTP/"), response);
-            assertTrue(response.contains(" " + WorkerHttpProbe.STATUS + " "), response);
-            assertTrue(response.contains(WorkerHttpProbe.BODY), response);
+            assertTrue(response.contains(" " + WorkerHttpProbeFixture.STATUS + " "), response);
+            assertTrue(response.contains(WorkerHttpProbeFixture.BODY), response);
 
             ServerRequestContract request = probe.capturedRequest();
             assertNotNull(request, "the adapter did not dispatch the incoming request");

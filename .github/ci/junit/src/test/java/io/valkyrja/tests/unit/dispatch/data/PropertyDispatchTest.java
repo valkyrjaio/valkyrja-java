@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.dispatch.data.PropertyDispatch;
-import io.valkyrja.tests.fixtures.dispatch.DispatchableClass;
+import io.valkyrja.tests.fixtures.dispatch.DispatchableFixture;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link PropertyDispatch} data object. */
@@ -23,7 +23,7 @@ final class PropertyDispatchTest {
 
     @Test
     void twoArgConstructorDefaultsToInstanceProperty() {
-        var dispatch = new PropertyDispatch(DispatchableClass.class, "instanceField");
+        var dispatch = new PropertyDispatch(DispatchableFixture.class, "instanceField");
 
         assertEquals("instanceField", dispatch.getProperty());
         assertFalse(dispatch.isStatic());
@@ -31,14 +31,14 @@ final class PropertyDispatchTest {
 
     @Test
     void staticFlagConstructor() {
-        var dispatch = new PropertyDispatch(DispatchableClass.class, "staticField", true);
+        var dispatch = new PropertyDispatch(DispatchableFixture.class, "staticField", true);
 
         assertTrue(dispatch.isStatic());
     }
 
     @Test
     void withMethodsReturnNewInstances() {
-        var original = new PropertyDispatch(DispatchableClass.class, "instanceField");
+        var original = new PropertyDispatch(DispatchableFixture.class, "instanceField");
 
         var withProperty = original.withProperty("other");
         var withStatic = original.withIsStatic(true);
@@ -51,20 +51,20 @@ final class PropertyDispatchTest {
 
     @Test
     void toMapIncludesPropertyAndStaticFlag() {
-        var map = new PropertyDispatch(DispatchableClass.class, "staticField", true).toMap();
+        var map = new PropertyDispatch(DispatchableFixture.class, "staticField", true).toMap();
 
         assertEquals("staticField", map.get("property"));
         assertEquals(true, map.get("isStatic"));
-        assertEquals(DispatchableClass.class.getName(), map.get("class"));
+        assertEquals(DispatchableFixture.class.getName(), map.get("class"));
     }
 
     @Test
     void toStringUsesStaticOrInstanceSeparator() {
         assertEquals(
-                DispatchableClass.class.getName() + "::staticField",
-                new PropertyDispatch(DispatchableClass.class, "staticField", true).toString());
+                DispatchableFixture.class.getName() + "::staticField",
+                new PropertyDispatch(DispatchableFixture.class, "staticField", true).toString());
         assertEquals(
-                DispatchableClass.class.getName() + "->instanceField",
-                new PropertyDispatch(DispatchableClass.class, "instanceField").toString());
+                DispatchableFixture.class.getName() + "->instanceField",
+                new PropertyDispatch(DispatchableFixture.class, "instanceField").toString());
     }
 }

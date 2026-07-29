@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.dispatch.data.ClassDispatch;
-import io.valkyrja.tests.fixtures.dispatch.DispatchableClass;
+import io.valkyrja.tests.fixtures.dispatch.DispatchableFixture;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -25,16 +25,16 @@ final class ClassDispatchTest {
 
     @Test
     void defaultsToEmptyArgumentsAndDependencies() {
-        var dispatch = new ClassDispatch(DispatchableClass.class);
+        var dispatch = new ClassDispatch(DispatchableFixture.class);
 
-        assertSame(DispatchableClass.class, dispatch.getClassName());
+        assertSame(DispatchableFixture.class, dispatch.getClassName());
         assertTrue(dispatch.getArguments().isEmpty());
         assertTrue(dispatch.getDependencies().isEmpty());
     }
 
     @Test
     void withMethodsReturnNewInstancesAndLeaveOriginalUnchanged() {
-        var original = new ClassDispatch(DispatchableClass.class);
+        var original = new ClassDispatch(DispatchableFixture.class);
 
         var withArgs = original.withArguments(Map.of("a", 1));
         var withDeps = original.withDependencies(List.of(String.class));
@@ -52,11 +52,11 @@ final class ClassDispatchTest {
     @Test
     void toMapContainsClassArgumentsAndDependencies() {
         var dispatch =
-                new ClassDispatch(DispatchableClass.class, Map.of("a", 1), List.of(String.class));
+                new ClassDispatch(DispatchableFixture.class, Map.of("a", 1), List.of(String.class));
 
         var map = dispatch.toMap();
 
-        assertEquals(DispatchableClass.class.getName(), map.get("class"));
+        assertEquals(DispatchableFixture.class.getName(), map.get("class"));
         assertEquals(Map.of("a", 1), map.get("arguments"));
         assertEquals(List.of(String.class.getName()), map.get("dependencies"));
     }
@@ -64,7 +64,7 @@ final class ClassDispatchTest {
     @Test
     void toStringIsClassName() {
         assertEquals(
-                DispatchableClass.class.getName(),
-                new ClassDispatch(DispatchableClass.class).toString());
+                DispatchableFixture.class.getName(),
+                new ClassDispatch(DispatchableFixture.class).toString());
     }
 }

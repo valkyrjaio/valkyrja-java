@@ -22,17 +22,17 @@ import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.provider.ContainerComponentProvider;
 import io.valkyrja.event.provider.EventComponentProvider;
-import io.valkyrja.tests.fixtures.application.provider.CliComponentProviderClass;
-import io.valkyrja.tests.fixtures.application.provider.CliRouteComponentProviderClass;
-import io.valkyrja.tests.fixtures.application.provider.ComponentProviderClass;
-import io.valkyrja.tests.fixtures.application.provider.EventComponentProviderClass;
-import io.valkyrja.tests.fixtures.application.provider.GrpcRouteComponentProviderClass;
-import io.valkyrja.tests.fixtures.application.provider.HttpComponentProviderClass;
-import io.valkyrja.tests.fixtures.application.provider.HttpRouteComponentProviderClass;
-import io.valkyrja.tests.fixtures.cli.routing.provider.CliRouteProviderClass;
-import io.valkyrja.tests.fixtures.event.provider.ListenerProviderClass;
-import io.valkyrja.tests.fixtures.grpc.GreeterRouteProvider;
-import io.valkyrja.tests.fixtures.http.routing.provider.HttpRouteProviderClass;
+import io.valkyrja.tests.fixtures.application.provider.CliComponentProviderFixture;
+import io.valkyrja.tests.fixtures.application.provider.CliRouteComponentProviderFixture;
+import io.valkyrja.tests.fixtures.application.provider.ComponentProviderFixture;
+import io.valkyrja.tests.fixtures.application.provider.EventComponentProviderFixture;
+import io.valkyrja.tests.fixtures.application.provider.GrpcRouteComponentProviderFixture;
+import io.valkyrja.tests.fixtures.application.provider.HttpComponentProviderFixture;
+import io.valkyrja.tests.fixtures.application.provider.HttpRouteComponentProviderFixture;
+import io.valkyrja.tests.fixtures.cli.routing.provider.CliRouteProviderFixture;
+import io.valkyrja.tests.fixtures.event.provider.ListenerProviderFixture;
+import io.valkyrja.tests.fixtures.grpc.GreeterRouteProviderFixture;
+import io.valkyrja.tests.fixtures.http.routing.provider.HttpRouteProviderFixture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -99,18 +99,18 @@ final class ValkyrjaTest {
 
     @Test
     void getProvidersExpandsComponentProviders() {
-        var application = appWith(new ComponentProviderClass());
+        var application = appWith(new ComponentProviderFixture());
 
         var providers = application.getProviders();
         assertEquals(3, providers.size());
-        assertInstanceOf(CliComponentProviderClass.class, providers.get(0));
-        assertInstanceOf(HttpComponentProviderClass.class, providers.get(1));
-        assertInstanceOf(ComponentProviderClass.class, providers.get(2));
+        assertInstanceOf(CliComponentProviderFixture.class, providers.get(0));
+        assertInstanceOf(HttpComponentProviderFixture.class, providers.get(1));
+        assertInstanceOf(ComponentProviderFixture.class, providers.get(2));
     }
 
     @Test
     void getProvidersIsCached() {
-        var application = appWith(new ComponentProviderClass());
+        var application = appWith(new ComponentProviderFixture());
 
         var first = application.getProviders();
 
@@ -120,7 +120,7 @@ final class ValkyrjaTest {
 
     @Test
     void getContainerProviders() {
-        var application = appWith(new ComponentProviderClass());
+        var application = appWith(new ComponentProviderFixture());
 
         var result = application.getContainerProviders();
 
@@ -129,7 +129,7 @@ final class ValkyrjaTest {
 
     @Test
     void getContainerProvidersIsCached() {
-        var application = appWith(new ComponentProviderClass());
+        var application = appWith(new ComponentProviderFixture());
 
         var first = application.getContainerProviders();
 
@@ -139,17 +139,17 @@ final class ValkyrjaTest {
 
     @Test
     void getEventProviders() {
-        var application = appWith(new EventComponentProviderClass());
+        var application = appWith(new EventComponentProviderFixture());
 
         var result = application.getEventProviders();
 
         assertEquals(1, result.size());
-        assertInstanceOf(ListenerProviderClass.class, result.get(0));
+        assertInstanceOf(ListenerProviderFixture.class, result.get(0));
     }
 
     @Test
     void getEventProvidersIsCached() {
-        var application = appWith(new EventComponentProviderClass());
+        var application = appWith(new EventComponentProviderFixture());
 
         var first = application.getEventProviders();
 
@@ -159,17 +159,17 @@ final class ValkyrjaTest {
 
     @Test
     void getCliProviders() {
-        var application = appWith(new CliRouteComponentProviderClass());
+        var application = appWith(new CliRouteComponentProviderFixture());
 
         var result = application.getCliProviders();
 
         assertEquals(1, result.size());
-        assertInstanceOf(CliRouteProviderClass.class, result.get(0));
+        assertInstanceOf(CliRouteProviderFixture.class, result.get(0));
     }
 
     @Test
     void getCliProvidersIsCached() {
-        var application = appWith(new CliRouteComponentProviderClass());
+        var application = appWith(new CliRouteComponentProviderFixture());
 
         var first = application.getCliProviders();
 
@@ -179,17 +179,17 @@ final class ValkyrjaTest {
 
     @Test
     void getHttpProviders() {
-        var application = appWith(new HttpRouteComponentProviderClass());
+        var application = appWith(new HttpRouteComponentProviderFixture());
 
         var result = application.getHttpProviders();
 
         assertEquals(1, result.size());
-        assertInstanceOf(HttpRouteProviderClass.class, result.get(0));
+        assertInstanceOf(HttpRouteProviderFixture.class, result.get(0));
     }
 
     @Test
     void getHttpProvidersIsCached() {
-        var application = appWith(new HttpRouteComponentProviderClass());
+        var application = appWith(new HttpRouteComponentProviderFixture());
 
         var first = application.getHttpProviders();
 
@@ -199,17 +199,17 @@ final class ValkyrjaTest {
 
     @Test
     void getGrpcProviders() {
-        var application = appWith(new GrpcRouteComponentProviderClass());
+        var application = appWith(new GrpcRouteComponentProviderFixture());
 
         var result = application.getGrpcProviders();
 
         assertEquals(1, result.size());
-        assertInstanceOf(GreeterRouteProvider.class, result.get(0));
+        assertInstanceOf(GreeterRouteProviderFixture.class, result.get(0));
     }
 
     @Test
     void getGrpcProvidersIsCached() {
-        var application = appWith(new GrpcRouteComponentProviderClass());
+        var application = appWith(new GrpcRouteComponentProviderFixture());
 
         var first = application.getGrpcProviders();
 

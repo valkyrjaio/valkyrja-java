@@ -55,6 +55,7 @@ jobs:
           - '.github/ci/archunit/**'
           - '.github/workflows/ci.yml'
           - 'src/**/*.java'
+          - '.github/ci/junit/src/test/**/*.java'
     secrets: inherit
 
   errorprone:
@@ -70,6 +71,7 @@ jobs:
           - '.github/ci/errorprone/**'
           - '.github/workflows/ci.yml'
           - 'src/**/*.java'
+          - '.github/ci/junit/src/test/**/*.java'
     secrets: inherit
 
   spotbugs:
@@ -85,6 +87,7 @@ jobs:
           - '.github/ci/spotbugs/**'
           - '.github/workflows/ci.yml'
           - 'src/**/*.java'
+          - '.github/ci/junit/src/test/**/*.java'
     secrets: inherit
 
   junit:

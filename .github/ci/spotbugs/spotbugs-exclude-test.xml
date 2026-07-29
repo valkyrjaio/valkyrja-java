@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SpotBugs exclude filter for the JUnit build's test tree.
+
+    Kept separate from spotbugs-exclude.xml so `src` stays strict: nothing here
+    can loosen the framework's own analysis. Every entry is a JUnit/fixture
+    idiom that SpotBugs reports because it assumes production code — none of
+    them describe a defect in a test.
+-->
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/3.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/master/spotbugs/etc/findbugsfilter.xsd">
+
+    <!--
+        Tests implement contracts as anonymous classes to stub a single method
+        inline. Hoisting each to a static nested class would scatter the stub
+        away from the assertion that explains it, for no behavioral gain.
+    -->
+    <Match>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+    </Match>
+
+    <!--
+        Middleware and handler fixtures record invocations in static counters so
+        a test can assert how many times a stage ran. Writing them from an
+        instance method is the point — the framework, not the test, constructs
+        the instance.
+    -->
+    <Match>
+        <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" />
+    </Match>
+
+    <!--
+        `void test() throws Exception` is the universal JUnit signature: the
+        framework catches whatever a test throws and reports it as a failure, so
+        narrowing every clause would add noise without adding safety.
+    -->
+    <Match>
+        <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    </Match>
+
+    <!--
+        Utility classes with only static members are instantiated deliberately,
+        to cover their private constructors and hold branch coverage at 100%.
+    -->
+    <Match>
+        <Bug pattern="ISC_INSTANTIATE_STATIC_CLASS" />
+    </Match>
+
+    <!--
+        `var ignored = call();` is the test tree's established way to invoke a
+        method for its side effect while satisfying Error Prone's
+        ReturnValueIgnored. The two tools disagree here; Error Prone wins,
+        because dropping the assignment would drop the call.
+    -->
+    <Match>
+        <Bug pattern="DLS_DEAD_LOCAL_STORE" />
+    </Match>
+
+    <!--
+        Fixture state is public and mutable by design: ProviderFixture's flags
+        are what a deferred-publish test asserts on, and DispatchableFixture's
+        members exist to be found reflectively — a private or final member would
+        make the fixture useless for the test that reflects over it.
+    -->
+    <Match>
+        <Class name="io.valkyrja.tests.fixtures.container.provider.ProviderFixture" />
+        <Bug pattern="MS_CANNOT_BE_FINAL,PA_PUBLIC_PRIMITIVE_ATTRIBUTE" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.tests.fixtures.dispatch.DispatchableFixture" />
+        <Bug pattern="MS_SHOULD_BE_FINAL,UPM_UNCALLED_PRIVATE_METHOD" />
+    </Match>
+
+    <!--
+        Carried over from spotbugs-exclude.xml, which excludes these
+        framework-wide: fixtures are production-shaped doubles, so they store and
+        return the same mutable collections the framework does, and defensive
+        copies would make a fixture stop mirroring the type it stands in for.
+    -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+
+    <!--
+        Also framework-wide in spotbugs-exclude.xml. DispatchableFixture's public
+        fields are unread by design here — they exist to be resolved reflectively
+        by the dispatcher tests, which SpotBugs cannot see.
+    -->
+    <Match>
+        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+    </Match>
+
+    <!--
+        Also framework-wide in spotbugs-exclude.xml: Valkyrja's throwables are all
+        unchecked, so a test that documents what a method throws names a
+        RuntimeException subclass.
+    -->
+    <Match>
+        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+    </Match>
+
+    <!--
+        These absolute paths are string inputs to pure path-parsing methods, not
+        filesystem access — the assertion is that "/dir/file.txt" yields "/dir".
+    -->
+    <Match>
+        <Class name="io.valkyrja.http.message.file.UploadedFileInternalsTest" />
+        <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.tests.unit.http.message.file.UploadedFileTest" />
+        <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME" />
+    </Match>
+
+</FindBugsFilter>

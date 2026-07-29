@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.tests.fixtures.support.generator.FileGeneratorClass;
+import io.valkyrja.tests.fixtures.support.generator.FileGeneratorFixture;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,10 +28,10 @@ final class FileGeneratorTest {
             throws IOException {
         Path target = dir.resolve("nested/output.txt");
 
-        new FileGeneratorClass(target.toString()).generateFile();
+        new FileGeneratorFixture(target.toString()).generateFile();
 
         assertTrue(Files.exists(target));
-        assertEquals(FileGeneratorClass.CONTENTS, Files.readString(target));
+        assertEquals(FileGeneratorFixture.CONTENTS, Files.readString(target));
     }
 
     @Test
@@ -43,7 +43,7 @@ final class FileGeneratorTest {
         var thrown =
                 assertThrows(
                         RuntimeException.class,
-                        () -> new FileGeneratorClass(invalidPath).generateFile());
+                        () -> new FileGeneratorFixture(invalidPath).generateFile());
 
         assertTrue(thrown.getMessage().contains("Failed to write file"));
     }
