@@ -32,7 +32,7 @@ final class OutputTest {
         var buffer = new ByteArrayOutputStream();
         System.setOut(new PrintStream(buffer, true, StandardCharsets.UTF_8));
         try {
-            action.get();
+            var ignored = action.get();
         } finally {
             System.setOut(original);
         }

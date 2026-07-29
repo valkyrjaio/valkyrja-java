@@ -30,12 +30,13 @@ import io.valkyrja.grpc.routing.attribute.Middleware;
 import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** Fixture gRPC service controller exercising the {@code AttributeRouteCollector}. */
 @Service(service = "pkg.Greeter")
-public class GreeterControllerFixture {
+public final class GreeterControllerFixture {
 
     @Method(name = "SayHello")
     public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
@@ -45,14 +46,18 @@ public class GreeterControllerFixture {
     /** Unary (1 → 1): returns a single byte[] message, for the end-to-end unary verification. */
     @Method(name = "Ping")
     public ServiceResponseContract ping(ContainerContract container, RouteContract route) {
-        return ServiceResponse.ok("pong".getBytes());
+        return ServiceResponse.ok("pong".getBytes(StandardCharsets.UTF_8));
     }
 
     /** Server-streaming (1 → N): buffered path returns several byte[] messages for one request. */
     @Method(name = "Fanout", serverStreaming = true)
     public ServiceResponseContract fanout(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok()
-                .withMessages(List.<Object>of("x".getBytes(), "y".getBytes(), "z".getBytes()));
+                .withMessages(
+                        List.<Object>of(
+                                "x".getBytes(StandardCharsets.UTF_8),
+                                "y".getBytes(StandardCharsets.UTF_8),
+                                "z".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Method(name = "StreamHellos", clientStreaming = true, serverStreaming = true)
@@ -84,7 +89,7 @@ public class GreeterControllerFixture {
     /** Client-streaming (not bidirectional): buffered like unary, so it takes the buffered path. */
     @Method(name = "Collect", clientStreaming = true)
     public ServiceResponseContract collect(ContainerContract container, RouteContract route) {
-        return ServiceResponse.ok("collected".getBytes());
+        return ServiceResponse.ok("collected".getBytes(StandardCharsets.UTF_8));
     }
 
     @Method(name = "Boom")

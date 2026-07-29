@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -160,7 +161,7 @@ final class CacheResponseMiddlewareTest {
 
     private static void writeCacheFile(String path) throws IOException {
         Path p = Path.of(path);
-        Files.createDirectories(p.getParent());
+        Files.createDirectories(Objects.requireNonNull(p.getParent()));
         Files.writeString(p, "cached");
     }
 
@@ -193,7 +194,7 @@ final class CacheResponseMiddlewareTest {
         var request = request();
         var file = new java.io.File(cache.pathFor(request));
         writeCacheFile(file.getPath());
-        file.setLastModified(0L);
+        assertTrue(file.setLastModified(0L));
 
         cache.requestReceived(request, receivedHandler());
 

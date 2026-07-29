@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -138,7 +139,7 @@ final class GrpcBridgeTest {
                         call,
                         headers,
                         "pkg.Svc/M",
-                        List.of("a".getBytes()),
+                        List.of("a".getBytes(StandardCharsets.UTF_8)),
                         new CancellationToken());
 
         assertEquals("/pkg.Svc/M", serviceCall.getMethod());
@@ -239,8 +240,10 @@ final class GrpcBridgeTest {
         ServiceCallContract serviceCall = ServiceCall.unary("/pkg.Svc/M", "req");
         ServiceResponse response =
                 (ServiceResponse)
-                        ServiceResponse.of(Status.internal("boom", "detail".getBytes()))
-                                .withMessages(List.of("hi".getBytes()))
+                        ServiceResponse.of(
+                                        Status.internal(
+                                                "boom", "detail".getBytes(StandardCharsets.UTF_8)))
+                                .withMessages(List.of("hi".getBytes(StandardCharsets.UTF_8)))
                                 .withInitialMetadata(new Metadata().with("x", "v"));
 
         ArgumentCaptor<io.grpc.Metadata> trailers = ArgumentCaptor.forClass(io.grpc.Metadata.class);
@@ -261,12 +264,16 @@ final class GrpcBridgeTest {
         ServiceCallContract serviceCall = ServiceCall.unary("/pkg.Svc/M", "req");
         ServiceResponse response =
                 (ServiceResponse)
-                        ServiceResponse.of(Status.internal("boom", "authoritative".getBytes()))
+                        ServiceResponse.of(
+                                        Status.internal(
+                                                "boom",
+                                                "authoritative".getBytes(StandardCharsets.UTF_8)))
                                 .withTrailingMetadata(
                                         new Metadata()
                                                 .with(
                                                         "grpc-status-details-bin",
-                                                        "handler-set".getBytes()));
+                                                        "handler-set"
+                                                                .getBytes(StandardCharsets.UTF_8)));
 
         ArgumentCaptor<io.grpc.Metadata> trailers = ArgumentCaptor.forClass(io.grpc.Metadata.class);
         GrpcBridge.write(call, serviceCall, response);
@@ -280,13 +287,16 @@ final class GrpcBridgeTest {
                 .forEach(details::add);
         // Only the Status's own details survive; the handler-set duplicate was discarded.
         assertEquals(1, details.size());
-        assertArrayEquals("authoritative".getBytes(), details.get(0));
+        assertArrayEquals("authoritative".getBytes(StandardCharsets.UTF_8), details.get(0));
     }
 
     @Test
     void toAndFromGrpcMetadataCarryAsciiAndBinary() {
         Metadata metadata =
-                (Metadata) new Metadata().with("x", "v").with("y-bin", "binary".getBytes());
+                (Metadata)
+                        new Metadata()
+                                .with("x", "v")
+                                .with("y-bin", "binary".getBytes(StandardCharsets.UTF_8));
 
         io.grpc.Metadata grpcMetadata = GrpcBridge.toGrpcMetadata(metadata);
         assertTrue(grpcMetadata.keys().contains("x"));
@@ -294,12 +304,13 @@ final class GrpcBridgeTest {
 
         MetadataContract roundTrip = GrpcBridge.fromGrpcMetadata(grpcMetadata);
         assertEquals("v", roundTrip.get("x"));
-        assertArrayEquals("binary".getBytes(), (byte[]) roundTrip.get("y-bin"));
+        assertArrayEquals(
+                "binary".getBytes(StandardCharsets.UTF_8), (byte[]) roundTrip.get("y-bin"));
     }
 
     @Test
     void byteMarshallerRoundTrips() throws Exception {
-        byte[] bytes = "payload".getBytes();
+        byte[] bytes = "payload".getBytes(StandardCharsets.UTF_8);
 
         try (InputStream stream = GrpcBridge.ByteMarshaller.INSTANCE.stream(bytes)) {
             assertArrayEquals(bytes, stream.readAllBytes());
@@ -310,18 +321,18 @@ final class GrpcBridgeTest {
     }
 
     @Test
-    void byteMarshallerParseWrapsIoException() {
-        InputStream failing =
+    void byteMarshallerParseWrapsIoException() throws IOException {
+        try (InputStream failing =
                 new InputStream() {
                     @Override
                     public int read() throws IOException {
                         throw new IOException("boom");
                     }
-                };
-
-        assertThrows(
-                java.io.UncheckedIOException.class,
-                () -> GrpcBridge.ByteMarshaller.INSTANCE.parse(failing));
+                }) {
+            assertThrows(
+                    java.io.UncheckedIOException.class,
+                    () -> GrpcBridge.ByteMarshaller.INSTANCE.parse(failing));
+        }
     }
 
     @Test
@@ -334,7 +345,7 @@ final class GrpcBridgeTest {
         ServerCallHandler<byte[], byte[]> handler =
                 GrpcBridge.handler(app, data, "pkg.Greeter/Missing");
         ServerCall.Listener<byte[]> listener = handler.startCall(call, new io.grpc.Metadata());
-        listener.onMessage("ignored".getBytes());
+        listener.onMessage("ignored".getBytes(StandardCharsets.UTF_8));
         listener.onHalfClose();
         listener.onCancel();
 
@@ -408,8 +419,8 @@ final class GrpcBridgeTest {
         ServerCall.Listener<byte[]> listener =
                 GrpcBridge.handler(app, data, "pkg.Greeter/Collect")
                         .startCall(call, new io.grpc.Metadata());
-        listener.onMessage("a".getBytes());
-        listener.onMessage("b".getBytes());
+        listener.onMessage("a".getBytes(StandardCharsets.UTF_8));
+        listener.onMessage("b".getBytes(StandardCharsets.UTF_8));
         listener.onHalfClose();
 
         verify(call).sendHeaders(any());
@@ -466,9 +477,9 @@ final class GrpcBridgeTest {
         ServerCall.Listener<byte[]> listener =
                 GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
                         .startCall(call, new io.grpc.Metadata());
-        listener.onMessage("a".getBytes());
-        listener.onMessage("b".getBytes());
-        listener.onMessage("c".getBytes());
+        listener.onMessage("a".getBytes(StandardCharsets.UTF_8));
+        listener.onMessage("b".getBytes(StandardCharsets.UTF_8));
+        listener.onMessage("c".getBytes(StandardCharsets.UTF_8));
         listener.onHalfClose();
 
         assertTrue(closed.await(5, TimeUnit.SECONDS));
@@ -508,7 +519,7 @@ final class GrpcBridgeTest {
         ServerCall.Listener<byte[]> listener =
                 GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
                         .startCall(call, new io.grpc.Metadata());
-        listener.onMessage("a".getBytes());
+        listener.onMessage("a".getBytes(StandardCharsets.UTF_8));
         // Wait until the handler has drained and echoed "a" — it is now mid-stream, parked on the
         // next read — then cancel before half-close.
         assertTrue(echoed.await(5, TimeUnit.SECONDS));
@@ -541,8 +552,8 @@ final class GrpcBridgeTest {
         ServerCall.Listener<byte[]> listener =
                 GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
                         .startCall(call, new io.grpc.Metadata());
-        listener.onMessage("a".getBytes());
-        listener.onMessage("b".getBytes());
+        listener.onMessage("a".getBytes(StandardCharsets.UTF_8));
+        listener.onMessage("b".getBytes(StandardCharsets.UTF_8));
         listener.onHalfClose();
 
         assertTrue(closed.await(5, TimeUnit.SECONDS));

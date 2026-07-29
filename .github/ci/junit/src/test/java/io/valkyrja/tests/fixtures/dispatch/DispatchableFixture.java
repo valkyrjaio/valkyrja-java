@@ -10,7 +10,7 @@
 package io.valkyrja.tests.fixtures.dispatch;
 
 /** Reflection target for dispatcher tests: static/instance methods, fields, and a constant. */
-public class DispatchableFixture {
+public final class DispatchableFixture {
 
     public static final String CONSTANT = "constant-value";
 

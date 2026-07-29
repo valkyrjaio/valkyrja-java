@@ -14,7 +14,7 @@ import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
 import java.util.List;
 
 /** Fixture route provider supplying the {@link GreeterControllerFixture} to the service map. */
-public class GreeterRouteProviderFixture implements GrpcRouteProviderContract {
+public final class GreeterRouteProviderFixture implements GrpcRouteProviderContract {
 
     @Override
     public List<Class<?>> getControllerClasses() {

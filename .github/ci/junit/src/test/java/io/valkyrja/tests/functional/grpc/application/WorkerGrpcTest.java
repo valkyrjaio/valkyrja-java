@@ -151,8 +151,9 @@ final class WorkerGrpcTest {
 
         assertEquals(List.of("a", "b"), outbound.messages);
         assertTrue(outbound.headersSent);
-        assertNotNull(outbound.terminal);
-        assertEquals(StatusCode.OK, outbound.terminal.getStatus().getCode());
+        ServiceResponseContract terminal = outbound.terminal;
+        assertNotNull(terminal);
+        assertEquals(StatusCode.OK, terminal.getStatus().getCode());
         // SendingResponse once at stream open (first emit), ResponseSent once at close.
         assertEquals(1, GreeterControllerFixture.SendingMiddleware.calls.get());
         assertEquals(1, GreeterControllerFixture.ResponseSentMiddleware.calls.get());

@@ -21,7 +21,7 @@ import io.valkyrja.grpc.routing.data.contract.RouteContract;
  * fails with a {@link ReflectiveOperationException}.
  */
 @Service(service = "pkg.NoCtor")
-public class NoDefaultConstructorControllerFixture {
+public final class NoDefaultConstructorControllerFixture {
 
     public NoDefaultConstructorControllerFixture(String required) {
         // Only a parameterized constructor exists.

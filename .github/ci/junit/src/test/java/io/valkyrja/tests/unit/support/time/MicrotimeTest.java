@@ -16,7 +16,7 @@ import io.valkyrja.support.time.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-public class MicrotimeTest {
+public final class MicrotimeTest {
 
     @AfterEach
     void tearDown() {

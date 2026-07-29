@@ -21,7 +21,7 @@ import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
 /** Fixture component provider that pulls in the gRPC stack and registers the greeter routes. */
-public class GreeterComponentProviderFixture extends ComponentProvider {
+public final class GreeterComponentProviderFixture extends ComponentProvider {
 
     @Override
     public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {

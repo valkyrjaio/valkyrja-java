@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 /**
  * Fixture service provider registering the {@link GreeterControllerFixture} per-route middleware.
  */
-public class GreeterServiceProviderFixture implements ServiceProviderContract {
+public final class GreeterServiceProviderFixture implements ServiceProviderContract {
 
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {

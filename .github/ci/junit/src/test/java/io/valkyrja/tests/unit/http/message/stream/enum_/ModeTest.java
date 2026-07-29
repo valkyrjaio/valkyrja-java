@@ -54,8 +54,9 @@ final class ModeTest {
     @Test
     void readableAndWriteableForEveryMode() {
         for (Mode mode : Mode.values()) {
-            mode.isReadable();
-            mode.isWriteable();
+            // Non-short-circuiting on purpose: both accessors must be evaluated for every
+            // constant, which is what holds this enum at 100% branch coverage.
+            boolean ignored = mode.isReadable() | mode.isWriteable();
         }
         assertTrue(Mode.READ.isReadable());
         assertFalse(Mode.WRITE.isReadable());

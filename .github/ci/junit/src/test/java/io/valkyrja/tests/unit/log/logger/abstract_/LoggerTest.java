@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import io.valkyrja.log.enum_.LogLevel;
 import io.valkyrja.log.logger.abstract_.Logger;
 import io.valkyrja.log.throwable.exception.LogInvalidLogLevelException;
+import java.util.Locale;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -77,7 +78,7 @@ final class LoggerTest {
         for (LogLevel level : LogLevel.values()) {
             logger.log(level, "m", Map.of());
 
-            assertEquals(level.name().toLowerCase(), logger.last);
+            assertEquals(level.name().toLowerCase(Locale.ROOT), logger.last);
         }
     }
 

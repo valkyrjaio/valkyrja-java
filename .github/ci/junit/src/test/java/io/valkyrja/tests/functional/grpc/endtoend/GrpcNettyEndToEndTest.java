@@ -30,6 +30,7 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.tests.fixtures.grpc.GreeterComponentProviderFixture;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -114,13 +115,13 @@ final class GrpcNettyEndToEndTest {
                             CallOptions.DEFAULT);
             call.start(collector(responses, status, done), new Metadata());
             call.request(1);
-            call.sendMessage("ping".getBytes());
+            call.sendMessage("ping".getBytes(StandardCharsets.UTF_8));
             call.halfClose();
 
             assertTrue(done.await(10, TimeUnit.SECONDS), "call did not complete");
             assertEquals(Status.Code.OK, status.get().getCode());
             assertEquals(1, responses.size());
-            assertArrayEquals("pong".getBytes(), responses.get(0));
+            assertArrayEquals("pong".getBytes(StandardCharsets.UTF_8), responses.get(0));
         } finally {
             channel.shutdownNow();
             server.shutdownNow();
@@ -147,15 +148,15 @@ final class GrpcNettyEndToEndTest {
                             CallOptions.DEFAULT);
             call.start(collector(responses, status, done), new Metadata());
             call.request(10);
-            call.sendMessage("go".getBytes());
+            call.sendMessage("go".getBytes(StandardCharsets.UTF_8));
             call.halfClose();
 
             assertTrue(done.await(10, TimeUnit.SECONDS), "call did not complete");
             assertEquals(Status.Code.OK, status.get().getCode());
             assertEquals(3, responses.size());
-            assertArrayEquals("x".getBytes(), responses.get(0));
-            assertArrayEquals("y".getBytes(), responses.get(1));
-            assertArrayEquals("z".getBytes(), responses.get(2));
+            assertArrayEquals("x".getBytes(StandardCharsets.UTF_8), responses.get(0));
+            assertArrayEquals("y".getBytes(StandardCharsets.UTF_8), responses.get(1));
+            assertArrayEquals("z".getBytes(StandardCharsets.UTF_8), responses.get(2));
         } finally {
             channel.shutdownNow();
             server.shutdownNow();
@@ -182,14 +183,14 @@ final class GrpcNettyEndToEndTest {
                             CallOptions.DEFAULT);
             call.start(collector(responses, status, done), new Metadata());
             call.request(2);
-            call.sendMessage("chunk-1".getBytes());
-            call.sendMessage("chunk-2".getBytes());
+            call.sendMessage("chunk-1".getBytes(StandardCharsets.UTF_8));
+            call.sendMessage("chunk-2".getBytes(StandardCharsets.UTF_8));
             call.halfClose();
 
             assertTrue(done.await(10, TimeUnit.SECONDS), "call did not complete");
             assertEquals(Status.Code.OK, status.get().getCode());
             assertEquals(1, responses.size());
-            assertArrayEquals("collected".getBytes(), responses.get(0));
+            assertArrayEquals("collected".getBytes(StandardCharsets.UTF_8), responses.get(0));
         } finally {
             channel.shutdownNow();
             server.shutdownNow();
@@ -214,17 +215,17 @@ final class GrpcNettyEndToEndTest {
                             CallOptions.DEFAULT);
             call.start(collector(responses, status, done), new Metadata());
             call.request(10);
-            call.sendMessage("a".getBytes());
-            call.sendMessage("b".getBytes());
-            call.sendMessage("c".getBytes());
+            call.sendMessage("a".getBytes(StandardCharsets.UTF_8));
+            call.sendMessage("b".getBytes(StandardCharsets.UTF_8));
+            call.sendMessage("c".getBytes(StandardCharsets.UTF_8));
             call.halfClose();
 
             assertTrue(done.await(10, TimeUnit.SECONDS), "call did not complete");
             assertEquals(Status.Code.OK, status.get().getCode());
             assertEquals(3, responses.size());
-            assertArrayEquals("a".getBytes(), responses.get(0));
-            assertArrayEquals("b".getBytes(), responses.get(1));
-            assertArrayEquals("c".getBytes(), responses.get(2));
+            assertArrayEquals("a".getBytes(StandardCharsets.UTF_8), responses.get(0));
+            assertArrayEquals("b".getBytes(StandardCharsets.UTF_8), responses.get(1));
+            assertArrayEquals("c".getBytes(StandardCharsets.UTF_8), responses.get(2));
         } finally {
             channel.shutdownNow();
             server.shutdownNow();
@@ -266,16 +267,16 @@ final class GrpcNettyEndToEndTest {
             // Ping-pong: each message's echo MUST arrive before the next is sent, and crucially
             // before half-close. A buffered implementation cannot echo until half-close, so these
             // polls would time out — proving the path genuinely interleaves rather than buffers.
-            call.sendMessage("a".getBytes());
+            call.sendMessage("a".getBytes(StandardCharsets.UTF_8));
             byte[] firstEcho = echoes.poll(10, TimeUnit.SECONDS);
             assertNotNull(
                     firstEcho, "server did not echo before half-close — the path is not streaming");
-            assertArrayEquals("a".getBytes(), firstEcho);
+            assertArrayEquals("a".getBytes(StandardCharsets.UTF_8), firstEcho);
 
-            call.sendMessage("b".getBytes());
+            call.sendMessage("b".getBytes(StandardCharsets.UTF_8));
             byte[] secondEcho = echoes.poll(10, TimeUnit.SECONDS);
             assertNotNull(secondEcho, "server did not echo the second message before half-close");
-            assertArrayEquals("b".getBytes(), secondEcho);
+            assertArrayEquals("b".getBytes(StandardCharsets.UTF_8), secondEcho);
 
             call.halfClose();
             assertTrue(done.await(10, TimeUnit.SECONDS), "call did not complete");
