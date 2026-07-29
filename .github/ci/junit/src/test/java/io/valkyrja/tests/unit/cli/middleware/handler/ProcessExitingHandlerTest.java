@@ -16,7 +16,7 @@ import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.middleware.handler.ProcessExitingHandler;
 import io.valkyrja.container.manager.Container;
-import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddleware;
+import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddlewareFixture;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link ProcessExitingHandler}. */
@@ -25,7 +25,8 @@ final class ProcessExitingHandlerTest {
     @Test
     void runsWithAndWithoutMiddleware() {
         var container = new Container();
-        container.setSingleton(PassThroughMiddleware.class, new PassThroughMiddleware());
+        container.setSingleton(
+                PassThroughMiddlewareFixture.class, new PassThroughMiddlewareFixture());
 
         assertDoesNotThrow(
                 () ->
@@ -34,7 +35,7 @@ final class ProcessExitingHandlerTest {
                                         mock(InputContract.class), mock(OutputContract.class)));
         assertDoesNotThrow(
                 () ->
-                        new ProcessExitingHandler(container, PassThroughMiddleware.class)
+                        new ProcessExitingHandler(container, PassThroughMiddlewareFixture.class)
                                 .processExiting(
                                         mock(InputContract.class), mock(OutputContract.class)));
     }

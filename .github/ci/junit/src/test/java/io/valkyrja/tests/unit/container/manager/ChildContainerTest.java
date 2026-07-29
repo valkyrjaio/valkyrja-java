@@ -22,10 +22,10 @@ import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
-import io.valkyrja.tests.fixtures.container.ServiceClass;
-import io.valkyrja.tests.fixtures.container.SingletonClass;
-import io.valkyrja.tests.fixtures.container.provider.BindingProviderClass;
-import io.valkyrja.tests.fixtures.container.provider.ProvidedClass;
+import io.valkyrja.tests.fixtures.container.ServiceFixture;
+import io.valkyrja.tests.fixtures.container.SingletonFixture;
+import io.valkyrja.tests.fixtures.container.provider.BindingProviderFixture;
+import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,8 +54,8 @@ final class ChildContainerTest {
 
     @Test
     void isAliasFromParent() {
-        parent.bind(ServiceClass.class, ServiceClass::make);
-        parent.bindAlias(CharSequence.class, raw(ServiceClass.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
 
         assertTrue(child.isAlias(CharSequence.class));
         assertFalse(child.isAlias(Runnable.class));
@@ -63,8 +63,8 @@ final class ChildContainerTest {
 
     @Test
     void isAliasFromChild() {
-        child.bind(ServiceClass.class, ServiceClass::make);
-        child.bindAlias(Runnable.class, raw(ServiceClass.class));
+        child.bind(ServiceFixture.class, ServiceFixture::make);
+        child.bindAlias(Runnable.class, raw(ServiceFixture.class));
 
         assertTrue(child.isAlias(Runnable.class));
         assertFalse(parent.isAlias(Runnable.class));
@@ -72,234 +72,234 @@ final class ChildContainerTest {
 
     @Test
     void isServiceFromParent() {
-        parent.bind(ServiceClass.class, ServiceClass::make);
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
 
-        assertTrue(child.isService(ServiceClass.class));
-        assertFalse(child.isService(SingletonClass.class));
+        assertTrue(child.isService(ServiceFixture.class));
+        assertFalse(child.isService(SingletonFixture.class));
     }
 
     @Test
     void isServiceFromChild() {
-        child.bind(ServiceClass.class, ServiceClass::make);
+        child.bind(ServiceFixture.class, ServiceFixture::make);
 
-        assertTrue(child.isService(ServiceClass.class));
-        assertFalse(parent.isService(ServiceClass.class));
+        assertTrue(child.isService(ServiceFixture.class));
+        assertFalse(parent.isService(ServiceFixture.class));
     }
 
     @Test
     void isSingletonBindingFromParent() {
-        parent.bindSingleton(SingletonClass.class, SingletonClass::make);
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
         var freshChild = createChild();
 
-        assertTrue(freshChild.isSingletonBinding(SingletonClass.class));
-        assertTrue(freshChild.isSingleton(SingletonClass.class));
-        assertFalse(freshChild.isSingletonInstance(SingletonClass.class));
+        assertTrue(freshChild.isSingletonBinding(SingletonFixture.class));
+        assertTrue(freshChild.isSingleton(SingletonFixture.class));
+        assertFalse(freshChild.isSingletonInstance(SingletonFixture.class));
     }
 
     @Test
     void isSingletonInstanceFromParent() {
-        parent.setSingleton(SingletonClass.class, new SingletonClass());
+        parent.setSingleton(SingletonFixture.class, new SingletonFixture());
 
-        assertTrue(child.isSingletonInstance(SingletonClass.class));
-        assertTrue(child.isSingleton(SingletonClass.class));
+        assertTrue(child.isSingletonInstance(SingletonFixture.class));
+        assertTrue(child.isSingleton(SingletonFixture.class));
     }
 
     @Test
     void isSingletonBindingFromChild() {
-        child.bindSingleton(SingletonClass.class, SingletonClass::make);
+        child.bindSingleton(SingletonFixture.class, SingletonFixture::make);
 
-        assertTrue(child.isSingletonBinding(SingletonClass.class));
-        assertFalse(parent.isSingletonBinding(SingletonClass.class));
+        assertTrue(child.isSingletonBinding(SingletonFixture.class));
+        assertFalse(parent.isSingletonBinding(SingletonFixture.class));
     }
 
     @Test
     void isSingletonInstanceFromChild() {
-        child.setSingleton(SingletonClass.class, new SingletonClass());
+        child.setSingleton(SingletonFixture.class, new SingletonFixture());
 
-        assertTrue(child.isSingletonInstance(SingletonClass.class));
-        assertFalse(parent.isSingletonInstance(SingletonClass.class));
+        assertTrue(child.isSingletonInstance(SingletonFixture.class));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
     }
 
     @Test
     void hasFromParentWhenRegisteredInParent() {
-        parent.register(new BindingProviderClass());
+        parent.register(new BindingProviderFixture());
         var freshChild = createChild();
 
-        assertTrue(freshChild.has(ProvidedClass.class));
+        assertTrue(freshChild.has(ProvidedFixture.class));
     }
 
     @Test
     void hasFromChildWhenRegisteredInChild() {
-        child.register(new BindingProviderClass());
+        child.register(new BindingProviderFixture());
 
-        assertTrue(child.has(ProvidedClass.class));
-        assertFalse(parent.has(ProvidedClass.class));
+        assertTrue(child.has(ProvidedFixture.class));
+        assertFalse(parent.has(ProvidedFixture.class));
     }
 
     @Test
     void isPublishedFromParent() {
-        parent.bind(ServiceClass.class, ServiceClass::make);
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
 
-        assertTrue(child.isPublished(ServiceClass.class));
+        assertTrue(child.isPublished(ServiceFixture.class));
     }
 
     @Test
     void isPublishedFromChild() {
-        child.bind(ServiceClass.class, ServiceClass::make);
+        child.bind(ServiceFixture.class, ServiceFixture::make);
 
-        assertTrue(child.isPublished(ServiceClass.class));
-        assertFalse(parent.isPublished(ServiceClass.class));
+        assertTrue(child.isPublished(ServiceFixture.class));
+        assertFalse(parent.isPublished(ServiceFixture.class));
     }
 
     @Test
     void getSingletonFromParentBinding() {
-        parent.bindSingleton(SingletonClass.class, SingletonClass::make);
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
         var freshChild = createChild();
 
-        var instance = freshChild.getSingleton(SingletonClass.class);
+        var instance = freshChild.getSingleton(SingletonFixture.class);
 
-        assertInstanceOf(SingletonClass.class, instance);
-        assertSame(instance, freshChild.getSingleton(SingletonClass.class));
-        assertFalse(parent.isSingletonInstance(SingletonClass.class));
+        assertInstanceOf(SingletonFixture.class, instance);
+        assertSame(instance, freshChild.getSingleton(SingletonFixture.class));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
     }
 
     @Test
     void getSingletonFromParentInstance() {
-        var parentInstance = new SingletonClass();
-        parent.setSingleton(SingletonClass.class, parentInstance);
+        var parentInstance = new SingletonFixture();
+        parent.setSingleton(SingletonFixture.class, parentInstance);
 
-        assertSame(parentInstance, child.getSingleton(SingletonClass.class));
+        assertSame(parentInstance, child.getSingleton(SingletonFixture.class));
     }
 
     @Test
     void getSingletonFromChildOverridesParent() {
-        var parentInstance = new SingletonClass();
-        parent.setSingleton(SingletonClass.class, parentInstance);
-        var childInstance = new SingletonClass();
-        child.setSingleton(SingletonClass.class, childInstance);
+        var parentInstance = new SingletonFixture();
+        parent.setSingleton(SingletonFixture.class, parentInstance);
+        var childInstance = new SingletonFixture();
+        child.setSingleton(SingletonFixture.class, childInstance);
 
-        assertSame(childInstance, child.getSingleton(SingletonClass.class));
-        assertNotSame(parentInstance, child.getSingleton(SingletonClass.class));
+        assertSame(childInstance, child.getSingleton(SingletonFixture.class));
+        assertNotSame(parentInstance, child.getSingleton(SingletonFixture.class));
     }
 
     @Test
     void childSingletonDoesNotPolluteParent() {
-        parent.bindSingleton(SingletonClass.class, SingletonClass::make);
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
         var freshChild = createChild();
 
-        var childInstance = freshChild.getSingleton(SingletonClass.class);
+        var childInstance = freshChild.getSingleton(SingletonFixture.class);
 
-        assertFalse(parent.isSingletonInstance(SingletonClass.class));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
         assertNotNull(childInstance);
     }
 
     @Test
     void getServiceFromParent() {
-        parent.bind(ServiceClass.class, ServiceClass::make);
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
 
-        var instance = child.getService(ServiceClass.class, Map.of());
+        var instance = child.getService(ServiceFixture.class, Map.of());
 
-        assertInstanceOf(ServiceClass.class, instance);
-        assertNotSame(instance, child.getService(ServiceClass.class, Map.of()));
+        assertInstanceOf(ServiceFixture.class, instance);
+        assertNotSame(instance, child.getService(ServiceFixture.class, Map.of()));
     }
 
     @Test
     void getServiceFromChild() {
-        child.bind(ServiceClass.class, ServiceClass::make);
+        child.bind(ServiceFixture.class, ServiceFixture::make);
 
-        assertInstanceOf(ServiceClass.class, child.getService(ServiceClass.class, Map.of()));
-        assertFalse(parent.isService(ServiceClass.class));
+        assertInstanceOf(ServiceFixture.class, child.getService(ServiceFixture.class, Map.of()));
+        assertFalse(parent.isService(ServiceFixture.class));
     }
 
     @Test
     void getAliasedFromParent() {
-        parent.bind(ServiceClass.class, ServiceClass::make);
-        parent.bindAlias(CharSequence.class, raw(ServiceClass.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
 
-        assertInstanceOf(ServiceClass.class, child.getAliased(CharSequence.class, Map.of()));
+        assertInstanceOf(ServiceFixture.class, child.getAliased(CharSequence.class, Map.of()));
     }
 
     @Test
     void getAliasedFromChild() {
-        child.bind(ServiceClass.class, ServiceClass::make);
-        child.bindAlias(Runnable.class, raw(ServiceClass.class));
+        child.bind(ServiceFixture.class, ServiceFixture::make);
+        child.bindAlias(Runnable.class, raw(ServiceFixture.class));
 
-        assertInstanceOf(ServiceClass.class, child.getAliased(Runnable.class, Map.of()));
+        assertInstanceOf(ServiceFixture.class, child.getAliased(Runnable.class, Map.of()));
         assertFalse(parent.isAlias(Runnable.class));
     }
 
     @Test
     void parentStateUnchangedAfterChildOperations() {
-        parent.bind(ServiceClass.class, ServiceClass::make);
-        parent.bindAlias(CharSequence.class, raw(ServiceClass.class));
-        parent.bindSingleton(SingletonClass.class, SingletonClass::make);
-        parent.register(new BindingProviderClass());
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.register(new BindingProviderFixture());
         var freshChild = createChild();
 
         var aliasesBefore = parent.getData().aliases();
         var servicesBefore = parent.getData().services();
         var singletonsBefore = parent.getData().singletons();
-        var singletonInstanceBefore = parent.isSingletonInstance(SingletonClass.class);
-        var providedPublishedBefore = parent.isPublished(ProvidedClass.class);
+        var singletonInstanceBefore = parent.isSingletonInstance(SingletonFixture.class);
+        var providedPublishedBefore = parent.isPublished(ProvidedFixture.class);
 
-        freshChild.get(ServiceClass.class);
-        freshChild.getService(ServiceClass.class, Map.of());
+        freshChild.get(ServiceFixture.class);
+        freshChild.getService(ServiceFixture.class, Map.of());
         freshChild.getAliased(CharSequence.class, Map.of());
-        freshChild.getSingleton(SingletonClass.class);
-        freshChild.get(ProvidedClass.class);
+        freshChild.getSingleton(SingletonFixture.class);
+        freshChild.get(ProvidedFixture.class);
 
         assertEquals(aliasesBefore, parent.getData().aliases());
         assertEquals(servicesBefore, parent.getData().services());
         assertEquals(singletonsBefore, parent.getData().singletons());
-        assertEquals(singletonInstanceBefore, parent.isSingletonInstance(SingletonClass.class));
-        assertEquals(providedPublishedBefore, parent.isPublished(ProvidedClass.class));
+        assertEquals(singletonInstanceBefore, parent.isSingletonInstance(SingletonFixture.class));
+        assertEquals(providedPublishedBefore, parent.isPublished(ProvidedFixture.class));
     }
 
     @Test
     void providerFromChildPublishedInChild() {
-        child.register(new BindingProviderClass());
+        child.register(new BindingProviderFixture());
 
-        assertTrue(child.has(ProvidedClass.class));
-        assertInstanceOf(ProvidedClass.class, child.get(ProvidedClass.class));
-        assertFalse(parent.isPublished(ProvidedClass.class));
+        assertTrue(child.has(ProvidedFixture.class));
+        assertInstanceOf(ProvidedFixture.class, child.get(ProvidedFixture.class));
+        assertFalse(parent.isPublished(ProvidedFixture.class));
     }
 
     @Test
     void providerFromParentPublishedInChild() {
-        parent.register(new BindingProviderClass());
+        parent.register(new BindingProviderFixture());
         var freshChild = createChild();
 
-        assertTrue(freshChild.has(ProvidedClass.class));
-        assertInstanceOf(ProvidedClass.class, freshChild.get(ProvidedClass.class));
-        assertFalse(parent.isPublished(ProvidedClass.class));
+        assertTrue(freshChild.has(ProvidedFixture.class));
+        assertInstanceOf(ProvidedFixture.class, freshChild.get(ProvidedFixture.class));
+        assertFalse(parent.isPublished(ProvidedFixture.class));
     }
 
     @Test
     void publishUnknownIsNoOp() {
-        child.publish(SingletonClass.class);
+        child.publish(SingletonFixture.class);
 
-        assertFalse(child.isPublished(SingletonClass.class));
+        assertFalse(child.isPublished(SingletonFixture.class));
     }
 
     @Test
     void resolvesServiceFromParentThenChild() {
-        parent.bind(ServiceClass.class, ServiceClass::make);
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
         var freshChild = createChild();
-        assertNotNull(freshChild.getService(ServiceClass.class, java.util.Map.of()));
+        assertNotNull(freshChild.getService(ServiceFixture.class, java.util.Map.of()));
 
-        freshChild.bind(SingletonClass.class, SingletonClass::make);
-        assertNotNull(freshChild.getService(SingletonClass.class, java.util.Map.of()));
+        freshChild.bind(SingletonFixture.class, SingletonFixture::make);
+        assertNotNull(freshChild.getService(SingletonFixture.class, java.util.Map.of()));
     }
 
     @Test
     void resolvesAliasFromParentThenChild() {
-        parent.bind(ServiceClass.class, ServiceClass::make);
-        parent.bindAlias(CharSequence.class, raw(ServiceClass.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
         var freshChild = createChild();
         assertNotNull(freshChild.get(CharSequence.class));
 
-        freshChild.bind(ServiceClass.class, ServiceClass::make);
-        freshChild.bindAlias(Runnable.class, raw(ServiceClass.class));
+        freshChild.bind(ServiceFixture.class, ServiceFixture::make);
+        freshChild.bindAlias(Runnable.class, raw(ServiceFixture.class));
         assertNotNull(freshChild.get(Runnable.class));
     }
 

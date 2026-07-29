@@ -27,7 +27,7 @@ import io.valkyrja.http.middleware.handler.SendingResponseHandler;
 import io.valkyrja.http.middleware.handler.ThrowableCaughtHandler;
 import io.valkyrja.http.routing.data.Route;
 import io.valkyrja.http.routing.data.contract.RouteContract;
-import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddleware;
+import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddlewareFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,14 +43,15 @@ final class MiddlewareHandlerTest {
     @BeforeEach
     void setUp() {
         container = new Container();
-        container.setSingleton(PassThroughHttpMiddleware.class, new PassThroughHttpMiddleware());
+        container.setSingleton(
+                PassThroughHttpMiddlewareFixture.class, new PassThroughHttpMiddlewareFixture());
     }
 
     @Test
     void requestReceivedChain() {
         assertNotNull(new RequestReceivedHandler(container).requestReceived(request));
-        var handler = new RequestReceivedHandler(container, PassThroughHttpMiddleware.class);
-        handler.add(PassThroughHttpMiddleware.class);
+        var handler = new RequestReceivedHandler(container, PassThroughHttpMiddlewareFixture.class);
+        handler.add(PassThroughHttpMiddlewareFixture.class);
         assertNotNull(handler.requestReceived(request));
     }
 
@@ -58,7 +59,7 @@ final class MiddlewareHandlerTest {
     void routeMatchedChain() {
         assertNotNull(new RouteMatchedHandler(container).routeMatched(request, route));
         assertNotNull(
-                new RouteMatchedHandler(container, PassThroughHttpMiddleware.class)
+                new RouteMatchedHandler(container, PassThroughHttpMiddlewareFixture.class)
                         .routeMatched(request, route));
     }
 
@@ -68,7 +69,7 @@ final class MiddlewareHandlerTest {
                 response, new RouteNotMatchedHandler(container).routeNotMatched(request, response));
         assertSame(
                 response,
-                new RouteNotMatchedHandler(container, PassThroughHttpMiddleware.class)
+                new RouteNotMatchedHandler(container, PassThroughHttpMiddlewareFixture.class)
                         .routeNotMatched(request, response));
     }
 
@@ -79,7 +80,7 @@ final class MiddlewareHandlerTest {
                 new RouteDispatchedHandler(container).routeDispatched(request, response, route));
         assertSame(
                 response,
-                new RouteDispatchedHandler(container, PassThroughHttpMiddleware.class)
+                new RouteDispatchedHandler(container, PassThroughHttpMiddlewareFixture.class)
                         .routeDispatched(request, response, route));
     }
 
@@ -89,7 +90,7 @@ final class MiddlewareHandlerTest {
                 response, new SendingResponseHandler(container).sendingResponse(request, response));
         assertSame(
                 response,
-                new SendingResponseHandler(container, PassThroughHttpMiddleware.class)
+                new SendingResponseHandler(container, PassThroughHttpMiddlewareFixture.class)
                         .sendingResponse(request, response));
     }
 
@@ -102,7 +103,7 @@ final class MiddlewareHandlerTest {
                         .throwableCaught(request, response, throwable));
         assertSame(
                 response,
-                new ThrowableCaughtHandler(container, PassThroughHttpMiddleware.class)
+                new ThrowableCaughtHandler(container, PassThroughHttpMiddlewareFixture.class)
                         .throwableCaught(request, response, throwable));
     }
 
@@ -112,7 +113,7 @@ final class MiddlewareHandlerTest {
                 () -> new ResponseSentHandler(container).responseSent(request, response));
         assertDoesNotThrow(
                 () ->
-                        new ResponseSentHandler(container, PassThroughHttpMiddleware.class)
+                        new ResponseSentHandler(container, PassThroughHttpMiddlewareFixture.class)
                                 .responseSent(request, response));
     }
 }

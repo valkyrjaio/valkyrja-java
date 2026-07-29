@@ -18,8 +18,8 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.tests.fixtures.application.entry.EntryConfigFixture;
-import io.valkyrja.tests.fixtures.application.entry.HttpSmokeClient;
-import io.valkyrja.tests.fixtures.application.entry.WorkerHttpProbe;
+import io.valkyrja.tests.fixtures.application.entry.HttpSmokeClientFixture;
+import io.valkyrja.tests.fixtures.application.entry.WorkerHttpProbeFixture;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -43,14 +43,14 @@ final class JettyHttpSmokeTest {
 
         Server server = JettyHttp.server(EntryConfigFixture.httpOnPort(0, appRef::set));
         try {
-            WorkerHttpProbe probe = WorkerHttpProbe.bind(appRef.get());
+            WorkerHttpProbeFixture probe = WorkerHttpProbeFixture.bind(appRef.get());
             int port = ((ServerConnector) server.getConnectors()[0]).getLocalPort();
 
-            String response = HttpSmokeClient.get(port);
+            String response = HttpSmokeClientFixture.get(port);
 
             assertTrue(response.startsWith("HTTP/"), response);
-            assertTrue(response.contains(" " + WorkerHttpProbe.STATUS + " "), response);
-            assertTrue(response.contains(WorkerHttpProbe.BODY), response);
+            assertTrue(response.contains(" " + WorkerHttpProbeFixture.STATUS + " "), response);
+            assertTrue(response.contains(WorkerHttpProbeFixture.BODY), response);
 
             ServerRequestContract request = probe.capturedRequest();
             assertNotNull(request, "the adapter did not dispatch the incoming request");

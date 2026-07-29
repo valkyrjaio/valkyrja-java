@@ -16,7 +16,7 @@ import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.handler.SendingResponseHandler;
-import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddleware;
+import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddlewareFixture;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link SendingResponseHandler}. */
@@ -35,12 +35,13 @@ final class SendingResponseHandlerTest {
     @Test
     void runsMiddlewareChain() {
         var container = new Container();
-        container.setSingleton(PassThroughHttpMiddleware.class, new PassThroughHttpMiddleware());
+        container.setSingleton(
+                PassThroughHttpMiddlewareFixture.class, new PassThroughHttpMiddlewareFixture());
         var response = mock(ResponseContract.class);
 
         assertSame(
                 response,
-                new SendingResponseHandler(container, PassThroughHttpMiddleware.class)
+                new SendingResponseHandler(container, PassThroughHttpMiddlewareFixture.class)
                         .sendingResponse(mock(ServerRequestContract.class), response));
     }
 }

@@ -16,7 +16,7 @@ import io.valkyrja.http.message.param.QueryParamCollection;
 import io.valkyrja.http.message.request.ServerRequest;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.struct.request.abstract_.QueryRequestStruct;
-import io.valkyrja.tests.fixtures.http.struct.QueryStructClass;
+import io.valkyrja.tests.fixtures.http.struct.QueryStructFixture;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +29,7 @@ final class QueryRequestStructTest {
                 new ServerRequest()
                         .withQueryParams(
                                 new QueryParamCollection(Map.of("page", "2", "extra", "x")));
-        var struct = new QueryStructClass();
+        var struct = new QueryStructFixture();
 
         assertFalse(struct.getDataFromRequest(request).isEmpty());
         assertTrue(struct.determineIfRequestContainsExtraData(request));

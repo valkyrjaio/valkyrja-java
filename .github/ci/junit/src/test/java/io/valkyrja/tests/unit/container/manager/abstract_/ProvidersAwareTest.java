@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.throwable.exception.ContainerInvalidPublishCallbackException;
-import io.valkyrja.tests.fixtures.container.provider.InvalidDeferredProviderClass;
-import io.valkyrja.tests.fixtures.container.provider.ProvidedClass;
-import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryClass;
-import io.valkyrja.tests.fixtures.container.provider.ProviderClass;
+import io.valkyrja.tests.fixtures.container.provider.InvalidDeferredProviderFixture;
+import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
+import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryFixture;
+import io.valkyrja.tests.fixtures.container.provider.ProviderFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,46 +27,46 @@ final class ProvidersAwareTest {
 
     @BeforeEach
     void resetFlags() {
-        ProviderClass.publishCalled = false;
-        ProviderClass.publishSecondaryCalled = false;
+        ProviderFixture.publishCalled = false;
+        ProviderFixture.publishSecondaryCalled = false;
     }
 
     @Test
     void register() {
         var aware = new Container();
 
-        assertFalse(ProviderClass.publishCalled);
-        assertFalse(ProviderClass.publishSecondaryCalled);
-        assertFalse(aware.isPublished(ProvidedClass.class));
-        assertFalse(aware.isPublished(ProvidedSecondaryClass.class));
+        assertFalse(ProviderFixture.publishCalled);
+        assertFalse(ProviderFixture.publishSecondaryCalled);
+        assertFalse(aware.isPublished(ProvidedFixture.class));
+        assertFalse(aware.isPublished(ProvidedSecondaryFixture.class));
 
-        aware.register(new ProviderClass());
+        aware.register(new ProviderFixture());
         // Re-registering the same provider just overwrites the callbacks.
-        aware.register(new ProviderClass());
+        aware.register(new ProviderFixture());
 
-        assertFalse(ProviderClass.publishCalled);
-        assertFalse(aware.isPublished(ProvidedClass.class));
+        assertFalse(ProviderFixture.publishCalled);
+        assertFalse(aware.isPublished(ProvidedFixture.class));
 
-        aware.publish(ProvidedClass.class);
+        aware.publish(ProvidedFixture.class);
 
-        assertTrue(ProviderClass.publishCalled);
-        assertFalse(ProviderClass.publishSecondaryCalled);
-        assertTrue(aware.isPublished(ProvidedClass.class));
-        assertFalse(aware.isPublished(ProvidedSecondaryClass.class));
+        assertTrue(ProviderFixture.publishCalled);
+        assertFalse(ProviderFixture.publishSecondaryCalled);
+        assertTrue(aware.isPublished(ProvidedFixture.class));
+        assertFalse(aware.isPublished(ProvidedSecondaryFixture.class));
 
-        aware.publish(ProvidedSecondaryClass.class);
+        aware.publish(ProvidedSecondaryFixture.class);
 
-        assertTrue(ProviderClass.publishSecondaryCalled);
-        assertTrue(aware.isPublished(ProvidedSecondaryClass.class));
+        assertTrue(ProviderFixture.publishSecondaryCalled);
+        assertTrue(aware.isPublished(ProvidedSecondaryFixture.class));
     }
 
     @Test
     void publishBeforeRegisterIsNoOp() {
         var aware = new Container();
 
-        aware.publish(ProvidedClass.class);
+        aware.publish(ProvidedFixture.class);
 
-        assertFalse(aware.isPublished(ProvidedClass.class));
+        assertFalse(aware.isPublished(ProvidedFixture.class));
     }
 
     @Test
@@ -75,6 +75,6 @@ final class ProvidersAwareTest {
 
         assertThrows(
                 ContainerInvalidPublishCallbackException.class,
-                () -> aware.register(new InvalidDeferredProviderClass()));
+                () -> aware.register(new InvalidDeferredProviderFixture()));
     }
 }

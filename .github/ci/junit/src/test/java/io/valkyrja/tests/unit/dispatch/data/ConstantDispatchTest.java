@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.dispatch.data.ConstantDispatch;
 import io.valkyrja.dispatch.throwable.exception.DispatchNoClassException;
-import io.valkyrja.tests.fixtures.dispatch.DispatchableClass;
+import io.valkyrja.tests.fixtures.dispatch.DispatchableFixture;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link ConstantDispatch} data object. */
@@ -40,15 +40,15 @@ final class ConstantDispatchTest {
 
     @Test
     void constantWithClassName() {
-        var dispatch = new ConstantDispatch("CONSTANT", DispatchableClass.class);
+        var dispatch = new ConstantDispatch("CONSTANT", DispatchableFixture.class);
 
         assertTrue(dispatch.hasClassName());
-        assertSame(DispatchableClass.class, dispatch.getClassName());
+        assertSame(DispatchableFixture.class, dispatch.getClassName());
     }
 
     @Test
     void withMethodsReturnNewInstances() {
-        var original = new ConstantDispatch("CONSTANT", DispatchableClass.class);
+        var original = new ConstantDispatch("CONSTANT", DispatchableFixture.class);
 
         assertEquals("OTHER", original.withConstant("OTHER").getConstant());
         assertSame(String.class, original.withClassName(String.class).getClassName());
@@ -60,12 +60,12 @@ final class ConstantDispatchTest {
 
     @Test
     void toMapAndToStringWithClassName() {
-        var dispatch = new ConstantDispatch("CONSTANT", DispatchableClass.class);
+        var dispatch = new ConstantDispatch("CONSTANT", DispatchableFixture.class);
 
         var map = dispatch.toMap();
         assertEquals("CONSTANT", map.get("constant"));
-        assertEquals(DispatchableClass.class.getName(), map.get("class"));
-        assertEquals(DispatchableClass.class.getName() + "::CONSTANT", dispatch.toString());
+        assertEquals(DispatchableFixture.class.getName(), map.get("class"));
+        assertEquals(DispatchableFixture.class.getName() + "::CONSTANT", dispatch.toString());
     }
 
     @Test

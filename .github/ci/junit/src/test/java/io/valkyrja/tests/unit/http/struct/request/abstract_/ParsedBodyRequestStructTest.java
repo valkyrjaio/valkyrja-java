@@ -16,7 +16,7 @@ import io.valkyrja.http.message.param.ParsedBodyParamCollection;
 import io.valkyrja.http.message.request.ServerRequest;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.struct.request.abstract_.ParsedBodyRequestStruct;
-import io.valkyrja.tests.fixtures.http.struct.ParsedBodyStructClass;
+import io.valkyrja.tests.fixtures.http.struct.ParsedBodyStructFixture;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +30,7 @@ final class ParsedBodyRequestStructTest {
                         .withParsedBody(
                                 new ParsedBodyParamCollection(
                                         Map.of("name", "bob", "email", "e", "extra", "x")));
-        var struct = new ParsedBodyStructClass();
+        var struct = new ParsedBodyStructFixture();
 
         assertFalse(struct.getDataFromRequest(request).isEmpty());
         assertTrue(struct.determineIfRequestContainsExtraData(request));

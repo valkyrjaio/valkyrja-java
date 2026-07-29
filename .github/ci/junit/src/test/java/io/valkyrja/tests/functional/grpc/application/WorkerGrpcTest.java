@@ -28,8 +28,8 @@ import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.message.stream.InboundMessageStream;
 import io.valkyrja.grpc.message.stream.contract.OutboundStreamContract;
-import io.valkyrja.tests.fixtures.grpc.GreeterComponentProvider;
-import io.valkyrja.tests.fixtures.grpc.GreeterController;
+import io.valkyrja.tests.fixtures.grpc.GreeterComponentProviderFixture;
+import io.valkyrja.tests.fixtures.grpc.GreeterControllerFixture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,7 +52,7 @@ final class WorkerGrpcTest {
                 "app.grpc.provider.data",
                 50051,
                 1000,
-                List.of(new GreeterComponentProvider()),
+                List.of(new GreeterComponentProviderFixture()),
                 List.of(),
                 List.of(),
                 List.of(),
@@ -85,7 +85,7 @@ final class WorkerGrpcTest {
 
         // A wire write that blows up must not skip the ResponseSent stage, or per-call resources
         // leak and observers never see the call complete.
-        GreeterController.ResponseSentMiddleware.calls.set(0);
+        GreeterControllerFixture.ResponseSentMiddleware.calls.set(0);
         assertThrows(
                 IllegalStateException.class,
                 () ->
@@ -97,7 +97,7 @@ final class WorkerGrpcTest {
                                     throw new IllegalStateException("wire write failed");
                                 }));
 
-        assertEquals(1, GreeterController.ResponseSentMiddleware.calls.get());
+        assertEquals(1, GreeterControllerFixture.ResponseSentMiddleware.calls.get());
     }
 
     @Test
@@ -137,8 +137,8 @@ final class WorkerGrpcTest {
     void dispatchStreamingEchoesInboundAndFiresMiddlewareOnceAtOpenAndClose() {
         ApplicationContract app = WorkerGrpc.bootstrap(config());
         ContainerData data = (ContainerData) app.getContainer().getData();
-        GreeterController.SendingMiddleware.calls.set(0);
-        GreeterController.ResponseSentMiddleware.calls.set(0);
+        GreeterControllerFixture.SendingMiddleware.calls.set(0);
+        GreeterControllerFixture.ResponseSentMiddleware.calls.set(0);
 
         InboundMessageStream inbound = new InboundMessageStream();
         inbound.offer("a");
@@ -154,16 +154,16 @@ final class WorkerGrpcTest {
         assertNotNull(outbound.terminal);
         assertEquals(StatusCode.OK, outbound.terminal.getStatus().getCode());
         // SendingResponse once at stream open (first emit), ResponseSent once at close.
-        assertEquals(1, GreeterController.SendingMiddleware.calls.get());
-        assertEquals(1, GreeterController.ResponseSentMiddleware.calls.get());
+        assertEquals(1, GreeterControllerFixture.SendingMiddleware.calls.get());
+        assertEquals(1, GreeterControllerFixture.ResponseSentMiddleware.calls.get());
     }
 
     @Test
     void dispatchStreamingOpensAndClosesEvenWhenTheHandlerEmitsNothing() {
         ApplicationContract app = WorkerGrpc.bootstrap(config());
         ContainerData data = (ContainerData) app.getContainer().getData();
-        GreeterController.SendingMiddleware.calls.set(0);
-        GreeterController.ResponseSentMiddleware.calls.set(0);
+        GreeterControllerFixture.SendingMiddleware.calls.set(0);
+        GreeterControllerFixture.ResponseSentMiddleware.calls.set(0);
 
         InboundMessageStream inbound = new InboundMessageStream();
         inbound.complete();
@@ -177,8 +177,8 @@ final class WorkerGrpcTest {
         assertTrue(outbound.messages.isEmpty());
         assertTrue(outbound.headersSent);
         assertNotNull(outbound.terminal);
-        assertEquals(1, GreeterController.SendingMiddleware.calls.get());
-        assertEquals(1, GreeterController.ResponseSentMiddleware.calls.get());
+        assertEquals(1, GreeterControllerFixture.SendingMiddleware.calls.get());
+        assertEquals(1, GreeterControllerFixture.ResponseSentMiddleware.calls.get());
     }
 
     private static java.util.function.Function<

@@ -24,7 +24,7 @@ import io.valkyrja.http.middleware.handler.contract.RouteDispatchedHandlerContra
 import io.valkyrja.http.routing.data.Route;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.server.middleware.routematched.ResponseStructMiddleware;
-import io.valkyrja.tests.fixtures.http.struct.ResponseStructClass;
+import io.valkyrja.tests.fixtures.http.struct.ResponseStructFixture;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +46,7 @@ final class ResponseStructMiddlewareTest {
         var json =
                 new JsonResponse(
                         Map.of("id", 7, "name", "bob"), StatusCode.OK, new HeaderCollection());
-        var routeWithStruct = route.withResponseStruct(new ResponseStructClass());
+        var routeWithStruct = route.withResponseStruct(new ResponseStructFixture());
 
         var result =
                 middleware.routeDispatched(request, json, routeWithStruct, passThroughHandler());
@@ -58,7 +58,7 @@ final class ResponseStructMiddlewareTest {
     @Test
     void passesNonJsonResponseThrough() {
         var response = new EmptyResponse();
-        var routeWithStruct = route.withResponseStruct(new ResponseStructClass());
+        var routeWithStruct = route.withResponseStruct(new ResponseStructFixture());
 
         var result =
                 middleware.routeDispatched(

@@ -22,7 +22,7 @@ import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.NativeChildContainer;
-import io.valkyrja.tests.fixtures.container.SingletonClass;
+import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -140,18 +140,18 @@ final class ChildApplicationTest {
 
     @Test
     void childContainerWriteDoesNotAffectParentContainer() {
-        var instance = new SingletonClass();
-        child.getContainer().setSingleton(SingletonClass.class, instance);
+        var instance = new SingletonFixture();
+        child.getContainer().setSingleton(SingletonFixture.class, instance);
 
-        assertFalse(parent.getContainer().isSingletonInstance(SingletonClass.class));
+        assertFalse(parent.getContainer().isSingletonInstance(SingletonFixture.class));
     }
 
     @Test
     void childContainerServesItsOwnRegistrations() {
-        var instance = new SingletonClass();
-        child.getContainer().setSingleton(SingletonClass.class, instance);
+        var instance = new SingletonFixture();
+        child.getContainer().setSingleton(SingletonFixture.class, instance);
 
-        assertSame(instance, child.getContainer().getSingleton(SingletonClass.class));
+        assertSame(instance, child.getContainer().getSingleton(SingletonFixture.class));
     }
 
     // Alternative container type — ChildContainer (portable default)
@@ -185,9 +185,9 @@ final class ChildApplicationTest {
         var child2Container = new NativeChildContainer((Container) parent.getContainer());
         var child2 = new ChildApplication(parent, child2Container);
 
-        var instance = new SingletonClass();
-        child.getContainer().setSingleton(SingletonClass.class, instance);
+        var instance = new SingletonFixture();
+        child.getContainer().setSingleton(SingletonFixture.class, instance);
 
-        assertFalse(child2.getContainer().isSingletonInstance(SingletonClass.class));
+        assertFalse(child2.getContainer().isSingletonInstance(SingletonFixture.class));
     }
 }

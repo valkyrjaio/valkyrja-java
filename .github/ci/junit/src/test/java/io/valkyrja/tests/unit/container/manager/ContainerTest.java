@@ -20,11 +20,11 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.enum_.InvalidReferenceMode;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
-import io.valkyrja.tests.fixtures.container.ServiceClass;
-import io.valkyrja.tests.fixtures.container.SingletonClass;
-import io.valkyrja.tests.fixtures.container.provider.ProvidedClass;
-import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryClass;
-import io.valkyrja.tests.fixtures.container.provider.ProviderClass;
+import io.valkyrja.tests.fixtures.container.ServiceFixture;
+import io.valkyrja.tests.fixtures.container.SingletonFixture;
+import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
+import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryFixture;
+import io.valkyrja.tests.fixtures.container.provider.ProviderFixture;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -38,62 +38,62 @@ final class ContainerTest {
     @Test
     void bind() {
         var container = new Container();
-        container.bind(ServiceClass.class, ServiceClass::make);
+        container.bind(ServiceFixture.class, ServiceFixture::make);
 
-        assertTrue(container.has(ServiceClass.class));
-        assertTrue(container.isService(ServiceClass.class));
-        assertTrue(container.isPublished(ServiceClass.class));
-        assertFalse(container.isAlias(ServiceClass.class));
-        assertFalse(container.isSingleton(ServiceClass.class));
+        assertTrue(container.has(ServiceFixture.class));
+        assertTrue(container.isService(ServiceFixture.class));
+        assertTrue(container.isPublished(ServiceFixture.class));
+        assertFalse(container.isAlias(ServiceFixture.class));
+        assertFalse(container.isSingleton(ServiceFixture.class));
 
-        var service = container.get(ServiceClass.class);
-        assertInstanceOf(ServiceClass.class, service);
+        var service = container.get(ServiceFixture.class);
+        assertInstanceOf(ServiceFixture.class, service);
         // A bound service returns a fresh instance each time.
-        assertNotSame(service, container.get(ServiceClass.class));
-        assertNotSame(service, container.getService(ServiceClass.class, Map.of()));
+        assertNotSame(service, container.get(ServiceFixture.class));
+        assertNotSame(service, container.getService(ServiceFixture.class, Map.of()));
     }
 
     @Test
     void bindAlias() {
         var container = new Container();
-        container.bind(ServiceClass.class, ServiceClass::make);
-        container.bindAlias(CharSequence.class, raw(ServiceClass.class));
+        container.bind(ServiceFixture.class, ServiceFixture::make);
+        container.bindAlias(CharSequence.class, raw(ServiceFixture.class));
 
         assertTrue(container.has(CharSequence.class));
         assertTrue(container.isAlias(CharSequence.class));
-        assertTrue(container.isPublished(ServiceClass.class));
+        assertTrue(container.isPublished(ServiceFixture.class));
         assertFalse(container.isService(CharSequence.class));
 
         Object service = container.get(CharSequence.class);
-        assertInstanceOf(ServiceClass.class, service);
+        assertInstanceOf(ServiceFixture.class, service);
         assertNotSame(service, container.get(CharSequence.class));
-        assertInstanceOf(ServiceClass.class, container.getAliased(CharSequence.class, Map.of()));
+        assertInstanceOf(ServiceFixture.class, container.getAliased(CharSequence.class, Map.of()));
     }
 
     @Test
     void bindSingleton() {
         var container = new Container();
-        container.bindSingleton(SingletonClass.class, SingletonClass::make);
+        container.bindSingleton(SingletonFixture.class, SingletonFixture::make);
 
-        assertTrue(container.has(SingletonClass.class));
-        assertTrue(container.isSingleton(SingletonClass.class));
-        assertTrue(container.isService(SingletonClass.class));
-        assertTrue(container.isPublished(SingletonClass.class));
-        assertFalse(container.isAlias(SingletonClass.class));
+        assertTrue(container.has(SingletonFixture.class));
+        assertTrue(container.isSingleton(SingletonFixture.class));
+        assertTrue(container.isService(SingletonFixture.class));
+        assertTrue(container.isPublished(SingletonFixture.class));
+        assertFalse(container.isAlias(SingletonFixture.class));
 
-        var service = container.get(SingletonClass.class);
-        assertInstanceOf(SingletonClass.class, service);
+        var service = container.get(SingletonFixture.class);
+        assertInstanceOf(SingletonFixture.class, service);
         // A bound singleton returns the same instance each time.
-        assertSame(service, container.get(SingletonClass.class));
-        assertSame(service, container.getSingleton(SingletonClass.class));
+        assertSame(service, container.get(SingletonFixture.class));
+        assertSame(service, container.getSingleton(SingletonFixture.class));
     }
 
     @Test
     void provided() {
         var container = new Container();
-        container.register(new ProviderClass());
+        container.register(new ProviderFixture());
 
-        assertTrue(container.has(ProvidedClass.class));
+        assertTrue(container.has(ProvidedFixture.class));
     }
 
     @Test
@@ -111,7 +111,7 @@ final class ContainerTest {
 
         assertThrows(
                 ContainerInvalidArgumentException.class,
-                () -> container.getSingleton(ServiceClass.class));
+                () -> container.getSingleton(ServiceFixture.class));
     }
 
     @Test
@@ -129,18 +129,18 @@ final class ContainerTest {
 
         assertThrows(
                 ContainerInvalidArgumentException.class,
-                () -> container.getService(ServiceClass.class, Map.of()));
+                () -> container.getService(ServiceFixture.class, Map.of()));
     }
 
     @Test
     void getDataReflectsRegisteredCallbacks() {
         var container = new Container();
-        container.register(new ProviderClass());
+        container.register(new ProviderFixture());
 
         var data = container.getData();
 
-        assertTrue(data.callbacks().containsKey(ProvidedClass.class));
-        assertTrue(data.callbacks().containsKey(ProvidedSecondaryClass.class));
+        assertTrue(data.callbacks().containsKey(ProvidedFixture.class));
+        assertTrue(data.callbacks().containsKey(ProvidedSecondaryFixture.class));
         assertTrue(data.aliases().isEmpty());
         assertTrue(data.services().isEmpty());
         assertTrue(data.singletons().isEmpty());
@@ -149,39 +149,39 @@ final class ContainerTest {
     @Test
     void setFromDataImportsCallbacks() {
         var source = new Container();
-        source.register(new ProviderClass());
+        source.register(new ProviderFixture());
         var data = source.getData();
 
         var container = new Container();
-        assertFalse(container.has(ProvidedClass.class));
+        assertFalse(container.has(ProvidedFixture.class));
 
         container.setFromData(data);
 
-        assertTrue(container.has(ProvidedClass.class));
-        assertTrue(container.getData().callbacks().containsKey(ProvidedClass.class));
+        assertTrue(container.has(ProvidedFixture.class));
+        assertTrue(container.getData().callbacks().containsKey(ProvidedFixture.class));
     }
 
     @Test
     void constructWithDataImportsCallbacks() {
         var source = new Container();
-        source.register(new ProviderClass());
+        source.register(new ProviderFixture());
         var data = source.getData();
 
         var container = new Container(data);
 
-        assertTrue(container.has(ProvidedClass.class));
-        assertTrue(container.getData().callbacks().containsKey(ProvidedClass.class));
+        assertTrue(container.has(ProvidedFixture.class));
+        assertTrue(container.getData().callbacks().containsKey(ProvidedFixture.class));
     }
 
     @Test
     void getResolvesDeferredProviderThenFallsBack() {
         var container = new Container();
-        container.register(new ProviderClass());
+        container.register(new ProviderFixture());
 
-        Object provided = container.get(ProvidedClass.class);
+        Object provided = container.get(ProvidedFixture.class);
 
-        assertInstanceOf(ProvidedClass.class, provided);
-        assertTrue(container.isPublished(ProvidedClass.class));
+        assertInstanceOf(ProvidedFixture.class, provided);
+        assertTrue(container.isPublished(ProvidedFixture.class));
     }
 
     @Test
@@ -190,23 +190,23 @@ final class ContainerTest {
 
         var object =
                 container.get(
-                        SingletonClass.class,
+                        SingletonFixture.class,
                         Map.of(),
                         InvalidReferenceMode.NEW_INSTANCE_OR_THROW_EXCEPTION);
 
-        assertInstanceOf(SingletonClass.class, object);
+        assertInstanceOf(SingletonFixture.class, object);
     }
 
     @Test
     void newInstanceOrThrowModeThrowsWhenConstructionFails() {
         var container = new Container();
 
-        // ServiceClass has no no-arg constructor, so reflective instantiation fails.
+        // ServiceFixture has no no-arg constructor, so reflective instantiation fails.
         assertThrows(
                 ContainerInvalidArgumentException.class,
                 () ->
                         container.get(
-                                ServiceClass.class,
+                                ServiceFixture.class,
                                 Map.of(),
                                 InvalidReferenceMode.NEW_INSTANCE_OR_THROW_EXCEPTION));
     }
@@ -219,7 +219,7 @@ final class ContainerTest {
                 ContainerInvalidArgumentException.class,
                 () ->
                         container.get(
-                                ServiceClass.class,
+                                ServiceFixture.class,
                                 Map.of(),
                                 InvalidReferenceMode.THROW_EXCEPTION));
     }
@@ -242,10 +242,10 @@ final class ContainerTest {
     void getSingletonWithNullFactoryThrows() {
         var container = new Container();
         // Singleton factory yields null → the cache-put is skipped and the lookup ultimately fails.
-        container.bindSingleton(SingletonClass.class, (c, a) -> null);
+        container.bindSingleton(SingletonFixture.class, (c, a) -> null);
 
         assertThrows(
                 ContainerInvalidArgumentException.class,
-                () -> container.getSingleton(SingletonClass.class));
+                () -> container.getSingleton(SingletonFixture.class));
     }
 }

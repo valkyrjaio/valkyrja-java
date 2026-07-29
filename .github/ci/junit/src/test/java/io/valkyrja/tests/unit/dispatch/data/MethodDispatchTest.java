@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.dispatch.data.MethodDispatch;
-import io.valkyrja.tests.fixtures.dispatch.DispatchableClass;
+import io.valkyrja.tests.fixtures.dispatch.DispatchableFixture;
 import io.valkyrja.throwable.exception.InvalidArgumentException;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +26,7 @@ final class MethodDispatchTest {
 
     @Test
     void twoArgConstructorDefaultsToInstanceMethod() {
-        var dispatch = new MethodDispatch(DispatchableClass.class, "instanceMethod");
+        var dispatch = new MethodDispatch(DispatchableFixture.class, "instanceMethod");
 
         assertEquals("instanceMethod", dispatch.getMethod());
         assertFalse(dispatch.isStatic());
@@ -34,14 +34,14 @@ final class MethodDispatchTest {
 
     @Test
     void staticFlagConstructor() {
-        var dispatch = new MethodDispatch(DispatchableClass.class, "staticMethod", true);
+        var dispatch = new MethodDispatch(DispatchableFixture.class, "staticMethod", true);
 
         assertTrue(dispatch.isStatic());
     }
 
     @Test
     void fromArrayCreatesStaticDispatch() {
-        var dispatch = MethodDispatch.fromArray(DispatchableClass.class, "staticMethod");
+        var dispatch = MethodDispatch.fromArray(DispatchableFixture.class, "staticMethod");
 
         assertEquals("staticMethod", dispatch.getMethod());
         assertTrue(dispatch.isStatic());
@@ -51,12 +51,12 @@ final class MethodDispatchTest {
     void fromArrayRejectsBlankMethodName() {
         assertThrows(
                 InvalidArgumentException.class,
-                () -> MethodDispatch.fromArray(DispatchableClass.class, " "));
+                () -> MethodDispatch.fromArray(DispatchableFixture.class, " "));
     }
 
     @Test
     void withMethodsReturnNewInstances() {
-        var original = new MethodDispatch(DispatchableClass.class, "instanceMethod");
+        var original = new MethodDispatch(DispatchableFixture.class, "instanceMethod");
 
         var withMethod = original.withMethod("other");
         var withStatic = original.withIsStatic(true);
@@ -69,31 +69,31 @@ final class MethodDispatchTest {
 
     @Test
     void toMapIncludesMethodAndStaticFlag() {
-        var map = new MethodDispatch(DispatchableClass.class, "staticMethod", true).toMap();
+        var map = new MethodDispatch(DispatchableFixture.class, "staticMethod", true).toMap();
 
         assertEquals("staticMethod", map.get("method"));
         assertEquals(true, map.get("isStatic"));
-        assertEquals(DispatchableClass.class.getName(), map.get("class"));
+        assertEquals(DispatchableFixture.class.getName(), map.get("class"));
     }
 
     @Test
     void toStringUsesStaticOrInstanceSeparator() {
         assertEquals(
-                DispatchableClass.class.getName() + "::staticMethod()",
-                new MethodDispatch(DispatchableClass.class, "staticMethod", true).toString());
+                DispatchableFixture.class.getName() + "::staticMethod()",
+                new MethodDispatch(DispatchableFixture.class, "staticMethod", true).toString());
         assertEquals(
-                DispatchableClass.class.getName() + "->instanceMethod()",
-                new MethodDispatch(DispatchableClass.class, "instanceMethod").toString());
+                DispatchableFixture.class.getName() + "->instanceMethod()",
+                new MethodDispatch(DispatchableFixture.class, "instanceMethod").toString());
     }
 
     @Test
     void fromArrayValidatesMethodName() {
         assertThrows(
                 io.valkyrja.throwable.exception.InvalidArgumentException.class,
-                () -> MethodDispatch.fromArray(DispatchableClass.class, null));
+                () -> MethodDispatch.fromArray(DispatchableFixture.class, null));
         assertThrows(
                 io.valkyrja.throwable.exception.InvalidArgumentException.class,
-                () -> MethodDispatch.fromArray(DispatchableClass.class, " "));
-        assertNotNull(MethodDispatch.fromArray(DispatchableClass.class, "instanceMethod"));
+                () -> MethodDispatch.fromArray(DispatchableFixture.class, " "));
+        assertNotNull(MethodDispatch.fromArray(DispatchableFixture.class, "instanceMethod"));
     }
 }

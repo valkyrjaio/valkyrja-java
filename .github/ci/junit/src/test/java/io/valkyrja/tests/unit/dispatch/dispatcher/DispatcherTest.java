@@ -22,8 +22,8 @@ import io.valkyrja.dispatch.data.MethodDispatch;
 import io.valkyrja.dispatch.data.PropertyDispatch;
 import io.valkyrja.dispatch.dispatcher.Dispatcher;
 import io.valkyrja.dispatch.throwable.exception.DispatchInvalidDispatchCapabilityException;
-import io.valkyrja.tests.fixtures.dispatch.DispatchableClass;
-import io.valkyrja.tests.fixtures.dispatch.UnknownDispatchClass;
+import io.valkyrja.tests.fixtures.dispatch.DispatchableFixture;
+import io.valkyrja.tests.fixtures.dispatch.UnknownDispatchFixture;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,7 +39,8 @@ final class DispatcherTest {
         var result =
                 new Dispatcher()
                         .dispatch(
-                                new MethodDispatch(DispatchableClass.class, "staticMethod", true));
+                                new MethodDispatch(
+                                        DispatchableFixture.class, "staticMethod", true));
 
         assertEquals("static-result", result);
     }
@@ -50,7 +51,7 @@ final class DispatcherTest {
     void dispatchesStaticMethod() {
         var result =
                 dispatcher.dispatch(
-                        new MethodDispatch(DispatchableClass.class, "staticMethod", true));
+                        new MethodDispatch(DispatchableFixture.class, "staticMethod", true));
 
         assertEquals("static-result", result);
     }
@@ -58,7 +59,8 @@ final class DispatcherTest {
     @Test
     void dispatchesInstanceMethod() {
         var result =
-                dispatcher.dispatch(new MethodDispatch(DispatchableClass.class, "instanceMethod"));
+                dispatcher.dispatch(
+                        new MethodDispatch(DispatchableFixture.class, "instanceMethod"));
 
         assertEquals("instance-result", result);
     }
@@ -67,24 +69,28 @@ final class DispatcherTest {
     void dispatchesMethodWithArgument() {
         var dispatch =
                 new MethodDispatch(
-                        DispatchableClass.class, "echo", false, Map.of("value", "hi"), List.of());
+                        DispatchableFixture.class, "echo", false, Map.of("value", "hi"), List.of());
 
         assertEquals("echo:hi", dispatcher.dispatch(dispatch));
     }
 
     @Test
     void dispatchesMethodWithNestedDispatchArgument() {
-        var nested = new ConstantDispatch("CONSTANT", DispatchableClass.class);
+        var nested = new ConstantDispatch("CONSTANT", DispatchableFixture.class);
         var dispatch =
                 new MethodDispatch(
-                        DispatchableClass.class, "echo", false, Map.of("value", nested), List.of());
+                        DispatchableFixture.class,
+                        "echo",
+                        false,
+                        Map.of("value", nested),
+                        List.of());
 
         assertEquals("echo:constant-value", dispatcher.dispatch(dispatch));
     }
 
     @Test
     void wrapsExceptionThrownInsideMethod() {
-        var dispatch = new MethodDispatch(DispatchableClass.class, "boom", true);
+        var dispatch = new MethodDispatch(DispatchableFixture.class, "boom", true);
 
         var thrown =
                 assertThrows(
@@ -96,7 +102,7 @@ final class DispatcherTest {
 
     @Test
     void throwsWhenMethodNotFound() {
-        var dispatch = new MethodDispatch(DispatchableClass.class, "missing", true);
+        var dispatch = new MethodDispatch(DispatchableFixture.class, "missing", true);
 
         assertThrows(
                 DispatchInvalidDispatchCapabilityException.class,
@@ -105,7 +111,7 @@ final class DispatcherTest {
 
     @Test
     void dispatchesMethodWithExternalArguments() {
-        var dispatch = new MethodDispatch(DispatchableClass.class, "echo");
+        var dispatch = new MethodDispatch(DispatchableFixture.class, "echo");
 
         // External arguments take precedence over the dispatch's own (empty) arguments.
         assertEquals("echo:ext", dispatcher.dispatch(dispatch, Map.of("value", "ext")));
@@ -115,11 +121,11 @@ final class DispatcherTest {
     void dispatchesMethodWithDependencies() {
         var dispatch =
                 new MethodDispatch(
-                        DispatchableClass.class,
+                        DispatchableFixture.class,
                         "echo",
                         false,
                         Map.of(),
-                        List.of(DispatchableClass.class));
+                        List.of(DispatchableFixture.class));
 
         // The single dependency is resolved from the container and passed as the only argument.
         assertNotNull(dispatcher.dispatch(dispatch));
@@ -135,7 +141,8 @@ final class DispatcherTest {
                     protected java.lang.reflect.Method findMethod(
                             Class<?> clazz, String methodName, int paramCount) {
                         try {
-                            return DispatchableClass.class.getDeclaredMethod("inaccessibleMethod");
+                            return DispatchableFixture.class.getDeclaredMethod(
+                                    "inaccessibleMethod");
                         } catch (NoSuchMethodException e) {
                             throw new IllegalStateException(e);
                         }
@@ -144,7 +151,9 @@ final class DispatcherTest {
 
         assertThrows(
                 DispatchInvalidDispatchCapabilityException.class,
-                () -> dispatcher.dispatch(new MethodDispatch(DispatchableClass.class, "anything")));
+                () ->
+                        dispatcher.dispatch(
+                                new MethodDispatch(DispatchableFixture.class, "anything")));
     }
 
     // -- properties --
@@ -153,7 +162,7 @@ final class DispatcherTest {
     void dispatchesStaticProperty() {
         var result =
                 dispatcher.dispatch(
-                        new PropertyDispatch(DispatchableClass.class, "staticField", true));
+                        new PropertyDispatch(DispatchableFixture.class, "staticField", true));
 
         assertEquals("static-field", result);
     }
@@ -161,14 +170,15 @@ final class DispatcherTest {
     @Test
     void dispatchesInstanceProperty() {
         var result =
-                dispatcher.dispatch(new PropertyDispatch(DispatchableClass.class, "instanceField"));
+                dispatcher.dispatch(
+                        new PropertyDispatch(DispatchableFixture.class, "instanceField"));
 
         assertEquals("instance-field", result);
     }
 
     @Test
     void throwsWhenPropertyNotFound() {
-        var dispatch = new PropertyDispatch(DispatchableClass.class, "missing", true);
+        var dispatch = new PropertyDispatch(DispatchableFixture.class, "missing", true);
 
         assertThrows(
                 DispatchInvalidDispatchCapabilityException.class,
@@ -179,7 +189,8 @@ final class DispatcherTest {
 
     @Test
     void dispatchesConstant() {
-        var result = dispatcher.dispatch(new ConstantDispatch("CONSTANT", DispatchableClass.class));
+        var result =
+                dispatcher.dispatch(new ConstantDispatch("CONSTANT", DispatchableFixture.class));
 
         assertEquals("constant-value", result);
     }
@@ -193,7 +204,7 @@ final class DispatcherTest {
 
     @Test
     void throwsWhenConstantNotFound() {
-        var dispatch = new ConstantDispatch("MISSING", DispatchableClass.class);
+        var dispatch = new ConstantDispatch("MISSING", DispatchableFixture.class);
 
         assertThrows(
                 DispatchInvalidDispatchCapabilityException.class,
@@ -204,24 +215,24 @@ final class DispatcherTest {
 
     @Test
     void dispatchesClassInstantiation() {
-        var result = dispatcher.dispatch(new ClassDispatch(DispatchableClass.class));
+        var result = dispatcher.dispatch(new ClassDispatch(DispatchableFixture.class));
 
-        assertInstanceOf(DispatchableClass.class, result);
+        assertInstanceOf(DispatchableFixture.class, result);
     }
 
     @Test
     void dispatchesClassInstantiationWithDispatchArguments() {
-        var dispatch = new ClassDispatch(DispatchableClass.class, Map.of(), List.of());
+        var dispatch = new ClassDispatch(DispatchableFixture.class, Map.of(), List.of());
 
         assertNotNull(dispatcher.dispatch(dispatch, Map.of()));
     }
 
     @Test
     void dispatchesClassInstantiationWithExternalArguments() {
-        var dispatch = new ClassDispatch(DispatchableClass.class);
+        var dispatch = new ClassDispatch(DispatchableFixture.class);
 
         // Non-empty external arguments are forwarded to the container.
-        assertInstanceOf(DispatchableClass.class, dispatcher.dispatch(dispatch, Map.of("a", 1)));
+        assertInstanceOf(DispatchableFixture.class, dispatcher.dispatch(dispatch, Map.of("a", 1)));
     }
 
     // -- callables --
@@ -238,7 +249,7 @@ final class DispatcherTest {
         Function<Object[], Object> callable = args -> "args:" + args.length;
         var dispatch =
                 new CallableDispatch(
-                        callable, Map.of("value", "x"), List.of(DispatchableClass.class));
+                        callable, Map.of("value", "x"), List.of(DispatchableFixture.class));
 
         // one dependency + one argument = 2 resolved args
         assertEquals("args:2", dispatcher.dispatch(dispatch));
@@ -250,7 +261,7 @@ final class DispatcherTest {
     void throwsForUnknownDispatchType() {
         assertThrows(
                 DispatchInvalidDispatchCapabilityException.class,
-                () -> dispatcher.dispatch(new UnknownDispatchClass()));
+                () -> dispatcher.dispatch(new UnknownDispatchFixture()));
     }
 
     @Test
@@ -266,7 +277,7 @@ final class DispatcherTest {
     void findMethodSkipsNameMatchWithWrongArgumentCount() {
         // "echo" exists but takes one parameter; dispatching with zero args matches the name but
         // not the parameter count, so no method is found.
-        var dispatch = new MethodDispatch(DispatchableClass.class, "echo", true);
+        var dispatch = new MethodDispatch(DispatchableFixture.class, "echo", true);
 
         assertThrows(
                 DispatchInvalidDispatchCapabilityException.class,

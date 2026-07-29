@@ -16,7 +16,7 @@ import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.handler.ResponseSentHandler;
-import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddleware;
+import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddlewareFixture;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link ResponseSentHandler}. */
@@ -25,7 +25,8 @@ final class ResponseSentHandlerTest {
     @Test
     void runsWithAndWithoutMiddleware() {
         var container = new Container();
-        container.setSingleton(PassThroughHttpMiddleware.class, new PassThroughHttpMiddleware());
+        container.setSingleton(
+                PassThroughHttpMiddlewareFixture.class, new PassThroughHttpMiddlewareFixture());
 
         assertDoesNotThrow(
                 () ->
@@ -35,7 +36,7 @@ final class ResponseSentHandlerTest {
                                         mock(ResponseContract.class)));
         assertDoesNotThrow(
                 () ->
-                        new ResponseSentHandler(container, PassThroughHttpMiddleware.class)
+                        new ResponseSentHandler(container, PassThroughHttpMiddlewareFixture.class)
                                 .responseSent(
                                         mock(ServerRequestContract.class),
                                         mock(ResponseContract.class)));

@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.valkyrja.reflection.support.Reflection;
 import io.valkyrja.reflection.throwable.exception.ReflectionInvalidClassToInstantiateException;
-import io.valkyrja.tests.fixtures.reflection.AbstractReflectableClass;
-import io.valkyrja.tests.fixtures.reflection.NoDefaultConstructorClass;
-import io.valkyrja.tests.fixtures.reflection.ReflectableClass;
+import io.valkyrja.tests.fixtures.reflection.NoDefaultConstructorFixture;
+import io.valkyrja.tests.fixtures.reflection.ReflectableFixture;
+import io.valkyrja.tests.fixtures.reflection.abstract_.NonInstantiableFixture;
 import java.lang.reflect.Constructor;
 import org.junit.jupiter.api.Test;
 
@@ -27,8 +27,8 @@ final class ReflectionTest {
 
     @Test
     void instantiateReturnsInstanceAndCaches() {
-        var first = Reflection.instantiate(ReflectableClass.class);
-        var second = Reflection.instantiate(ReflectableClass.class);
+        var first = Reflection.instantiate(ReflectableFixture.class);
+        var second = Reflection.instantiate(ReflectableFixture.class);
 
         assertNotNull(first);
         assertSame(first, second);
@@ -38,13 +38,13 @@ final class ReflectionTest {
     void instantiateThrowsWhenClassCannotBeInstantiated() {
         assertThrows(
                 ReflectionInvalidClassToInstantiateException.class,
-                () -> Reflection.instantiate(AbstractReflectableClass.class));
+                () -> Reflection.instantiate(NonInstantiableFixture.class));
     }
 
     @Test
     void constructorReturnsNoArgConstructorAndCaches() {
-        Constructor<ReflectableClass> first = Reflection.constructor(ReflectableClass.class);
-        Constructor<ReflectableClass> second = Reflection.constructor(ReflectableClass.class);
+        Constructor<ReflectableFixture> first = Reflection.constructor(ReflectableFixture.class);
+        Constructor<ReflectableFixture> second = Reflection.constructor(ReflectableFixture.class);
 
         assertNotNull(first);
         assertSame(first, second);
@@ -54,24 +54,24 @@ final class ReflectionTest {
     void constructorThrowsWhenNoNoArgConstructorExists() {
         assertThrows(
                 ReflectionInvalidClassToInstantiateException.class,
-                () -> Reflection.constructor(NoDefaultConstructorClass.class));
+                () -> Reflection.constructor(NoDefaultConstructorFixture.class));
     }
 
     @Test
     void methodResolvesAndCaches() throws Exception {
-        var first = Reflection.method(ReflectableClass.class, "greet");
-        var second = Reflection.method(ReflectableClass.class, "greet");
+        var first = Reflection.method(ReflectableFixture.class, "greet");
+        var second = Reflection.method(ReflectableFixture.class, "greet");
 
         assertNotNull(first);
         assertSame(first, second);
-        assertEquals("hello", first.invoke(new ReflectableClass()));
+        assertEquals("hello", first.invoke(new ReflectableFixture()));
     }
 
     @Test
     void methodThrowsWhenMethodDoesNotExist() {
         assertThrows(
                 ReflectionInvalidClassToInstantiateException.class,
-                () -> Reflection.method(ReflectableClass.class, "doesNotExist"));
+                () -> Reflection.method(ReflectableFixture.class, "doesNotExist"));
     }
 
     @Test

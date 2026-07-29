@@ -15,7 +15,7 @@ import static org.mockito.Mockito.mock;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.middleware.handler.RequestReceivedHandler;
-import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddleware;
+import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddlewareFixture;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link RequestReceivedHandler}. */
@@ -33,11 +33,12 @@ final class RequestReceivedHandlerTest {
     @Test
     void runsMiddlewareChain() {
         var container = new Container();
-        container.setSingleton(PassThroughHttpMiddleware.class, new PassThroughHttpMiddleware());
+        container.setSingleton(
+                PassThroughHttpMiddlewareFixture.class, new PassThroughHttpMiddlewareFixture());
         var request = mock(ServerRequestContract.class);
 
         var result =
-                new RequestReceivedHandler(container, PassThroughHttpMiddleware.class)
+                new RequestReceivedHandler(container, PassThroughHttpMiddlewareFixture.class)
                         .requestReceived(request);
 
         assertSame(request, result.request());

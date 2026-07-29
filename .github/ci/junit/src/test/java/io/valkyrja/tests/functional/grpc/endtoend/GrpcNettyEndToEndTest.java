@@ -28,7 +28,7 @@ import io.valkyrja.application.entry.abstract_.WorkerGrpc;
 import io.valkyrja.application.entry.grpc.GrpcBridge;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.data.ContainerData;
-import io.valkyrja.tests.fixtures.grpc.GreeterComponentProvider;
+import io.valkyrja.tests.fixtures.grpc.GreeterComponentProviderFixture;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +66,7 @@ final class GrpcNettyEndToEndTest {
                 "app.grpc.provider.data",
                 50051,
                 1000,
-                List.of(new GreeterComponentProvider()),
+                List.of(new GreeterComponentProviderFixture()),
                 List.of(),
                 List.of(),
                 List.of(),

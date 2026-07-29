@@ -46,7 +46,7 @@ import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
 import io.valkyrja.grpc.message.peer.contract.PeerContract;
 import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.status.Status;
-import io.valkyrja.tests.fixtures.grpc.GreeterComponentProvider;
+import io.valkyrja.tests.fixtures.grpc.GreeterComponentProviderFixture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -80,7 +80,7 @@ final class GrpcBridgeTest {
                 "app.grpc.provider.data",
                 50051,
                 maxInboundMessages,
-                List.of(new GreeterComponentProvider()),
+                List.of(new GreeterComponentProviderFixture()),
                 List.of(),
                 List.of(),
                 List.of(),
