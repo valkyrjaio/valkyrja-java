@@ -32,6 +32,7 @@ import io.valkyrja.tests.fixtures.grpc.GreeterComponentProviderFixture;
 import io.valkyrja.tests.fixtures.grpc.GreeterControllerFixture;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -151,8 +152,7 @@ final class WorkerGrpcTest {
 
         assertEquals(List.of("a", "b"), outbound.messages);
         assertTrue(outbound.headersSent);
-        ServiceResponseContract terminal = outbound.terminal;
-        assertNotNull(terminal);
+        ServiceResponseContract terminal = Objects.requireNonNull(outbound.terminal);
         assertEquals(StatusCode.OK, terminal.getStatus().getCode());
         // SendingResponse once at stream open (first emit), ResponseSent once at close.
         assertEquals(1, GreeterControllerFixture.SendingMiddleware.calls.get());
