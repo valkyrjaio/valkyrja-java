@@ -19,8 +19,10 @@ import io.valkyrja.http.routing.attribute.Route;
 import io.valkyrja.http.routing.attribute.route.Middleware;
 import io.valkyrja.http.routing.attribute.route.Name;
 import io.valkyrja.http.routing.attribute.route.Path;
+import io.valkyrja.http.routing.attribute.route.RouteHandler;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddlewareFixture;
+import io.valkyrja.tests.fixtures.http.routing.provider.AnnotatedRouteHandlerProviderFixture;
 import io.valkyrja.tests.fixtures.http.struct.FailingRequestStructFixture;
 import io.valkyrja.tests.fixtures.http.struct.FailingResponseStructFixture;
 import io.valkyrja.tests.fixtures.http.struct.ParsedBodyStructFixture;
@@ -109,11 +111,7 @@ public final class AnnotatedHttpControllerFixture {
     }
 
     @Route(path = "/handled", name = "handled")
-    @io.valkyrja.http.routing.attribute.route.RouteHandler(
-            handlerClass =
-                    io.valkyrja.fixtures.http.routing.provider.AnnotatedRouteHandlerProviderClass
-                            .class,
-            handlerMethod = "handle")
+    @RouteHandler(handlerClass = AnnotatedRouteHandlerProviderFixture.class, handlerMethod = "handle")
     public ResponseContract handlerAnnotated() {
         // Deliberately parameterless: the @RouteHandler names the handler, so the collector must
         // never try to invoke this method — a controller method may take no arguments at all.
@@ -121,10 +119,8 @@ public final class AnnotatedHttpControllerFixture {
     }
 
     @Route(path = "/handled-missing", name = "handled.missing")
-    @io.valkyrja.http.routing.attribute.route.RouteHandler(
-            handlerClass =
-                    io.valkyrja.fixtures.http.routing.provider.AnnotatedRouteHandlerProviderClass
-                            .class,
+    @RouteHandler(
+            handlerClass = AnnotatedRouteHandlerProviderFixture.class,
             handlerMethod = "doesNotExist")
     public ResponseContract handlerAnnotatedMissing() {
         return new EmptyResponse();

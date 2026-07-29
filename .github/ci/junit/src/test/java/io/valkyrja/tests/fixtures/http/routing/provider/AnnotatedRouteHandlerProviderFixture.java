@@ -21,9 +21,9 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
  * which is how a controller with constructor dependencies is reached — the handler resolves it from
  * the container rather than the collector reflecting a constructor.
  */
-public final class AnnotatedRouteHandlerProviderClass {
+public final class AnnotatedRouteHandlerProviderFixture {
 
-    private AnnotatedRouteHandlerProviderClass() {}
+    private AnnotatedRouteHandlerProviderFixture() {}
 
     public static ResponseContract handle(ContainerContract container, RouteContract route) {
         return new EmptyResponse();
