@@ -30,6 +30,14 @@ public class CancellationToken implements CancellationTokenContract {
     protected volatile @Nullable CancellationReason reason;
     protected final List<Runnable> listeners = new ArrayList<>();
 
+    /**
+     * Guards {@link #listeners}, {@link #cancelled} and {@link #reason}. A dedicated private final
+     * lock rather than the list itself: {@code listeners} is protected, so a subclass could
+     * synchronize on it for unrelated work — or hold it indefinitely — and deadlock or stall
+     * cancellation. See SEI CERT LCK00-J.
+     */
+    private final Object lock = new Object();
+
     public CancellationToken() {
         this(false, null);
     }
@@ -58,7 +66,7 @@ public class CancellationToken implements CancellationTokenContract {
 
     @Override
     public void onCancelled(Runnable listener) {
-        synchronized (listeners) {
+        synchronized (lock) {
             if (cancelled) {
                 listener.run();
                 return;
@@ -77,7 +85,7 @@ public class CancellationToken implements CancellationTokenContract {
     public void cancel(CancellationReason reason) {
         List<Runnable> toFire;
 
-        synchronized (listeners) {
+        synchronized (lock) {
             if (cancelled) {
                 return;
             }
