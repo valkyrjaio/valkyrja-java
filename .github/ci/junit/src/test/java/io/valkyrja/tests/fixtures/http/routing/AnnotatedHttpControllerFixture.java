@@ -107,4 +107,26 @@ public final class AnnotatedHttpControllerFixture {
     public ResponseContract badStruct(ContainerContract container, RouteContract route) {
         return new EmptyResponse();
     }
+
+    @Route(path = "/handled", name = "handled")
+    @io.valkyrja.http.routing.attribute.route.RouteHandler(
+            handlerClass =
+                    io.valkyrja.fixtures.http.routing.provider.AnnotatedRouteHandlerProviderClass
+                            .class,
+            handlerMethod = "handle")
+    public ResponseContract handlerAnnotated() {
+        // Deliberately parameterless: the @RouteHandler names the handler, so the collector must
+        // never try to invoke this method — a controller method may take no arguments at all.
+        return new EmptyResponse();
+    }
+
+    @Route(path = "/handled-missing", name = "handled.missing")
+    @io.valkyrja.http.routing.attribute.route.RouteHandler(
+            handlerClass =
+                    io.valkyrja.fixtures.http.routing.provider.AnnotatedRouteHandlerProviderClass
+                            .class,
+            handlerMethod = "doesNotExist")
+    public ResponseContract handlerAnnotatedMissing() {
+        return new EmptyResponse();
+    }
 }

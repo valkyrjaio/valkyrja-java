@@ -14,9 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
-import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.collector.AttributeRouteCollector;
 import io.valkyrja.http.routing.constant.Regex;
@@ -70,9 +69,11 @@ final class AttributeRouteCollectorTest {
     }
 
     @Test
-    void handlerInvokesControllerMethod() {
+    void handlerResolvesTheControllerFromTheContainer() {
         var route = routes.get("api.plain");
-        var container = mock(ContainerContract.class);
+        // A real container, because the controller is now resolved through it rather than through
+        // its no-argument constructor — which a controller with dependencies does not have.
+        var container = new Container();
 
         ResponseContract response = route.getHandler().apply(container, route);
 
@@ -82,9 +83,33 @@ final class AttributeRouteCollectorTest {
     @Test
     void handlerWrapsControllerFailures() {
         var route = routes.get("api.boom");
-        var container = mock(ContainerContract.class);
+        var container = new Container();
 
         assertThrows(RuntimeException.class, () -> route.getHandler().apply(container, route));
+    }
+
+    @Test
+    void handlerNamedByAnnotationIsInvokedInsteadOfTheControllerMethod() {
+        // The controller method takes no arguments, so it could not be invoked as a handler at all;
+        // the @RouteHandler names the real handler, mirroring the generated routing data.
+        var route = routes.get("api.handled");
+        var container = new Container();
+
+        ResponseContract response = route.getHandler().apply(container, route);
+
+        assertInstanceOf(ResponseContract.class, response);
+    }
+
+    @Test
+    void handlerNamedByAnnotationWrapsAMissingHandlerMethod() {
+        var route = routes.get("api.handled.missing");
+        var container = new Container();
+
+        var exception =
+                assertThrows(
+                        RuntimeException.class, () -> route.getHandler().apply(container, route));
+
+        assertTrue(exception.getMessage().contains("doesNotExist"));
     }
 
     @Test

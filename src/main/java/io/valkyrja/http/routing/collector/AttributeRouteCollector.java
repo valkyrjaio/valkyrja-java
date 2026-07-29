@@ -25,6 +25,7 @@ import io.valkyrja.http.routing.attribute.route.Middlewares;
 import io.valkyrja.http.routing.attribute.route.Name;
 import io.valkyrja.http.routing.attribute.route.Path;
 import io.valkyrja.http.routing.attribute.route.RequestMethod;
+import io.valkyrja.http.routing.attribute.route.RouteHandler;
 import io.valkyrja.http.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.processor.Processor;
@@ -161,9 +162,23 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                     RouteContract,
                     io.valkyrja.http.message.response.contract.ResponseContract>
             buildHandler(Class<?> clazz, Method method) {
+        RouteHandler routeHandler = method.getAnnotation(RouteHandler.class);
+
+        // A @RouteHandler names the handler explicitly — a static
+        // (ContainerContract, RouteContract) method, typically on the route provider — which is how
+        // a controller with constructor dependencies is reached: the handler resolves it from the
+        // container. This mirrors the PHP collector, which takes the handler straight off the
+        // attribute, and matches what the generated routing data emits for the same route.
+        if (routeHandler != null) {
+            return buildAnnotatedHandler(routeHandler);
+        }
+
+        // Otherwise the annotated controller method is the handler itself. Resolve the controller
+        // from the container rather than calling its no-argument constructor: the container knows
+        // how to build it, and a controller with dependencies has no such constructor.
         return (container, route) -> {
             try {
-                Object instance = clazz.getDeclaredConstructor().newInstance();
+                Object instance = container.get(clazz);
                 return (io.valkyrja.http.message.response.contract.ResponseContract)
                         method.invoke(instance, container, route);
             } catch (Exception e) {
@@ -172,6 +187,41 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                                 + clazz.getName()
                                 + "#"
                                 + method.getName(),
+                        e);
+            }
+        };
+    }
+
+    /**
+     * Build the handler named by a {@link RouteHandler} annotation.
+     *
+     * @param routeHandler the annotation naming the handler class and method
+     * @return a handler invoking that static method with the container and route
+     */
+    protected BiFunction<
+                    io.valkyrja.container.manager.contract.ContainerContract,
+                    RouteContract,
+                    io.valkyrja.http.message.response.contract.ResponseContract>
+            buildAnnotatedHandler(RouteHandler routeHandler) {
+        Class<?> handlerClass = routeHandler.handlerClass();
+        String handlerMethod = routeHandler.handlerMethod();
+
+        return (container, route) -> {
+            try {
+                Method handler =
+                        handlerClass.getMethod(
+                                handlerMethod,
+                                io.valkyrja.container.manager.contract.ContainerContract.class,
+                                RouteContract.class);
+
+                return (io.valkyrja.http.message.response.contract.ResponseContract)
+                        handler.invoke(null, container, route);
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Failed to invoke route handler: "
+                                + handlerClass.getName()
+                                + "#"
+                                + handlerMethod,
                         e);
             }
         };
