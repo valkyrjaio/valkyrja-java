@@ -9,6 +9,8 @@
 
 package io.valkyrja.http.routing.collector;
 
+import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.middleware.contract.ResponseSentMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.http.middleware.contract.RouteMatchedMiddlewareContract;
@@ -27,6 +29,7 @@ import io.valkyrja.http.routing.attribute.route.Path;
 import io.valkyrja.http.routing.attribute.route.RequestMethod;
 import io.valkyrja.http.routing.attribute.route.RouteHandler;
 import io.valkyrja.http.routing.collector.contract.RouteCollectorContract;
+import io.valkyrja.http.routing.data.contract.ParameterContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.processor.Processor;
 import io.valkyrja.http.routing.processor.contract.ProcessorContract;
@@ -157,11 +160,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                 buildResponseStruct(annotation.responseStruct()));
     }
 
-    protected BiFunction<
-                    io.valkyrja.container.manager.contract.ContainerContract,
-                    RouteContract,
-                    io.valkyrja.http.message.response.contract.ResponseContract>
-            buildHandler(Class<?> clazz, Method method) {
+    protected BiFunction<ContainerContract, RouteContract, ResponseContract> buildHandler(
+            Class<?> clazz, Method method) {
         RouteHandler routeHandler = method.getAnnotation(RouteHandler.class);
 
         // A @RouteHandler names the handler explicitly — a static
@@ -179,8 +179,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         return (container, route) -> {
             try {
                 Object instance = container.get(clazz);
-                return (io.valkyrja.http.message.response.contract.ResponseContract)
-                        method.invoke(instance, container, route);
+                return (ResponseContract) method.invoke(instance, container, route);
             } catch (Exception e) {
                 throw new RuntimeException(
                         "Failed to invoke route handler: "
@@ -198,11 +197,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
      * @param routeHandler the annotation naming the handler class and method
      * @return a handler invoking that static method with the container and route
      */
-    protected BiFunction<
-                    io.valkyrja.container.manager.contract.ContainerContract,
-                    RouteContract,
-                    io.valkyrja.http.message.response.contract.ResponseContract>
-            buildAnnotatedHandler(RouteHandler routeHandler) {
+    protected BiFunction<ContainerContract, RouteContract, ResponseContract> buildAnnotatedHandler(
+            RouteHandler routeHandler) {
         Class<?> handlerClass = routeHandler.handlerClass();
         String handlerMethod = routeHandler.handlerMethod();
 
@@ -210,12 +206,9 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             try {
                 Method handler =
                         handlerClass.getMethod(
-                                handlerMethod,
-                                io.valkyrja.container.manager.contract.ContainerContract.class,
-                                RouteContract.class);
+                                handlerMethod, ContainerContract.class, RouteContract.class);
 
-                return (io.valkyrja.http.message.response.contract.ResponseContract)
-                        handler.invoke(null, container, route);
+                return (ResponseContract) handler.invoke(null, container, route);
             } catch (Exception e) {
                 throw new RuntimeException(
                         "Failed to invoke route handler: "
@@ -332,7 +325,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     protected io.valkyrja.http.routing.data.DynamicRoute updateParameters(
             io.valkyrja.http.routing.data.DynamicRoute route, Class<?> clazz, Method method) {
         List<io.valkyrja.http.routing.data.Parameter> parameters = new ArrayList<>();
-        for (io.valkyrja.http.routing.data.contract.ParameterContract p : route.getParameters()) {
+        for (ParameterContract p : route.getParameters()) {
             parameters.add(convertToDataParameter(p));
         }
 
@@ -348,13 +341,11 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         }
 
         return (io.valkyrja.http.routing.data.DynamicRoute)
-                route.withParameters(
-                        parameters.toArray(
-                                new io.valkyrja.http.routing.data.contract.ParameterContract[0]));
+                route.withParameters(parameters.toArray(new ParameterContract[0]));
     }
 
     protected io.valkyrja.http.routing.data.Parameter convertToDataParameter(
-            io.valkyrja.http.routing.data.contract.ParameterContract parameter) {
+            ParameterContract parameter) {
         return new io.valkyrja.http.routing.data.Parameter(
                 parameter.getName(),
                 parameter.getRegex(),

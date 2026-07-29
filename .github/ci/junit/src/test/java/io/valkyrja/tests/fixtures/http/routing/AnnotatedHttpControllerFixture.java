@@ -111,7 +111,9 @@ public final class AnnotatedHttpControllerFixture {
     }
 
     @Route(path = "/handled", name = "handled")
-    @RouteHandler(handlerClass = AnnotatedRouteHandlerProviderFixture.class, handlerMethod = "handle")
+    @RouteHandler(
+            handlerClass = AnnotatedRouteHandlerProviderFixture.class,
+            handlerMethod = "handle")
     public ResponseContract handlerAnnotated() {
         // Deliberately parameterless: the @RouteHandler names the handler, so the collector must
         // never try to invoke this method — a controller method may take no arguments at all.
