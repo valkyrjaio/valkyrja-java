@@ -27,6 +27,7 @@ import io.valkyrja.http.routing.attribute.route.Path;
 import io.valkyrja.http.routing.attribute.route.RequestMethod;
 import io.valkyrja.http.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
+import io.valkyrja.http.routing.factory.RouteFactory;
 import io.valkyrja.http.routing.processor.Processor;
 import io.valkyrja.http.routing.processor.contract.ProcessorContract;
 import io.valkyrja.http.struct.request.contract.RequestStructContract;
@@ -83,7 +84,17 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             route =
                     (io.valkyrja.http.routing.data.Route)
                             updateRequestMethods(route, clazz, method);
-            routes.add(processor.route(route));
+
+            // A path carrying a {parameter} placeholder describes a dynamic route, so rebuild it
+            // as one and attach the parameters it declares. Without this the route would keep no
+            // regex and never match.
+            RouteContract built = RouteFactory.fromRoute(route);
+
+            if (built instanceof io.valkyrja.http.routing.data.DynamicRoute dynamic) {
+                built = updateParameters(dynamic, clazz, method);
+            }
+
+            routes.add(processor.route(built));
         }
 
         return routes;

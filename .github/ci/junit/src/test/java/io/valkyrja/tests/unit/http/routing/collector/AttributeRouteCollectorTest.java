@@ -173,4 +173,31 @@ final class AttributeRouteCollectorTest {
         assertInstanceOf(DynamicRouteContract.class, route);
         return ((DynamicRouteContract) route).getRegex();
     }
+
+    @Test
+    void promotesAPlainRouteWhosePathCarriesAParameterIntoADynamicRoute() {
+        var byName =
+                new AttributeRouteCollector()
+                        .getRoutes(RoutingCombinationsHttpControllerFixture.class).stream()
+                                .collect(
+                                        Collectors.toMap(
+                                                RouteContract::getName, Function.identity()));
+
+        var route = byName.get("combinations.promoted");
+
+        // Declared with a plain @Route, it must still be dynamic and carry its parameter's regex.
+        var dynamic = assertInstanceOf(DynamicRouteContract.class, route);
+        assertEquals(
+                Regex.START
+                        + Regex.PATH
+                        + "promoted"
+                        + Regex.PATH
+                        + "(?<id>"
+                        + Regex.NUM
+                        + ")"
+                        + Regex.END,
+                dynamic.getRegex());
+        assertEquals(1, dynamic.getParameters().size());
+        assertEquals("id", dynamic.getParameters().get(0).getName());
+    }
 }

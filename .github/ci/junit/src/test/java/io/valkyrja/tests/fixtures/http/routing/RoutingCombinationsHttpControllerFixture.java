@@ -14,6 +14,7 @@ import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.attribute.DynamicRoute;
 import io.valkyrja.http.routing.attribute.Parameter;
+import io.valkyrja.http.routing.attribute.Route;
 import io.valkyrja.http.routing.constant.Regex;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
@@ -63,6 +64,16 @@ public final class RoutingCombinationsHttpControllerFixture {
                 @Parameter(name = "y", regex = Regex.ALPHA)
             })
     public ResponseContract multi(ContainerContract container, RouteContract route) {
+        return new EmptyResponse();
+    }
+
+    /**
+     * A plain route whose path carries a parameter placeholder. The collector must rebuild it as a
+     * dynamic route so the processor can give it a regex.
+     */
+    @Route(path = "/promoted/{id}", name = "combinations.promoted")
+    @Parameter(name = "id", regex = Regex.NUM)
+    public ResponseContract promoted(ContainerContract container, RouteContract route) {
         return new EmptyResponse();
     }
 }
