@@ -1,0 +1,47 @@
+/*
+ * This file is part of the Valkyrja Framework package.
+ *
+ * (c) Melech Mizrachi <melechmizrachi@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+package io.valkyrja.tests.fixtures.application.entry;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+
+/**
+ * A minimal raw-socket HTTP client for the worker-entry smoke tests.
+ *
+ * <p>Sends a single {@code GET} over a socket with {@code Connection: close} — so the server closes
+ * the socket once it has emitted the response — and returns the full raw response, letting a test
+ * assert the adapter wrote a real HTTP response back through its runtime rather than to {@code
+ * System.out}.
+ */
+public final class HttpSmokeClient {
+
+    private HttpSmokeClient() {}
+
+    /**
+     * Send {@code GET /?probe=1} to {@code localhost:port} and return the full raw HTTP response.
+     *
+     * @param port the port to connect to
+     * @return the raw HTTP response text
+     * @throws IOException if the socket cannot be opened or read
+     */
+    public static String get(int port) throws IOException {
+        try (Socket socket = new Socket("localhost", port)) {
+            OutputStream out = socket.getOutputStream();
+            out.write(
+                    "GET /?probe=1 HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n"
+                            .getBytes(StandardCharsets.US_ASCII));
+            out.flush();
+
+            return new String(socket.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+}
