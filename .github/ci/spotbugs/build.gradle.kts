@@ -40,6 +40,11 @@ sourceSets {
 }
 
 dependencies {
+    // The SpotBugs tool version is declared here rather than via `spotbugs { toolVersion }` so it
+    // is a real dependency notation. useLatestVersions only rewrites dependency notations, so a
+    // toolVersion string is reported as outdated every run but never updated — it drifts forever.
+    spotbugs("com.github.spotbugs:spotbugs:4.10.3")
+
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
     compileOnly("org.jspecify:jspecify:1.0.0")
     compileOnly("io.grpc:grpc-api:1.83.0")
@@ -54,7 +59,6 @@ dependencies {
 }
 
 spotbugs {
-    toolVersion.set("4.9.8")
     excludeFilter.set(layout.projectDirectory.file("spotbugs-exclude.xml"))
     effort.set(Effort.MAX)
     reportLevel.set(Confidence.LOW)
