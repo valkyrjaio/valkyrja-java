@@ -1,6 +1,15 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.4.0...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.4.1...26.x)
+
+## [v26.4.1](https://github.com/valkyrjaio/valkyrja-java/compare/v26.4.0...v26.4.1) - 2026-07-28
+
+* [CI] Declare the SpotBugs and JaCoCo tool versions as dependencies by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/65
+* [Tests] Move the test tree under the tests namespace to match the other ports by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/63
+* [CI] Bring the JUnit tests under ErrorProne, SpotBugs, and ArchUnit by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/66
+* [Http] Honor the route handler annotation when collecting attribute routes by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/64
+* [Http] Build a dynamic route from a route whose path declares a parameter by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/67
+* [Gradle] Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/62
 
 ## [v26.4.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.3.0...v26.4.0) - 2026-07-27
 
