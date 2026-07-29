@@ -27,6 +27,7 @@ import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.ParameterContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.factory.RouteFactory;
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
@@ -87,7 +88,10 @@ final class RouteFactoryTest {
     }
 
     @Test
-    void isConstructible() {
-        assertNotNull(new RouteFactory() {});
+    void hasPrivateConstructor() throws Exception {
+        Constructor<RouteFactory> constructor = RouteFactory.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        assertNotNull(constructor.newInstance());
     }
 }

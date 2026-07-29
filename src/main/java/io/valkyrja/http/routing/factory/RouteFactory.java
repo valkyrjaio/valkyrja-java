@@ -20,7 +20,9 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 /** Builds the route a declaration describes. */
-public abstract class RouteFactory {
+public final class RouteFactory {
+
+    private RouteFactory() {}
 
     /**
      * Rebuild a route as the kind its path calls for.
