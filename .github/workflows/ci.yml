@@ -36,8 +36,9 @@ jobs:
   spotless:
     name: Spotless
     if: github.event.action != 'edited' || github.event.changes.base
-    uses: valkyrjaio/.github/.github/workflows/_java-spotless.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
+    uses: valkyrjaio/.github/.github/workflows/_java-ci-tool.yml@1fdc1ccfcbd2305908853fa401ee04135be8e184
     with:
+      tool: 'spotless'
       ci-directory: .github/ci/spotless
       paths: |
         ci:
@@ -53,8 +54,9 @@ jobs:
   archunit:
     name: ArchUnit
     if: github.event.action != 'edited' || github.event.changes.base
-    uses: valkyrjaio/.github/.github/workflows/_java-archunit.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
+    uses: valkyrjaio/.github/.github/workflows/_java-ci-tool.yml@1fdc1ccfcbd2305908853fa401ee04135be8e184
     with:
+      tool: 'archunit'
       ci-directory: .github/ci/archunit
       paths: |
         ci:
@@ -70,8 +72,9 @@ jobs:
   errorprone:
     name: ErrorProne
     if: github.event.action != 'edited' || github.event.changes.base
-    uses: valkyrjaio/.github/.github/workflows/_java-errorprone.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
+    uses: valkyrjaio/.github/.github/workflows/_java-ci-tool.yml@1fdc1ccfcbd2305908853fa401ee04135be8e184
     with:
+      tool: 'errorprone'
       ci-directory: .github/ci/errorprone
       paths: |
         ci:
@@ -87,8 +90,9 @@ jobs:
   spotbugs:
     name: SpotBugs
     if: github.event.action != 'edited' || github.event.changes.base
-    uses: valkyrjaio/.github/.github/workflows/_java-spotbugs.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
+    uses: valkyrjaio/.github/.github/workflows/_java-ci-tool.yml@1fdc1ccfcbd2305908853fa401ee04135be8e184
     with:
+      tool: 'spotbugs'
       ci-directory: .github/ci/spotbugs
       paths: |
         ci:
