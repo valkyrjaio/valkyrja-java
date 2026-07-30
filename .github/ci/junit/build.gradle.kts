@@ -91,29 +91,82 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+// Exclude non-unit-testable infra:
+//  - benchmark harnesses are performance tooling, not production logic.
+//  - the worker-runtime entry adapters (exchange/jetty/netty/tomcat) are bootstrap glue whose
+//    run() starts persistent, non-daemon servers that block forever (server.join() /
+//    awaitTermination() / await()) with JVM shutdown hooks — they cannot be exercised to full
+//    branch coverage from a unit test without leaking the server / hanging the test JVM. The
+//    reusable logic they build on (WorkerHttp / WorkerGrpc / GrpcBridge) is covered directly,
+//    and the adapters are exercised by the smoke tests. Package globs also drop the anonymous
+//    inner classes the HTTP adapters generate (handlers / servlets / channel initializers).
+//  - Exiter and Logger each carry exactly one branch no test can take. Exiter#exit guards a real
+//    System.exit: taking the true arm kills the test JVM, which is why freeze()/frozenCallback()
+//    exists as a seam at all — the seam's own guard is the irreducible remainder. Logger#log
+//    switches over every LogLevel constant, and javac still emits a synthetic default for an
+//    exhaustive enum switch; it is reachable only if the enum gains a constant after this class is
+//    compiled. Both are excluded here rather than accommodated by a sub-100 threshold, which would
+//    stop the floor from catching anything else.
+// Shared by jacocoTestReport and jacocoTestCoverageVerification so the gate measures exactly what
+// the report shows — scoping only one of them silently lets the other disagree.
+val coverageExclusions = listOf(
+        "**/benchmark/**",
+        "**/application/entry/exchange/**",
+        "**/application/entry/jetty/**",
+        "**/application/entry/netty/**",
+        "**/application/entry/tomcat/**",
+        "**/cli/server/support/Exiter.class",
+        "**/log/logger/abstract_/Logger.class",
+)
+
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
-    // Exclude non-unit-testable infra:
-    //  - benchmark harnesses are performance tooling, not production logic.
-    //  - the worker-runtime entry adapters (exchange/jetty/netty/tomcat) are bootstrap glue whose
-    //    run() starts persistent, non-daemon servers that block forever (server.join() /
-    //    awaitTermination() / await()) with JVM shutdown hooks — they cannot be exercised to full
-    //    branch coverage from a unit test without leaking the server / hanging the test JVM. The
-    //    reusable logic they build on (WorkerHttp / WorkerGrpc / GrpcBridge) is covered directly,
-    //    and the adapters are exercised by the smoke tests. Package globs also drop the anonymous
-    //    inner classes the HTTP adapters generate (handlers / servlets / channel initializers).
     classDirectories.setFrom(
             classDirectories.files.map { dir ->
-                fileTree(dir) {
-                    exclude("**/benchmark/**")
-                    exclude("**/application/entry/exchange/**")
-                    exclude("**/application/entry/jetty/**")
-                    exclude("**/application/entry/netty/**")
-                    exclude("**/application/entry/tomcat/**")
-                }
+                fileTree(dir) { exclude(coverageExclusions) }
             })
     reports {
         xml.required.set(true)
         html.required.set(true)
+    }
+}
+
+// The floor. Coverage was reported here and enforced nowhere: `junit` ran `test` finalized by
+// `jacocoTestReport`, so the report was generated and then nothing asserted anything about it.
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+    classDirectories.setFrom(
+            classDirectories.files.map { dir ->
+                fileTree(dir) { exclude(coverageExclusions) }
+            })
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "1.00".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "1.00".toBigDecimal()
+            }
+        }
+        // Per class as well as per bundle. A bundle-wide rule is not enough: a large, well-covered
+        // codebase absorbs one entirely untested new class almost without moving, so the aggregate
+        // stays high while the new file is at zero. A class-level rule fails on that file itself.
+        rule {
+            element = "CLASS"
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "1.00".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "1.00".toBigDecimal()
+            }
+        }
     }
 }
