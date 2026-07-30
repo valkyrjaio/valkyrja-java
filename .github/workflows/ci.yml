@@ -5,11 +5,16 @@ on:
     branches: [ 'master', '*.x' ]
   pull_request:
     # `edited` is included so a pull request that GitHub auto-retargets — which happens to a stacked
-    # pull request the moment its parent merges — re-runs its checks. A base-branch change has no
-    # activity type of its own; GitHub reports it as `edited` with a `changes.base` payload, and
-    # `edited` is not one of the default types, so such a pull request otherwise sits with no checks
-    # at all. `edited` also fires for title and description edits, so the tool jobs below additionally
-    # require `changes.base` rather than replaying a whole matrix for a reworded description.
+    # pull request the moment its parent merges — re-runs its checks against the new base. A
+    # base-branch change has no activity type of its own; GitHub reports it as `edited`, and `edited`
+    # is not one of the default types, so such a pull request otherwise sits with no checks at all.
+    #
+    # `edited` also fires for title and description edits, so the whole suite re-runs for those too.
+    # That cost is accepted deliberately. Skipping the jobs instead — via a `changes.base` guard —
+    # does not work: a skipped caller job never produces the `<job> / <job>` context the required
+    # status checks are waiting for, and GitHub evaluates requirements against the latest run, so an
+    # earlier run's success does not carry over. The pull request ends up blocked on
+    # "Expected — Waiting for status to be reported" until someone pushes a commit.
     types: [ opened, synchronize, reopened, edited ]
     branches: [ 'master', '*.x' ]
 
@@ -35,7 +40,6 @@ jobs:
 
   spotless:
     name: Spotless
-    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-ci-tool.yml@ddea291816127b905f6e00006e998f4a6851c1e8
     with:
       tool: 'spotless'
@@ -53,7 +57,6 @@ jobs:
 
   archunit:
     name: ArchUnit
-    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-ci-tool.yml@ddea291816127b905f6e00006e998f4a6851c1e8
     with:
       tool: 'archunit'
@@ -71,7 +74,6 @@ jobs:
 
   errorprone:
     name: ErrorProne
-    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-ci-tool.yml@ddea291816127b905f6e00006e998f4a6851c1e8
     with:
       tool: 'errorprone'
@@ -89,7 +91,6 @@ jobs:
 
   spotbugs:
     name: SpotBugs
-    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-ci-tool.yml@ddea291816127b905f6e00006e998f4a6851c1e8
     with:
       tool: 'spotbugs'
@@ -107,7 +108,6 @@ jobs:
 
   junit:
     name: JUnit
-    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-junit.yml@ddea291816127b905f6e00006e998f4a6851c1e8
     with:
       ci-directory: .github/ci/junit
