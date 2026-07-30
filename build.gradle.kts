@@ -131,9 +131,10 @@ tasks.register<GradleBuild>("spotbugs") {
 
 tasks.register<GradleBuild>("junit") {
     group = "CI"
-    description = "Run JUnit unit tests"
+    description = "Run JUnit unit tests and verify 100% coverage"
     dir = file(".github/ci/junit")
-    tasks = listOf("test")
+    // jacocoTestCoverageVerification is what makes the coverage report a gate rather than a printout.
+    tasks = listOf("test", "jacocoTestCoverageVerification")
 }
 
 listOf("spotless", "archunit", "errorprone", "spotbugs", "junit").forEach { ci ->
