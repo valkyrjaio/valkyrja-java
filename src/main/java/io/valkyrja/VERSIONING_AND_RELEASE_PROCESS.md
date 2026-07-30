@@ -2,25 +2,48 @@
 
 ## Introduction
 
-Valkyrja follows [semantic versioning](https://semver.org/). Releases use a
-single integer major version number — `25`, `26`, `27` — rather than the
-traditional `MAJOR.MINOR.PATCH` triple. A new major version is released once per
-year, and each major version is supported for two years from its release date.
+Valkyrja versions are `YY.FEATURE.PATCH`, where `YY` is the two-digit year — so
+`26.4.1` is the fifth feature release of the 2026 line. A new major line opens
+once per year, and each is supported for two years from its release date.
 
 This cadence gives you a predictable upgrade path: you know when a new version
 is coming, how long your current version will be maintained, and what the
 support window looks like before you need to plan a migration.
 
+## Versioning
+
+Each part of the version signals what kind of changes the release contains.
+
+- **`YY`** — The year. Opens once a year, and is the only component bumped by
+  hand.
+- **`FEATURE`** — New features, deprecations, and breaking changes.
+- **`PATCH`** — Everything else: fixes, documentation, and small atomic changes
+  that don't affect existing behavior.
+
+Because the year is the major component, it is the only one left to carry
+breaking changes — so **`FEATURE` covers both new features and breaking
+changes**. That is deliberate. Under strict semantic versioning an urgent fix
+that happens to break a public contract cannot ship until someone cuts a major
+release, which means either the fix waits or the break gets hidden in a patch.
+
+Two things keep that manageable for you:
+
+- **Planned removals wait for the year boundary.** An API is deprecated first and
+  removed in the next `YY`, so you get a full line's notice.
+- **Unplanned breaks are always marked.** Any change that breaks a public
+  contract is flagged in the release notes, because the version number alone
+  cannot tell you a `FEATURE` release broke something.
+
+If you pin to a version range, you will receive feature releases automatically —
+read the release notes before upgrading.
+
 ## Release Schedule
 
-| Version | PHP       | Release | Bug Fixes Until | Security Fixes Until |
-|:--------|:----------|:--------|:----------------|:---------------------|
-| 26      | 8.4 – 8.6 | Q2 2026 | Q2 2027         | Q1 2028              |
-| 27      | 8.5 – 8.6 | Q1 2027 | Q2 2028         | Q1 2029              |
-| 28      | 8.6+      | Q1 2028 | Q2 2029         | Q1 2030              |
-
-(*) Pre-release version. Version 25 is not supported once version 26 is
-released.
+| Version | Java | Release | Bug Fixes Until | Security Fixes Until |
+|:--------|:-----|:--------|:----------------|:---------------------|
+| 26      | 21+  | Q2 2026 | Q2 2027         | Q1 2028              |
+| 27      | 21+  | Q1 2027 | Q2 2028         | Q1 2029              |
+| 28      | 21+  | Q1 2028 | Q2 2029         | Q1 2030              |
 
 ## Support Policy
 
@@ -40,12 +63,14 @@ software in production means known security vulnerabilities will not be patched.
 Each major version in active development has a corresponding branch in the
 repository.
 
-| Branch   | Purpose                                                                                             |
-|:---------|:----------------------------------------------------------------------------------------------------|
-| `master` | Active development for v26. Open for backwards-incompatible changes and major internal API changes. |
+| Branch   | Purpose                                                                        |
+|:---------|:-------------------------------------------------------------------------------|
+| `26.x`   | The current release line. Where fixes, features, and deprecations land.          |
+| `master` | Preparation for the next year's major. Open for removals and large API changes.  |
 
-When a new major version ships, the previous stable branch moves into
-security-only mode. The `master` branch advances to the next version cycle.
+When a new major version ships, its `YY.x` branch becomes the current line and
+the previous one moves into security-only mode.
 
-Bug fix contributions should target the stable branch (`26.x`). New features and
-breaking changes should target `master`.
+Contributions should target the current `YY.x` branch. Only changes that must
+wait for the next year — chiefly removing something already deprecated — target
+`master`.
