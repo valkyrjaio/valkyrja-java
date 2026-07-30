@@ -13,7 +13,7 @@ import net.ltgt.gradle.errorprone.errorprone
 plugins {
     java
     id("net.ltgt.errorprone") version "5.1.0"
-    id("com.github.ben-manes.versions") version "0.56.0"
+    id("com.github.ben-manes.versions") version "0.57.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
@@ -46,8 +46,8 @@ sourceSets {
 
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
-    compileOnly("org.jspecify:jspecify:1.0.0")
-    compileOnly("io.grpc:grpc-api:1.83.0")
+    compileOnly("org.jspecify:jspecify:1.0.1")
+    compileOnly("io.grpc:grpc-api:1.83.1")
     errorprone("com.google.errorprone:error_prone_core:2.50.0")
     errorprone("com.uber.nullaway:nullaway:0.13.8")
 
@@ -56,17 +56,17 @@ dependencies {
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
     compileOnly("io.netty:netty-codec-http:4.2.16.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
-    compileOnly("io.grpc:grpc-servlet-jakarta:1.83.0")
-    compileOnly("io.grpc:grpc-netty-shaded:1.83.0")
+    compileOnly("io.grpc:grpc-servlet-jakarta:1.83.1")
+    compileOnly("io.grpc:grpc-netty-shaded:1.83.1")
 
     // Mirrors the JUnit build's test classpath — needed only so the tests compile here.
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
     testImplementation("org.mockito:mockito-core:5.23.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
-    testImplementation("org.jspecify:jspecify:1.0.0")
-    testImplementation("io.grpc:grpc-api:1.83.0")
-    testImplementation("io.grpc:grpc-netty-shaded:1.83.0")
-    testImplementation("io.grpc:grpc-servlet-jakarta:1.83.0")
+    testImplementation("org.jspecify:jspecify:1.0.1")
+    testImplementation("io.grpc:grpc-api:1.83.1")
+    testImplementation("io.grpc:grpc-netty-shaded:1.83.1")
+    testImplementation("io.grpc:grpc-servlet-jakarta:1.83.1")
     testImplementation("org.eclipse.jetty:jetty-server:12.1.11")
     testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
     testImplementation("io.netty:netty-codec-http:4.2.16.Final")
