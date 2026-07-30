@@ -4,6 +4,13 @@ on:
   push:
     branches: [ 'master', '*.x' ]
   pull_request:
+    # `edited` is included so a pull request that GitHub auto-retargets — which happens to a stacked
+    # pull request the moment its parent merges — re-runs its checks. A base-branch change has no
+    # activity type of its own; GitHub reports it as `edited` with a `changes.base` payload, and
+    # `edited` is not one of the default types, so such a pull request otherwise sits with no checks
+    # at all. `edited` also fires for title and description edits, so the tool jobs below additionally
+    # require `changes.base` rather than replaying a whole matrix for a reworded description.
+    types: [ opened, synchronize, reopened, edited ]
     branches: [ 'master', '*.x' ]
 
 permissions:
@@ -28,6 +35,7 @@ jobs:
 
   spotless:
     name: Spotless
+    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-spotless.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
     with:
       ci-directory: .github/ci/spotless
@@ -44,6 +52,7 @@ jobs:
 
   archunit:
     name: ArchUnit
+    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-archunit.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
     with:
       ci-directory: .github/ci/archunit
@@ -60,6 +69,7 @@ jobs:
 
   errorprone:
     name: ErrorProne
+    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-errorprone.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
     with:
       ci-directory: .github/ci/errorprone
@@ -76,6 +86,7 @@ jobs:
 
   spotbugs:
     name: SpotBugs
+    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-spotbugs.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
     with:
       ci-directory: .github/ci/spotbugs
@@ -92,6 +103,7 @@ jobs:
 
   junit:
     name: JUnit
+    if: github.event.action != 'edited' || github.event.changes.base
     uses: valkyrjaio/.github/.github/workflows/_java-junit.yml@e3e801bdc0d696988d6fc331b6cf0d806b653abd
     with:
       ci-directory: .github/ci/junit
