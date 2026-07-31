@@ -203,17 +203,4 @@
         <Bug pattern="DE_MIGHT_IGNORE" />
     </Match>
 
-    <!--
-        Intentional design: the gRPC outbound flow-control gate waits on a Condition with a
-        timeout purely to bound each pass. Whether that wait was signaled or timed out carries
-        no information the gate can act on — its loop re-reads ServerCall.isReady(), which is
-        the transport's own authoritative answer, so the wait's return value is deliberately
-        unused rather than unchecked.
-    -->
-    <Match>
-        <Class name="io.valkyrja.application.entry.grpc.GrpcBridge$OutboundFlowControl" />
-        <Method name="awaitWritable" />
-        <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE" />
-    </Match>
-
 </FindBugsFilter>
