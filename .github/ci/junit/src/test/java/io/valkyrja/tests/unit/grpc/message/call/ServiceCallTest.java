@@ -11,6 +11,7 @@ package io.valkyrja.tests.unit.grpc.message.call;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -28,6 +29,9 @@ import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
 import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
+import io.valkyrja.grpc.throwable.exception.GrpcConcurrentSendException;
+import io.valkyrja.grpc.throwable.exception.GrpcNonStreamingSendException;
+import io.valkyrja.grpc.throwable.exception.abstract_.GrpcRuntimeException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -66,7 +70,10 @@ final class ServiceCallTest {
     void aBufferedCallIsNotStreamingAndRejectsSend() {
         ServiceCall call = ServiceCall.unary(METHOD, "hello");
         assertFalse(call.isStreaming());
-        assertThrows(IllegalStateException.class, () -> call.send("out"));
+
+        var exception = assertThrows(GrpcNonStreamingSendException.class, () -> call.send("out"));
+
+        assertInstanceOf(GrpcRuntimeException.class, exception);
     }
 
     @Test
@@ -119,7 +126,9 @@ final class ServiceCallTest {
         // The first send is parked inside the sink; a second, concurrent send must be rejected fast
         // rather than racing the non-thread-safe transport.
         assertTrue(insideSink.await(5, java.util.concurrent.TimeUnit.SECONDS));
-        assertThrows(IllegalStateException.class, () -> call.send("b"));
+        var exception = assertThrows(GrpcConcurrentSendException.class, () -> call.send("b"));
+
+        assertInstanceOf(GrpcRuntimeException.class, exception);
 
         release.countDown();
         first.join();

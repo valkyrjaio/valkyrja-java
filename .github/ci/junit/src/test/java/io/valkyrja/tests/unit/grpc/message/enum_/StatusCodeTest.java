@@ -11,11 +11,13 @@ package io.valkyrja.tests.unit.grpc.message.enum_;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.grpc.message.enum_.StatusCode;
+import io.valkyrja.grpc.throwable.exception.GrpcInvalidStatusCodeException;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link StatusCode} enum. */
@@ -58,7 +60,12 @@ final class StatusCodeTest {
 
     @Test
     void fromValueThrowsForUnknownValue() {
-        assertThrows(IllegalArgumentException.class, () -> StatusCode.fromValue(99));
+        var exception =
+                assertThrows(GrpcInvalidStatusCodeException.class, () -> StatusCode.fromValue(99));
+
+        // The module exception still extends the language root, so a caller catching
+        // IllegalArgumentException around fromValue keeps working.
+        assertInstanceOf(IllegalArgumentException.class, exception);
     }
 
     @Test

@@ -9,6 +9,8 @@
 
 package io.valkyrja.grpc.message.enum_;
 
+import io.valkyrja.grpc.throwable.exception.GrpcInvalidStatusCodeException;
+
 /**
  * The canonical gRPC status codes.
  *
@@ -86,7 +88,7 @@ public enum StatusCode {
      *
      * @param value the integer value (0–16)
      * @return the matching status code
-     * @throws IllegalArgumentException if no code matches the value
+     * @throws GrpcInvalidStatusCodeException if no code matches the value
      */
     public static StatusCode fromValue(int value) {
         for (StatusCode code : values()) {
@@ -95,6 +97,6 @@ public enum StatusCode {
             }
         }
 
-        throw new IllegalArgumentException("No gRPC status code for value `" + value + "`");
+        throw new GrpcInvalidStatusCodeException("No gRPC status code for value `" + value + "`");
     }
 }
