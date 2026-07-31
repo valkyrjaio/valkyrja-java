@@ -116,11 +116,11 @@ public final class GrpcBridge {
             // before half-close) has something to fire.
             CancellationToken token = new CancellationToken();
 
-            // Fire the token from context cancellation. Listener callbacks (onCancel) are
-            // serialized per call, so onCancel cannot preempt a handler running inside onHalfClose;
-            // the context is cancelled off that serialized path (deadline scheduler / transport
-            // thread), so a cooperative handler polling throwIfCancelled() actually observes it
-            // mid-flight. onCancel below remains as a belt-and-suspenders fallback.
+            // Fire the token from context cancellation. Both models run the handler off the
+            // serialized listener path — the buffered one on a per-call virtual thread, the
+            // streaming one on its own — so onCancel and the context listener can both transition
+            // the token while a handler is mid-flight, and a cooperative handler polling
+            // throwIfCancelled() observes it. The two paths are redundant by design.
             wireCancellation(token, Context.current());
 
             if (streaming) {
@@ -166,13 +166,29 @@ public final class GrpcBridge {
                         return;
                     }
 
+                    // Built here, on the transport thread, because it reads the deadline from the
+                    // gRPC Context, which is bound to this thread and not to the worker.
                     ServiceCallContract serviceCall =
                             buildCall(call, headers, fullMethodName, messages, token);
-                    WorkerGrpc.dispatch(
-                            app,
-                            data,
-                            serviceCall,
-                            response -> write(call, serviceCall, response, flowControl));
+
+                    // Run the pipeline off the callback path. Returning immediately keeps a
+                    // blocking handler out of the adapter's executor, so the adapter is free to
+                    // use a direct executor, and leaves the listener able to deliver onReady and
+                    // onCancel while the handler runs.
+                    Thread.ofVirtual()
+                            .name("grpc-call-" + fullMethodName)
+                            .start(
+                                    () ->
+                                            WorkerGrpc.dispatch(
+                                                    app,
+                                                    data,
+                                                    serviceCall,
+                                                    response ->
+                                                            write(
+                                                                    call,
+                                                                    serviceCall,
+                                                                    response,
+                                                                    flowControl)));
                 }
 
                 @Override
@@ -315,12 +331,11 @@ public final class GrpcBridge {
      * sits above its high-water mark, so a handler cannot outrun a peer that has stopped reading.
      * {@code maxInboundMessages} bounds the inbound side; this is its outbound counterpart.
      *
-     * <p>The wait is bounded per pass and the loop re-reads {@link ServerCall#isReady()} itself, so
-     * readiness never depends on a callback arriving. That matters because listener callbacks are
-     * serialized per call: the buffered path runs its whole pipeline inside {@code onHalfClose} and
-     * therefore cannot be handed an {@code onReady} while it is writing, whereas the streaming path
-     * writes from a separate virtual thread and can. {@link #signal} is the prompt wakeup for the
-     * latter; re-reading the transport is what keeps the former correct.
+     * <p>Both models write from a per-call virtual thread rather than from the serialized listener
+     * path, so {@link #signal} — driven by {@code onReady} — is the wakeup in both. The wait is
+     * still bounded per pass and the loop re-reads {@link ServerCall#isReady()} itself, which is
+     * the transport's own answer: readiness never depends on a callback arriving, so a signal that
+     * races the park costs one interval instead of stranding the writer.
      */
     private static final class OutboundFlowControl {
 
@@ -336,13 +351,12 @@ public final class GrpcBridge {
             this.call = call;
         }
 
-        /** Release a held writer: the transport can take more, or the call has ended. */
+        /**
+         * Release a held writer: the transport can take more, or the call has ended. Unparking a
+         * null thread is a no-op, so this needs no guard for the common case of no writer held.
+         */
         void signal() {
-            Thread held = waiter.get();
-
-            if (held != null) {
-                LockSupport.unpark(held);
-            }
+            LockSupport.unpark(waiter.get());
         }
 
         /**

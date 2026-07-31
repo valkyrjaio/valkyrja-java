@@ -120,6 +120,20 @@ final class GrpcBridgeTest {
 
     private record SocketAddressAndSession(InetSocketAddress remote, SSLSession session) {}
 
+    /** A latch fired when the call is closed, for awaiting a pipeline that runs off-thread. */
+    private CountDownLatch closeLatch(ServerCall<byte[], byte[]> call) {
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        return closed;
+    }
+
     @Test
     void registryLookupBuildsAByteMethodDefinition() {
         ApplicationContract app = WorkerGrpc.bootstrap(config());
@@ -433,8 +447,7 @@ final class GrpcBridgeTest {
 
     @Test
     @Timeout(10)
-    void bufferedServerStreamingHoldsTheDrainUntilTheListenerSignalsReadiness()
-            throws InterruptedException {
+    void bufferedHalfCloseReturnsWhileTheHeldDrainAwaitsReadiness() throws InterruptedException {
         ApplicationContract app = WorkerGrpc.bootstrap(config());
         ContainerData data = (ContainerData) app.getContainer().getData();
         ServerCall<byte[], byte[]> call =
@@ -464,19 +477,22 @@ final class GrpcBridgeTest {
                 GrpcBridge.handler(app, data, "pkg.Greeter/Fanout")
                         .startCall(call, new io.grpc.Metadata());
         listener.onMessage("req".getBytes(StandardCharsets.UTF_8));
-        // The buffered pipeline runs inline on the caller, so dispatch off-thread to keep the
-        // listener callable while the drain is held.
-        Thread dispatch = Thread.ofVirtual().start(listener::onHalfClose);
+        // Returns straight away: the pipeline runs on its own thread, so a drain held by an
+        // unwritable transport cannot pin the caller. Were it still inline, this would not return
+        // until readiness is restored below — which only a later call on this thread can do.
+        listener.onHalfClose();
 
-        // Fanout yields three messages; none of them reach a transport that cannot take them.
+        // Fanout yields three messages; none of them reach a transport that cannot take them, and
+        // the call is still open with the writer held.
         assertTrue(headersSent.await(5, TimeUnit.SECONDS));
         verify(call, never()).sendMessage(any());
+        verify(call, never()).close(any(), any());
 
+        // onReady is deliverable now that no handler occupies the serialized listener path.
         ready.set(true);
         listener.onReady();
 
         assertTrue(closed.await(5, TimeUnit.SECONDS));
-        dispatch.join();
         verify(call, times(3)).sendMessage(any());
     }
 
@@ -612,17 +628,21 @@ final class GrpcBridgeTest {
     }
 
     @Test
-    void handlerBuffersUnderFlowControlAndDispatchesOnHalfClose() {
+    @Timeout(10)
+    void handlerBuffersUnderFlowControlAndDispatchesOnHalfClose() throws InterruptedException {
         ApplicationContract app = WorkerGrpc.bootstrap(config());
         ContainerData data = (ContainerData) app.getContainer().getData();
         ServerCall<byte[], byte[]> call =
                 mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+        CountDownLatch closed = closeLatch(call);
 
         ServerCallHandler<byte[], byte[]> handler =
                 GrpcBridge.handler(app, data, "pkg.Greeter/Missing");
         ServerCall.Listener<byte[]> listener = handler.startCall(call, new io.grpc.Metadata());
         listener.onMessage("ignored".getBytes(StandardCharsets.UTF_8));
         listener.onHalfClose();
+        // The pipeline runs on its own thread, so await the close before asserting on it.
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
         listener.onCancel();
 
         verify(call, org.mockito.Mockito.atLeastOnce()).request(1);
@@ -684,13 +704,15 @@ final class GrpcBridgeTest {
     }
 
     @Test
-    void handlerBuffersAClientStreamingMethodRatherThanStreamingIt() {
+    @Timeout(10)
+    void handlerBuffersAClientStreamingMethodRatherThanStreamingIt() throws InterruptedException {
         // Client-streaming (not bidirectional) takes the buffered path: buffer, dispatch on
         // half-close, write one response.
         ApplicationContract app = WorkerGrpc.bootstrap(config());
         ContainerData data = (ContainerData) app.getContainer().getData();
         ServerCall<byte[], byte[]> call =
                 mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+        CountDownLatch closed = closeLatch(call);
 
         ServerCall.Listener<byte[]> listener =
                 GrpcBridge.handler(app, data, "pkg.Greeter/Collect")
@@ -698,6 +720,7 @@ final class GrpcBridgeTest {
         listener.onMessage("a".getBytes(StandardCharsets.UTF_8));
         listener.onMessage("b".getBytes(StandardCharsets.UTF_8));
         listener.onHalfClose();
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
 
         verify(call).sendHeaders(any());
         verify(call).sendMessage(any());
