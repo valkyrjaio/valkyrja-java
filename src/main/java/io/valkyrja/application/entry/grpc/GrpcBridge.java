@@ -46,9 +46,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import javax.net.ssl.SSLSession;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The transport-agnostic grpc-java bridge: it turns any inbound gRPC method into a call on {@link
@@ -323,12 +324,13 @@ public final class GrpcBridge {
      */
     private static final class OutboundFlowControl {
 
-        /** How long a held writer waits before re-reading the transport state itself. */
-        private static final long POLL_MILLIS = 10L;
+        /** How long a held writer parks before re-reading the transport state itself. */
+        private static final long POLL_NANOS = 10_000_000L;
 
         private final ServerCall<byte[], byte[]> call;
-        private final ReentrantLock lock = new ReentrantLock();
-        private final Condition writable = lock.newCondition();
+
+        /** The parked writer, or null when none is held. Written only by the writer itself. */
+        private final AtomicReference<@Nullable Thread> waiter = new AtomicReference<>();
 
         OutboundFlowControl(ServerCall<byte[], byte[]> call) {
             this.call = call;
@@ -336,12 +338,10 @@ public final class GrpcBridge {
 
         /** Release a held writer: the transport can take more, or the call has ended. */
         void signal() {
-            lock.lock();
+            Thread held = waiter.get();
 
-            try {
-                writable.signalAll();
-            } finally {
-                lock.unlock();
+            if (held != null) {
+                LockSupport.unpark(held);
             }
         }
 
@@ -353,31 +353,30 @@ public final class GrpcBridge {
          * the writer, so the drain stops instead of waiting on a transport that will never be ready
          * again.
          *
+         * <p>Each park is bounded, so a signal that races the park costs one interval rather than
+         * stranding the writer: the loop re-reads the transport regardless of why the park ended.
+         *
          * @return true once the transport is writable; false when the call was cancelled, or the
-         *     waiting thread was interrupted
+         *     held thread was interrupted
          */
         boolean awaitWritable() {
-            lock.lock();
-
-            try {
-                while (!call.isReady()) {
-                    if (call.isCancelled()) {
-                        return false;
-                    }
-
-                    // Whether this timed out or was signaled is not interesting: either way the
-                    // loop re-reads the transport, which is the authority on readiness.
-                    writable.await(POLL_MILLIS, TimeUnit.MILLISECONDS);
+            while (!call.isReady()) {
+                if (call.isCancelled()) {
+                    return false;
                 }
 
-                return true;
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                waiter.set(Thread.currentThread());
+                LockSupport.parkNanos(POLL_NANOS);
+                waiter.set(null);
 
-                return false;
-            } finally {
-                lock.unlock();
+                // parkNanos returns immediately on interrupt and leaves the flag set, so the
+                // caller's interrupt status is preserved without re-asserting it here.
+                if (Thread.currentThread().isInterrupted()) {
+                    return false;
+                }
             }
+
+            return true;
         }
     }
 
