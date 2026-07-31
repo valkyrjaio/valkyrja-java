@@ -9,7 +9,6 @@
 
 package io.valkyrja.application.kernel;
 
-import io.valkyrja.application.data.Config;
 import io.valkyrja.application.data.contract.ConfigContract;
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
@@ -34,10 +33,6 @@ public class Valkyrja implements ApplicationContract {
     protected List<CliRouteProviderContract> cliRouteProviders = List.of();
     protected List<HttpRouteProviderContract> httpRouteProviders = List.of();
     protected List<GrpcRouteProviderContract> grpcRouteProviders = List.of();
-
-    public Valkyrja(ContainerContract container) {
-        this(container, new Config());
-    }
 
     public Valkyrja(ContainerContract container, ConfigContract config) {
         this.container = container;

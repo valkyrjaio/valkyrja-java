@@ -86,18 +86,6 @@ final class ValkyrjaTest {
     }
 
     @Test
-    void singleArgConstructorUsesDefaultConfig() {
-        var container = new Container();
-
-        var application = new Valkyrja(container);
-
-        assertSame(container, application.getContainer());
-        assertEquals("production", application.getEnvironment());
-        assertEquals("1.0.0", application.getVersion());
-        assertEquals(3, application.getProviders().size());
-    }
-
-    @Test
     void getProvidersExpandsComponentProviders() {
         var application = appWith(new ComponentProviderFixture());
 
