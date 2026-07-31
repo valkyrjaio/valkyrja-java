@@ -19,6 +19,8 @@ import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
 import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.peer.contract.PeerContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
+import io.valkyrja.grpc.throwable.exception.GrpcConcurrentSendException;
+import io.valkyrja.grpc.throwable.exception.GrpcNonStreamingSendException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -143,7 +145,7 @@ public class ServiceCall implements ServiceCallContract {
     @Override
     public void send(Object message) {
         if (sink == null) {
-            throw new IllegalStateException(
+            throw new GrpcNonStreamingSendException(
                     "send() is only available on a streaming (bidirectional) call; a buffered call"
                             + " returns its messages on the ServiceResponse instead.");
         }
@@ -151,7 +153,7 @@ public class ServiceCall implements ServiceCallContract {
         // corrupt the stream silently. Fail fast and loud instead so a handler emitting from more
         // than one thread learns immediately, rather than debugging an intermittent broken stream.
         if (!sending.compareAndSet(false, true)) {
-            throw new IllegalStateException(
+            throw new GrpcConcurrentSendException(
                     "Concurrent send() on a streaming call: a streaming handler must emit from a"
                             + " single thread — sends are serialized and the transport is not"
                             + " thread-safe.");

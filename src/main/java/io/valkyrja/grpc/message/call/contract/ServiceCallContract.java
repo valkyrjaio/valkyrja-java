@@ -14,6 +14,8 @@ import io.valkyrja.grpc.message.deadline.contract.DeadlineContract;
 import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
 import io.valkyrja.grpc.message.peer.contract.PeerContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
+import io.valkyrja.grpc.throwable.exception.GrpcConcurrentSendException;
+import io.valkyrja.grpc.throwable.exception.GrpcNonStreamingSendException;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -94,8 +96,8 @@ public interface ServiceCallContract {
      * out to multiple threads must funnel its emissions back through one.
      *
      * @param message the outbound message
-     * @throws IllegalStateException if this call is not streaming, or if a concurrent {@code send}
-     *     is detected
+     * @throws GrpcNonStreamingSendException if this call is not streaming
+     * @throws GrpcConcurrentSendException if a concurrent {@code send} is detected
      */
     void send(Object message);
 
