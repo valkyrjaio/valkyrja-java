@@ -44,7 +44,7 @@ jobs:
   # as `CI / Tools / <Tool> / …`.
   tools:
     name: Tools
-    uses: valkyrjaio/.github/.github/workflows/_java-ci-tools.yml@72073e44b2a39d1ab18b188a7994162abe391aa5
+    uses: valkyrjaio/.github/.github/workflows/_java-ci-tools.yml@1818bba787db661fcd285ee66797556bd1c43401
     with:
       source-paths: |
         src/**/*.java
