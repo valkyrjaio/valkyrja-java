@@ -43,8 +43,10 @@ import io.valkyrja.grpc.message.enum_.AddressType;
 import io.valkyrja.grpc.message.enum_.CancellationReason;
 import io.valkyrja.grpc.message.metadata.Metadata;
 import io.valkyrja.grpc.message.metadata.contract.MetadataContract;
+import io.valkyrja.grpc.message.peer.Peer;
 import io.valkyrja.grpc.message.peer.contract.PeerContract;
 import io.valkyrja.grpc.message.response.ServiceResponse;
+import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.message.status.Status;
 import io.valkyrja.tests.fixtures.grpc.GreeterComponentProviderFixture;
 import java.io.IOException;
@@ -56,6 +58,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.net.ssl.SSLSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -94,7 +97,12 @@ final class GrpcBridgeTest {
 
     @SuppressWarnings("unchecked")
     private ServerCall<byte[], byte[]> mockCall() {
-        return mock(ServerCall.class);
+        ServerCall<byte[], byte[]> call = mock(ServerCall.class);
+        // io.grpc.ServerCall.isReady() is concrete and returns true; a mock would answer false and
+        // hold every outbound drain on the flow-control gate. Tests that exercise the gate restub
+        // it themselves.
+        when(call.isReady()).thenReturn(true);
+        return call;
     }
 
     private ServerCall<byte[], byte[]> mockCall(SocketAddressAndSession attributes) {
@@ -288,6 +296,274 @@ final class GrpcBridgeTest {
         // Only the Status's own details survive; the handler-set duplicate was discarded.
         assertEquals(1, details.size());
         assertArrayEquals("authoritative".getBytes(StandardCharsets.UTF_8), details.get(0));
+    }
+
+    /** A response carrying {@code count} one-byte outbound messages. */
+    private ServiceResponseContract fanoutResponse(int count) {
+        List<Object> messages = new java.util.ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            messages.add(new byte[] {(byte) i});
+        }
+
+        return ServiceResponse.ok().withMessages(messages);
+    }
+
+    /** A call whose cancellation token has already fired. */
+    private ServiceCallContract cancelledCall() {
+        CancellationToken token = new CancellationToken();
+        token.cancel(CancellationReason.CLIENT_CANCELLED);
+
+        return new ServiceCall(
+                "/pkg.Svc/M",
+                new Metadata(),
+                Deadline.none(),
+                token,
+                Peer.insecure("unknown"),
+                List.of(),
+                null);
+    }
+
+    @Test
+    @Timeout(10)
+    void writeHoldsTheDrainWhileTheTransportIsFullAndResumesWhenItDrains()
+            throws InterruptedException {
+        ServerCall<byte[], byte[]> call = mockCall();
+        AtomicBoolean ready = new AtomicBoolean(false);
+        when(call.isReady()).thenAnswer(invocation -> ready.get());
+        when(call.isCancelled()).thenReturn(false);
+
+        // Headers precede the drain, so once they are out the writer is inside the gate.
+        CountDownLatch headersSent = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            headersSent.countDown();
+                            return null;
+                        })
+                .when(call)
+                .sendHeaders(any());
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        Thread writer =
+                Thread.ofVirtual()
+                        .start(
+                                () ->
+                                        GrpcBridge.write(
+                                                call,
+                                                ServiceCall.unary("/pkg.Svc/M", "req"),
+                                                fanoutResponse(3)));
+
+        // The peer has stopped reading: not one message reaches the wire, and the call stays open.
+        assertTrue(headersSent.await(5, TimeUnit.SECONDS));
+        verify(call, never()).sendMessage(any());
+        verify(call, never()).close(any(), any());
+
+        // The transport drains; the held writer resumes and finishes the response.
+        ready.set(true);
+
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
+        writer.join();
+        verify(call, times(3)).sendMessage(any());
+    }
+
+    @Test
+    @Timeout(10)
+    void writeStopsTheDrainOnceTheCallIsGoneRatherThanWaitingOnADeadTransport() {
+        ServerCall<byte[], byte[]> call = mockCall();
+        when(call.isReady()).thenReturn(false);
+        when(call.isCancelled()).thenReturn(true);
+
+        GrpcBridge.write(call, ServiceCall.unary("/pkg.Svc/M", "req"), fanoutResponse(3));
+
+        // Nothing to write into, so nothing is written — but the call is still closed normally.
+        verify(call, never()).sendMessage(any());
+        verify(call).close(any(), any());
+    }
+
+    @Test
+    @Timeout(10)
+    void writeStopsTheDrainWhenTheWritingThreadIsInterrupted() throws InterruptedException {
+        ServerCall<byte[], byte[]> call = mockCall();
+        CountDownLatch held = new CountDownLatch(1);
+        when(call.isReady())
+                .thenAnswer(
+                        invocation -> {
+                            held.countDown();
+                            return false;
+                        });
+        when(call.isCancelled()).thenReturn(false);
+
+        Thread writer =
+                Thread.ofVirtual()
+                        .start(
+                                () ->
+                                        GrpcBridge.write(
+                                                call,
+                                                ServiceCall.unary("/pkg.Svc/M", "req"),
+                                                fanoutResponse(3)));
+
+        assertTrue(held.await(5, TimeUnit.SECONDS));
+        writer.interrupt();
+        writer.join();
+
+        verify(call, never()).sendMessage(any());
+        verify(call).close(any(), any());
+    }
+
+    @Test
+    @Timeout(10)
+    void writeStillExitsTheDrainEarlyOnCancellationWithAWritableTransport() {
+        // A writable transport, so only the per-message cancellation check can stop the drain —
+        // the flow-control gate must not have displaced it.
+        ServerCall<byte[], byte[]> call = mockCall();
+        when(call.isCancelled()).thenReturn(false);
+
+        GrpcBridge.write(call, cancelledCall(), fanoutResponse(3));
+
+        verify(call).sendHeaders(any());
+        verify(call, never()).sendMessage(any());
+        verify(call).close(any(), any());
+    }
+
+    @Test
+    @Timeout(10)
+    void bufferedServerStreamingHoldsTheDrainUntilTheListenerSignalsReadiness()
+            throws InterruptedException {
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+        AtomicBoolean ready = new AtomicBoolean(false);
+        when(call.isReady()).thenAnswer(invocation -> ready.get());
+        when(call.isCancelled()).thenReturn(false);
+
+        CountDownLatch headersSent = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            headersSent.countDown();
+                            return null;
+                        })
+                .when(call)
+                .sendHeaders(any());
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/Fanout")
+                        .startCall(call, new io.grpc.Metadata());
+        listener.onMessage("req".getBytes(StandardCharsets.UTF_8));
+        // The buffered pipeline runs inline on the caller, so dispatch off-thread to keep the
+        // listener callable while the drain is held.
+        Thread dispatch = Thread.ofVirtual().start(listener::onHalfClose);
+
+        // Fanout yields three messages; none of them reach a transport that cannot take them.
+        assertTrue(headersSent.await(5, TimeUnit.SECONDS));
+        verify(call, never()).sendMessage(any());
+
+        ready.set(true);
+        listener.onReady();
+
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
+        dispatch.join();
+        verify(call, times(3)).sendMessage(any());
+    }
+
+    @Test
+    @Timeout(10)
+    void streamingHoldsEmitsUntilTheListenerSignalsReadiness() throws InterruptedException {
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+        AtomicBoolean ready = new AtomicBoolean(false);
+        when(call.isReady()).thenAnswer(invocation -> ready.get());
+        when(call.isCancelled()).thenReturn(false);
+
+        CountDownLatch headersSent = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            headersSent.countDown();
+                            return null;
+                        })
+                .when(call)
+                .sendHeaders(any());
+        CountDownLatch echoed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            echoed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .sendMessage(any());
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
+                        .startCall(call, new io.grpc.Metadata());
+        listener.onMessage("a".getBytes(StandardCharsets.UTF_8));
+
+        // The echo opened the stream, then parked on the gate — its reply is still unwritten.
+        assertTrue(headersSent.await(5, TimeUnit.SECONDS));
+        verify(call, never()).sendMessage(any());
+
+        // The transport drains and the listener reports it, releasing the handler's virtual thread.
+        ready.set(true);
+        listener.onReady();
+
+        assertTrue(echoed.await(5, TimeUnit.SECONDS));
+        listener.onHalfClose();
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
+        verify(call).sendMessage(any());
+    }
+
+    @Test
+    @Timeout(10)
+    void streamingDropsEmitsOnceTheCallIsGone() throws InterruptedException {
+        ApplicationContract app = WorkerGrpc.bootstrap(config());
+        ContainerData data = (ContainerData) app.getContainer().getData();
+        ServerCall<byte[], byte[]> call =
+                mockCall(new SocketAddressAndSession(new InetSocketAddress("1.2.3.4", 80), null));
+        when(call.isReady()).thenReturn(false);
+        when(call.isCancelled()).thenReturn(true);
+
+        CountDownLatch closed = new CountDownLatch(1);
+        doAnswer(
+                        invocation -> {
+                            closed.countDown();
+                            return null;
+                        })
+                .when(call)
+                .close(any(), any());
+
+        ServerCall.Listener<byte[]> listener =
+                GrpcBridge.handler(app, data, "pkg.Greeter/Echo")
+                        .startCall(call, new io.grpc.Metadata());
+        listener.onMessage("a".getBytes(StandardCharsets.UTF_8));
+        listener.onHalfClose();
+
+        // The handler unwinds and the call closes; the emit is dropped, not written to a dead
+        // stream.
+        assertTrue(closed.await(5, TimeUnit.SECONDS));
+        verify(call, never()).sendMessage(any());
     }
 
     @Test

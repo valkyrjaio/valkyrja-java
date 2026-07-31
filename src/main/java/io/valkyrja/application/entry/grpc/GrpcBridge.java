@@ -46,6 +46,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.net.ssl.SSLSession;
 
 /**
@@ -130,6 +132,7 @@ public final class GrpcBridge {
             call.request(1);
             List<Object> messages = new ArrayList<>();
             boolean[] rejected = {false};
+            OutboundFlowControl flowControl = new OutboundFlowControl(call);
 
             return new ServerCall.Listener<>() {
                 @Override
@@ -165,12 +168,22 @@ public final class GrpcBridge {
                     ServiceCallContract serviceCall =
                             buildCall(call, headers, fullMethodName, messages, token);
                     WorkerGrpc.dispatch(
-                            app, data, serviceCall, response -> write(call, serviceCall, response));
+                            app,
+                            data,
+                            serviceCall,
+                            response -> write(call, serviceCall, response, flowControl));
+                }
+
+                @Override
+                public void onReady() {
+                    flowControl.signal();
                 }
 
                 @Override
                 public void onCancel() {
                     token.cancel(cancellationReason(Context.current().getDeadline()));
+                    // Release a writer held on a transport that will never be ready again.
+                    flowControl.signal();
                 }
             };
         };
@@ -211,7 +224,10 @@ public final class GrpcBridge {
         InboundMessageStream inbound = new InboundMessageStream(() -> call.request(1));
         call.request(maxInboundMessages);
 
-        OutboundStreamContract outbound = new ServerCallOutboundStream(call);
+        // The outbound counterpart: the push sink holds the handler's virtual thread while the
+        // transport's send queue is full, so emitting cannot outrun a peer that stopped reading.
+        OutboundFlowControl flowControl = new OutboundFlowControl(call);
+        OutboundStreamContract outbound = new ServerCallOutboundStream(call, flowControl);
 
         Thread.ofVirtual()
                 .name("grpc-stream-" + fullMethodName)
@@ -244,10 +260,17 @@ public final class GrpcBridge {
             }
 
             @Override
+            public void onReady() {
+                flowControl.signal();
+            }
+
+            @Override
             public void onCancel() {
                 token.cancel(cancellationReason(Context.current().getDeadline()));
                 // Unblock the handler's read loop so the worker thread finishes and closes.
                 inbound.complete();
+                // Release a writer held on a transport that will never be ready again.
+                flowControl.signal();
             }
         };
     }
@@ -256,9 +279,11 @@ public final class GrpcBridge {
     private static final class ServerCallOutboundStream implements OutboundStreamContract {
 
         private final ServerCall<byte[], byte[]> call;
+        private final OutboundFlowControl flowControl;
 
-        ServerCallOutboundStream(ServerCall<byte[], byte[]> call) {
+        ServerCallOutboundStream(ServerCall<byte[], byte[]> call, OutboundFlowControl flowControl) {
             this.call = call;
+            this.flowControl = flowControl;
         }
 
         @Override
@@ -268,12 +293,91 @@ public final class GrpcBridge {
 
         @Override
         public void sendMessage(Object message) {
+            // Hold the emitting thread until the transport can take the message. A dead call
+            // yields nothing to write to, so drop the emit rather than write into a closed stream
+            // — the same shape as the buffered drain, which stops yielding once cancelled.
+            if (!flowControl.awaitWritable()) {
+                return;
+            }
+
             call.sendMessage((byte[]) message);
         }
 
         @Override
         public void close(ServiceResponseContract terminal) {
             sendStatus(call, terminal);
+        }
+    }
+
+    /**
+     * Outbound flow control for one call: holds the writing thread while the transport's send queue
+     * sits above its high-water mark, so a handler cannot outrun a peer that has stopped reading.
+     * {@code maxInboundMessages} bounds the inbound side; this is its outbound counterpart.
+     *
+     * <p>The wait is bounded per pass and the loop re-reads {@link ServerCall#isReady()} itself, so
+     * readiness never depends on a callback arriving. That matters because listener callbacks are
+     * serialized per call: the buffered path runs its whole pipeline inside {@code onHalfClose} and
+     * therefore cannot be handed an {@code onReady} while it is writing, whereas the streaming path
+     * writes from a separate virtual thread and can. {@link #signal} is the prompt wakeup for the
+     * latter; re-reading the transport is what keeps the former correct.
+     */
+    private static final class OutboundFlowControl {
+
+        /** How long a held writer waits before re-reading the transport state itself. */
+        private static final long POLL_MILLIS = 10L;
+
+        private final ServerCall<byte[], byte[]> call;
+        private final ReentrantLock lock = new ReentrantLock();
+        private final Condition writable = lock.newCondition();
+
+        OutboundFlowControl(ServerCall<byte[], byte[]> call) {
+            this.call = call;
+        }
+
+        /** Release a held writer: the transport can take more, or the call has ended. */
+        void signal() {
+            lock.lock();
+
+            try {
+                writable.signalAll();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        /**
+         * Hold the calling thread until the transport can accept another message.
+         *
+         * <p>A not-ready transport is a pause, not a cancellation — this waits however long the
+         * peer takes and still reports true. It reports false only when the call ends underneath
+         * the writer, so the drain stops instead of waiting on a transport that will never be ready
+         * again.
+         *
+         * @return true once the transport is writable; false when the call was cancelled, or the
+         *     waiting thread was interrupted
+         */
+        boolean awaitWritable() {
+            lock.lock();
+
+            try {
+                while (!call.isReady()) {
+                    if (call.isCancelled()) {
+                        return false;
+                    }
+
+                    // Whether this timed out or was signaled is not interesting: either way the
+                    // loop re-reads the transport, which is the authority on readiness.
+                    writable.await(POLL_MILLIS, TimeUnit.MILLISECONDS);
+                }
+
+                return true;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+
+                return false;
+            } finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -378,8 +482,8 @@ public final class GrpcBridge {
 
     /**
      * Write a {@link ServiceResponseContract} to the wire: initial headers, each message (drained
-     * through the per-step cancellation check), then the status (with rich details as {@code
-     * grpc-status-details-bin} when present) and trailers.
+     * through the per-step cancellation check and the outbound flow-control gate), then the status
+     * (with rich details as {@code grpc-status-details-bin} when present) and trailers.
      *
      * @param call the native server call
      * @param serviceCall the inbound call (for the cancellation check)
@@ -389,9 +493,32 @@ public final class GrpcBridge {
             ServerCall<byte[], byte[]> call,
             ServiceCallContract serviceCall,
             ServiceResponseContract response) {
+        write(call, serviceCall, response, new OutboundFlowControl(call));
+    }
+
+    /**
+     * Write a response, holding the drain on the given flow-control gate between messages so a
+     * server-streaming response cannot outrun a peer that has stopped reading.
+     *
+     * @param call the native server call
+     * @param serviceCall the inbound call (for the cancellation check)
+     * @param response the response to write
+     * @param flowControl the outbound gate, shared with the call's listener
+     */
+    private static void write(
+            ServerCall<byte[], byte[]> call,
+            ServiceCallContract serviceCall,
+            ServiceResponseContract response,
+            OutboundFlowControl flowControl) {
         call.sendHeaders(toGrpcMetadata(response.getInitialMetadata()));
 
         for (Object message : serviceCall.cancellable(response.getMessages())) {
+            // The gate pauses; it never cancels. It reports false only once the call itself is
+            // gone, at which point there is nothing left to drain into.
+            if (!flowControl.awaitWritable()) {
+                break;
+            }
+
             call.sendMessage((byte[]) message);
         }
 
