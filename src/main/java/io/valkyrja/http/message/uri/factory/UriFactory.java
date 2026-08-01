@@ -11,6 +11,7 @@ package io.valkyrja.http.message.uri.factory;
 
 import io.valkyrja.http.message.constant.Port;
 import io.valkyrja.http.message.uri.Uri;
+import io.valkyrja.http.message.uri.constant.Char;
 import io.valkyrja.http.message.uri.contract.UriContract;
 import io.valkyrja.http.message.uri.enum_.Scheme;
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidFromStringException;
@@ -26,31 +27,13 @@ import java.util.regex.Pattern;
 
 public abstract class UriFactory {
 
-    /**
-     * The unreserved characters, which every uri component allows unencoded.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.3">RFC 3986 section 2.3</a>
-     */
-    private static final String CHAR_UNRESERVED = "a-zA-Z0-9_\\-\\.~";
+    private static final Pattern USER_INFO_PATTERN = encodePattern(Char.USER_INFO);
 
-    /**
-     * The sub-delimiters, which every uri component this factory filters allows unencoded.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986 section 2.2</a>
-     */
-    private static final String CHAR_SUB_DELIMS = "!\\$&'\\(\\)\\*\\+,;=";
+    private static final Pattern HOST_PATTERN = encodePattern(Char.HOST);
 
-    /** The user info also allows the colon that separates the username from the password. */
-    private static final Pattern USER_INFO_PATTERN = encodePattern(":");
+    private static final Pattern PATH_PATTERN = encodePattern(Char.PATH);
 
-    /** A reg-name allows no character beyond the unreserved characters and the sub-delimiters. */
-    private static final Pattern HOST_PATTERN = encodePattern("");
-
-    /** The path also allows a colon, an at sign, and the segment separator. */
-    private static final Pattern PATH_PATTERN = encodePattern(":@/");
-
-    /** The query and the fragment also allow a colon, an at sign, a slash, and a question mark. */
-    private static final Pattern QUERY_PATTERN = encodePattern(":@/?");
+    private static final Pattern QUERY_PATTERN = encodePattern(Char.QUERY);
 
     public static UriContract fromString(String uri) {
         // A value starting with "https" already starts with "http", so the http check covers both.
@@ -286,11 +269,10 @@ public abstract class UriFactory {
      * valid percent-encoded triplet, so the pattern claims one before it reads the percent sign as
      * a character to encode.
      *
-     * @param extraAllowed the character class atoms the component allows beyond the common set
+     * @param allowed the character class atoms the component allows, from {@link Char}
      */
-    private static Pattern encodePattern(String extraAllowed) {
-        return Pattern.compile(
-                "(%[A-Fa-f0-9]{2})|[^" + CHAR_UNRESERVED + CHAR_SUB_DELIMS + extraAllowed + "]+");
+    private static Pattern encodePattern(String allowed) {
+        return Pattern.compile("(%[A-Fa-f0-9]{2})|[^" + allowed + "]+");
     }
 
     /**
