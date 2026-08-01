@@ -27,14 +27,6 @@ import java.util.regex.Pattern;
 
 public abstract class UriFactory {
 
-    private static final Pattern USER_INFO_PATTERN = encodePattern(Char.USER_INFO);
-
-    private static final Pattern HOST_PATTERN = encodePattern(Char.HOST);
-
-    private static final Pattern PATH_PATTERN = encodePattern(Char.PATH);
-
-    private static final Pattern QUERY_PATTERN = encodePattern(Char.QUERY);
-
     public static UriContract fromString(String uri) {
         // A value starting with "https" already starts with "http", so the http check covers both.
         if (!uri.isEmpty() && !uri.startsWith("/") && !uri.startsWith(Scheme.HTTP.getValue())) {
@@ -107,7 +99,7 @@ public abstract class UriFactory {
      * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.2.1">RFC 3986 section 3.2.1</a>
      */
     public static String filterUserInfo(String userInfo) {
-        return encode(USER_INFO_PATTERN, userInfo);
+        return encode(userInfo, Char.USER_INFO);
     }
 
     /**
@@ -123,7 +115,7 @@ public abstract class UriFactory {
             return host;
         }
 
-        return encode(HOST_PATTERN, host);
+        return encode(host, Char.HOST);
     }
 
     /**
@@ -135,7 +127,7 @@ public abstract class UriFactory {
     public static String filterPath(String path) {
         validatePath(path);
 
-        path = encode(PATH_PATTERN, path);
+        path = encode(path, Char.PATH);
 
         if (path.startsWith("/")) {
             return "/" + path.replaceAll("^/+", "");
@@ -165,7 +157,7 @@ public abstract class UriFactory {
     public static String filterQuery(String query) {
         validateQuery(query);
 
-        return encode(QUERY_PATTERN, query.replaceAll("^\\?+", ""));
+        return encode(query.replaceAll("^\\?+", ""), Char.QUERY);
     }
 
     public static void validateQuery(String query) {
@@ -185,7 +177,7 @@ public abstract class UriFactory {
     public static String filterFragment(String fragment) {
         validateFragment(fragment);
 
-        return encode(QUERY_PATTERN, fragment.replaceAll("^#+", ""));
+        return encode(fragment.replaceAll("^#+", ""), Char.QUERY);
     }
 
     public static void validateFragment(String fragment) {}
@@ -265,17 +257,6 @@ public abstract class UriFactory {
     }
 
     /**
-     * Build the pattern that finds what a uri component must encode. The first group matches a
-     * valid percent-encoded triplet, so the pattern claims one before it reads the percent sign as
-     * a character to encode.
-     *
-     * @param allowed the character class atoms the component allows, from {@link Char}
-     */
-    private static Pattern encodePattern(String allowed) {
-        return Pattern.compile("(%[A-Fa-f0-9]{2})|[^" + allowed + "]+");
-    }
-
-    /**
      * Percent-encode the characters that a uri component does not allow unencoded.
      *
      * <p>A character that is already part of a valid percent-encoded triplet is not encoded a
@@ -283,9 +264,15 @@ public abstract class UriFactory {
      * percent sign that does not begin a valid triplet is a literal percent sign, so this method
      * encodes it.
      *
+     * <p>The first group matches a valid percent-encoded triplet, so the pattern claims one before
+     * it reads the percent sign as a character to encode.
+     *
      * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.1">RFC 3986 section 2.1</a>
+     * @param value the component value
+     * @param allowed the character class atoms the component allows, from {@link Char}
      */
-    private static String encode(Pattern pattern, String value) {
+    private static String encode(String value, String allowed) {
+        Pattern pattern = Pattern.compile("(%[A-Fa-f0-9]{2})|[^" + allowed + "]+");
         Matcher matcher = pattern.matcher(value);
         StringBuilder result = new StringBuilder();
 
