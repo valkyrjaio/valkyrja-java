@@ -1,4 +1,5 @@
 /.idea
+/.worktrees
 .DS_Store
 dbname*
 Thumbs.db
