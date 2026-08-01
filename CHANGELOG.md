@@ -1,6 +1,14 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.5.0...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.5.1...26.x)
+
+## [v26.5.1](https://github.com/valkyrjaio/valkyrja-java/compare/v26.5.0...v26.5.1) - 2026-08-01
+
+* [Workflow] ci: Correct the Claude review trigger by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/94
+* [Workflow] refactor: Split the pull request checks out of CI by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/95
+* [Workflow] ci: Update .github workflow refs to v26.18.0 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/97
+* [Workflow] ci: Update .github workflow refs to v26.18.1 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/98
+* [Workflow] ci: Rename the version branch workflow from major to yearly by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/96
 
 ## [v26.5.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.4.1...v26.5.0) - 2026-07-31
 
