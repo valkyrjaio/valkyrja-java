@@ -158,4 +158,41 @@ final class UriTest {
     void withUserInfoWithNullPasswordYieldsUserOnly() {
         assertEquals("user", new Uri().withUserInfo("user", null).getUserInfo());
     }
+
+    /** The constructor and the wither filter the host the same way. */
+    @Test
+    void withHostFilters() {
+        var uri = new Uri();
+
+        assertEquals("example.com", uri.withHost("EXAMPLE.COM").getHost());
+        assertEquals("exa%20mple.com", uri.withHost("exa mple.com").getHost());
+        assertEquals("[::1]", uri.withHost("[::1]").getHost());
+        assertEquals(
+                new Uri(Scheme.HTTP, "", "", "EXAMPLE.COM", 0, "", "", "").getHost(),
+                uri.withHost("EXAMPLE.COM").getHost());
+    }
+
+    /** The constructor and the wither filter the user info the same way. */
+    @Test
+    void withUserInfoFilters() {
+        var uri = new Uri();
+
+        assertEquals("user%20name:p%40ss", uri.withUserInfo("user name", "p@ss").getUserInfo());
+        // The colon that separates the username from the password stays unencoded.
+        assertEquals("user:pass", uri.withUserInfo("user", "pass").getUserInfo());
+        // A value that is already encoded is not encoded a second time.
+        assertEquals("us%C3%A9r", uri.withUserInfo("us%C3%A9r", null).getUserInfo());
+        assertEquals(
+                new Uri(Scheme.HTTP, "user name", "p@ss", "example.com", 0, "", "", "")
+                        .getUserInfo(),
+                uri.withUserInfo("user name", "p@ss").getUserInfo());
+    }
+
+    /** A uri string carries every component encoded. */
+    @Test
+    void toStringEncodesEveryComponent() {
+        var uri = new Uri(Scheme.HTTPS, "user", "p@ss", "EXAMPLE.com", 0, "/a b", "q=1 2", "f g");
+
+        assertEquals("https://user:p%40ss@example.com/a%20b?q=1%202#f%20g", uri.toString());
+    }
 }

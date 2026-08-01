@@ -12,7 +12,6 @@ package io.valkyrja.http.message.uri;
 import io.valkyrja.http.message.uri.contract.UriContract;
 import io.valkyrja.http.message.uri.enum_.Scheme;
 import io.valkyrja.http.message.uri.factory.UriFactory;
-import java.util.Locale;
 import org.jspecify.annotations.Nullable;
 
 public class Uri implements UriContract {
@@ -63,7 +62,7 @@ public class Uri implements UriContract {
         this.password = password;
         this.port = port;
         this.userInfo = UriFactory.filterUserInfo(userInfo);
-        this.host = host.toLowerCase(Locale.ROOT);
+        this.host = UriFactory.filterHost(host);
         this.path = UriFactory.filterPath(path);
         this.query = UriFactory.filterQuery(query);
         this.fragment = UriFactory.filterFragment(fragment);
@@ -202,7 +201,7 @@ public class Uri implements UriContract {
 
         Uri newUri = copy();
 
-        newUri.userInfo = info;
+        newUri.userInfo = UriFactory.filterUserInfo(info);
         newUri.username = user;
         newUri.password = pass;
 
@@ -213,7 +212,7 @@ public class Uri implements UriContract {
     public UriContract withHost(String host) {
         Uri newUri = copy();
 
-        newUri.host = host;
+        newUri.host = UriFactory.filterHost(host);
 
         return newUri;
     }

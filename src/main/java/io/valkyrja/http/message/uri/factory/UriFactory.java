@@ -19,9 +19,38 @@ import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidPortExcept
 import io.valkyrja.http.message.uri.throwable.exception.HttpUriInvalidQueryException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class UriFactory {
+
+    /**
+     * The unreserved characters, which every uri component allows unencoded.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.3">RFC 3986 section 2.3</a>
+     */
+    private static final String CHAR_UNRESERVED = "a-zA-Z0-9_\\-\\.~";
+
+    /**
+     * The sub-delimiters, which every uri component this factory filters allows unencoded.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986 section 2.2</a>
+     */
+    private static final String CHAR_SUB_DELIMS = "!\\$&'\\(\\)\\*\\+,;=";
+
+    /** The user info also allows the colon that separates the username from the password. */
+    private static final Pattern USER_INFO_PATTERN = encodePattern(":");
+
+    /** A reg-name allows no character beyond the unreserved characters and the sub-delimiters. */
+    private static final Pattern HOST_PATTERN = encodePattern("");
+
+    /** The path also allows a colon, an at sign, and the segment separator. */
+    private static final Pattern PATH_PATTERN = encodePattern(":@/");
+
+    /** The query and the fragment also allow a colon, an at sign, a slash, and a question mark. */
+    private static final Pattern QUERY_PATTERN = encodePattern(":@/?");
 
     public static UriContract fromString(String uri) {
         // A value starting with "https" already starts with "http", so the http check covers both.
@@ -88,12 +117,42 @@ public abstract class UriFactory {
         }
     }
 
+    /**
+     * The user info allows the unreserved characters, the sub-delimiters, and a colon. The colon
+     * separates the username from the password, and a password can contain one.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.2.1">RFC 3986 section 3.2.1</a>
+     */
     public static String filterUserInfo(String userInfo) {
-        return userInfo;
+        return encode(USER_INFO_PATTERN, userInfo);
     }
 
+    /**
+     * A host is either an IP literal or a reg-name. An IP literal is in brackets and holds
+     * characters that a reg-name does not allow, so this method does not encode one.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.2.2">RFC 3986 section 3.2.2</a>
+     */
+    public static String filterHost(String host) {
+        host = host.toLowerCase(Locale.ROOT);
+
+        if (host.startsWith("[") && host.endsWith("]")) {
+            return host;
+        }
+
+        return encode(HOST_PATTERN, host);
+    }
+
+    /**
+     * The path allows the unreserved characters, the sub-delimiters, a colon, an at sign, and a
+     * forward slash.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.3">RFC 3986 section 3.3</a>
+     */
     public static String filterPath(String path) {
         validatePath(path);
+
+        path = encode(PATH_PATTERN, path);
 
         if (path.startsWith("/")) {
             return "/" + path.replaceAll("^/+", "");
@@ -114,14 +173,16 @@ public abstract class UriFactory {
         }
     }
 
+    /**
+     * The query allows the unreserved characters, the sub-delimiters, a colon, an at sign, a
+     * forward slash, and a question mark.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.4">RFC 3986 section 3.4</a>
+     */
     public static String filterQuery(String query) {
         validateQuery(query);
 
-        if (query.startsWith("?")) {
-            return query.substring(1);
-        }
-
-        return query;
+        return encode(QUERY_PATTERN, query.replaceAll("^\\?+", ""));
     }
 
     public static void validateQuery(String query) {
@@ -133,14 +194,15 @@ public abstract class UriFactory {
         }
     }
 
+    /**
+     * The fragment allows the same characters as the query.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.5">RFC 3986 section 3.5</a>
+     */
     public static String filterFragment(String fragment) {
         validateFragment(fragment);
 
-        if (fragment.startsWith("#")) {
-            return fragment.substring(1);
-        }
-
-        return fragment;
+        return encode(QUERY_PATTERN, fragment.replaceAll("^#+", ""));
     }
 
     public static void validateFragment(String fragment) {}
@@ -217,5 +279,57 @@ public abstract class UriFactory {
         }
 
         return "";
+    }
+
+    /**
+     * Build the pattern that finds what a uri component must encode. The first group matches a
+     * valid percent-encoded triplet, so the pattern claims one before it reads the percent sign as
+     * a character to encode.
+     *
+     * @param extraAllowed the character class atoms the component allows beyond the common set
+     */
+    private static Pattern encodePattern(String extraAllowed) {
+        return Pattern.compile(
+                "(%[A-Fa-f0-9]{2})|[^" + CHAR_UNRESERVED + CHAR_SUB_DELIMS + extraAllowed + "]+");
+    }
+
+    /**
+     * Percent-encode the characters that a uri component does not allow unencoded.
+     *
+     * <p>A character that is already part of a valid percent-encoded triplet is not encoded a
+     * second time; the triplet keeps its meaning and its hexadecimal digits become uppercase. A
+     * percent sign that does not begin a valid triplet is a literal percent sign, so this method
+     * encodes it.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.1">RFC 3986 section 2.1</a>
+     */
+    private static String encode(Pattern pattern, String value) {
+        Matcher matcher = pattern.matcher(value);
+        StringBuilder result = new StringBuilder();
+
+        while (matcher.find()) {
+            String triplet = matcher.group(1);
+            String replacement =
+                    triplet != null
+                            ? triplet.toUpperCase(Locale.ROOT)
+                            : percentEncode(matcher.group());
+
+            matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+        }
+
+        matcher.appendTail(result);
+
+        return result.toString();
+    }
+
+    /** Percent-encode every UTF-8 byte of a value that a uri component does not allow. */
+    private static String percentEncode(String value) {
+        StringBuilder encoded = new StringBuilder();
+
+        for (byte b : value.getBytes(StandardCharsets.UTF_8)) {
+            encoded.append('%').append(String.format("%02X", b));
+        }
+
+        return encoded.toString();
     }
 }
