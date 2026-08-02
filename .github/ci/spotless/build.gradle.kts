@@ -33,13 +33,17 @@ tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("
 
 spotless {
     java {
-        // The JUnit build's tests are the repo's other Java source tree; format them too.
+        // The JUnit and ArchUnit builds hold the repo's other Java source trees; format them too.
         // Scoped to `src/test/java` on purpose — a `src/test/resources` tree can hold .java files
         // that are test *data* rather than source, parsed as text by the code under test.
         // Formatting them, or injecting a license header, rewrites the very input those tests
         // assert on. sindri-java has exactly such fixtures, and the broader `src/test/**` glob
         // silently corrupted 58 of them there.
-        target("src/**/*.java", ".github/ci/junit/src/test/java/**/*.java")
+        target(
+            "src/**/*.java",
+            ".github/ci/junit/src/test/java/**/*.java",
+            ".github/ci/archunit/src/test/java/**/*.java",
+        )
         googleJavaFormat("1.27.0").aosp()
         licenseHeader(
             """/*
