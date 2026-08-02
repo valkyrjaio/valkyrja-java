@@ -182,7 +182,7 @@ The input passes through a **six-stage middleware pipeline** that mirrors HTTP
 exactly:
 
 | HTTP Stage        | CLI Equivalent    | Description                                                 |
-|-------------------|-------------------|-------------------------------------------------------------|
+| ----------------- | ----------------- | ----------------------------------------------------------- |
 | `RequestReceived` | `InputReceived`   | Before routing; can short-circuit with output               |
 | `RouteMatched`    | `RouteMatched`    | After match; can short-circuit with output                  |
 | `RouteNotMatched` | `RouteNotMatched` | When no command matches                                     |
