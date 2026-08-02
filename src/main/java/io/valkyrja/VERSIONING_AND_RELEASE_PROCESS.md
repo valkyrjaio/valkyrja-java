@@ -39,11 +39,11 @@ read the release notes before upgrading.
 
 ## Release Schedule
 
-| Version | Java | Release | Bug Fixes Until | Security Fixes Until |
-|:--------|:-----|:--------|:----------------|:---------------------|
-| 26      | 21+  | Q2 2026 | Q2 2027         | Q1 2028              |
-| 27      | 21+  | Q1 2027 | Q2 2028         | Q1 2029              |
-| 28      | 21+  | Q1 2028 | Q2 2029         | Q1 2030              |
+| Version | Java    | Release        | Bug Fixes Until | Security Fixes Until |
+|:--------|:--------|:---------------|:----------------|:---------------------|
+| 26      | 21 – 25 | March 31, 2026 | Q2 2027         | Q1 2028              |
+| 27      | 23 – 25 | Q1 2027        | Q2 2028         | Q1 2029              |
+| 28      | 25+     | Q1 2028        | Q2 2029         | Q1 2030              |
 
 ## Support Policy
 
