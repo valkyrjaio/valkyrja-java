@@ -9,7 +9,6 @@
 package io.valkyrja.tests.fixtures.application.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.application.provider.abstract_.ComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
@@ -20,7 +19,7 @@ import io.valkyrja.tests.fixtures.grpc.GreeterRouteProviderFixture;
 import java.util.List;
 
 /** Test component provider supplying a single gRPC route provider. */
-public final class GrpcRouteComponentProviderFixture extends ComponentProvider {
+public final class GrpcRouteComponentProviderFixture implements ComponentProviderContract {
 
     @Override
     public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {

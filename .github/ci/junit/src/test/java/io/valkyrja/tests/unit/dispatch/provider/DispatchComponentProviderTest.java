@@ -22,11 +22,32 @@ final class DispatchComponentProviderTest {
     private final ApplicationContract app = mock(ApplicationContract.class);
 
     @Test
-    void allProviderListsAreEmpty() {
+    void getComponentProvidersIsEmpty() {
         assertTrue(provider.getComponentProviders(app).isEmpty());
+    }
+
+    @Test
+    void getContainerProvidersIsEmpty() {
         assertTrue(provider.getContainerProviders(app).isEmpty());
+    }
+
+    @Test
+    void getEventProvidersIsEmpty() {
         assertTrue(provider.getEventProviders(app).isEmpty());
+    }
+
+    @Test
+    void getCliProvidersIsEmpty() {
         assertTrue(provider.getCliProviders(app).isEmpty());
+    }
+
+    @Test
+    void getHttpProvidersIsEmpty() {
         assertTrue(provider.getHttpProviders(app).isEmpty());
+    }
+
+    @Test
+    void getGrpcProvidersIsEmpty() {
+        assertTrue(provider.getGrpcProviders(app).isEmpty());
     }
 }

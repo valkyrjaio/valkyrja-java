@@ -21,24 +21,39 @@ import org.junit.jupiter.api.Test;
 /** Test the {@link LogComponentProvider}. */
 final class LogComponentProviderTest {
 
+    private final LogComponentProvider provider = new LogComponentProvider();
     private final ApplicationContract app = mock(ApplicationContract.class);
 
     @Test
-    void providesTheLogServiceProvider() {
-        var providers = new LogComponentProvider().getContainerProviders(app);
+    void getComponentProvidersIsEmpty() {
+        assertTrue(provider.getComponentProviders(app).isEmpty());
+    }
+
+    @Test
+    void getContainerProvidersReturnsTheServiceProviders() {
+        var providers = provider.getContainerProviders(app);
 
         assertEquals(1, providers.size());
         assertInstanceOf(LogServiceProvider.class, providers.get(0));
     }
 
     @Test
-    void providesNothingElse() {
-        var provider = new LogComponentProvider();
-
-        assertTrue(provider.getComponentProviders(app).isEmpty());
+    void getEventProvidersIsEmpty() {
         assertTrue(provider.getEventProviders(app).isEmpty());
+    }
+
+    @Test
+    void getCliProvidersIsEmpty() {
         assertTrue(provider.getCliProviders(app).isEmpty());
+    }
+
+    @Test
+    void getHttpProvidersIsEmpty() {
         assertTrue(provider.getHttpProviders(app).isEmpty());
+    }
+
+    @Test
+    void getGrpcProvidersIsEmpty() {
         assertTrue(provider.getGrpcProviders(app).isEmpty());
     }
 }

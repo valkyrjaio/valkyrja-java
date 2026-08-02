@@ -14,9 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.container.provider.*;
+import io.valkyrja.container.provider.ContainerComponentProvider;
+import io.valkyrja.container.provider.ServiceProvider;
 import org.junit.jupiter.api.Test;
 
+/** Test the {@link ContainerComponentProvider}. */
 final class ContainerComponentProviderTest {
 
     private final ContainerComponentProvider provider = new ContainerComponentProvider();
@@ -28,8 +30,11 @@ final class ContainerComponentProviderTest {
     }
 
     @Test
-    void getContainerProvidersReturnsServiceProvider() {
-        assertInstanceOf(ServiceProvider.class, provider.getContainerProviders(app).get(0));
+    void getContainerProvidersReturnsTheServiceProviders() {
+        var providers = provider.getContainerProviders(app);
+
+        assertEquals(1, providers.size());
+        assertInstanceOf(ServiceProvider.class, providers.get(0));
     }
 
     @Test
@@ -48,7 +53,7 @@ final class ContainerComponentProviderTest {
     }
 
     @Test
-    void getContainerProvidersReturnsExactlyOne() {
-        assertEquals(1, provider.getContainerProviders(app).size());
+    void getGrpcProvidersIsEmpty() {
+        assertTrue(provider.getGrpcProviders(app).isEmpty());
     }
 }

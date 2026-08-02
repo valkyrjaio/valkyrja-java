@@ -25,18 +25,35 @@ final class CliInteractionComponentProviderTest {
     private final ApplicationContract app = mock(ApplicationContract.class);
 
     @Test
-    void providesCliInteractionServiceProvider() {
-        var containerProviders = provider.getContainerProviders(app);
-
-        assertEquals(1, containerProviders.size());
-        assertInstanceOf(CliInteractionServiceProvider.class, containerProviders.get(0));
+    void getComponentProvidersIsEmpty() {
+        assertTrue(provider.getComponentProviders(app).isEmpty());
     }
 
     @Test
-    void otherProviderListsAreEmpty() {
-        assertTrue(provider.getComponentProviders(app).isEmpty());
+    void getContainerProvidersReturnsTheServiceProviders() {
+        var providers = provider.getContainerProviders(app);
+
+        assertEquals(1, providers.size());
+        assertInstanceOf(CliInteractionServiceProvider.class, providers.get(0));
+    }
+
+    @Test
+    void getEventProvidersIsEmpty() {
         assertTrue(provider.getEventProviders(app).isEmpty());
+    }
+
+    @Test
+    void getCliProvidersIsEmpty() {
         assertTrue(provider.getCliProviders(app).isEmpty());
+    }
+
+    @Test
+    void getHttpProvidersIsEmpty() {
         assertTrue(provider.getHttpProviders(app).isEmpty());
+    }
+
+    @Test
+    void getGrpcProvidersIsEmpty() {
+        assertTrue(provider.getGrpcProviders(app).isEmpty());
     }
 }

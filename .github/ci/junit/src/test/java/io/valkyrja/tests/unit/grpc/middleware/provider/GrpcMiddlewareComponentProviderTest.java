@@ -6,7 +6,7 @@
  * Released under the MIT License. See LICENSE.md for details.
  */
 
-package io.valkyrja.tests.unit.http.message.provider;
+package io.valkyrja.tests.unit.grpc.middleware.provider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -14,14 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.http.message.provider.HttpMessageComponentProvider;
-import io.valkyrja.http.message.provider.HttpMessageServiceProvider;
+import io.valkyrja.grpc.middleware.provider.GrpcMiddlewareComponentProvider;
+import io.valkyrja.grpc.middleware.provider.GrpcMiddlewareServiceProvider;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link HttpMessageComponentProvider}. */
-final class HttpMessageComponentProviderTest {
+/** Test the {@link GrpcMiddlewareComponentProvider}. */
+final class GrpcMiddlewareComponentProviderTest {
 
-    private final HttpMessageComponentProvider provider = new HttpMessageComponentProvider();
+    private final GrpcMiddlewareComponentProvider provider = new GrpcMiddlewareComponentProvider();
     private final ApplicationContract app = mock(ApplicationContract.class);
 
     @Test
@@ -34,7 +34,7 @@ final class HttpMessageComponentProviderTest {
         var providers = provider.getContainerProviders(app);
 
         assertEquals(1, providers.size());
-        assertInstanceOf(HttpMessageServiceProvider.class, providers.get(0));
+        assertInstanceOf(GrpcMiddlewareServiceProvider.class, providers.get(0));
     }
 
     @Test
