@@ -40,7 +40,7 @@ read the release notes before upgrading.
 ## Release Schedule
 
 | Version | Java    | Release        | Bug Fixes Until | Security Fixes Until |
-|:--------|:--------|:---------------|:----------------|:---------------------|
+| :------ | :------ | :------------- | :-------------- | :------------------- |
 | 26      | 21 – 25 | March 31, 2026 | Q2 2027         | Q1 2028              |
 | 27      | 23 – 25 | Q1 2027        | Q2 2028         | Q1 2029              |
 | 28      | 25+     | Q1 2028        | Q2 2029         | Q1 2030              |
@@ -63,10 +63,10 @@ software in production means known security vulnerabilities will not be patched.
 Each major version in active development has a corresponding branch in the
 repository.
 
-| Branch   | Purpose                                                                        |
-|:---------|:-------------------------------------------------------------------------------|
-| `26.x`   | The current release line. Where fixes, features, and deprecations land.          |
-| `master` | Preparation for the next year's major. Open for removals and large API changes.  |
+| Branch   | Purpose                                                                         |
+| :------- | :------------------------------------------------------------------------------ |
+| `26.x`   | The current release line. Where fixes, features, and deprecations land.         |
+| `master` | Preparation for the next year's major. Open for removals and large API changes. |
 
 When a new major version ships, its `YY.x` branch becomes the current line and
 the previous one moves into security-only mode.
