@@ -14,33 +14,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.application.provider.CliApplicationComponentProvider;
-import io.valkyrja.application.provider.CliWithHttpApplicationComponentProvider;
-import io.valkyrja.http.message.provider.HttpMessageComponentProvider;
-import io.valkyrja.http.middleware.provider.HttpMiddlewareComponentProvider;
-import io.valkyrja.http.routing.provider.HttpRoutingCliComponentProvider;
-import io.valkyrja.http.routing.provider.HttpRoutingComponentProvider;
-import io.valkyrja.http.server.provider.HttpServerComponentProvider;
+import io.valkyrja.application.provider.ApplicationComponentProvider;
+import io.valkyrja.application.provider.GrpcApplicationComponentProvider;
+import io.valkyrja.grpc.middleware.provider.GrpcMiddlewareComponentProvider;
+import io.valkyrja.grpc.routing.provider.GrpcRoutingComponentProvider;
+import io.valkyrja.grpc.server.provider.GrpcServerComponentProvider;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link CliWithHttpApplicationComponentProvider}. */
-final class CliWithHttpApplicationComponentProviderTest {
+/** Test the {@link GrpcApplicationComponentProvider}. */
+final class GrpcApplicationComponentProviderTest {
 
-    private final CliWithHttpApplicationComponentProvider provider =
-            new CliWithHttpApplicationComponentProvider();
+    private final GrpcApplicationComponentProvider provider =
+            new GrpcApplicationComponentProvider();
     private final ApplicationContract app = mock(ApplicationContract.class);
 
     @Test
     void getComponentProvidersReturnsTheComponentProviders() {
         var providers = provider.getComponentProviders(app);
 
-        assertEquals(6, providers.size());
-        assertInstanceOf(CliApplicationComponentProvider.class, providers.get(0));
-        assertInstanceOf(HttpMessageComponentProvider.class, providers.get(1));
-        assertInstanceOf(HttpMiddlewareComponentProvider.class, providers.get(2));
-        assertInstanceOf(HttpRoutingComponentProvider.class, providers.get(3));
-        assertInstanceOf(HttpRoutingCliComponentProvider.class, providers.get(4));
-        assertInstanceOf(HttpServerComponentProvider.class, providers.get(5));
+        assertEquals(4, providers.size());
+        assertInstanceOf(ApplicationComponentProvider.class, providers.get(0));
+        assertInstanceOf(GrpcMiddlewareComponentProvider.class, providers.get(1));
+        assertInstanceOf(GrpcRoutingComponentProvider.class, providers.get(2));
+        assertInstanceOf(GrpcServerComponentProvider.class, providers.get(3));
     }
 
     @Test

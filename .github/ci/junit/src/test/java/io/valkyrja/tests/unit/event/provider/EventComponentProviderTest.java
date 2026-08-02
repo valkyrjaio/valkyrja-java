@@ -15,17 +15,39 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.event.provider.EventComponentProvider;
 import org.junit.jupiter.api.Test;
 
+/** Test the {@link EventComponentProvider}. */
 final class EventComponentProviderTest {
 
     private final EventComponentProvider provider = new EventComponentProvider();
     private final ApplicationContract app = mock(ApplicationContract.class);
 
     @Test
-    void allProviderListsAreEmpty() {
+    void getComponentProvidersIsEmpty() {
         assertTrue(provider.getComponentProviders(app).isEmpty());
+    }
+
+    @Test
+    void getContainerProvidersIsEmpty() {
         assertTrue(provider.getContainerProviders(app).isEmpty());
+    }
+
+    @Test
+    void getEventProvidersIsEmpty() {
         assertTrue(provider.getEventProviders(app).isEmpty());
+    }
+
+    @Test
+    void getCliProvidersIsEmpty() {
         assertTrue(provider.getCliProviders(app).isEmpty());
+    }
+
+    @Test
+    void getHttpProvidersIsEmpty() {
         assertTrue(provider.getHttpProviders(app).isEmpty());
+    }
+
+    @Test
+    void getGrpcProvidersIsEmpty() {
+        assertTrue(provider.getGrpcProviders(app).isEmpty());
     }
 }

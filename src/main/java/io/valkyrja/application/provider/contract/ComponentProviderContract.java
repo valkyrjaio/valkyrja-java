@@ -16,6 +16,17 @@ import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import java.util.List;
 
+/**
+ * Contract for the top-level provider aggregator of a component.
+ *
+ * <p>Every method here is abstract, so no protocol is privileged over another. An implementation
+ * declares each method, including a method that returns an empty list. A reader of one provider
+ * then sees what the component supplies, and what it does not supply, from that one file.
+ *
+ * <p>Warning: a base class that supplies empty defaults breaks both properties. Do not add one. An
+ * inherited default is not a method on the component, so no test asserts it, and a component that
+ * must supply a provider can return empty with nothing to report the fault.
+ */
 public interface ComponentProviderContract {
 
     /**
@@ -60,11 +71,6 @@ public interface ComponentProviderContract {
 
     /**
      * Get the component's gRPC route providers.
-     *
-     * <p>Abstract, like every other provider method here, so no protocol is privileged over
-     * another. Components that contribute to only some protocols should extend {@code
-     * io.valkyrja.application.provider.abstract_.ComponentProvider}, which supplies empty defaults,
-     * rather than repeating an empty implementation per protocol.
      *
      * @param app the application
      * @return list of gRPC route provider instances

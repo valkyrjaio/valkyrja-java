@@ -9,17 +9,17 @@
 package io.valkyrja.tests.fixtures.application.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.application.provider.abstract_.ComponentProvider;
 import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.event.provider.contract.ListenerProviderContract;
+import io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract;
 import io.valkyrja.http.routing.provider.contract.HttpRouteProviderContract;
 import io.valkyrja.tests.fixtures.http.routing.provider.HttpRouteProviderFixture;
 import java.util.List;
 
 /** Test component provider supplying HTTP container and route providers. */
-public final class HttpComponentProviderFixture extends ComponentProvider {
+public final class HttpComponentProviderFixture implements ComponentProviderContract {
 
     @Override
     public List<ComponentProviderContract> getComponentProviders(ApplicationContract app) {
@@ -45,5 +45,10 @@ public final class HttpComponentProviderFixture extends ComponentProvider {
     @Override
     public List<HttpRouteProviderContract> getHttpProviders(ApplicationContract app) {
         return List.of(new HttpRouteProviderFixture());
+    }
+
+    @Override
+    public List<GrpcRouteProviderContract> getGrpcProviders(ApplicationContract app) {
+        return List.of();
     }
 }

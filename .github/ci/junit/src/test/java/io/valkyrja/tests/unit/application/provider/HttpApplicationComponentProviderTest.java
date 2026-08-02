@@ -11,31 +11,62 @@ package io.valkyrja.tests.unit.application.provider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.application.provider.ApplicationComponentProvider;
 import io.valkyrja.application.provider.HttpApplicationComponentProvider;
+import io.valkyrja.http.message.provider.HttpMessageComponentProvider;
+import io.valkyrja.http.middleware.provider.HttpMiddlewareComponentProvider;
+import io.valkyrja.http.routing.provider.HttpRoutingCliComponentProvider;
+import io.valkyrja.http.routing.provider.HttpRoutingComponentProvider;
+import io.valkyrja.http.server.provider.HttpServerComponentProvider;
 import io.valkyrja.log.provider.LogComponentProvider;
 import org.junit.jupiter.api.Test;
 
+/** Test the {@link HttpApplicationComponentProvider}. */
 final class HttpApplicationComponentProviderTest {
 
     private final HttpApplicationComponentProvider provider =
             new HttpApplicationComponentProvider();
+    private final ApplicationContract app = mock(ApplicationContract.class);
 
     @Test
-    void componentProvidersIncludeApplicationAndHttpStack() {
-        var components = provider.getComponentProviders(null);
+    void getComponentProvidersReturnsTheComponentProviders() {
+        var providers = provider.getComponentProviders(app);
 
-        assertEquals(7, components.size());
-        assertInstanceOf(ApplicationComponentProvider.class, components.get(0));
-        assertInstanceOf(LogComponentProvider.class, components.get(6));
+        assertEquals(7, providers.size());
+        assertInstanceOf(ApplicationComponentProvider.class, providers.get(0));
+        assertInstanceOf(HttpMessageComponentProvider.class, providers.get(1));
+        assertInstanceOf(HttpMiddlewareComponentProvider.class, providers.get(2));
+        assertInstanceOf(HttpRoutingComponentProvider.class, providers.get(3));
+        assertInstanceOf(HttpRoutingCliComponentProvider.class, providers.get(4));
+        assertInstanceOf(HttpServerComponentProvider.class, providers.get(5));
+        assertInstanceOf(LogComponentProvider.class, providers.get(6));
     }
 
     @Test
-    void otherProviderListsAreEmpty() {
-        assertTrue(provider.getContainerProviders(null).isEmpty());
-        assertTrue(provider.getEventProviders(null).isEmpty());
-        assertTrue(provider.getCliProviders(null).isEmpty());
-        assertTrue(provider.getHttpProviders(null).isEmpty());
+    void getContainerProvidersIsEmpty() {
+        assertTrue(provider.getContainerProviders(app).isEmpty());
+    }
+
+    @Test
+    void getEventProvidersIsEmpty() {
+        assertTrue(provider.getEventProviders(app).isEmpty());
+    }
+
+    @Test
+    void getCliProvidersIsEmpty() {
+        assertTrue(provider.getCliProviders(app).isEmpty());
+    }
+
+    @Test
+    void getHttpProvidersIsEmpty() {
+        assertTrue(provider.getHttpProviders(app).isEmpty());
+    }
+
+    @Test
+    void getGrpcProvidersIsEmpty() {
+        assertTrue(provider.getGrpcProviders(app).isEmpty());
     }
 }
