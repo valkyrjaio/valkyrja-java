@@ -24,8 +24,8 @@ import java.util.List;
  * then sees what the component supplies, and what it does not supply, from that one file.
  *
  * <p>Warning: a base class that supplies empty defaults breaks both properties. Do not add one. An
- * inherited default is not a method on the component, so no test asserts it, and a component that
- * must supply a provider can return empty with nothing to report the fault.
+ * inherited default is not a method on the component, so no test asserts it. A component that must
+ * supply a provider can then return empty, and nothing reports the fault.
  */
 public interface ComponentProviderContract {
 
