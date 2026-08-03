@@ -6,20 +6,8 @@
  * Released under the MIT License. See LICENSE.md for details.
  */
 
-import io.valkyrja.spotless.CopyrightHeader
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("io.valkyrja:ci-spotless:26.1.4")
-    }
-}
-
 plugins {
-    id("com.diffplug.spotless") version "8.9.0"
+    id("io.valkyrja.ci-spotless") version "26.2.0"
     id("com.github.ben-manes.versions") version "0.59.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
@@ -42,20 +30,14 @@ tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("
     rejectVersionIf { isNonStable(candidate.version) }
 }
 
-spotless {
-    java {
-        // The JUnit and ArchUnit builds hold the repo's other Java source trees; format them too.
-        // Scoped to `src/test/java` on purpose — a `src/test/resources` tree can hold .java files
-        // that are test *data* rather than source, parsed as text by the code under test.
-        // Formatting them, or injecting a license header, rewrites the very input those tests
-        // assert on. sindri-java has exactly such fixtures, and the broader `src/test/**` glob
-        // silently corrupted 58 of them there.
-        target(
-            "src/**/*.java",
-            ".github/ci/junit/src/test/java/**/*.java",
-            ".github/ci/archunit/src/test/java/**/*.java",
-        )
-        googleJavaFormat("1.27.0").aosp()
-        licenseHeader(CopyrightHeader.block("Valkyrja Framework"))
-    }
+valkyrjaSpotless {
+    packageName = "Valkyrja Framework"
+
+    // Each CI build is scoped to `src/test/java`. A `src/test/resources` tree can hold .java
+    // files that are test data, and formatting one rewrites the input a test asserts on.
+    javaTargets = listOf(
+        "src/**/*.java",
+        ".github/ci/junit/src/test/java/**/*.java",
+        ".github/ci/archunit/src/test/java/**/*.java",
+    )
 }
