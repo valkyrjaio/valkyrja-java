@@ -94,9 +94,13 @@ public class EventDispatcher implements EventDispatcherContract {
      * Resolve an event from the container.
      *
      * <p>The container is the only source of an event instance. The application binds each event
-     * that it dispatches. The dispatcher does not construct the event itself, because reflection is
-     * slow, because reflection assumes a constructor that takes no argument, and because no other
-     * port has an equivalent mechanism.
+     * that it dispatches. The dispatcher does not construct the event itself, for three reasons:
+     *
+     * <ul>
+     *   <li>Reflection is slow.
+     *   <li>Reflection assumes a constructor that takes no argument.
+     *   <li>No other port has an equivalent mechanism.
+     * </ul>
      *
      * <p>The container resolves a binding key to a value of any type, so the dispatcher tests the
      * value against the key.
