@@ -11,7 +11,7 @@ package io.valkyrja.tests.fixtures.event;
 import io.valkyrja.event.contract.ArgumentsCapableEventContract;
 import java.util.Map;
 
-/** Event that captures the arguments passed when constructed from its id. */
+/** Event that captures the arguments passed when resolved from its binding key. */
 public final class ArgumentsCapableEventFixture implements ArgumentsCapableEventContract {
 
     private Map<String, Object> arguments = Map.of();

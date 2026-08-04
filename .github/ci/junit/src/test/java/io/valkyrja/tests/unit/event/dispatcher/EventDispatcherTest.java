@@ -12,13 +12,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.event.collection.ListenerCollection;
 import io.valkyrja.event.data.Listener;
 import io.valkyrja.event.dispatcher.EventDispatcher;
+import io.valkyrja.event.throwable.exception.EventInvalidEventException;
 import io.valkyrja.tests.fixtures.event.ArgumentsCapableEventFixture;
 import io.valkyrja.tests.fixtures.event.DispatchCollectableEventFixture;
 import io.valkyrja.tests.fixtures.event.EventFixture;
@@ -43,8 +47,20 @@ final class EventDispatcherTest {
         return new Listener(eventId, name, handler);
     }
 
+    /** A container that binds every event this test dispatches by its binding key. */
+    private Container container() {
+        var container = new Container();
+        container.bind(
+                DispatchCollectableEventFixture.class,
+                (c, arguments) -> new DispatchCollectableEventFixture());
+        container.bind(
+                ArgumentsCapableEventFixture.class,
+                (c, arguments) -> new ArgumentsCapableEventFixture());
+        return container;
+    }
+
     private EventDispatcher dispatcherWith(ListenerCollection collection) {
-        return new EventDispatcher(collection, new Container());
+        return new EventDispatcher(collection, container());
     }
 
     @Test
@@ -129,17 +145,38 @@ final class EventDispatcherTest {
     }
 
     @Test
-    void dispatchByIdUnknownClassReturnsPlainObject() {
+    void dispatchByIdUnboundEventThrows() {
         var dispatcher = new EventDispatcher();
 
-        var result = dispatcher.dispatchById(CharSequence.class, Map.of());
+        // The container holds no binding for the key, so it reports the invalid reference.
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> dispatcher.dispatchById(EventFixture.class, Map.of()));
+    }
 
-        assertSame(Object.class, result.getClass());
+    @Test
+    void dispatchByIdBindingOfAnotherTypeThrows() {
+        var data =
+                new ContainerData(
+                        Map.of(),
+                        Map.of(),
+                        Map.of(EventFixture.class, (c, arguments) -> "not an event"),
+                        Map.of());
+        var dispatcher = new EventDispatcher(new ListenerCollection(), new Container(data));
+
+        var exception =
+                assertThrows(
+                        EventInvalidEventException.class,
+                        () -> dispatcher.dispatchById(EventFixture.class, Map.of()));
+
+        assertEquals(
+                "Service with `" + EventFixture.class.getName() + "` is not an event",
+                exception.getMessage());
     }
 
     @Test
     void dispatchByIdArgumentsCapableEventReceivesArguments() {
-        var dispatcher = new EventDispatcher();
+        var dispatcher = new EventDispatcher(new ListenerCollection(), container());
 
         var result =
                 dispatcher.dispatchById(ArgumentsCapableEventFixture.class, Map.of("key", "value"));

@@ -8,6 +8,7 @@
 
 package io.valkyrja.event.dispatcher;
 
+import io.valkyrja.container.enum_.InvalidReferenceMode;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.event.collection.ListenerCollection;
@@ -17,6 +18,7 @@ import io.valkyrja.event.contract.DispatchCollectableEventContract;
 import io.valkyrja.event.contract.StoppableEventContract;
 import io.valkyrja.event.data.contract.ListenerContract;
 import io.valkyrja.event.dispatcher.contract.EventDispatcherContract;
+import io.valkyrja.event.throwable.exception.EventInvalidEventException;
 import java.util.Map;
 
 /** Default event dispatcher implementation. */
@@ -55,10 +57,13 @@ public class EventDispatcher implements EventDispatcherContract {
 
     @Override
     public Object dispatchByIdIfHasListeners(Class<?> eventId, Map<String, Object> arguments) {
+        Object event = getEventFromId(eventId, arguments);
+
         if (collection.hasListenersForEventById(eventId)) {
-            return dispatchById(eventId, arguments);
+            return dispatch(event);
         }
-        return getEventFromId(eventId, arguments);
+
+        return event;
     }
 
     @Override
@@ -85,16 +90,35 @@ public class EventDispatcher implements EventDispatcherContract {
         return event;
     }
 
-    /** Instantiate an event from its class, optionally passing arguments if it supports them. */
+    /**
+     * Resolve an event from the container.
+     *
+     * <p>The container is the only source of an event instance. The application binds each event
+     * that it dispatches. The dispatcher does not construct the event itself, because reflection is
+     * slow, because reflection assumes a constructor that takes no argument, and because no other
+     * port has an equivalent mechanism.
+     *
+     * <p>The container resolves a binding key to a value of any type, so the dispatcher tests the
+     * value against the key.
+     *
+     * @param eventId the binding key of the event
+     * @param arguments the arguments for the binding, and for the event
+     * @return the event
+     * @throws io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException if the
+     *     container holds no binding for the key
+     * @throws EventInvalidEventException if the container resolves a value of another type
+     */
     protected Object getEventFromId(Class<?> eventId, Map<String, Object> arguments) {
-        try {
-            Object event = eventId.getDeclaredConstructor().newInstance();
-            if (event instanceof ArgumentsCapableEventContract capable) {
-                return capable.setArguments(arguments);
-            }
-            return event;
-        } catch (ReflectiveOperationException e) {
-            return new Object();
+        Object event = container.get(eventId, arguments, InvalidReferenceMode.THROW_EXCEPTION);
+
+        if (!eventId.isInstance(event)) {
+            throw new EventInvalidEventException(eventId.getName());
         }
+
+        if (event instanceof ArgumentsCapableEventContract capable) {
+            return capable.setArguments(arguments);
+        }
+
+        return event;
     }
 }

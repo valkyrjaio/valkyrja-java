@@ -35,19 +35,24 @@ public interface EventDispatcherContract {
     Object dispatchIfHasListeners(Object event);
 
     /**
-     * Dispatch an event by its class, constructing a new instance.
+     * Dispatch an event that the container resolves from its binding key.
      *
-     * @param eventId the event class
-     * @param arguments constructor arguments
+     * <p>The application binds each event that it dispatches.
+     *
+     * @param eventId the binding key of the event
+     * @param arguments the arguments for the binding, and for the event
      * @return the dispatched event
      */
     Object dispatchById(Class<?> eventId, Map<String, Object> arguments);
 
     /**
-     * Dispatch an event by class only if listeners exist.
+     * Resolve an event from the container, and dispatch the event only if listeners exist.
      *
-     * @param eventId the event class
-     * @param arguments constructor arguments
+     * <p>The container resolves the event before the dispatcher reads the listeners. An event with
+     * no listener therefore still needs a binding.
+     *
+     * @param eventId the binding key of the event
+     * @param arguments the arguments for the binding, and for the event
      * @return the event
      */
     Object dispatchByIdIfHasListeners(Class<?> eventId, Map<String, Object> arguments);
