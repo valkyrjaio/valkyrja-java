@@ -16,9 +16,9 @@ import io.valkyrja.event.throwable.exception.abstract_.EventInvalidArgumentExcep
  * <p>The dispatcher builds an event through the container. The container resolves a binding key to
  * any value at all, so the dispatcher tests the value against the key.
  */
-public class EventInvalidEventException extends EventInvalidArgumentException {
+public class InvalidEventException extends EventInvalidArgumentException {
 
-    public EventInvalidEventException(String id) {
+    public InvalidEventException(String id) {
         super("Service with `" + id + "` is not an event");
     }
 }
