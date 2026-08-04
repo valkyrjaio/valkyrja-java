@@ -247,7 +247,7 @@ index.php / bin/cli
 ### HTTP Lifecycle
 
 <p align="center"><a href="https://valkyrja.io" target="_blank">
-    <img src="https://raw.githubusercontent.com/valkyrjaio/art/refs/heads/master/flow-charts/php/http-lifecycle.svg" width="100%">
+    <img src="https://raw.githubusercontent.com/valkyrjaio/art/refs/heads/26.x/flow-charts/php/http-lifecycle.svg" width="100%">
 </a></p>
 
 ```mermaid
@@ -281,7 +281,7 @@ flowchart TD
 ### CLI Lifecycle
 
 <p align="center"><a href="https://valkyrja.io" target="_blank">
-    <img src="https://raw.githubusercontent.com/valkyrjaio/art/refs/heads/master/flow-charts/php/cli-lifecycle.svg" width="100%">
+    <img src="https://raw.githubusercontent.com/valkyrjaio/art/refs/heads/26.x/flow-charts/php/cli-lifecycle.svg" width="100%">
 </a></p>
 
 ```mermaid
