@@ -60,17 +60,12 @@
 
     <!--
         Fixture state is public and mutable by design: ProviderFixture's flags
-        are what a deferred-publish test asserts on, and DispatchableFixture's
-        members exist to be found reflectively — a private or final member would
-        make the fixture useless for the test that reflects over it.
+        are what a deferred-publish test asserts on. A private or final member
+        would make the fixture useless for the test that reads it.
     -->
     <Match>
         <Class name="io.valkyrja.tests.fixtures.container.provider.ProviderFixture" />
         <Bug pattern="MS_CANNOT_BE_FINAL,PA_PUBLIC_PRIMITIVE_ATTRIBUTE" />
-    </Match>
-    <Match>
-        <Class name="io.valkyrja.tests.fixtures.dispatch.DispatchableFixture" />
-        <Bug pattern="MS_SHOULD_BE_FINAL,UPM_UNCALLED_PRIVATE_METHOD" />
     </Match>
 
     <!--
@@ -84,15 +79,6 @@
     </Match>
     <Match>
         <Bug pattern="EI_EXPOSE_REP2" />
-    </Match>
-
-    <!--
-        Also framework-wide in spotbugs-exclude.xml. DispatchableFixture's public
-        fields are unread by design here — they exist to be resolved reflectively
-        by the dispatcher tests, which SpotBugs cannot see.
-    -->
-    <Match>
-        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
     </Match>
 
     <!--
