@@ -44,9 +44,9 @@ dependencies {
     // Runtime-entry SDKs for the optional worker adapters in application.entry.{jetty,netty,tomcat}.
     // compileOnly (non-transitive) so core still builds and is consumable with none of them on the
     // runtime classpath — a consumer that picks a runtime adds that runtime's dependency itself.
-    compileOnly("org.eclipse.jetty:jetty-server:12.1.11")
-    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
-    compileOnly("io.netty:netty-codec-http:4.2.16.Final")
+    compileOnly("org.eclipse.jetty:jetty-server:12.1.12")
+    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.12")
+    compileOnly("io.netty:netty-codec-http:4.2.17.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.83.1")
     compileOnly("io.grpc:grpc-netty-shaded:1.83.1")

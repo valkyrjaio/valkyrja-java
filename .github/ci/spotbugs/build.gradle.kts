@@ -12,7 +12,7 @@ import com.github.spotbugs.snom.SpotBugsTask
 
 plugins {
     java
-    id("com.github.spotbugs") version "6.5.9"
+    id("com.github.spotbugs") version "6.5.10"
     id("com.github.ben-manes.versions") version "0.59.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
@@ -55,9 +55,9 @@ dependencies {
     compileOnly("io.grpc:grpc-api:1.83.1")
 
     // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
-    compileOnly("org.eclipse.jetty:jetty-server:12.1.11")
-    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
-    compileOnly("io.netty:netty-codec-http:4.2.16.Final")
+    compileOnly("org.eclipse.jetty:jetty-server:12.1.12")
+    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.12")
+    compileOnly("io.netty:netty-codec-http:4.2.17.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.83.1")
     compileOnly("io.grpc:grpc-netty-shaded:1.83.1")
@@ -70,9 +70,9 @@ dependencies {
     testImplementation("io.grpc:grpc-api:1.83.1")
     testImplementation("io.grpc:grpc-netty-shaded:1.83.1")
     testImplementation("io.grpc:grpc-servlet-jakarta:1.83.1")
-    testImplementation("org.eclipse.jetty:jetty-server:12.1.11")
-    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.11")
-    testImplementation("io.netty:netty-codec-http:4.2.16.Final")
+    testImplementation("org.eclipse.jetty:jetty-server:12.1.12")
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.12")
+    testImplementation("io.netty:netty-codec-http:4.2.17.Final")
     testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
 }
 
