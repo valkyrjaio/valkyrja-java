@@ -92,6 +92,7 @@ public class EventDispatcher implements EventDispatcherContract {
 
     /** Get an event from a given id. */
     protected Object getEventFromId(Class<?> eventId, Map<String, Object> arguments) {
+        // The default mode falls back to reflection, which this dispatcher does not use.
         Object event = container.get(eventId, arguments, InvalidReferenceMode.THROW_EXCEPTION);
 
         if (!eventId.isInstance(event)) {
