@@ -35,24 +35,19 @@ public interface EventDispatcherContract {
     Object dispatchIfHasListeners(Object event);
 
     /**
-     * Dispatch an event that the container resolves from its binding key.
+     * Dispatch an event by its id.
      *
-     * <p>The application binds each event that it dispatches.
-     *
-     * @param eventId the binding key of the event
-     * @param arguments the arguments for the binding, and for the event
+     * @param eventId the event id
+     * @param arguments the arguments to pass to the event
      * @return the dispatched event
      */
     Object dispatchById(Class<?> eventId, Map<String, Object> arguments);
 
     /**
-     * Resolve an event from the container, and dispatch the event only if listeners exist.
+     * Dispatch an event by its id if it has listeners.
      *
-     * <p>The container resolves the event before the dispatcher reads the listeners. An event with
-     * no listener therefore still needs a binding.
-     *
-     * @param eventId the binding key of the event
-     * @param arguments the arguments for the binding, and for the event
+     * @param eventId the event id
+     * @param arguments the arguments to pass to the event
      * @return the event
      */
     Object dispatchByIdIfHasListeners(Class<?> eventId, Map<String, Object> arguments);

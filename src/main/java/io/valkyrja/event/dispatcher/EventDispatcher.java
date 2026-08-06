@@ -90,7 +90,7 @@ public class EventDispatcher implements EventDispatcherContract {
         return event;
     }
 
-    /** Resolve an event from the container by its binding key. */
+    /** Get an event from a given id. */
     protected Object getEventFromId(Class<?> eventId, Map<String, Object> arguments) {
         Object event = container.get(eventId, arguments, InvalidReferenceMode.THROW_EXCEPTION);
 
