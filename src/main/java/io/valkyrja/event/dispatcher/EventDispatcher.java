@@ -8,7 +8,6 @@
 
 package io.valkyrja.event.dispatcher;
 
-import io.valkyrja.container.enum_.InvalidReferenceMode;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.event.collection.ListenerCollection;
@@ -92,8 +91,7 @@ public class EventDispatcher implements EventDispatcherContract {
 
     /** Get an event from a given id. */
     protected Object getEventFromId(Class<?> eventId, Map<String, Object> arguments) {
-        // The default mode falls back to reflection, which this dispatcher does not use.
-        Object event = container.get(eventId, arguments, InvalidReferenceMode.THROW_EXCEPTION);
+        Object event = container.get(eventId, arguments);
 
         if (!eventId.isInstance(event)) {
             throw new EventInvalidEventException(eventId.getName());
