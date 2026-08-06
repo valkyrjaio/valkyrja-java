@@ -37,8 +37,8 @@ public interface EventDispatcherContract {
     /**
      * Dispatch an event by its id.
      *
-     * @param eventId the event id
-     * @param arguments the arguments to pass to the event
+     * @param eventId the event class
+     * @param arguments the arguments to pass to the event class
      * @return the dispatched event
      */
     Object dispatchById(Class<?> eventId, Map<String, Object> arguments);
@@ -46,8 +46,8 @@ public interface EventDispatcherContract {
     /**
      * Dispatch an event by its id if it has listeners.
      *
-     * @param eventId the event id
-     * @param arguments the arguments to pass to the event
+     * @param eventId the event class
+     * @param arguments the arguments to pass to the event class
      * @return the event
      */
     Object dispatchByIdIfHasListeners(Class<?> eventId, Map<String, Object> arguments);
