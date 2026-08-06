@@ -18,7 +18,7 @@ import io.valkyrja.event.contract.DispatchCollectableEventContract;
 import io.valkyrja.event.contract.StoppableEventContract;
 import io.valkyrja.event.data.contract.ListenerContract;
 import io.valkyrja.event.dispatcher.contract.EventDispatcherContract;
-import io.valkyrja.event.throwable.exception.InvalidEventException;
+import io.valkyrja.event.throwable.exception.EventInvalidEventException;
 import java.util.Map;
 
 /** Default event dispatcher implementation. */
@@ -110,13 +110,13 @@ public class EventDispatcher implements EventDispatcherContract {
      * @return the event
      * @throws io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException if the
      *     container holds no binding for the key
-     * @throws InvalidEventException if the container resolves a value of another type
+     * @throws EventInvalidEventException if the container resolves a value of another type
      */
     protected Object getEventFromId(Class<?> eventId, Map<String, Object> arguments) {
         Object event = container.get(eventId, arguments, InvalidReferenceMode.THROW_EXCEPTION);
 
         if (!eventId.isInstance(event)) {
-            throw new InvalidEventException(eventId.getName());
+            throw new EventInvalidEventException(eventId.getName());
         }
 
         if (event instanceof ArgumentsCapableEventContract capable) {

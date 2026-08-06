@@ -10,17 +10,17 @@ package io.valkyrja.tests.unit.event.throwable.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.valkyrja.event.throwable.exception.InvalidEventException;
+import io.valkyrja.event.throwable.exception.EventInvalidEventException;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link InvalidEventException}. */
-final class InvalidEventExceptionTest {
+/** Test the {@link EventInvalidEventException}. */
+final class EventInvalidEventExceptionTest {
 
     @Test
     void message() {
-        String id = InvalidEventExceptionTest.class.getName();
+        String id = EventInvalidEventExceptionTest.class.getName();
 
-        var exception = new InvalidEventException(id);
+        var exception = new EventInvalidEventException(id);
 
         assertEquals("Service with `" + id + "` is not an event", exception.getMessage());
     }

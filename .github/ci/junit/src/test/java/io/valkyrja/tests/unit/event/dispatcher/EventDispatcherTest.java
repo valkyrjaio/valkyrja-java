@@ -22,7 +22,7 @@ import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceExcept
 import io.valkyrja.event.collection.ListenerCollection;
 import io.valkyrja.event.data.Listener;
 import io.valkyrja.event.dispatcher.EventDispatcher;
-import io.valkyrja.event.throwable.exception.InvalidEventException;
+import io.valkyrja.event.throwable.exception.EventInvalidEventException;
 import io.valkyrja.tests.fixtures.event.ArgumentsCapableEventFixture;
 import io.valkyrja.tests.fixtures.event.DispatchCollectableEventFixture;
 import io.valkyrja.tests.fixtures.event.EventFixture;
@@ -166,7 +166,7 @@ final class EventDispatcherTest {
 
         var exception =
                 assertThrows(
-                        InvalidEventException.class,
+                        EventInvalidEventException.class,
                         () -> dispatcher.dispatchById(EventFixture.class, Map.of()));
 
         assertEquals(
