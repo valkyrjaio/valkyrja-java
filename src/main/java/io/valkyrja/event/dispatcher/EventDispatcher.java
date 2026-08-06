@@ -90,28 +90,7 @@ public class EventDispatcher implements EventDispatcherContract {
         return event;
     }
 
-    /**
-     * Resolve an event from the container.
-     *
-     * <p>The container is the only source of an event instance. The application binds each event
-     * that it dispatches. The dispatcher does not construct the event itself, for three reasons:
-     *
-     * <ul>
-     *   <li>Reflection is slow.
-     *   <li>Reflection assumes a constructor that takes no argument.
-     *   <li>No other port has an equivalent mechanism.
-     * </ul>
-     *
-     * <p>The container resolves a binding key to a value of any type, so the dispatcher tests the
-     * value against the key.
-     *
-     * @param eventId the binding key of the event
-     * @param arguments the arguments for the binding, and for the event
-     * @return the event
-     * @throws io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException if the
-     *     container holds no binding for the key
-     * @throws EventInvalidEventException if the container resolves a value of another type
-     */
+    /** Resolve an event from the container by its binding key. */
     protected Object getEventFromId(Class<?> eventId, Map<String, Object> arguments) {
         Object event = container.get(eventId, arguments, InvalidReferenceMode.THROW_EXCEPTION);
 
