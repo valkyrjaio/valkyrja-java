@@ -17,6 +17,7 @@ import io.valkyrja.event.contract.DispatchCollectableEventContract;
 import io.valkyrja.event.contract.StoppableEventContract;
 import io.valkyrja.event.data.contract.ListenerContract;
 import io.valkyrja.event.dispatcher.contract.EventDispatcherContract;
+import io.valkyrja.event.throwable.exception.EventInvalidEventException;
 import java.util.Map;
 
 /** Default event dispatcher implementation. */
@@ -55,10 +56,13 @@ public class EventDispatcher implements EventDispatcherContract {
 
     @Override
     public Object dispatchByIdIfHasListeners(Class<?> eventId, Map<String, Object> arguments) {
+        Object event = getEventFromId(eventId, arguments);
+
         if (collection.hasListenersForEventById(eventId)) {
-            return dispatchById(eventId, arguments);
+            return dispatch(event);
         }
-        return getEventFromId(eventId, arguments);
+
+        return event;
     }
 
     @Override
@@ -85,16 +89,18 @@ public class EventDispatcher implements EventDispatcherContract {
         return event;
     }
 
-    /** Instantiate an event from its class, optionally passing arguments if it supports them. */
+    /** Get an event from a given id. */
     protected Object getEventFromId(Class<?> eventId, Map<String, Object> arguments) {
-        try {
-            Object event = eventId.getDeclaredConstructor().newInstance();
-            if (event instanceof ArgumentsCapableEventContract capable) {
-                return capable.setArguments(arguments);
-            }
-            return event;
-        } catch (ReflectiveOperationException e) {
-            return new Object();
+        Object event = container.get(eventId, arguments);
+
+        if (!eventId.isInstance(event)) {
+            throw new EventInvalidEventException(eventId.getName());
         }
+
+        if (event instanceof ArgumentsCapableEventContract capable) {
+            return capable.setArguments(arguments);
+        }
+
+        return event;
     }
 }

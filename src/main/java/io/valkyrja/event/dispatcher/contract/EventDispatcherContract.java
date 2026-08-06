@@ -35,19 +35,19 @@ public interface EventDispatcherContract {
     Object dispatchIfHasListeners(Object event);
 
     /**
-     * Dispatch an event by its class, constructing a new instance.
+     * Dispatch an event by its id.
      *
      * @param eventId the event class
-     * @param arguments constructor arguments
+     * @param arguments the arguments to pass to the event class
      * @return the dispatched event
      */
     Object dispatchById(Class<?> eventId, Map<String, Object> arguments);
 
     /**
-     * Dispatch an event by class only if listeners exist.
+     * Dispatch an event by its id if it has listeners.
      *
      * @param eventId the event class
-     * @param arguments constructor arguments
+     * @param arguments the arguments to pass to the event class
      * @return the event
      */
     Object dispatchByIdIfHasListeners(Class<?> eventId, Map<String, Object> arguments);
