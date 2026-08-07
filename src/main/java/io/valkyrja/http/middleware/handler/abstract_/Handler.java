@@ -38,7 +38,7 @@ public abstract class Handler<M> implements HandlerContract<M> {
 
     @SuppressWarnings("unchecked")
     protected M getMiddleware(Class<? extends M> className) {
-        M instance = (M) container.getSingleton(className);
+        M instance = (M) container.get(className);
         index++;
         updateNext();
         return instance;

@@ -9,6 +9,7 @@
 package io.valkyrja.tests.unit.cli.middleware.handler;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -125,5 +126,18 @@ final class MiddlewareHandlerTest {
                 () ->
                         new ProcessExitingHandler(container, PassThroughMiddlewareFixture.class)
                                 .processExiting(input, output));
+    }
+
+    /** A developer binds a middleware as a service, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAService() {
+        var serviceContainer = new Container();
+        serviceContainer.bind(
+                PassThroughMiddlewareFixture.class, (c, a) -> new PassThroughMiddlewareFixture());
+
+        var handler =
+                new InputReceivedHandler(serviceContainer, PassThroughMiddlewareFixture.class);
+
+        assertNotNull(handler.inputReceived(input));
     }
 }
