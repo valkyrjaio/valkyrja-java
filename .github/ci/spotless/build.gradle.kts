@@ -33,8 +33,8 @@ tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("
 valkyrjaSpotless {
     packageName = "Valkyrja Framework"
 
-    // Each CI build is scoped to `src/test/java`. A `src/test/resources` tree can hold .java
-    // files that are test data, and formatting one rewrites the input a test asserts on.
+    // The CI build entries stop at `src/test/java`, because a `src/test/resources` tree can hold
+    // .java files that are test data, and formatting one rewrites the input a test asserts on.
     javaTargets = listOf(
         "src/**/*.java",
         ".github/ci/junit/src/test/java/**/*.java",
