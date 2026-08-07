@@ -9,12 +9,14 @@
 package io.valkyrja.tests.unit.cli.middleware.handler;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.valkyrja.cli.interaction.input.Input;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
+import io.valkyrja.cli.middleware.contract.InputReceivedMiddlewareContract;
 import io.valkyrja.cli.middleware.handler.InputReceivedHandler;
 import io.valkyrja.cli.middleware.handler.ProcessExitingHandler;
 import io.valkyrja.cli.middleware.handler.RouteDispatchedHandler;
@@ -125,5 +127,39 @@ final class MiddlewareHandlerTest {
                 () ->
                         new ProcessExitingHandler(container, PassThroughMiddlewareFixture.class)
                                 .processExiting(input, output));
+    }
+
+    /** A developer binds a middleware as a service, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAService() {
+        var serviceContainer = new Container();
+        serviceContainer.bind(
+                PassThroughMiddlewareFixture.class, (c, a) -> new PassThroughMiddlewareFixture());
+
+        var handler =
+                new InputReceivedHandler(serviceContainer, PassThroughMiddlewareFixture.class);
+
+        assertNotNull(handler.inputReceived(input));
+    }
+
+    /** A developer binds a middleware as an alias, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAnAlias() {
+        var aliasContainer = new Container();
+        aliasContainer.setSingleton(
+                PassThroughMiddlewareFixture.class, new PassThroughMiddlewareFixture());
+        aliasContainer.bindAlias(
+                raw(InputReceivedMiddlewareContract.class),
+                raw(PassThroughMiddlewareFixture.class));
+
+        var handler =
+                new InputReceivedHandler(aliasContainer, InputReceivedMiddlewareContract.class);
+
+        assertNotNull(handler.inputReceived(input));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> raw(Class<?> type) {
+        return (Class<T>) type;
     }
 }

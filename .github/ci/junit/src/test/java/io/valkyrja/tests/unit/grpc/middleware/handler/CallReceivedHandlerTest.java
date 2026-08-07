@@ -10,6 +10,7 @@ package io.valkyrja.tests.unit.grpc.middleware.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -149,5 +150,34 @@ final class CallReceivedHandlerTest {
         CallReceivedHandler handler = new CallReceivedHandler(container, CancelThenContinue.class);
         CallReceivedResult result = handler.callReceived(call(new CancellationToken()));
         assertEquals(StatusCode.DEADLINE_EXCEEDED, result.response().getStatus().getCode());
+    }
+
+    /** A developer binds a middleware as a service, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAService() {
+        ContainerContract container = new Container();
+        container.bind(PassThrough.class, (c, a) -> new PassThrough());
+
+        CallReceivedHandler handler = new CallReceivedHandler(container, PassThrough.class);
+
+        assertNotNull(handler.callReceived(call(new CancellationToken())));
+    }
+
+    /** A developer binds a middleware as an alias, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAnAlias() {
+        ContainerContract aliasContainer = new Container();
+        aliasContainer.setSingleton(PassThrough.class, new PassThrough());
+        aliasContainer.bindAlias(raw(CallReceivedMiddlewareContract.class), raw(PassThrough.class));
+
+        CallReceivedHandler handler =
+                new CallReceivedHandler(aliasContainer, CallReceivedMiddlewareContract.class);
+
+        assertNotNull(handler.callReceived(call(new CancellationToken())));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> raw(Class<?> type) {
+        return (Class<T>) type;
     }
 }
