@@ -17,6 +17,7 @@ import io.valkyrja.container.manager.Container;
 import io.valkyrja.http.message.request.contract.ServerRequestContract;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
+import io.valkyrja.http.middleware.contract.RequestReceivedMiddlewareContract;
 import io.valkyrja.http.middleware.handler.RequestReceivedHandler;
 import io.valkyrja.http.middleware.handler.ResponseSentHandler;
 import io.valkyrja.http.middleware.handler.RouteDispatchedHandler;
@@ -114,5 +115,41 @@ final class MiddlewareHandlerTest {
                 () ->
                         new ResponseSentHandler(container, PassThroughHttpMiddlewareFixture.class)
                                 .responseSent(request, response));
+    }
+
+    /** A developer binds a middleware as a service, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAService() {
+        var serviceContainer = new Container();
+        serviceContainer.bind(
+                PassThroughHttpMiddlewareFixture.class,
+                (c, a) -> new PassThroughHttpMiddlewareFixture());
+
+        var handler =
+                new RequestReceivedHandler(
+                        serviceContainer, PassThroughHttpMiddlewareFixture.class);
+
+        assertNotNull(handler.requestReceived(request));
+    }
+
+    /** A developer binds a middleware as an alias, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAnAlias() {
+        var aliasContainer = new Container();
+        aliasContainer.setSingleton(
+                PassThroughHttpMiddlewareFixture.class, new PassThroughHttpMiddlewareFixture());
+        aliasContainer.bindAlias(
+                raw(RequestReceivedMiddlewareContract.class),
+                raw(PassThroughHttpMiddlewareFixture.class));
+
+        var handler =
+                new RequestReceivedHandler(aliasContainer, RequestReceivedMiddlewareContract.class);
+
+        assertNotNull(handler.requestReceived(request));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> raw(Class<?> type) {
+        return (Class<T>) type;
     }
 }
