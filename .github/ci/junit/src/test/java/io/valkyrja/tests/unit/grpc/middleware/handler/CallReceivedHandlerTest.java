@@ -162,4 +162,22 @@ final class CallReceivedHandlerTest {
 
         assertNotNull(handler.callReceived(call(new CancellationToken())));
     }
+
+    /** A developer binds a middleware as an alias, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAnAlias() {
+        ContainerContract aliasContainer = new Container();
+        aliasContainer.setSingleton(PassThrough.class, new PassThrough());
+        aliasContainer.bindAlias(raw(CallReceivedMiddlewareContract.class), raw(PassThrough.class));
+
+        CallReceivedHandler handler =
+                new CallReceivedHandler(aliasContainer, CallReceivedMiddlewareContract.class);
+
+        assertNotNull(handler.callReceived(call(new CancellationToken())));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> raw(Class<?> type) {
+        return (Class<T>) type;
+    }
 }

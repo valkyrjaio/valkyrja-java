@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import io.valkyrja.cli.interaction.input.Input;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
+import io.valkyrja.cli.middleware.contract.InputReceivedMiddlewareContract;
 import io.valkyrja.cli.middleware.handler.InputReceivedHandler;
 import io.valkyrja.cli.middleware.handler.ProcessExitingHandler;
 import io.valkyrja.cli.middleware.handler.RouteDispatchedHandler;
@@ -139,5 +140,26 @@ final class MiddlewareHandlerTest {
                 new InputReceivedHandler(serviceContainer, PassThroughMiddlewareFixture.class);
 
         assertNotNull(handler.inputReceived(input));
+    }
+
+    /** A developer binds a middleware as an alias, and the handler resolves it. */
+    @Test
+    void resolvesAMiddlewareBoundAsAnAlias() {
+        var aliasContainer = new Container();
+        aliasContainer.setSingleton(
+                PassThroughMiddlewareFixture.class, new PassThroughMiddlewareFixture());
+        aliasContainer.bindAlias(
+                raw(InputReceivedMiddlewareContract.class),
+                raw(PassThroughMiddlewareFixture.class));
+
+        var handler =
+                new InputReceivedHandler(aliasContainer, InputReceivedMiddlewareContract.class);
+
+        assertNotNull(handler.inputReceived(input));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> raw(Class<?> type) {
+        return (Class<T>) type;
     }
 }
