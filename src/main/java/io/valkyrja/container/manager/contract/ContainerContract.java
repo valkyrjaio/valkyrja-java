@@ -9,7 +9,6 @@
 package io.valkyrja.container.manager.contract;
 
 import io.valkyrja.container.data.contract.ContainerDataContract;
-import io.valkyrja.container.enum_.InvalidReferenceMode;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -124,7 +123,7 @@ public interface ContainerContract extends ProvidersAwareContract {
     boolean isSingletonBinding(Class<?> id);
 
     /**
-     * Resolve a service from the container using the default mode.
+     * Resolve a service from the container.
      *
      * @param <T> the service type
      * @param id the service type
@@ -137,28 +136,17 @@ public interface ContainerContract extends ProvidersAwareContract {
      *
      * @param <T> the service type
      * @param id the service type
-     * @param arguments arguments passed to the factory/constructor
+     * @param arguments arguments passed to the factory
      * @return the resolved instance
      */
     <T> T get(Class<T> id, Map<String, Object> arguments);
-
-    /**
-     * Resolve a service from the container with arguments and a fallback mode.
-     *
-     * @param <T> the service type
-     * @param id the service type
-     * @param arguments arguments passed to the factory/constructor
-     * @param mode behaviour when the service is not found
-     * @return the resolved instance
-     */
-    <T> T get(Class<T> id, Map<String, Object> arguments, InvalidReferenceMode mode);
 
     /**
      * Resolve an aliased service type.
      *
      * @param <T> the service type
      * @param id the alias type
-     * @param arguments arguments passed to the factory/constructor
+     * @param arguments arguments passed to the factory
      * @return the resolved instance
      */
     <T> T getAliased(Class<T> id, Map<String, Object> arguments);

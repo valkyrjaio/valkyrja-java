@@ -10,7 +10,6 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.data.contract.ContainerDataContract;
-import io.valkyrja.container.enum_.InvalidReferenceMode;
 import io.valkyrja.container.manager.abstract_.ProvidersAware;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
@@ -29,8 +28,11 @@ import org.jspecify.annotations.Nullable;
  *   <li>Cached singleton instance
  *   <li>Service callable factory (covers both regular and singleton bindings)
  *   <li>Alias (redirects to another service type)
- *   <li>Fallback (new instance or exception depending on {@link InvalidReferenceMode})
  * </ol>
+ *
+ * <p>A service type that none of the three resolves raises {@link
+ * ContainerInvalidReferenceException}. The container builds nothing that a binding does not
+ * describe.
  */
 public class Container extends ProvidersAware {
 
@@ -137,16 +139,11 @@ public class Container extends ProvidersAware {
 
     @Override
     public <T> T get(Class<T> id) {
-        return get(id, Map.of(), InvalidReferenceMode.NEW_INSTANCE_OR_THROW_EXCEPTION);
+        return get(id, Map.of());
     }
 
     @Override
     public <T> T get(Class<T> id, Map<String, Object> arguments) {
-        return get(id, arguments, InvalidReferenceMode.NEW_INSTANCE_OR_THROW_EXCEPTION);
-    }
-
-    @Override
-    public <T> T get(Class<T> id, Map<String, Object> arguments, InvalidReferenceMode mode) {
         publishUnpublishedDeferred(id);
 
         T singleton = getSingletonWithoutChecks(id);
@@ -164,7 +161,7 @@ public class Container extends ProvidersAware {
             return aliased;
         }
 
-        return getFallback(id, arguments, mode);
+        throw new ContainerInvalidReferenceException(id.getName());
     }
 
     @Override
@@ -238,27 +235,6 @@ public class Container extends ProvidersAware {
             return null;
         }
         return (T) callable.apply(this, arguments);
-    }
-
-    /** Fallback behavior when no binding is found for the given service type. */
-    protected <T> T getFallback(
-            Class<T> id, Map<String, Object> arguments, InvalidReferenceMode mode) {
-        return switch (mode) {
-            case THROW_EXCEPTION -> throw new ContainerInvalidReferenceException(id.getName());
-            case NEW_INSTANCE_OR_THROW_EXCEPTION -> newInstanceOrThrow(id, arguments);
-        };
-    }
-
-    /**
-     * Attempt to instantiate the class directly via its no-arg constructor, throwing {@link
-     * ContainerInvalidReferenceException} if not possible.
-     */
-    protected <T> T newInstanceOrThrow(Class<T> id, Map<String, Object> arguments) {
-        try {
-            return id.getDeclaredConstructor().newInstance();
-        } catch (ReflectiveOperationException e) {
-            throw new ContainerInvalidReferenceException(id.getName(), e);
-        }
     }
 
     /**
