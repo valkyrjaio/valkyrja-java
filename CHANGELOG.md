@@ -1,6 +1,13 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.7.2...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.8.0...26.x)
+
+## [v26.8.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.7.2...v26.8.0) - 2026-08-07
+
+* [Container] feat!: Remove the implicit new-instance fallback by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/146
+* [Middleware] fix: Resolve a middleware with get rather than getSingleton by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/147
+* [Workflow] ci: Update .github workflow refs to v26.24.2 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/148
+* [Dependency] build: Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/149
 
 ## [v26.7.2](https://github.com/valkyrjaio/valkyrja-java/compare/v26.7.1...v26.7.2) - 2026-08-06
 
