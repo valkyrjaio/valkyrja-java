@@ -146,7 +146,7 @@ public interface ContainerContract extends ProvidersAwareContract {
      *
      * @param <T> the service type
      * @param id the alias type
-     * @param arguments arguments passed to the factory/constructor
+     * @param arguments arguments passed to the factory
      * @return the resolved instance
      */
     <T> T getAliased(Class<T> id, Map<String, Object> arguments);
