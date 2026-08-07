@@ -33,6 +33,16 @@ final class AttributeRouteCollectorTest {
 
     private Map<String, RouteContract> routes;
 
+    /** A container that binds the controller, the way an application binds its own. */
+    private static Container containerWithController() {
+        var container = new Container();
+        container.bind(
+                AnnotatedHttpControllerFixture.class,
+                (c, a) -> new AnnotatedHttpControllerFixture());
+
+        return container;
+    }
+
     @BeforeEach
     void setUp() {
         var collected =
@@ -72,7 +82,7 @@ final class AttributeRouteCollectorTest {
         var route = routes.get("api.plain");
         // A real container, because the controller is now resolved through it rather than through
         // its no-argument constructor — which a controller with dependencies does not have.
-        var container = new Container();
+        var container = containerWithController();
 
         ResponseContract response = route.getHandler().apply(container, route);
 
@@ -82,7 +92,7 @@ final class AttributeRouteCollectorTest {
     @Test
     void handlerWrapsControllerFailures() {
         var route = routes.get("api.boom");
-        var container = new Container();
+        var container = containerWithController();
 
         assertThrows(RuntimeException.class, () -> route.getHandler().apply(container, route));
     }
@@ -92,7 +102,7 @@ final class AttributeRouteCollectorTest {
         // The controller method takes no arguments, so it could not be invoked as a handler at all;
         // the @RouteHandler names the real handler, mirroring the generated routing data.
         var route = routes.get("api.handled");
-        var container = new Container();
+        var container = containerWithController();
 
         ResponseContract response = route.getHandler().apply(container, route);
 
@@ -102,7 +112,7 @@ final class AttributeRouteCollectorTest {
     @Test
     void handlerNamedByAnnotationWrapsAMissingHandlerMethod() {
         var route = routes.get("api.handled.missing");
-        var container = new Container();
+        var container = containerWithController();
 
         var exception =
                 assertThrows(

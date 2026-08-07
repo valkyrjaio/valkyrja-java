@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.container.enum_.InvalidReferenceMode;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
@@ -173,7 +172,7 @@ final class ContainerTest {
     }
 
     @Test
-    void getResolvesDeferredProviderThenFallsBack() {
+    void getPublishesTheDeferredProviderThenResolvesItsBinding() {
         var container = new Container();
         container.register(new ProviderFixture());
 
@@ -184,57 +183,22 @@ final class ContainerTest {
     }
 
     @Test
-    void newInstanceOrThrowModeCreatesInstantiableType() {
+    void getUnboundTypeThrows() {
         var container = new Container();
 
-        var object =
-                container.get(
-                        SingletonFixture.class,
-                        Map.of(),
-                        InvalidReferenceMode.NEW_INSTANCE_OR_THROW_EXCEPTION);
+        assertThrows(
+                ContainerInvalidArgumentException.class,
+                () -> container.get(SingletonFixture.class, Map.of()));
+    }
+
+    @Test
+    void getBoundTypeResolvesThroughTheBinding() {
+        var container = new Container();
+        container.bind(SingletonFixture.class, (c, a) -> new SingletonFixture());
+
+        var object = container.get(SingletonFixture.class, Map.of());
 
         assertInstanceOf(SingletonFixture.class, object);
-    }
-
-    @Test
-    void newInstanceOrThrowModeThrowsWhenConstructionFails() {
-        var container = new Container();
-
-        // ServiceFixture has no no-arg constructor, so reflective instantiation fails.
-        assertThrows(
-                ContainerInvalidArgumentException.class,
-                () ->
-                        container.get(
-                                ServiceFixture.class,
-                                Map.of(),
-                                InvalidReferenceMode.NEW_INSTANCE_OR_THROW_EXCEPTION));
-    }
-
-    @Test
-    void throwExceptionModeAlwaysThrows() {
-        var container = new Container();
-
-        assertThrows(
-                ContainerInvalidArgumentException.class,
-                () ->
-                        container.get(
-                                ServiceFixture.class,
-                                Map.of(),
-                                InvalidReferenceMode.THROW_EXCEPTION));
-    }
-
-    @Test
-    void newInstanceOrThrowModeThrowsForNonInstantiableType() {
-        var container = new Container();
-
-        // An interface cannot be instantiated reflectively.
-        assertThrows(
-                ContainerInvalidArgumentException.class,
-                () ->
-                        container.get(
-                                Runnable.class,
-                                Map.of(),
-                                InvalidReferenceMode.NEW_INSTANCE_OR_THROW_EXCEPTION));
     }
 
     @Test

@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.NativeChildContainer;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
@@ -254,10 +255,11 @@ final class NativeChildContainerTest {
     }
 
     @Test
-    void unknownTypeFallsBackToNewInstance() {
+    void unknownTypeThrows() {
         // Nothing registered in child or parent — exercises the neither-has-it null paths.
         assertFalse(child.has(SingletonFixture.class));
-        assertInstanceOf(SingletonFixture.class, child.get(SingletonFixture.class));
+        assertThrows(
+                ContainerInvalidReferenceException.class, () -> child.get(SingletonFixture.class));
     }
 
     @Test

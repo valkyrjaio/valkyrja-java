@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.container.data.ContainerData;
-import io.valkyrja.container.enum_.InvalidReferenceMode;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import java.util.HashMap;
@@ -184,30 +183,21 @@ final class ContainerTest {
                 () -> container.getAliased(Greeter.class, Map.of()));
     }
 
-    // --- fallback resolution ------------------------------------------------
+    // --- unbound resolution -------------------------------------------------
 
     @Test
-    void fallbackCreatesNewInstanceForInstantiableType() {
+    void getThrowsForAnUnboundType() {
         var container = new Container();
 
-        assertInstanceOf(Service.class, container.get(Service.class));
+        assertThrows(ContainerInvalidReferenceException.class, () -> container.get(Service.class));
     }
 
     @Test
-    void fallbackThrowsForNonInstantiableType() {
+    void getThrowsForAnUnboundInterface() {
         var container = new Container();
 
         assertThrows(
                 ContainerInvalidReferenceException.class, () -> container.get(Unresolvable.class));
-    }
-
-    @Test
-    void fallbackThrowModeThrowsWithoutAttemptingInstantiation() {
-        var container = new Container();
-
-        assertThrows(
-                ContainerInvalidReferenceException.class,
-                () -> container.get(Service.class, Map.of(), InvalidReferenceMode.THROW_EXCEPTION));
     }
 
     // --- deferred publishing ------------------------------------------------

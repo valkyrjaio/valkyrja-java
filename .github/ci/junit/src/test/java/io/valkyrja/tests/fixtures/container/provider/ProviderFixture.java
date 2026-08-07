@@ -22,10 +22,13 @@ public final class ProviderFixture implements ServiceProviderContract {
 
     public static void publish(ContainerContract container) {
         publishCalled = true;
+        container.bindSingleton(ProvidedFixture.class, (c, a) -> new ProvidedFixture());
     }
 
     public static void publishSecondary(ContainerContract container) {
         publishSecondaryCalled = true;
+        container.bindSingleton(
+                ProvidedSecondaryFixture.class, (c, a) -> new ProvidedSecondaryFixture());
     }
 
     @Override

@@ -145,8 +145,10 @@ final class EventDispatcherTest {
     }
 
     @Test
-    void dispatchByIdUnboundEventUsesTheContainerFallback() {
-        var dispatcher = new EventDispatcher();
+    void dispatchByIdBoundEventResolvesThroughTheBinding() {
+        var container = new Container();
+        container.bind(EventFixture.class, (c, arguments) -> new EventFixture());
+        var dispatcher = new EventDispatcher(new ListenerCollection(), container);
 
         var result = dispatcher.dispatchById(EventFixture.class, Map.of());
 
@@ -154,13 +156,12 @@ final class EventDispatcherTest {
     }
 
     @Test
-    void dispatchByIdUnbuildableEventThrows() {
+    void dispatchByIdUnboundEventThrows() {
         var dispatcher = new EventDispatcher();
 
-        // CharSequence is an interface, so the container fallback cannot build it either.
         assertThrows(
                 ContainerInvalidReferenceException.class,
-                () -> dispatcher.dispatchById(CharSequence.class, Map.of()));
+                () -> dispatcher.dispatchById(EventFixture.class, Map.of()));
     }
 
     @Test
