@@ -8,7 +8,7 @@
 
 plugins {
     java
-    id("com.github.ben-manes.versions") version "0.59.0"
+    id("com.github.ben-manes.versions") version "0.60.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
@@ -48,7 +48,7 @@ dependencies {
     compileOnly("org.jspecify:jspecify:1.0.1")
     compileOnly("io.grpc:grpc-api:1.83.1")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.5.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
@@ -61,7 +61,7 @@ dependencies {
 
     // Mirrors the JUnit build's test classpath — needed only so the tests compile here.
     "testTreeImplementation"("com.fasterxml.jackson.core:jackson-databind:2.22.1")
-    "testTreeImplementation"("org.junit.jupiter:junit-jupiter:6.1.2")
+    "testTreeImplementation"("org.junit.jupiter:junit-jupiter:6.1.3")
     "testTreeImplementation"("org.mockito:mockito-core:5.23.0")
     "testTreeImplementation"("org.mockito:mockito-junit-jupiter:5.23.0")
     "testTreeImplementation"("org.jspecify:jspecify:1.0.1")
