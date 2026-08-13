@@ -15,13 +15,12 @@ import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
+import io.valkyrja.cli.server.command.abstract_.Command;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.jspecify.annotations.Nullable;
 
-public class ListBashCommand {
+public class ListBashCommand extends Command {
 
-    protected RouteContract route;
     protected RouteCollectionContract collection;
     protected OutputFactoryContract outputFactory;
 
@@ -29,7 +28,7 @@ public class ListBashCommand {
             RouteContract route,
             RouteCollectionContract collection,
             OutputFactoryContract outputFactory) {
-        this.route = route;
+        super(route);
         this.collection = collection;
         this.outputFactory = outputFactory;
     }
@@ -69,16 +68,5 @@ public class ListBashCommand {
                         .collect(Collectors.toList());
 
         return output.withAddedMessages(new Message(String.join(" ", routesForBash)));
-    }
-
-    /** Returns the declared argument where the input spelled it, and null where it did not. */
-    protected @Nullable ArgumentParameterContract spelledArgument(String name) {
-        if (!route.hasArgument(name)) {
-            return null;
-        }
-
-        ArgumentParameterContract argument = route.getArgument(name);
-
-        return argument.hasFirstValue() ? argument : null;
     }
 }

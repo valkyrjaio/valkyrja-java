@@ -24,16 +24,15 @@ import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.cli.routing.data.contract.OptionParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
+import io.valkyrja.cli.server.command.abstract_.Command;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.jspecify.annotations.Nullable;
 
-public class ListCommand {
+public class ListCommand extends Command {
 
     protected String appNamespace;
     protected String appVersion;
-    protected RouteContract route;
     protected RouteCollectionContract collection;
     protected OutputFactoryContract outputFactory;
 
@@ -43,9 +42,9 @@ public class ListCommand {
             RouteContract route,
             RouteCollectionContract collection,
             OutputFactoryContract outputFactory) {
+        super(route);
         this.appNamespace = appNamespace;
         this.appVersion = appVersion;
-        this.route = route;
         this.collection = collection;
         this.outputFactory = outputFactory;
     }
@@ -124,16 +123,5 @@ public class ListCommand {
                 new Message("    - "),
                 new Message(route.getDescription(), new HighlightedTextFormatter()),
                 new NewLine());
-    }
-
-    /** Returns the declared option where the input spelled it, and null where it did not. */
-    protected @Nullable OptionParameterContract spelledOption(String name) {
-        if (!route.hasOption(name)) {
-            return null;
-        }
-
-        OptionParameterContract option = route.getOption(name);
-
-        return option.hasFirstValue() ? option : null;
     }
 }
