@@ -13,10 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import io.valkyrja.cli.interaction.enum_.ExitCode;
+import io.valkyrja.cli.interaction.enum_.OptionType;
 import io.valkyrja.cli.interaction.message.Message;
+import io.valkyrja.cli.interaction.option.Option;
+import io.valkyrja.cli.interaction.option.contract.OptionContract;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.Output;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
@@ -30,6 +32,8 @@ import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
 import io.valkyrja.cli.server.command.HelpCommand;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,28 +42,52 @@ final class HelpCommandTest {
 
     private OutputFactoryContract outputFactory;
     private RouteCollection collection;
-    private RouteContract route;
 
     @BeforeEach
     void setUp() {
         outputFactory = mock(OutputFactoryContract.class);
         lenient().when(outputFactory.createOutput()).thenReturn(new Output());
         collection = new RouteCollection();
-        route = mock(RouteContract.class);
-        lenient().when(route.getName()).thenReturn("help");
-        lenient().when(route.getDescription()).thenReturn("Help");
     }
 
-    private HelpCommand command() {
+    private HelpCommand command(RouteContract route) {
         return new HelpCommand("MyApp", "1.0", route, collection, outputFactory);
     }
 
-    private void whenAskingFor(String commandName) {
-        var commandOption = mock(OptionParameterContract.class);
-        when(commandOption.hasFirstValue()).thenReturn(true);
-        when(commandOption.getFirstValue()).thenReturn(commandName);
-        when(route.hasOption("command")).thenReturn(true);
-        when(route.getOption("command")).thenReturn(commandOption);
+    /**
+     * Builds a help route that declares the command option. The option carries a value only when
+     * the caller spelled it. The router keeps every declared parameter on the route, so the option
+     * is present whether or not the command line spelled it.
+     */
+    private RouteContract routeAskingFor(String commandName) {
+        List<OptionContract> options =
+                commandName.isEmpty()
+                        ? new ArrayList<>()
+                        : List.of(new Option("command", commandName, OptionType.LONG));
+
+        OptionParameterContract commandOption =
+                new OptionParameter(
+                        "command",
+                        "The name of the command to get help for",
+                        "command",
+                        "",
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        options,
+                        OptionMode.OPTIONAL,
+                        OptionValueMode.DEFAULT);
+
+        return new Route(
+                "help",
+                "Help",
+                (container, matched) -> new EmptyOutput(),
+                null,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                List.of(commandOption));
     }
 
     @Test
@@ -70,7 +98,20 @@ final class HelpCommandTest {
     /** A route that declares no command option reports the miss instead of throwing. */
     @Test
     void runReturnsErrorWhenTheRouteDeclaresNoCommandOption() {
-        var output = command().run();
+        RouteContract route = new Route("help", "Help", (c, r) -> new EmptyOutput());
+
+        var output = command(route).run();
+
+        assertEquals(ExitCode.ERROR, output.getExitCode());
+        assertTrue(
+                output.getMessages().stream()
+                        .anyMatch(m -> m.getText().contains("Command `` was not found.")));
+    }
+
+    /** A declared command option that the caller left unspelled reports the same miss. */
+    @Test
+    void runReturnsErrorWhenTheCommandOptionIsNotSpelled() {
+        var output = command(routeAskingFor("")).run();
 
         assertEquals(ExitCode.ERROR, output.getExitCode());
         assertTrue(
@@ -80,9 +121,7 @@ final class HelpCommandTest {
 
     @Test
     void runReturnsErrorWhenCommandNotFound() {
-        whenAskingFor("ghost");
-
-        var output = command().run();
+        var output = command(routeAskingFor("ghost")).run();
 
         assertEquals(ExitCode.ERROR, output.getExitCode());
         assertTrue(output.getMessages().stream().anyMatch(m -> m.getText().contains("ghost")));
@@ -118,9 +157,8 @@ final class HelpCommandTest {
                         .withOptions(richOption, optionalOption, plainOption)
                         .withHelpText(() -> new Message("Extended help text."));
         collection.add(deploy);
-        whenAskingFor("deploy");
 
-        var output = command().run();
+        var output = command(routeAskingFor("deploy")).run();
 
         assertTrue(output.getMessages().stream().anyMatch(m -> m.getText().contains("deploy")));
         assertTrue(output.getMessages().stream().anyMatch(m -> m.getText().contains("--verbose")));
@@ -133,9 +171,8 @@ final class HelpCommandTest {
     @Test
     void runRendersBareCommandHelp() {
         collection.add(new Route("ping", "Ping the server", (c, r) -> new EmptyOutput()));
-        whenAskingFor("ping");
 
-        var output = command().run();
+        var output = command(routeAskingFor("ping")).run();
 
         assertTrue(output.getMessages().stream().anyMatch(m -> m.getText().contains("ping")));
         // Global options are always shown even when the command has none of its own.
