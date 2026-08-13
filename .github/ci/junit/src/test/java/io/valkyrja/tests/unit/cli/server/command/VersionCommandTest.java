@@ -48,9 +48,9 @@ final class VersionCommandTest {
     }
 
     /**
-     * A route that declares an option, carrying a value only for the ones the caller spelled. The
-     * router keeps every declared parameter on the route, so a declared option is present whether
-     * or not the command line spelled it.
+     * Builds a route that declares the short option and the plain option. Each option carries a
+     * value only when the caller spelled it. The router keeps every declared parameter on the
+     * route, so a declared option is present whether or not the command line spelled it.
      */
     private RouteContract route(String... spelled) {
         List<String> spelledNames = List.of(spelled);
