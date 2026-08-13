@@ -48,7 +48,6 @@ public class HttpServerServiceProvider implements ServiceProviderContract {
 
         ThrowableCaughtHandlerContract throwableCaught =
                 container.getSingleton(ThrowableCaughtHandlerContract.class);
-        throwableCaught.add(LogThrowableCaughtMiddleware.class);
 
         container.setSingleton(
                 RequestHandlerContract.class,
