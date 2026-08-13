@@ -46,17 +46,13 @@ public class HttpServerServiceProvider implements ServiceProviderContract {
     public static void publishRequestHandler(ContainerContract container) {
         ApplicationContract app = container.getSingleton(ApplicationContract.class);
 
-        ThrowableCaughtHandlerContract throwableCaught =
-                container.getSingleton(ThrowableCaughtHandlerContract.class);
-        throwableCaught.add(LogThrowableCaughtMiddleware.class);
-
         container.setSingleton(
                 RequestHandlerContract.class,
                 new RequestHandler(
                         container,
                         container.getSingleton(RouterContract.class),
                         container.getSingleton(RequestReceivedHandlerContract.class),
-                        throwableCaught,
+                        container.getSingleton(ThrowableCaughtHandlerContract.class),
                         container.getSingleton(SendingResponseHandlerContract.class),
                         container.getSingleton(ResponseSentHandlerContract.class),
                         app.getDebugMode()));
