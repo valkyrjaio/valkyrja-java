@@ -15,7 +15,9 @@ import io.valkyrja.cli.interaction.message.NewLine;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
+import io.valkyrja.cli.routing.data.contract.OptionParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
+import org.jspecify.annotations.Nullable;
 
 public class VersionCommand {
 
@@ -40,11 +42,11 @@ public class VersionCommand {
     }
 
     public OutputContract run() {
-        if (hasSpelledOption("short")) {
+        if (spelledOption("short") != null) {
             return outputFactory.createOutput().withMessages(new Message(appVersion));
         }
 
-        if (hasSpelledOption("plain")) {
+        if (spelledOption("plain") != null) {
             return outputFactory
                     .createOutput()
                     .withMessages(
@@ -65,8 +67,14 @@ public class VersionCommand {
                 .withMessages(new Header(appNamespace, appVersion, route));
     }
 
-    /** Determines if the input spelled an option that the route declares. */
-    protected boolean hasSpelledOption(String name) {
-        return route.hasOption(name) && route.getOption(name).hasFirstValue();
+    /** Returns the declared option where the input spelled it, and null where it did not. */
+    protected @Nullable OptionParameterContract spelledOption(String name) {
+        if (!route.hasOption(name)) {
+            return null;
+        }
+
+        OptionParameterContract option = route.getOption(name);
+
+        return option.hasFirstValue() ? option : null;
     }
 }

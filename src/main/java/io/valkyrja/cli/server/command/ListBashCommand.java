@@ -13,9 +13,11 @@ import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
+import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 
 public class ListBashCommand {
 
@@ -44,8 +46,10 @@ public class ListBashCommand {
 
         int colonAt = -1;
 
-        if (route.hasArgument("namespace") && route.getArgument("namespace").hasFirstValue()) {
-            String namespace = route.getArgument("namespace").getFirstValue();
+        ArgumentParameterContract namespaceArgument = spelledArgument("namespace");
+
+        if (namespaceArgument != null) {
+            String namespace = namespaceArgument.getFirstValue();
             colonAt = namespace.indexOf(':');
             final String ns = namespace;
             routes =
@@ -65,5 +69,16 @@ public class ListBashCommand {
                         .collect(Collectors.toList());
 
         return output.withAddedMessages(new Message(String.join(" ", routesForBash)));
+    }
+
+    /** Returns the declared argument where the input spelled it, and null where it did not. */
+    protected @Nullable ArgumentParameterContract spelledArgument(String name) {
+        if (!route.hasArgument(name)) {
+            return null;
+        }
+
+        ArgumentParameterContract argument = route.getArgument(name);
+
+        return argument.hasFirstValue() ? argument : null;
     }
 }

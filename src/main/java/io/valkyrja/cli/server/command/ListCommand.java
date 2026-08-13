@@ -22,10 +22,12 @@ import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
+import io.valkyrja.cli.routing.data.contract.OptionParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 
 public class ListCommand {
 
@@ -57,8 +59,10 @@ public class ListCommand {
         List<RouteContract> routes =
                 collection.all().values().stream().collect(Collectors.toList());
 
-        if (route.hasOption("namespace") && route.getOption("namespace").hasFirstValue()) {
-            namespace = route.getOption("namespace").getFirstValue();
+        OptionParameterContract namespaceOption = spelledOption("namespace");
+
+        if (namespaceOption != null) {
+            namespace = namespaceOption.getFirstValue();
             final String ns = namespace;
             routes =
                     routes.stream()
@@ -120,5 +124,16 @@ public class ListCommand {
                 new Message("    - "),
                 new Message(route.getDescription(), new HighlightedTextFormatter()),
                 new NewLine());
+    }
+
+    /** Returns the declared option where the input spelled it, and null where it did not. */
+    protected @Nullable OptionParameterContract spelledOption(String name) {
+        if (!route.hasOption(name)) {
+            return null;
+        }
+
+        OptionParameterContract option = route.getOption(name);
+
+        return option.hasFirstValue() ? option : null;
     }
 }
