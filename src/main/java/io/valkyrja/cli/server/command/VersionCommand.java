@@ -40,11 +40,11 @@ public class VersionCommand {
     }
 
     public OutputContract run() {
-        if (route.hasOption("short")) {
+        if (hasSpelledOption("short")) {
             return outputFactory.createOutput().withMessages(new Message(appVersion));
         }
 
-        if (route.hasOption("plain")) {
+        if (hasSpelledOption("plain")) {
             return outputFactory
                     .createOutput()
                     .withMessages(
@@ -63,5 +63,10 @@ public class VersionCommand {
         return outputFactory
                 .createOutput()
                 .withMessages(new Header(appNamespace, appVersion, route));
+    }
+
+    /** Determines if the input spelled an option that the route declares. */
+    protected boolean hasSpelledOption(String name) {
+        return route.hasOption(name) && route.getOption(name).hasFirstValue();
     }
 }
