@@ -56,13 +56,26 @@ final class HelpCommandTest {
 
     private void whenAskingFor(String commandName) {
         var commandOption = mock(OptionParameterContract.class);
+        when(commandOption.hasFirstValue()).thenReturn(true);
         when(commandOption.getFirstValue()).thenReturn(commandName);
+        when(route.hasOption("command")).thenReturn(true);
         when(route.getOption("command")).thenReturn(commandOption);
     }
 
     @Test
     void helpReturnsMessage() {
         assertFalse(HelpCommand.help().getText().isEmpty());
+    }
+
+    /** A route that declares no command option reports the miss instead of throwing. */
+    @Test
+    void runReturnsErrorWhenTheRouteDeclaresNoCommandOption() {
+        var output = command().run();
+
+        assertEquals(ExitCode.ERROR, output.getExitCode());
+        assertTrue(
+                output.getMessages().stream()
+                        .anyMatch(m -> m.getText().contains("Command `` was not found.")));
     }
 
     @Test

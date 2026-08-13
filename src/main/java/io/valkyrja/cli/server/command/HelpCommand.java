@@ -65,7 +65,8 @@ public class HelpCommand extends Command {
     }
 
     public OutputContract run() {
-        String commandName = route.getOption("command").getFirstValue();
+        OptionParameterContract commandOption = spelledOption("command");
+        String commandName = commandOption != null ? commandOption.getFirstValue() : "";
 
         if (!collection.has(commandName)) {
             return outputFactory
