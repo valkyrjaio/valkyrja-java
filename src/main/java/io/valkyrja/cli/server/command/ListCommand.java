@@ -57,7 +57,7 @@ public class ListCommand {
         List<RouteContract> routes =
                 collection.all().values().stream().collect(Collectors.toList());
 
-        if (route.hasOption("namespace")) {
+        if (route.hasOption("namespace") && route.getOption("namespace").hasFirstValue()) {
             namespace = route.getOption("namespace").getFirstValue();
             final String ns = namespace;
             routes =

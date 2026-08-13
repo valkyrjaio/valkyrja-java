@@ -44,7 +44,7 @@ public class ListBashCommand {
 
         int colonAt = -1;
 
-        if (route.hasArgument("namespace")) {
+        if (route.hasArgument("namespace") && route.getArgument("namespace").hasFirstValue()) {
             String namespace = route.getArgument("namespace").getFirstValue();
             colonAt = namespace.indexOf(':');
             final String ns = namespace;
