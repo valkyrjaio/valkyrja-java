@@ -26,7 +26,7 @@ public abstract class Command {
         return spelledOption(name) != null;
     }
 
-    /** Returns the declared option where the input spelled it, and null where it did not. */
+    /** Returns the declared option if the input spelled it, and null if it did not. */
     protected @Nullable OptionParameterContract spelledOption(String name) {
         if (!route.hasOption(name)) {
             return null;
@@ -37,7 +37,7 @@ public abstract class Command {
         return option.hasFirstValue() ? option : null;
     }
 
-    /** Returns the declared argument where the input spelled it, and null where it did not. */
+    /** Returns the declared argument if the input spelled it, and null if it did not. */
     protected @Nullable ArgumentParameterContract spelledArgument(String name) {
         if (!route.hasArgument(name)) {
             return null;

@@ -56,9 +56,9 @@ final class ListCommandTest {
     }
 
     /**
-     * A route that declares the namespace option, carrying a value only where the caller spelled
-     * it. The router keeps every declared parameter on the route, so the option is present whether
-     * or not the command line spelled it.
+     * A route that declares the namespace option, carrying a value only if the caller spelled it.
+     * The router keeps every declared parameter on the route, so the option is present whether or
+     * not the command line spelled it.
      */
     private RouteContract route(String spelledValue) {
         List<OptionContract> options =
