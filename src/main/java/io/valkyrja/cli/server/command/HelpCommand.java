@@ -34,15 +34,15 @@ import io.valkyrja.cli.routing.data.option.VersionOptionParameter;
 import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
+import io.valkyrja.cli.server.command.abstract_.Command;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HelpCommand {
+public class HelpCommand extends Command {
 
     protected RouteContract helpRoute;
     protected String appNamespace;
     protected String appVersion;
-    protected RouteContract route;
     protected RouteCollectionContract collection;
     protected OutputFactoryContract outputFactory;
 
@@ -52,9 +52,9 @@ public class HelpCommand {
             RouteContract route,
             RouteCollectionContract collection,
             OutputFactoryContract outputFactory) {
+        super(route);
         this.appNamespace = appNamespace;
         this.appVersion = appVersion;
-        this.route = route;
         this.collection = collection;
         this.outputFactory = outputFactory;
         this.helpRoute = route;
