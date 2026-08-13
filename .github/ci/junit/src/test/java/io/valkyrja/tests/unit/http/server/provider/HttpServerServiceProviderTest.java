@@ -79,7 +79,7 @@ final class HttpServerServiceProviderTest {
     }
 
     @Test
-    void publishRequestHandlerRunsEachConfiguredThrowableCaughtMiddlewareOnce() {
+    void throwableCaughtStageRunsEachConfiguredMiddlewareOnce() {
         var logger = mock(LoggerContract.class);
         var container = containerFor(new HttpConfig(), logger);
 
@@ -92,7 +92,7 @@ final class HttpServerServiceProviderTest {
     }
 
     @Test
-    void publishRequestHandlerAddsNoThrowableCaughtMiddlewareWhenTheConfigIsEmpty() {
+    void throwableCaughtStageRunsNoMiddlewareWhenTheConfigIsEmpty() {
         var logger = mock(LoggerContract.class);
         var config = mock(HttpConfigContract.class);
         when(config.throwableCaughtMiddleware()).thenReturn(List.of());
