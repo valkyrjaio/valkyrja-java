@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -308,5 +309,25 @@ final class ChildContainerTest {
         assertThrows(
                 ContainerInvalidArgumentException.class,
                 () -> child.getAliased(Runnable.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedIdFromParent() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        var freshChild = createChild();
+
+        assertTrue(freshChild.isAlias(CharSequence.class));
+        assertEquals(ServiceFixture.class, freshChild.getAliasedId(CharSequence.class));
+        assertNull(freshChild.getAliasedId(Runnable.class));
+    }
+
+    @Test
+    void getAliasedIdFromChildTakesPrecedence() {
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        child.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+
+        assertEquals(SingletonFixture.class, child.getAliasedId(CharSequence.class));
+        assertEquals(ServiceFixture.class, parent.getAliasedId(CharSequence.class));
     }
 }
