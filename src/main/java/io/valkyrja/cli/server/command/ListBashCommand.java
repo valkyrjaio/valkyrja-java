@@ -13,13 +13,14 @@ import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
+import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
+import io.valkyrja.cli.server.command.abstract_.Command;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListBashCommand {
+public class ListBashCommand extends Command {
 
-    protected RouteContract route;
     protected RouteCollectionContract collection;
     protected OutputFactoryContract outputFactory;
 
@@ -27,7 +28,7 @@ public class ListBashCommand {
             RouteContract route,
             RouteCollectionContract collection,
             OutputFactoryContract outputFactory) {
-        this.route = route;
+        super(route);
         this.collection = collection;
         this.outputFactory = outputFactory;
     }
@@ -44,8 +45,10 @@ public class ListBashCommand {
 
         int colonAt = -1;
 
-        if (route.hasArgument("namespace")) {
-            String namespace = route.getArgument("namespace").getFirstValue();
+        ArgumentParameterContract namespaceArgument = spelledArgument("namespace");
+
+        if (namespaceArgument != null) {
+            String namespace = namespaceArgument.getFirstValue();
             colonAt = namespace.indexOf(':');
             final String ns = namespace;
             routes =
