@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,6 +63,41 @@ final class NativeChildContainerTest {
 
         assertTrue(child.isAlias(Runnable.class));
         assertFalse(parent.isAlias(Runnable.class));
+    }
+
+    @Test
+    void getAliasedIdFromParent() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+
+        assertEquals(ServiceFixture.class, child.getAliasedId(CharSequence.class));
+        assertNull(child.getAliasedId(Runnable.class));
+    }
+
+    @Test
+    void getAliasedIdFromChildTakesPrecedence() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        child.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+
+        assertEquals(SingletonFixture.class, child.getAliasedId(CharSequence.class));
+        assertEquals(ServiceFixture.class, parent.getAliasedId(CharSequence.class));
+    }
+
+    @Test
+    void isDeferredFromParent() {
+        parent.register(new BindingProviderFixture());
+
+        assertTrue(child.isDeferred(ProvidedFixture.class));
+        assertFalse(child.isDeferred(Runnable.class));
+    }
+
+    @Test
+    void isDeferredFromChild() {
+        child.register(new BindingProviderFixture());
+
+        assertTrue(child.isDeferred(ProvidedFixture.class));
+        assertFalse(parent.isDeferred(ProvidedFixture.class));
     }
 
     @Test

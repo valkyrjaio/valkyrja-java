@@ -111,6 +111,13 @@ public class ChildContainer extends Container {
     }
 
     @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        Class<?> aliased = super.getAliasedId(alias);
+
+        return aliased != null ? aliased : parent.getAliasedId(alias);
+    }
+
+    @Override
     public boolean isService(Class<?> id) {
         return super.isService(id) || parent.isService(id);
     }
