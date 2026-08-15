@@ -79,7 +79,7 @@ public class Container extends ProvidersAware {
 
     @Override
     public boolean has(Class<?> id) {
-        return callbacks.containsKey(id) || isSingleton(id) || isService(id) || isAlias(id);
+        return isDeferred(id) || isSingleton(id) || isService(id) || isAlias(id);
     }
 
     @Override
@@ -115,6 +115,11 @@ public class Container extends ProvidersAware {
     @Override
     public boolean isAlias(Class<?> id) {
         return aliases.containsKey(id);
+    }
+
+    @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        return aliases.get(alias);
     }
 
     @Override
@@ -196,7 +201,7 @@ public class Container extends ProvidersAware {
     /** Resolve an aliased service without ensuring publication. */
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        Class<?> aliased = aliases.get(id);
+        Class<?> aliased = getAliasedId(id);
         if (aliased == null) {
             return null;
         }
@@ -247,7 +252,7 @@ public class Container extends ProvidersAware {
 
     /** Publish a deferred service if it has not been published yet. */
     protected void publishUnpublishedDeferred(Class<?> id) {
-        if (callbacks.containsKey(id) && !isPublished(id)) {
+        if (isDeferred(id) && !isPublished(id)) {
             publish(id);
         }
     }
