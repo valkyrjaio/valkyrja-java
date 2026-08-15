@@ -9,7 +9,11 @@
 package io.valkyrja.container.manager;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
+import io.valkyrja.container.throwable.exception.ContainerUnresolvedParentAliasException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
@@ -85,11 +89,67 @@ public class NativeChildContainer extends Container {
     @Override
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        Class<?> aliased = getAliasedId(id);
-        if (aliased == null) {
+        Class<?> aliased = aliases.get(id);
+        if (aliased != null) {
+            return get((Class<T>) aliased, arguments);
+        }
+
+        if (!parent.aliases.containsKey(id)) {
             return null;
         }
-        return get((Class<T>) aliased, arguments);
+
+        validateParentAliasResolution(id);
+
+        return parent.getAliased(id, arguments);
+    }
+
+    /**
+     * Validate that the parent answers an alias without caching anything new.
+     *
+     * @param id the alias type
+     */
+    protected void validateParentAliasResolution(Class<?> id) {
+        Set<Class<?>> seen = new HashSet<>();
+        Class<?> current = id;
+        Class<?> aliasedId;
+
+        while ((aliasedId = parent.aliases.get(current)) != null) {
+            if (!seen.add(aliasedId)) {
+                throw new ContainerInvalidReferenceException(id.getName());
+            }
+
+            current = aliasedId;
+
+            if (isUnresolvedInParent(current)) {
+                throw new ContainerUnresolvedParentAliasException(id.getName(), current.getName());
+            }
+
+            // The parent answers a singleton or a service before it follows an alias,
+            // so it never reaches the rest of the chain.
+            if (parent.instances.containsKey(current) || parent.services.containsKey(current)) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * Check whether the parent would cache a given type for the first time.
+     *
+     * @param id the service type
+     * @return true if the parent would write while answering it
+     */
+    protected boolean isUnresolvedInParent(Class<?> id) {
+        // The parent publishes before it reads any map, so this test comes first.
+        // It is the same test publishUnpublishedDeferred() makes.
+        if (parent.getCallback(id) != null && !parent.isPublished(id)) {
+            return true;
+        }
+
+        if (parent.instances.containsKey(id)) {
+            return false;
+        }
+
+        return parent.singletons.containsKey(id);
     }
 
     /**
