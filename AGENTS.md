@@ -41,6 +41,7 @@ The last two entries drop more than the one branch that each class cannot
 cover. A new method on either class meets no coverage requirement. Keep both
 classes small, and read a change to them closely.
 
-Add an exclusion only where a test cannot drive the code, or where the code is
-not production logic. Give the reason beside the entry. Every other missed
+Add an exclusion only where no test can reach full coverage, or where the code
+is not production logic. A test that would hang or leak the test JVM does not
+reach full coverage. Give the reason beside the entry. Every other missed
 branch is a missing test.
