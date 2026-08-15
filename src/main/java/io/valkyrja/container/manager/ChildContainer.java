@@ -10,7 +10,12 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
+import io.valkyrja.container.throwable.exception.ContainerUnpublishedParentTargetException;
+import io.valkyrja.container.throwable.exception.ContainerUnresolvedParentAliasException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
@@ -67,6 +72,24 @@ public class ChildContainer extends Container {
     protected @Nullable <T> T getSingletonWithoutChecks(Class<T> id) {
         // Parent has a resolved instance and child does not — reuse it (frozen, safe)
         if (!super.isSingletonInstance(id) && parent.isSingletonInstance(id)) {
+            if (isUnpublishedInParent(id)) {
+                // Delegating would run the parent's publish callback, so answer from
+                // the child instead.
+                T instance = super.getSingletonWithoutChecks(id);
+
+                if (instance != null) {
+                    return instance;
+                }
+
+                // get() tries the child's service and alias maps after this, and
+                // getSingleton() does not, so refuse only when neither can answer.
+                if (super.isService(id) || super.isAlias(id)) {
+                    return null;
+                }
+
+                throw new ContainerUnpublishedParentTargetException(id.getName());
+            }
+
             return parent.getSingleton(id);
         }
 
@@ -77,6 +100,16 @@ public class ChildContainer extends Container {
     @Override
     protected @Nullable <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
         if (!super.isService(id) && parent.isService(id)) {
+            if (isUnpublishedInParent(id)) {
+                // get() tries the child's alias map after this, and getService() does
+                // not, so refuse only when that cannot answer either.
+                if (super.isAlias(id)) {
+                    return null;
+                }
+
+                throw new ContainerUnpublishedParentTargetException(id.getName());
+            }
+
             return parent.getService(id, arguments);
         }
         return super.getServiceWithoutChecks(id, arguments);
@@ -84,10 +117,75 @@ public class ChildContainer extends Container {
 
     @Override
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        if (!super.isAlias(id) && parent.isAlias(id)) {
-            return parent.getAliased(id, arguments);
+        if (super.isAlias(id)) {
+            return super.getAliasedWithoutChecks(id, arguments);
         }
-        return super.getAliasedWithoutChecks(id, arguments);
+
+        if (!parent.isAlias(id)) {
+            return null;
+        }
+
+        validateParentAliasResolution(id);
+
+        return parent.getAliased(id, arguments);
+    }
+
+    /**
+     * Validate that the parent answers an alias without caching anything new.
+     *
+     * @param id the alias type
+     */
+    protected void validateParentAliasResolution(Class<?> id) {
+        Set<Class<?>> seen = new HashSet<>();
+        Class<?> current = id;
+        Class<?> aliasedId;
+
+        while ((aliasedId = parent.getAliasedId(current)) != null) {
+            if (!seen.add(aliasedId)) {
+                throw new ContainerInvalidReferenceException(id.getName());
+            }
+
+            current = aliasedId;
+
+            if (isUnresolvedInParent(current)) {
+                throw new ContainerUnresolvedParentAliasException(id.getName(), current.getName());
+            }
+
+            // The parent answers a singleton or a service before it follows an alias,
+            // so it never reaches the rest of the chain.
+            if (parent.isSingletonInstance(current) || parent.isService(current)) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * Check whether the parent would cache a given type for the first time.
+     *
+     * @param id the service type
+     * @return true if the parent would write while answering it
+     */
+    protected boolean isUnresolvedInParent(Class<?> id) {
+        // The parent publishes before it reads any map, so this test comes first.
+        if (isUnpublishedInParent(id)) {
+            return true;
+        }
+
+        if (parent.isSingletonInstance(id)) {
+            return false;
+        }
+
+        return parent.isSingletonBinding(id);
+    }
+
+    /**
+     * Check whether the parent holds a publish callback it has not run.
+     *
+     * @param id the service type
+     * @return true if the callback is registered and unrun
+     */
+    protected boolean isUnpublishedInParent(Class<?> id) {
+        return parent.isDeferred(id) && !parent.isPublished(id);
     }
 
     /**

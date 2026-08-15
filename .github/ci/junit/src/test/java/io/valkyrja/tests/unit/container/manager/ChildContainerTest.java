@@ -21,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
+import io.valkyrja.container.throwable.exception.ContainerUnpublishedParentTargetException;
+import io.valkyrja.container.throwable.exception.ContainerUnresolvedParentAliasException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
@@ -50,6 +53,207 @@ final class ChildContainerTest {
     void setUp() {
         parent = new Container();
         child = createChild();
+    }
+
+    /** Cache an instance in the parent without marking it published, then add a callback. */
+    private void hydrateParentWithCachedInstanceAndUnrunCallback() {
+        parent.setFromData(
+                new ContainerData(
+                        Map.of(),
+                        Map.of(),
+                        Map.of(ProvidedFixture.class, (c, a) -> new ProvidedFixture()),
+                        Map.of(ProvidedFixture.class, ProvidedFixture.class)));
+        // Caching through getSingleton() never marks the id published
+        parent.getSingleton(ProvidedFixture.class);
+        parent.setFromData(
+                new ContainerData(
+                        Map.of(),
+                        Map.of(
+                                ProvidedFixture.class,
+                                c -> c.setSingleton(ProvidedFixture.class, new ProvidedFixture())),
+                        Map.of(),
+                        Map.of()));
+    }
+
+    /** A parent hydrated from data carries callbacks and services with no published map. */
+    private void hydrateParentWithUnrunCallback() {
+        parent.setFromData(
+                new ContainerData(
+                        Map.of(),
+                        Map.of(
+                                ProvidedFixture.class,
+                                c ->
+                                        c.bind(
+                                                ProvidedFixture.class,
+                                                (cc, a) -> new ProvidedFixture())),
+                        Map.of(ProvidedFixture.class, (c, a) -> new ProvidedFixture()),
+                        Map.of()));
+    }
+
+    @Test
+    void getAliasedFollowsAParentAliasChain() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        parent.bindAlias(Runnable.class, raw(CharSequence.class));
+        ChildContainer localChild = createChild();
+
+        assertInstanceOf(ServiceFixture.class, localChild.getAliased(Runnable.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsTheParentsOwnErrorForAnAbsentTarget() {
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedStopsOnACyclicParentAliasChain() {
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        parent.bindAlias(Runnable.class, raw(CharSequence.class));
+        ChildContainer localChild = createChild();
+
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedResolvesASelfAliasInTheParent() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(ServiceFixture.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+
+        assertInstanceOf(
+                ServiceFixture.class, localChild.getAliased(ServiceFixture.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsForAnUnresolvedParentSingleton() {
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+
+        assertThrows(
+                ContainerUnresolvedParentAliasException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedFromParentReusesAResolvedSingleton() {
+        SingletonFixture instance = new SingletonFixture();
+        parent.setSingleton(SingletonFixture.class, instance);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+
+        assertSame(instance, localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsForAnUnpublishedParentTarget() {
+        parent.register(new BindingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        ChildContainer localChild = createChild();
+
+        assertThrows(
+                ContainerUnresolvedParentAliasException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getServiceThrowsWhenTheParentWouldPublish() {
+        hydrateParentWithUnrunCallback();
+        ChildContainer bare =
+                new ChildContainer(
+                        parent, new ContainerData(Map.of(), Map.of(), Map.of(), Map.of()));
+
+        assertThrows(
+                ContainerUnpublishedParentTargetException.class,
+                () -> bare.getService(ProvidedFixture.class, Map.of()));
+    }
+
+    @Test
+    void getServiceDelegatesWhenTheParentAlreadyPublished() {
+        parent.register(new BindingProviderFixture());
+        parent.get(ProvidedFixture.class, Map.of());
+        ChildContainer bare =
+                new ChildContainer(
+                        parent, new ContainerData(Map.of(), Map.of(), Map.of(), Map.of()));
+
+        assertTrue(parent.isPublished(ProvidedFixture.class));
+        assertInstanceOf(ProvidedFixture.class, bare.getService(ProvidedFixture.class, Map.of()));
+    }
+
+    @Test
+    void getServiceDefersToTheChildsOwnAlias() {
+        hydrateParentWithUnrunCallback();
+        ChildContainer bare =
+                new ChildContainer(
+                        parent, new ContainerData(Map.of(), Map.of(), Map.of(), Map.of()));
+        bare.bind(SingletonFixture.class, (c, a) -> new SingletonFixture());
+        bare.bindAlias(ProvidedFixture.class, raw(SingletonFixture.class));
+
+        assertInstanceOf(SingletonFixture.class, bare.get(ProvidedFixture.class, Map.of()));
+        assertFalse(parent.isPublished(ProvidedFixture.class));
+    }
+
+    @Test
+    void getSingletonThrowsWhenNothingInTheChildCanAnswer() {
+        hydrateParentWithCachedInstanceAndUnrunCallback();
+        ChildContainer bare =
+                new ChildContainer(
+                        parent, new ContainerData(Map.of(), Map.of(), Map.of(), Map.of()));
+
+        assertThrows(
+                ContainerUnpublishedParentTargetException.class,
+                () -> bare.getSingleton(ProvidedFixture.class));
+    }
+
+    @Test
+    void getSingletonPrefersTheChildsOwnSingletonBinding() {
+        hydrateParentWithCachedInstanceAndUnrunCallback();
+        ChildContainer bare =
+                new ChildContainer(
+                        parent,
+                        new ContainerData(
+                                Map.of(),
+                                Map.of(),
+                                Map.of(),
+                                Map.of(ProvidedFixture.class, ProvidedFixture.class)));
+        // The child copies the singleton marker, and binds the factory that builds it
+        bare.bind(ProvidedFixture.class, (c, a) -> new ProvidedFixture());
+
+        assertInstanceOf(ProvidedFixture.class, bare.getSingleton(ProvidedFixture.class));
+        assertFalse(parent.isPublished(ProvidedFixture.class));
+    }
+
+    @Test
+    void getPrefersTheChildsOwnServiceOverARefusal() {
+        hydrateParentWithCachedInstanceAndUnrunCallback();
+        ChildContainer bare =
+                new ChildContainer(
+                        parent, new ContainerData(Map.of(), Map.of(), Map.of(), Map.of()));
+        bare.bind(ProvidedFixture.class, (c, a) -> new ProvidedFixture());
+
+        assertInstanceOf(ProvidedFixture.class, bare.get(ProvidedFixture.class, Map.of()));
+        assertFalse(parent.isPublished(ProvidedFixture.class));
+    }
+
+    @Test
+    void getSingletonPathDefersToTheChildsOwnAlias() {
+        hydrateParentWithCachedInstanceAndUnrunCallback();
+        ChildContainer bare =
+                new ChildContainer(
+                        parent, new ContainerData(Map.of(), Map.of(), Map.of(), Map.of()));
+        // The child holds only an alias, which get() reaches after the singleton path
+        bare.bind(SingletonFixture.class, (c, a) -> new SingletonFixture());
+        bare.bindAlias(ProvidedFixture.class, raw(SingletonFixture.class));
+
+        assertInstanceOf(SingletonFixture.class, bare.get(ProvidedFixture.class, Map.of()));
+        assertFalse(parent.isPublished(ProvidedFixture.class));
     }
 
     @Test
