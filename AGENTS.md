@@ -14,20 +14,29 @@ branch/commit/push/PR workflow this repo follows.
 
 JaCoCo enforces **100% line coverage and 100% branch coverage**. The `junit` CI task
 runs `jacocoTestCoverageVerification`, which fails the build below that floor. The
-rule applies to each class as well as to the whole bundle. A large, well-covered
-codebase absorbs one untested new class almost without moving, so the bundle rule
-alone would not catch it.
+rule covers each class as well as the whole bundle. A large, well-covered codebase
+absorbs one untested new class almost without moving, so the bundle rule alone would
+not catch that class.
 
-Code that a unit test cannot reach is **excluded** in
-`.github/ci/junit/build.gradle.kts`. It is not accommodated by a threshold below
-100%, because a lower floor stops the gate from catching everything else. The
-exclusions are the benchmark harnesses, the worker-runtime entry adapters, and two
-single branches:
+`.github/ci/junit/build.gradle.kts` excludes the code that a unit test cannot drive.
+A threshold below 100% would hide every other gap, so the build keeps the floor and
+drops the code instead. JaCoCo excludes a whole class or a whole package and never a
+single branch, so each entry below drops every line and every branch that the entry
+names:
 
-- `io.valkyrja.log.logger.abstract_.Logger#log` — the synthetic default that javac
-  emits for a switch over every enum constant.
-- `io.valkyrja.cli.server.support.Exiter#exit` — the guard over a real
-  `System.exit`, whose true arm stops the test JVM.
+- `**/benchmark/**` — performance harnesses rather than production logic.
+- `**/application/entry/exchange/**`, `**/application/entry/jetty/**`,
+  `**/application/entry/netty/**`, `**/application/entry/tomcat/**` — bootstrap glue
+  whose `run()` starts a server that blocks forever. The `grpc` and `abstract_` entry
+  packages stay measured.
+- `**/cli/server/support/Exiter.class` — the class guards a real `System.exit`, and
+  the true arm of that guard stops the test JVM.
+- `**/log/logger/abstract_/Logger.class` — the class switches over every `LogLevel`
+  constant, and javac emits a synthetic default that no test reaches.
 
-Exclude a class only if a test cannot reach it. Every other missed branch is a
-missing test.
+The last two entries drop more than the one branch that each class cannot cover. A
+new method on either class meets no coverage requirement, so keep both classes small
+and read a change to them closely.
+
+Add an exclusion only where a test cannot drive the code, and give the reason beside
+the entry. Every other missed branch is a missing test.
