@@ -15,21 +15,6 @@ import io.valkyrja.application.provider.contract.ComponentProviderContract;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Immutable application configuration.
- *
- * @param namespace the application namespace (e.g. {@code App})
- * @param dir the base directory path
- * @param version the application version string
- * @param environment the environment name (e.g. {@code production})
- * @param debugMode whether the application is running in debug mode
- * @param timezone the default timezone (e.g. {@code UTC})
- * @param key the application encryption key
- * @param dataPath the application data directory path
- * @param dataNamespace the application data namespace
- * @param providers registered component application provider instances
- * @param callbacks custom initialization callbacks invoked during bootstrapping
- */
 public record Config(
         String namespace,
         String dir,
