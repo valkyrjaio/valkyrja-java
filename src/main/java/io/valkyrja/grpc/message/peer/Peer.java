@@ -12,7 +12,6 @@ import io.valkyrja.grpc.message.enum_.AddressType;
 import io.valkyrja.grpc.message.peer.contract.AuthContextContract;
 import io.valkyrja.grpc.message.peer.contract.PeerContract;
 
-/** Immutable {@link PeerContract} implementation. */
 public class Peer implements PeerContract {
 
     protected final String address;
