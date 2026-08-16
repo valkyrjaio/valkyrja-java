@@ -8,7 +8,6 @@
 
 package io.valkyrja.throwable.handler.contract;
 
-/** Contract for Valkyrja throwable handlers. */
 public interface ThrowableHandlerContract {
 
     /**
