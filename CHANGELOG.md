@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.2...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.3...26.x)
+
+## [v26.9.3](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.2...v26.9.3) - 2026-08-16
+
+* [Agents] docs: Record the coverage gate that the build enforces by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/164
 
 ## [v26.9.2](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.1...v26.9.2) - 2026-08-15
 
