@@ -13,11 +13,7 @@ import io.valkyrja.http.middleware.contract.RequestReceivedMiddlewareContract;
 import io.valkyrja.http.middleware.data.RequestReceivedResult;
 import io.valkyrja.http.middleware.handler.contract.RequestReceivedHandlerContract;
 
-/**
- * Implements only {@link RequestReceivedMiddlewareContract} — none of the route-matched /
- * dispatched / throwable-caught / sending-response / response-sent contracts the route collector
- * checks — to exercise the {@code isAssignableFrom} false branches.
- */
+/** Middleware implementing only {@link RequestReceivedMiddlewareContract}. */
 public final class RequestReceivedOnlyHttpMiddlewareFixture
         implements RequestReceivedMiddlewareContract {
 

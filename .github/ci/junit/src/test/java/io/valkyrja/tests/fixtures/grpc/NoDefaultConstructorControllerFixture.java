@@ -15,10 +15,7 @@ import io.valkyrja.grpc.routing.attribute.Method;
 import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
-/**
- * Fixture with no accessible no-argument constructor, so the collector's reflective instantiation
- * fails with a {@link ReflectiveOperationException}.
- */
+/** A controller with no accessible no-argument constructor, so reflective instantiation fails. */
 @Service(service = "pkg.NoCtor")
 public final class NoDefaultConstructorControllerFixture {
 

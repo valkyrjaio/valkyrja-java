@@ -13,11 +13,7 @@ import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/**
- * Deferred provider whose publish callback registers a real service binding (mirrors a framework
- * service provider such as DispatchServiceProvider), so resolving {@link ProvidedFixture} exercises
- * the publish-then-resolve path in whichever container publishes it.
- */
+/** Deferred provider whose publish callback registers a real service binding. */
 public final class BindingProviderFixture implements ServiceProviderContract {
 
     @Override

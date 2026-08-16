@@ -13,14 +13,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
-/**
- * A minimal raw-socket HTTP client for the worker-entry smoke tests.
- *
- * <p>Sends a single {@code GET} over a socket with {@code Connection: close} — so the server closes
- * the socket once it has emitted the response — and returns the full raw response, letting a test
- * assert the adapter wrote a real HTTP response back through its runtime rather than to {@code
- * System.out}.
- */
+/** A raw-socket HTTP client that returns the full response for the worker-entry smoke tests. */
 public final class HttpSmokeClientFixture {
 
     private HttpSmokeClientFixture() {}
