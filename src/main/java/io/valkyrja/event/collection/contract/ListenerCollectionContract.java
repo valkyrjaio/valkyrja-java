@@ -13,7 +13,6 @@ import io.valkyrja.event.data.contract.ListenerContract;
 import java.util.List;
 import java.util.Map;
 
-/** Contract for the event listener collection. */
 public interface ListenerCollectionContract {
 
     /**

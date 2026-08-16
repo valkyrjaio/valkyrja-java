@@ -20,7 +20,6 @@ import io.valkyrja.event.dispatcher.contract.EventDispatcherContract;
 import io.valkyrja.event.throwable.exception.EventInvalidEventException;
 import java.util.Map;
 
-/** Default event dispatcher implementation. */
 public class EventDispatcher implements EventDispatcherContract {
 
     protected final ListenerCollectionContract collection;
