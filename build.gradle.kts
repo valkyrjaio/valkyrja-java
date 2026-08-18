@@ -47,7 +47,7 @@ dependencies {
     compileOnly("org.eclipse.jetty:jetty-server:12.1.12")
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.12")
     compileOnly("io.netty:netty-codec-http:4.2.17.Final")
-    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.24")
+    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.25")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.83.1")
     compileOnly("io.grpc:grpc-netty-shaded:1.83.1")
 }
