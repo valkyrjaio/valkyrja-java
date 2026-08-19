@@ -17,10 +17,7 @@ import io.valkyrja.http.routing.attribute.Route;
 import io.valkyrja.http.routing.constant.Regex;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
-/**
- * Annotated controller exercising a matrix of dynamic-route parameter types and modifiers, so the
- * annotation construction path can be asserted to produce the same regex as direct construction.
- */
+/** Annotated controller covering a matrix of dynamic-route parameter types and modifiers. */
 public final class RoutingCombinationsHttpControllerFixture {
 
     @DynamicRoute(

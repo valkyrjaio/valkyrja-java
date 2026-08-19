@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import org.jspecify.annotations.Nullable;
 
-/** Immutable {@link RouteContract} implementation. */
 public class Route implements RouteContract {
 
     protected String method;

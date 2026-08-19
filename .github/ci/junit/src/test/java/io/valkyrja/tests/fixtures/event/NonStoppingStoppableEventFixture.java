@@ -13,10 +13,7 @@ import io.valkyrja.event.contract.StoppableEventContract;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A stoppable event that never stops propagation — exercises the {@code isPropagationStopped()}
- * false branch of the dispatch loop, where every listener still runs.
- */
+/** A stoppable event that never stops propagation. */
 public final class NonStoppingStoppableEventFixture
         implements DispatchCollectableEventContract, StoppableEventContract {
 

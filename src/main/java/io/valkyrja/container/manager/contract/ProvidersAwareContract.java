@@ -10,7 +10,6 @@ package io.valkyrja.container.manager.contract;
 
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 
-/** Contract for objects that are aware of and manage service providers. */
 public interface ProvidersAwareContract {
 
     /**

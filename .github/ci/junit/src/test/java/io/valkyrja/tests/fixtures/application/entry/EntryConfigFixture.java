@@ -14,10 +14,7 @@ import io.valkyrja.application.kernel.contract.ApplicationContract;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Test config presets for the worker entry adapters: the framework defaults, rebound to a chosen
- * port. Pass port {@code 0} to bind an ephemeral port so the smoke tests never collide.
- */
+/** Framework default config for the worker entry adapters, rebound to a chosen port. */
 public final class EntryConfigFixture {
 
     private EntryConfigFixture() {}

@@ -22,14 +22,8 @@ import io.valkyrja.http.server.handler.contract.RequestHandlerContract;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Binds a known-response request handler into a bootstrapped worker application so a smoke test can
- * drive a real request all the way to the runtime's response and assert both halves of the worker
- * I/O: the adapter marshaled the native request (captured here) and emitted the framework response
- * back through the runtime (a distinctive {@code 418} status and body the test reads off the wire).
- *
- * <p>The request handler and sending-response handler are stubbed so the assertion does not depend
- * on the framework's routing — the adapter's {@code getRequest} / {@code emit} are the code under
- * test.
+ * Binds a known-response handler into a worker application so a smoke test can assert both halves
+ * of the worker I/O.
  */
 public final class WorkerHttpProbeFixture {
 

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
-/** Immutable {@link AuthContextContract} implementation. */
 public class AuthContext implements AuthContextContract {
 
     public static final String TYPE_INSECURE = "insecure";

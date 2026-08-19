@@ -12,7 +12,6 @@ import io.valkyrja.container.data.contract.ContainerDataContract;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-/** Contract for the dependency injection container. */
 public interface ContainerContract extends ProvidersAwareContract {
 
     /**
