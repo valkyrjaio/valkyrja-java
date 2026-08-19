@@ -18,9 +18,12 @@ import static org.mockito.Mockito.when;
 
 import io.valkyrja.cli.interaction.data.contract.CliInteractionConfigContract;
 import io.valkyrja.cli.interaction.input.Input;
+import io.valkyrja.cli.interaction.message.Message;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
+import io.valkyrja.cli.interaction.output.FileOutput;
 import io.valkyrja.cli.interaction.output.Output;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
+import io.valkyrja.cli.interaction.throwable.exception.CliInteractionFileWriteException;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
@@ -28,9 +31,11 @@ import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.server.handler.InputHandler;
 import io.valkyrja.cli.server.support.Exiter;
 import io.valkyrja.container.manager.Container;
+import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /** Test the cli server {@link InputHandler}. */
 final class InputHandlerTest {
@@ -41,6 +46,8 @@ final class InputHandlerTest {
     private ThrowableCaughtHandlerContract throwableCaughtHandler;
     private ProcessExitingHandlerContract processExitingHandler;
     private final Input input = new Input();
+
+    @TempDir Path directory;
 
     @BeforeEach
     void setUp() {
@@ -101,6 +108,26 @@ final class InputHandlerTest {
         when(router.dispatch(any())).thenReturn(new Output());
 
         assertDoesNotThrow(() -> handler().run(input));
+        verify(processExitingHandler).processExiting(any(), any());
+    }
+
+    @Test
+    void runRoutesAWriteThrowableThroughTheThrowableCaughtHandler() {
+        Exiter.freeze();
+
+        var recovered = new Output();
+        var unwritable =
+                new FileOutput(directory.resolve("missing").resolve("out.txt").toString())
+                        .withAddedMessage(new Message("hello"));
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        when(router.dispatch(any())).thenReturn(unwritable);
+        when(throwableCaughtHandler.throwableCaught(any(), any(), any())).thenReturn(recovered);
+
+        assertDoesNotThrow(() -> handler().run(input));
+
+        verify(throwableCaughtHandler)
+                .throwableCaught(any(), any(), any(CliInteractionFileWriteException.class));
         verify(processExitingHandler).processExiting(any(), any());
     }
 

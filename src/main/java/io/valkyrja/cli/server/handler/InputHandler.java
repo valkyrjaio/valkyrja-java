@@ -11,6 +11,10 @@ package io.valkyrja.cli.server.handler;
 import io.valkyrja.cli.interaction.data.contract.CliInteractionConfigContract;
 import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.input.contract.InputContract;
+import io.valkyrja.cli.interaction.message.ErrorMessage;
+import io.valkyrja.cli.interaction.message.Message;
+import io.valkyrja.cli.interaction.message.NewLine;
+import io.valkyrja.cli.interaction.output.Output;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ProcessExitingHandlerContract;
@@ -65,7 +69,16 @@ public class InputHandler implements InputHandlerContract {
     @Override
     public void run(InputContract input) {
         OutputContract output = handle(input);
-        output.writeMessages();
+
+        try {
+            output.writeMessages();
+        } catch (Throwable throwable) {
+            output =
+                    throwableCaughtHandler.throwableCaught(
+                            input, getOutputFromThrowable(input, throwable), throwable);
+            output.writeMessages();
+        }
+
         exit(input, output);
         Object exitCode = output.getExitCode();
         int code = exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
@@ -85,5 +98,25 @@ public class InputHandler implements InputHandlerContract {
 
     protected @Nullable OutputContract emptyOutput() {
         return null;
+    }
+
+    /**
+     * Build the output that reports a throwable the configured destination could not carry.
+     *
+     * @param input the input the command ran with
+     * @param throwable the throwable the write raised
+     * @return an output that writes to stdout, because the configured destination is what failed
+     */
+    protected OutputContract getOutputFromThrowable(InputContract input, Throwable throwable) {
+        return new Output()
+                .withExitCode(ExitCode.ERROR)
+                .withMessages(
+                        new ErrorMessage("Cli Server Error:"),
+                        new NewLine(),
+                        new ErrorMessage("Command:"),
+                        new Message(" " + input.getCommandName()),
+                        new NewLine(),
+                        new ErrorMessage("Message:"),
+                        new Message(" " + throwable.getMessage()));
     }
 }
