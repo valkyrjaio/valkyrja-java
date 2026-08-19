@@ -63,7 +63,7 @@ final class FileOutputTest {
     }
 
     @Test
-    void throwsWhenTheFileIsUnwritable() {
+    void throwsWhenTheFileWriteFails() {
         var filepath = directory.resolve("missing").resolve("out.txt");
         var output = new FileOutput(filepath.toString());
 

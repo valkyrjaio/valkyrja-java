@@ -63,7 +63,7 @@ final class StreamOutputTest {
     }
 
     @Test
-    void throwsWhenTheStreamIsUnwritable() {
+    void throwsWhenTheStreamWriteFails() {
         var output = new StreamOutput(new PipedOutputStream());
 
         assertThrows(
