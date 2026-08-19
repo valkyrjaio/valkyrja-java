@@ -10,13 +10,13 @@ package io.valkyrja.cli.interaction.throwable.exception;
 
 import io.valkyrja.cli.interaction.throwable.exception.abstract_.CliInteractionRuntimeException;
 
-public class CliInteractionUnwritableStreamException extends CliInteractionRuntimeException {
+public class CliInteractionStreamWriteException extends CliInteractionRuntimeException {
 
-    public CliInteractionUnwritableStreamException(String message) {
+    public CliInteractionStreamWriteException(String message) {
         super(message);
     }
 
-    public CliInteractionUnwritableStreamException(String message, Throwable cause) {
+    public CliInteractionStreamWriteException(String message, Throwable cause) {
         super(message, cause);
     }
 }

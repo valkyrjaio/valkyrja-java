@@ -11,15 +11,15 @@ package io.valkyrja.tests.unit.cli.interaction.throwable.exception;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import io.valkyrja.cli.interaction.throwable.exception.CliInteractionUnwritableFileException;
+import io.valkyrja.cli.interaction.throwable.exception.CliInteractionStreamWriteException;
 import org.junit.jupiter.api.Test;
 
-/** Test the {@link CliInteractionUnwritableFileException}. */
-final class CliInteractionUnwritableFileExceptionTest {
+/** Test the {@link CliInteractionStreamWriteException}. */
+final class CliInteractionStreamWriteExceptionTest {
 
     @Test
     void messageConstructor() {
-        var exception = new CliInteractionUnwritableFileException("message");
+        var exception = new CliInteractionStreamWriteException("message");
 
         assertEquals("message", exception.getMessage());
     }
@@ -27,7 +27,7 @@ final class CliInteractionUnwritableFileExceptionTest {
     @Test
     void messageAndCauseConstructor() {
         var cause = new IllegalStateException("cause");
-        var exception = new CliInteractionUnwritableFileException("message", cause);
+        var exception = new CliInteractionStreamWriteException("message", cause);
 
         assertEquals("message", exception.getMessage());
         assertSame(cause, exception.getCause());
