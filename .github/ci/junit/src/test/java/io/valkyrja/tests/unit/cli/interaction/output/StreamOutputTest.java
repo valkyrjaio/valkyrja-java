@@ -14,8 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.cli.interaction.message.Message;
+import io.valkyrja.cli.interaction.message.SuccessMessage;
 import io.valkyrja.cli.interaction.output.StreamOutput;
-import io.valkyrja.cli.interaction.throwable.exception.CliInteractionUnwritableStreamException;
+import io.valkyrja.cli.interaction.throwable.exception.CliInteractionStreamWriteException;
 import java.io.ByteArrayOutputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.Test;
 
 /** Test the {@link StreamOutput}. */
 final class StreamOutputTest {
+
+    private static final String ESCAPE = "\033";
 
     @Test
     void exposesAndReplacesStream() {
@@ -38,26 +41,25 @@ final class StreamOutputTest {
     @Test
     void writesTheFormattedTextToTheStream() {
         var stream = new ByteArrayOutputStream();
-        var message = new Message("hello");
         var output = new StreamOutput(stream);
 
-        assertTrue(((StreamOutput) output.writeMessage(message)).hasWrittenMessage());
-        assertEquals(message.getFormattedText(), stream.toString(StandardCharsets.UTF_8));
+        assertTrue(
+                ((StreamOutput) output.writeMessage(new SuccessMessage("hello")))
+                        .hasWrittenMessage());
+        assertEquals(
+                "%s[97;42mhello%s[39;49m".formatted(ESCAPE, ESCAPE),
+                stream.toString(StandardCharsets.UTF_8));
     }
 
     @Test
     void appendsEachMessageToTheStream() {
         var stream = new ByteArrayOutputStream();
-        var first = new Message("first");
-        var second = new Message("second");
         var output = new StreamOutput(stream);
 
-        output.writeMessage(first);
-        output.writeMessage(second);
+        output.writeMessage(new Message("first"));
+        output.writeMessage(new Message("second"));
 
-        assertEquals(
-                first.getFormattedText() + second.getFormattedText(),
-                stream.toString(StandardCharsets.UTF_8));
+        assertEquals("firstsecond", stream.toString(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -65,7 +67,7 @@ final class StreamOutputTest {
         var output = new StreamOutput(new PipedOutputStream());
 
         assertThrows(
-                CliInteractionUnwritableStreamException.class,
+                CliInteractionStreamWriteException.class,
                 () -> output.writeMessage(new Message("hello")));
     }
 }

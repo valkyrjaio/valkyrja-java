@@ -11,7 +11,7 @@ package io.valkyrja.cli.interaction.output;
 import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.FileOutputContract;
-import io.valkyrja.cli.interaction.throwable.exception.CliInteractionUnwritableFileException;
+import io.valkyrja.cli.interaction.throwable.exception.CliInteractionFileWriteException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -59,8 +59,8 @@ public class FileOutput extends Output implements FileOutputContract {
                     StandardOpenOption.CREATE,
                     StandardOpenOption.APPEND);
         } catch (IOException exception) {
-            throw new CliInteractionUnwritableFileException(
-                    "Unable to write to file " + filepath, exception);
+            throw new CliInteractionFileWriteException(
+                    "Unable to write to the file `" + filepath + "`", exception);
         }
     }
 

@@ -13,8 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.cli.interaction.message.Message;
+import io.valkyrja.cli.interaction.message.SuccessMessage;
 import io.valkyrja.cli.interaction.output.FileOutput;
-import io.valkyrja.cli.interaction.throwable.exception.CliInteractionUnwritableFileException;
+import io.valkyrja.cli.interaction.throwable.exception.CliInteractionFileWriteException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 /** Test the {@link FileOutput}. */
 final class FileOutputTest {
+
+    private static final String ESCAPE = "\033";
 
     @TempDir Path directory;
 
@@ -39,25 +42,24 @@ final class FileOutputTest {
     @Test
     void writesTheFormattedTextToTheFile() throws IOException {
         var filepath = directory.resolve("out.txt");
-        var message = new Message("hello");
         var output = new FileOutput(filepath.toString());
 
-        assertTrue(((FileOutput) output.writeMessage(message)).hasWrittenMessage());
-        assertEquals(message.getFormattedText(), Files.readString(filepath));
+        assertTrue(
+                ((FileOutput) output.writeMessage(new SuccessMessage("hello")))
+                        .hasWrittenMessage());
+        assertEquals(
+                "%s[97;42mhello%s[39;49m".formatted(ESCAPE, ESCAPE), Files.readString(filepath));
     }
 
     @Test
     void appendsEachMessageToTheFile() throws IOException {
         var filepath = directory.resolve("out.txt");
-        var first = new Message("first");
-        var second = new Message("second");
         var output = new FileOutput(filepath.toString());
 
-        output.writeMessage(first);
-        output.writeMessage(second);
+        output.writeMessage(new Message("first"));
+        output.writeMessage(new Message("second"));
 
-        assertEquals(
-                first.getFormattedText() + second.getFormattedText(), Files.readString(filepath));
+        assertEquals("firstsecond", Files.readString(filepath));
     }
 
     @Test
@@ -66,7 +68,7 @@ final class FileOutputTest {
         var output = new FileOutput(filepath.toString());
 
         assertThrows(
-                CliInteractionUnwritableFileException.class,
+                CliInteractionFileWriteException.class,
                 () -> output.writeMessage(new Message("hello")));
     }
 }
