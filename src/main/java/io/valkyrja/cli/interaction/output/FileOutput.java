@@ -11,6 +11,12 @@ package io.valkyrja.cli.interaction.output;
 import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.FileOutputContract;
+import io.valkyrja.cli.interaction.throwable.exception.CliInteractionUnwritableFileException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public class FileOutput extends Output implements FileOutputContract {
 
@@ -45,7 +51,17 @@ public class FileOutput extends Output implements FileOutputContract {
 
     @Override
     protected void outputMessage(MessageContract message) {
-        // TODO: Implement
+        try {
+            Files.writeString(
+                    Path.of(filepath),
+                    message.getFormattedText(),
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND);
+        } catch (IOException exception) {
+            throw new CliInteractionUnwritableFileException(
+                    "Unable to write to file " + filepath, exception);
+        }
     }
 
     @Override
