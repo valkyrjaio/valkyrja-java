@@ -1,6 +1,12 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.5...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.6...26.x)
+
+## [v26.9.6](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.5...v26.9.6) - 2026-08-19
+
+* [Comment] docs: Remove the restating doc blocks from type declarations by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/173
+* [Workflow] ci: Update .github workflow refs to v26.25.1 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/178
+* [Dependency] build: Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/179
 
 ## [v26.9.5](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.4...v26.9.5) - 2026-08-18
 
