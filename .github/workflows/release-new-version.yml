@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   release:
-    uses: valkyrjaio/.github/.github/workflows/_java-create-release.yml@f3c08751f14a5470fe63b15a82d52552ac84767d
+    uses: valkyrjaio/.github/.github/workflows/_java-create-release.yml@058874a43d572ee0648c8cb7f8d952e4adacc45c
     secrets:
       VALKYRJA_GHA_APP_ID: ${{ secrets.VALKYRJA_GHA_APP_ID }}
       VALKYRJA_GHA_PRIVATE_KEY: ${{ secrets.VALKYRJA_GHA_PRIVATE_KEY }}
@@ -41,7 +41,7 @@ jobs:
 
   publish:
     needs: release
-    uses: valkyrjaio/.github/.github/workflows/_java-release-maven-publish.yml@f3c08751f14a5470fe63b15a82d52552ac84767d
+    uses: valkyrjaio/.github/.github/workflows/_java-release-maven-publish.yml@058874a43d572ee0648c8cb7f8d952e4adacc45c
     secrets:
       MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
       MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
