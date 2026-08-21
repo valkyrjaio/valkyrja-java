@@ -195,9 +195,9 @@ ServiceResponseContract response = ServiceResponse.of(Status.notFound("No such u
 
 `io.valkyrja.grpc.message.response.ServiceResponse` holds the outbound side: the
 status, the initial metadata, the trailing metadata, and the messages. It is
-immutable, and each `with` method returns a new response. Four named constructors
-build the common cases: `of(status)`, `ok()`, `ok(message)`, and
-`unimplemented()`.
+immutable, and each `with` method returns a new response. Six named constructors
+build the common cases: `of(status)`, `ok()`, `ok(message)`, `unimplemented()`,
+`unimplemented(message)`, and `cancelled(reason)`.
 
 Warning: the initial metadata locks when the first message reaches the wire. The
 trailing metadata stays open until the handler returns.
