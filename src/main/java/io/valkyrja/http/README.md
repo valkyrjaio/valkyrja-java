@@ -57,7 +57,8 @@ dispatches the route.
    binds the route as `RouteContract`.
 4. The router runs the `RouteMatched` stage. A middleware that returns a
    response stops the dispatch.
-5. The router calls the handler of the route.
+5. The router binds the route that the stage returned, and it calls the handler
+   of that route.
 6. The router runs the `RouteDispatched` stage with the response of the handler.
 
 The handler is a
