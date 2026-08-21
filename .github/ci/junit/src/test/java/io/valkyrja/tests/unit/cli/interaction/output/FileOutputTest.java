@@ -26,6 +26,7 @@ import org.junit.jupiter.api.io.TempDir;
 final class FileOutputTest {
 
     private static final String ESCAPE = "\033";
+    private static final String FILENAME = "out.txt";
 
     @TempDir Path directory;
 
@@ -41,7 +42,7 @@ final class FileOutputTest {
 
     @Test
     void writesTheFormattedTextToTheFile() throws IOException {
-        var filepath = directory.resolve("out.txt");
+        var filepath = directory.resolve(FILENAME);
         var output = new FileOutput(filepath.toString());
 
         assertTrue(
@@ -53,7 +54,7 @@ final class FileOutputTest {
 
     @Test
     void appendsEachMessageToTheFile() throws IOException {
-        var filepath = directory.resolve("out.txt");
+        var filepath = directory.resolve(FILENAME);
         var output = new FileOutput(filepath.toString());
 
         output.writeMessage(new Message("first"));
@@ -64,7 +65,7 @@ final class FileOutputTest {
 
     @Test
     void throwsWhenTheFileWriteFails() {
-        var filepath = directory.resolve("missing").resolve("out.txt");
+        var filepath = directory.resolve("missing").resolve(FILENAME);
         var output = new FileOutput(filepath.toString());
 
         assertThrows(

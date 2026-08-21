@@ -180,10 +180,10 @@ public class Output implements OutputContract {
     }
 
     protected void writeMessageInternal(MessageContract message) {
+        writtenMessages.add(message);
         if (!isSilent && !(isQuiet && ExitCode.SUCCESS.equals(exitCode))) {
             outputMessage(message);
         }
-        writtenMessages.add(message);
     }
 
     protected void outputMessage(MessageContract message) {

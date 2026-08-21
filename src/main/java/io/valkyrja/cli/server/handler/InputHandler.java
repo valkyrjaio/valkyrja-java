@@ -76,7 +76,17 @@ public class InputHandler implements InputHandlerContract {
             output =
                     throwableCaughtHandler.throwableCaught(
                             input, getOutputFromThrowable(input, throwable), throwable);
-            output.writeMessages();
+            container.setSingleton(OutputContract.class, output);
+
+            try {
+                output.writeMessages();
+            } catch (Throwable ignored) {
+                // A middleware can return an output whose destination is the one that failed. This
+                // last resort reports the throwable the command's own destination raised.
+                output = getOutputFromThrowable(input, throwable);
+                output.writeMessages();
+                container.setSingleton(OutputContract.class, output);
+            }
         }
 
         exit(input, output);
@@ -105,18 +115,16 @@ public class InputHandler implements InputHandlerContract {
      *
      * @param input the input the command ran with
      * @param throwable the throwable the write raised
-     * @return an output that writes to stdout, because the configured destination is what failed
+     * @return the output that reports the throwable
      */
     protected OutputContract getOutputFromThrowable(InputContract input, Throwable throwable) {
+        // OutputThrowableCaughtMiddleware builds the component's full error report. This is the
+        // minimal fallback that prints when no throwable caught middleware is registered.
         return new Output()
                 .withExitCode(ExitCode.ERROR)
                 .withMessages(
                         new ErrorMessage("Cli Server Error:"),
                         new NewLine(),
-                        new ErrorMessage("Command:"),
-                        new Message(" " + input.getCommandName()),
-                        new NewLine(),
-                        new ErrorMessage("Message:"),
-                        new Message(" " + throwable.getMessage()));
+                        new Message(input.getCommandName() + ": " + throwable.getMessage()));
     }
 }

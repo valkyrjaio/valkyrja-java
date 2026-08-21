@@ -9,7 +9,9 @@
 package io.valkyrja.tests.unit.cli.server.handler;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -17,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.valkyrja.cli.interaction.data.contract.CliInteractionConfigContract;
+import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.input.Input;
 import io.valkyrja.cli.interaction.message.Message;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
@@ -36,9 +39,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 
 /** Test the cli server {@link InputHandler}. */
 final class InputHandlerTest {
+
+    private static final String FILENAME = "out.txt";
 
     private Container container;
     private RouterContract router;
@@ -117,7 +123,7 @@ final class InputHandlerTest {
 
         var recovered = new Output();
         var unwritable =
-                new FileOutput(directory.resolve("missing").resolve("out.txt").toString())
+                new FileOutput(directory.resolve("missing").resolve(FILENAME).toString())
                         .withAddedMessage(new Message("hello"));
 
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
@@ -126,8 +132,31 @@ final class InputHandlerTest {
 
         assertDoesNotThrow(() -> handler().run(input));
 
+        var reported = ArgumentCaptor.forClass(OutputContract.class);
         verify(throwableCaughtHandler)
-                .throwableCaught(any(), any(), any(CliInteractionFileWriteException.class));
+                .throwableCaught(
+                        any(), reported.capture(), any(CliInteractionFileWriteException.class));
+        assertEquals(ExitCode.ERROR, reported.getValue().getExitCode());
+        assertTrue(reported.getValue().hasUnwrittenMessage());
+        verify(processExitingHandler).processExiting(any(), any());
+    }
+
+    @Test
+    void runFallsBackToAnEchoingOutputWhenTheRecoveryWriteAlsoFails() {
+        Exiter.freeze();
+
+        var unwritablePath = directory.resolve("missing").resolve(FILENAME).toString();
+        var unwritable = new FileOutput(unwritablePath).withAddedMessage(new Message("hello"));
+        var alsoUnwritable =
+                new FileOutput(unwritablePath).withAddedMessage(new Message("recovery"));
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        when(router.dispatch(any())).thenReturn(unwritable);
+        when(throwableCaughtHandler.throwableCaught(any(), any(), any()))
+                .thenReturn(alsoUnwritable);
+
+        assertDoesNotThrow(() -> handler().run(input));
+
         verify(processExitingHandler).processExiting(any(), any());
     }
 
