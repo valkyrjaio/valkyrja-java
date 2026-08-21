@@ -49,7 +49,12 @@ valkyrja app:list --limit=10 -v target
 - `--name=value` and `-n=value` carry a value.
 - `-abc` is three short options, and each one carries no value.
 - `--` ends the options. Every argument after it is an argument of the command.
-- A single `-` is an argument, because it names standard input.
+- A single `-` is not an option, because it names standard input. After the
+  first slot it is an argument of the command.
+
+Warning: the factory tests the lone `-` before it tests the position, so a `-`
+in the first slot becomes the command name. `valkyrja - < input.txt` runs a
+command named `-`, and the router reaches the `RouteNotMatched` stage.
 
 Warning: `OptionFactory` throws `CliInteractionInvalidEmptyValueException` for a
 combined short option that carries a value, such as `-abc=value`.
