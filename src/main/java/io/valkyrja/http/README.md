@@ -355,12 +355,18 @@ which the providers register.
 
 ## Exceptions
 
-Each sub-component holds its own throwables, and each contract extends
-`HttpThrowable`: `HttpMessageThrowable`, `HttpRequestThrowable`,
-`HttpResponseThrowable`, `HttpUriThrowable`, `HttpHeaderThrowable`,
-`HttpStreamThrowable`, `UploadedFileThrowable`, `HttpRoutingThrowable`,
-`HttpMiddlewareThrowable`, `HttpServerThrowable`, `HttpStructThrowable`, and
-`HttpClientThrowable`.
+Each sub-component holds its own throwables, and the contracts nest two levels
+deep.
+
+Six contracts extend `HttpThrowable`: `HttpMessageThrowable`,
+`HttpRoutingThrowable`, `HttpMiddlewareThrowable`, `HttpServerThrowable`,
+`HttpStructThrowable`, and `HttpClientThrowable`.
+
+The message sub-component nests its own six under `HttpMessageThrowable`:
+`HttpRequestThrowable`, `HttpResponseThrowable`, `HttpUriThrowable`,
+`HttpHeaderThrowable`, `HttpStreamThrowable`, and `UploadedFileThrowable`. A
+`catch` clause that names `HttpMessageThrowable` therefore covers a URI failure,
+a header failure, a stream failure, and an uploaded file failure as well.
 
 Three exceptions carry a response, and the request handler reads them.
 
