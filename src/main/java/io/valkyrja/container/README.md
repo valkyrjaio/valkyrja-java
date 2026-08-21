@@ -203,7 +203,8 @@ public class LogServiceProvider implements ServiceProviderContract {
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
                 LoggerContract.class, LogServiceProvider::publishLogger,
-                FileLogger.class, LogServiceProvider::publishFileLogger);
+                FileLogger.class, LogServiceProvider::publishFileLogger,
+                NullLogger.class, LogServiceProvider::publishNullLogger);
     }
 
     public static void publishLogger(ContainerContract container) {
