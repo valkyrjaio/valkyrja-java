@@ -216,17 +216,17 @@ The kernel caches each list after the first call, so the walk runs once.
 
 ### The component providers of the framework
 
-| Provider                                  | Loads                                                                                                 |
-| :---------------------------------------- | :---------------------------------------------------------------------------------------------------- |
-| `ApplicationComponentProvider`            | The container and the event components                                                                |
-| `HttpApplicationComponentProvider`        | The application component, the four HTTP components, the HTTP routing commands, and the log component |
-| `CliApplicationComponentProvider`         | The application component, the four CLI components, and the log component                             |
-| `CliWithHttpApplicationComponentProvider` | The CLI providers, and the HTTP components                                                            |
-| `GrpcApplicationComponentProvider`        | The application component, and the three gRPC components                                              |
+| Provider                                  | Loads                                                                                                |
+| :---------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| `ApplicationComponentProvider`            | The container and the event components                                                               |
+| `HttpApplicationComponentProvider`        | The application component, the four HTTP components, the HTTP routing command, and the log component |
+| `CliApplicationComponentProvider`         | The application component, the four CLI components, and the log component                            |
+| `CliWithHttpApplicationComponentProvider` | The CLI providers, and the HTTP components                                                           |
+| `GrpcApplicationComponentProvider`        | The application component, and the three gRPC components                                             |
 
 `CliWithHttpApplicationComponentProvider` is the default of `CliConfig`, so a
-command reaches an HTTP service. The HTTP routing commands list and generate the
-routes of the application.
+command reaches an HTTP service. The HTTP routing command is `http:list`, and it
+lists the routes of the application.
 
 ## Accessing the application
 
