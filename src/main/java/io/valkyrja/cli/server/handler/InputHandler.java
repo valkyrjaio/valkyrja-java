@@ -110,13 +110,6 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build the output that reports a throwable the configured destination could not carry.
-     *
-     * @param input the input the command ran with
-     * @param throwable the throwable the write raised
-     * @return the output that reports the throwable
-     */
-    /**
      * Build the output that reports a throwable and the throwable the recovery write raised.
      *
      * @param input the input the command ran with
@@ -133,6 +126,13 @@ public class InputHandler implements InputHandlerContract {
                         new Message(" " + recoveryThrowable.getMessage()));
     }
 
+    /**
+     * Build the output that reports a throwable the configured destination could not carry.
+     *
+     * @param input the input the command ran with
+     * @param throwable the throwable the write raised
+     * @return the output that reports the throwable
+     */
     protected OutputContract getOutputFromThrowable(InputContract input, Throwable throwable) {
         // OutputThrowableCaughtMiddleware builds the component's full error report. This is the
         // minimal fallback that prints when no middleware replaces these messages.
