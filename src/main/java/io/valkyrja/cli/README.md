@@ -60,8 +60,10 @@ input without a write.
 
 ## Defining a command
 
-A command is a method of a controller class. The annotations live in
-`io.valkyrja.cli.routing.attribute`.
+A command is a method of a controller class. `io.valkyrja.cli.routing.attribute`
+holds `@Route`, `@ArgumentParameter`, and `@OptionParameter`.
+`io.valkyrja.cli.routing.attribute.route` holds `@Name`, `@Middleware`, and
+`@RouteHandler`.
 
 ```java
 @Name("app")

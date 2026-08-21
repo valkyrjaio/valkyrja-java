@@ -104,8 +104,11 @@ An optional parameter takes the slash before it into the group, so
 
 ## Defining a route
 
-A route is a method of a controller class. The annotations live in
-`io.valkyrja.http.routing.attribute`.
+A route is a method of a controller class. `io.valkyrja.http.routing.attribute`
+holds `@Route`, `@DynamicRoute`, and `@Parameter`.
+`io.valkyrja.http.routing.attribute.route` holds `@Path`, `@Name`,
+`@Middleware`, `@RouteHandler`, `@RequestMethod`, `@RequestStruct`, and
+`@ResponseStruct`.
 
 ```java
 @Path("/api")
