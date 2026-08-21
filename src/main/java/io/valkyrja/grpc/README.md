@@ -306,16 +306,19 @@ entry class of the runtime, and the entry class holds the handler.
 contract extends it: `GrpcRoutingThrowable`, `GrpcMiddlewareThrowable`, and
 `GrpcServerThrowable`.
 
-| Exception                        | The component throws it when                        |
-| :------------------------------- | :-------------------------------------------------- |
-| `CancelledException`             | `throwIfCancelled` runs on a cancelled token        |
-| `GrpcNonStreamingSendException`  | `send` runs on a buffered call                      |
-| `GrpcConcurrentSendException`    | A second `send` starts while the first one runs     |
-| `GrpcInvalidStatusCodeException` | A number matches no gRPC status code                |
-| `MetadataInvalidKeyException`    | A metadata key breaks the naming rule               |
-| `MetadataInvalidValueException`  | A metadata value does not match the type of its key |
+| Exception                           | The component throws it when                                                                  |
+| :---------------------------------- | :-------------------------------------------------------------------------------------------- |
+| `CancelledException`                | `throwIfCancelled` runs on a cancelled token                                                  |
+| `GrpcNonStreamingSendException`     | `send` runs on a buffered call                                                                |
+| `GrpcConcurrentSendException`       | A second `send` starts while the first one runs                                               |
+| `GrpcInvalidStatusCodeException`    | A number matches no gRPC status code                                                          |
+| `MetadataInvalidKeyException`       | A metadata key breaks the naming rule                                                         |
+| `MetadataInvalidValueException`     | A metadata value does not match the type of its key                                           |
+| `GrpcRoutingInvalidMethodException` | The `Route(method, handler)` constructor reads a method that is not `/package.Service/Method` |
 
-`RouteCollection.get` throws `GrpcRoutingInvalidMethodException` for a method
-that the service map does not hold. The router calls `has` first, so the router
-never reaches it. The [throwable component](../throwable/README.md) describes
-the hierarchy.
+A route provider that returns a prebuilt route with a malformed method therefore
+fails at boot, inside `GrpcRoutingServiceProvider.publishRouteCollection`.
+
+`RouteCollection.get` throws the same exception for a method that the service
+map does not hold. The router calls `has` first, so the router never reaches it.
+The [throwable component](../throwable/README.md) describes the hierarchy.
