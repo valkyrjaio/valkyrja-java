@@ -240,11 +240,16 @@ discards the return value, so the messages reach the terminal while the output
 it holds still reports each one as unwritten. Keep the return value when the
 moved state matters.
 
-Three flags control the write. `isSilent` stops every write. `isQuiet` stops the
-write while the exit code is `ExitCode.SUCCESS`. `isInteractive` states whether
-a question reads an answer from the terminal.
+Two flags control the write. `isSilent` stops it. `isQuiet` stops it while the
+exit code is `ExitCode.SUCCESS`. A third flag, `isInteractive`, reaches no write
+path. It states whether a question reads an answer from the terminal.
 `io.valkyrja.cli.interaction.data.CliInteractionConfig` holds the defaults,
 which are interactive, and neither quiet nor silent.
+
+Warning: a stopped write still records the message. `writeMessageInternal` adds
+the message to the written list before it reads either flag, so
+`getWrittenMessages()` and `hasWrittenMessage()` report a message that no
+terminal received.
 
 Warning: `Output` writes each message directly, and it consults no writer. An
 output holds a list of `WriterContract`, and a subclass that overrides
