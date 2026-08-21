@@ -85,8 +85,13 @@ describes the hierarchy this exception belongs to.
 
 ## NullLogger
 
-`io.valkyrja.log.logger.NullLogger` implements every method with an empty body.
-Bind it for a test, and for an environment that writes no log.
+`io.valkyrja.log.logger.NullLogger` implements the eight level methods and
+`throwable` with an empty body. Bind it for a test, and for an environment that
+writes no log.
+
+Warning: `NullLogger` does not override `log`. It inherits the method of
+`Logger`, which throws `LogInvalidLogLevelException` for a `null` level and
+calls the empty level method otherwise.
 
 ## Container bindings
 
