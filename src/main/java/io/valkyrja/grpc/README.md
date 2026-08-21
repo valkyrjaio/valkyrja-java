@@ -52,11 +52,12 @@ publishes as `RouteCollectionContract`. The key is the full method, which reads
 1. A method that the service map does not hold returns an `UNIMPLEMENTED`
    response, and the `RouteNotMatched` stage runs.
 2. The router appends the middleware of the route to five stage handlers, and it
-   binds the call and the route in the container.
+   binds the call as `ServiceCallContract`.
 3. The router runs the cancellation check. A cancelled call returns without the
    dispatch.
-4. The router runs the `RouteMatched` stage. A middleware that returns a
-   response stops the dispatch.
+4. The router runs the `RouteMatched` stage, and it then binds the route that
+   the stage returned as `RouteContract`. A middleware that returns a response
+   stops the dispatch.
 5. The router calls the handler of the route.
 6. The router runs the cancellation check again, and then the `RouteDispatched`
    stage.
