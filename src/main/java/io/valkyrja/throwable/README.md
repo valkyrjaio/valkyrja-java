@@ -107,8 +107,10 @@ unique across the framework.
 - A concrete exception extends the abstract base. The log component declares
   `LogFileWriteException`.
 
-Every component ships both abstract bases, and a component ships a base that it
-does not throw today.
+A component that ships a throwable ships both abstract bases, and it ships a
+base that it does not throw today. Eight components hold a throwable segment:
+`application`, `cli`, `container`, `event`, `grpc`, `http`, `log`, and
+`reflection`. The `support`, `type`, and `validation` components hold none.
 
 Warning: an abstract base is never thrown. Throw a concrete exception, so the
 `catch` clause of a caller can name the one failure it handles.
