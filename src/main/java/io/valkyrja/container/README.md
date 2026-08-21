@@ -279,9 +279,14 @@ not reach the record.
 
 `getData()` returns a snapshot of the container. `setFromData(data)` merges a
 snapshot into the container. `App.loadContainerData` calls both at boot. An
-application that ships a generated data class binds it as
+application that ships a generated data class publishes it as
 `ContainerDataContract` before boot, and the container then registers no
 provider at all.
+
+Warning: `loadContainerData` reads `isSingleton`, so only `bindSingleton` and
+`setSingleton` satisfy the guard. A key that `bind` registered leaves the guard
+`false`, and the framework then builds the data itself and ignores the generated
+class. Nothing reports it.
 
 Warning: `ContainerData` holds no built instance. A snapshot describes how to
 build each service, and it never holds the service.

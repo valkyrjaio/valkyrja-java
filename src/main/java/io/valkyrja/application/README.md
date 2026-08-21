@@ -158,9 +158,11 @@ publication. It reads every service provider of the application, and it
 registers each one. The [container component](../container/README.md) describes
 the registration.
 
-Warning: an application that binds `ContainerDataContract` before this step
+Warning: an application that publishes `ContainerDataContract` before this step
 ships a generated data class, and the framework then registers no provider at
-all.
+all. The guard reads `isSingleton`, so publish the key with `bindSingleton` or
+with `setSingleton`. A key that `bind` registered leaves the guard `false`, and
+the framework ignores the generated class in silence.
 
 Each method of `App` is `public static`, so a runtime that cannot extend the
 class still reproduces the sequence.
