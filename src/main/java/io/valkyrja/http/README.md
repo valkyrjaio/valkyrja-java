@@ -300,13 +300,16 @@ Three abstract request structs read one part of the request:
 | `header`   | `Header`, the collection, and the typed headers                                                                    |
 | `stream`   | `Stream`, its factory, and the seek and mode enums                                                                 |
 | `file`     | `UploadedFile` and its collection                                                                                  |
-| `param`    | The six parameter collections of a server request                                                                  |
+| `param`    | The parameter collections, one for each part of a request                                                          |
 | `enum_`    | `RequestMethod`, `StatusCode`, `StatusText`, `ProtocolVersion`, and `SameSite`                                     |
 
 `MessageContract` holds the protocol version, the headers, and the body.
 `RequestContract` adds the request target, the request method, and the URI.
-`ServerRequestContract` adds six parameter collections: the server params, the
-cookies, the query, the uploaded files, the parsed body, and the attributes.
+`ServerRequestContract` adds six collections: the server params, the cookies,
+the query, the uploaded files, the parsed body, and the attributes. Five of the
+six live in the `param` package, and the uploaded file collection lives in the
+`file` package. The `param` package also holds `ParsedJsonParamCollection`,
+which `JsonServerRequestContract.getParsedJson` returns.
 
 Each message is immutable. A `with` method returns a new message.
 
@@ -326,7 +329,11 @@ ResponseContract response = responseFactory.createJsonResponse(
 ```
 
 Each method takes a nullable status code and a nullable header collection. The
-factory uses `StatusCode.OK` and an empty collection for a `null`.
+factory uses an empty collection for a `null` collection, and `StatusCode.OK`
+for a `null` status code.
+
+Warning: `createRedirectResponse` uses `StatusCode.FOUND` instead, which is 302.
+Name the status code to send a 301.
 
 Warning: the factory holds no method for `HtmlResponse`, `XmlResponse`, and
 `EmptyResponse`. Construct one of the three directly.
