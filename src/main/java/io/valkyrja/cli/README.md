@@ -217,9 +217,14 @@ takes the messages alone. The variant uses `ExitCode.SUCCESS`.
 Warning: `FileOutput.outputMessage` and `StreamOutput.outputMessage` hold no
 implementation, so neither type writes a message today.
 
-`writeMessages()` writes each message that the output holds, and it moves the
-message from the unwritten list to the written list. `InputHandler.run` calls it
-once, after the router returns.
+`writeMessages()` writes each message that the output holds.
+`InputHandler.run` calls it once, after the router returns.
+
+Warning: `writeMessages()` returns a new output, and the receiver keeps its
+unwritten list. The new output holds each message as written. `InputHandler.run`
+discards the return value, so the messages reach the terminal while the output it
+holds still reports each one as unwritten. Keep the return value when the moved
+state matters.
 
 Three flags control the write. `isSilent` stops every write. `isQuiet` stops the
 write while the exit code is `ExitCode.SUCCESS`. `isInteractive` states whether a
