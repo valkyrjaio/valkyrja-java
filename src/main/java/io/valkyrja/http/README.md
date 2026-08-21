@@ -250,6 +250,17 @@ middleware class needs a binding. The
 `throwableCaughtMiddleware`, and it lists no other middleware. An application
 that wants one of the others lists it in its own config.
 
+`HttpServerServiceProvider` publishes a binding for four of the seven:
+`LogThrowableCaughtMiddleware`, `RequestStructMiddleware`,
+`ResponseStructMiddleware`, and `CacheResponseMiddleware`.
+
+Warning: `RedirectTrailingSlashMiddleware`, `NoCacheResponseMiddleware`, and
+`ViewRouteNotMatchedMiddleware` carry no binding. A config that lists one of the
+three throws `ContainerInvalidReferenceException` on the first request, so the
+application publishes a binding for it as well. `ViewRouteNotMatchedMiddleware`
+takes the renderer as its one constructor argument, and the application supplies
+it.
+
 Warning: `CacheResponseMiddleware` writes a cache file, and it deletes a file
 that is older than its 1800-second lifetime. It returns no cached response, so a
 cached file serves no request today.
