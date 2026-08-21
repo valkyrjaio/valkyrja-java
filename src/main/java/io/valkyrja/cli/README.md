@@ -310,8 +310,15 @@ order.
 ## The built-in commands
 
 The `server` sub-component ships four command classes: `HelpCommand`,
-`ListCommand`, `ListBashCommand`, and `VersionCommand`. Each one takes a route
-and returns an output from `run()`.
+`ListCommand`, `ListBashCommand`, and `VersionCommand`. Each one extends the
+abstract `io.valkyrja.cli.server.command.abstract_.Command`, which takes the
+route, and each one returns an output from `run()`.
+
+Warning: the four constructors differ, and none of them takes the route alone.
+`HelpCommand` and `ListCommand` take the namespace of the application, its
+version, the route, the collection, and the output factory. `ListBashCommand`
+takes the route, the collection, and the output factory. `VersionCommand` takes
+the output factory, the namespace, the version, and the route.
 
 Warning: no route provider of the framework registers these four commands, so an
 application that wants one declares a route for it.
