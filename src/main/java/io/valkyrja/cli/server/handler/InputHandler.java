@@ -82,9 +82,14 @@ public class InputHandler implements InputHandlerContract {
                 output.writeMessages();
             } catch (Throwable recoveryThrowable) {
                 // A middleware can return an output whose destination is the one that failed. This
-                // last resort reports the throwable the command's own destination raised.
-                throwable.addSuppressed(recoveryThrowable);
-                output = getOutputFromThrowable(input, throwable);
+                // last resort leads with the throwable the command's own destination raised, and it
+                // names both failures.
+                output =
+                        getOutputFromThrowable(input, throwable)
+                                .withAddedMessages(
+                                        new NewLine(),
+                                        new ErrorMessage("Recovery message:"),
+                                        new Message(" " + recoveryThrowable.getMessage()));
                 container.setSingleton(OutputContract.class, output);
                 output.writeMessages();
             }
