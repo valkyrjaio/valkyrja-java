@@ -86,9 +86,12 @@ log entry with one failure point. It does not identify an exception class.
 handler, and `ThrowableHandler` implements the trace code for a subclass.
 
 The framework ships no concrete handler. `App.bootstrapThrowableHandler` does
-nothing, and an application overrides it in its own entry class to register a
-handler for debug mode. The [application component](../application/README.md)
-describes the entry classes.
+nothing.
+
+Warning: the method is `public static`, so a subclass cannot override it. An
+application registers its handler in its own entry class, which reproduces the
+bootstrap sequence. The [application component](../application/README.md)
+describes that sequence.
 
 ## Component throwables
 

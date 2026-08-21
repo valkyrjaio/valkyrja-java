@@ -275,12 +275,39 @@ ExchangeHttp.dispatch(app, data, request, emitter);
 Capture the snapshot once, after the bootstrap. Each request reads that one
 snapshot, and each child copies from it.
 
-`bootstrapParentServices(app)` is empty. Override it to resolve an expensive
-shared service at startup, so the first request does not pay for it.
+`bootstrapParentServices(app)` and `bootstrapThrowableHandler(app, container)`
+are both empty. The first is the seam for resolving an expensive shared service
+at startup, so the first request does not pay for it. The second is the seam for
+registering an error handler. The [throwable component](../throwable/README.md)
+describes the handler contract.
 
-`bootstrapThrowableHandler(app, container)` is empty as well. The framework
-ships no error display handler. The
-[throwable component](../throwable/README.md) describes the handler contract.
+Warning: neither method can be overridden. Both are `public static`, and Java
+hides a static method in a subclass instead of overriding it, so `bootstrap`
+still calls the empty base method. A subclass that declares either name
+compiles, runs, and does nothing.
+
+Every method of `App` and of the worker classes is `public static` for that
+reason: an application reproduces the sequence in its own entry class rather
+than extending one. Call the steps in order, and call your own method where the
+seam sits.
+
+```java
+public final class AppHttp {
+
+    public static ApplicationContract bootstrap(HttpConfigContract config) {
+        ApplicationContract app = WorkerHttp.start(config);
+
+        WorkerHttp.bootstrapThrowableHandler(app, app.getContainer());
+        warmTheRouteCollection(app);
+
+        return app;
+    }
+
+    private static void warmTheRouteCollection(ApplicationContract app) {
+        app.getContainer().getSingleton(RouteCollectionContract.class);
+    }
+}
+```
 
 ## Directories
 
