@@ -42,11 +42,13 @@ constructor.
 ## The router
 
 `io.valkyrja.grpc.routing.dispatcher.Router` looks the method of the call up in
-the service map. The key is the full method, which reads
+the service map. The service map is
+`io.valkyrja.grpc.routing.collection.RouteCollection`, which the container
+publishes as `RouteCollectionContract`. The key is the full method, which reads
 `/package.Service/Method`, and the match is exact.
 
-1. A method that the map does not hold returns an `UNIMPLEMENTED` response, and
-   the `RouteNotMatched` stage runs.
+1. A method that the service map does not hold returns an `UNIMPLEMENTED`
+   response, and the `RouteNotMatched` stage runs.
 2. The router appends the middleware of the route to five stage handlers, and it
    binds the call and the route in the container.
 3. The router runs the cancellation check. A cancelled call returns without the
@@ -277,19 +279,19 @@ window of the flow control, and it rejects no call.
 
 ## Container bindings
 
-| Binding key                      | Published by                    | Resolves to                                        |
-| :------------------------------- | :------------------------------ | :------------------------------------------------- |
-| `RouterContract`                 | `GrpcRoutingServiceProvider`    | `Router`                                           |
-| `RouteCollectionContract`        | `GrpcRoutingServiceProvider`    | `RouteCollection`, filled from the route providers |
-| `RouteCollectorContract`         | `GrpcRoutingServiceProvider`    | `AttributeRouteCollector`                          |
-| `CallReceivedHandlerContract`    | `GrpcMiddlewareServiceProvider` | `CallReceivedHandler`                              |
-| `RouteMatchedHandlerContract`    | `GrpcMiddlewareServiceProvider` | `RouteMatchedHandler`                              |
-| `RouteNotMatchedHandlerContract` | `GrpcMiddlewareServiceProvider` | `RouteNotMatchedHandler`                           |
-| `RouteDispatchedHandlerContract` | `GrpcMiddlewareServiceProvider` | `RouteDispatchedHandler`                           |
-| `ThrowableCaughtHandlerContract` | `GrpcMiddlewareServiceProvider` | `ThrowableCaughtHandler`                           |
-| `SendingResponseHandlerContract` | `GrpcMiddlewareServiceProvider` | `SendingResponseHandler`                           |
-| `ResponseSentHandlerContract`    | `GrpcMiddlewareServiceProvider` | `ResponseSentHandler`                              |
-| `ServiceHandlerContract`         | `GrpcServerServiceProvider`     | `ServiceHandler`                                   |
+| Binding key                      | Published by                    | Resolves to                                      |
+| :------------------------------- | :------------------------------ | :----------------------------------------------- |
+| `RouterContract`                 | `GrpcRoutingServiceProvider`    | `Router`                                         |
+| `RouteCollectionContract`        | `GrpcRoutingServiceProvider`    | The service map, filled from the route providers |
+| `RouteCollectorContract`         | `GrpcRoutingServiceProvider`    | `AttributeRouteCollector`                        |
+| `CallReceivedHandlerContract`    | `GrpcMiddlewareServiceProvider` | `CallReceivedHandler`                            |
+| `RouteMatchedHandlerContract`    | `GrpcMiddlewareServiceProvider` | `RouteMatchedHandler`                            |
+| `RouteNotMatchedHandlerContract` | `GrpcMiddlewareServiceProvider` | `RouteNotMatchedHandler`                         |
+| `RouteDispatchedHandlerContract` | `GrpcMiddlewareServiceProvider` | `RouteDispatchedHandler`                         |
+| `ThrowableCaughtHandlerContract` | `GrpcMiddlewareServiceProvider` | `ThrowableCaughtHandler`                         |
+| `SendingResponseHandlerContract` | `GrpcMiddlewareServiceProvider` | `SendingResponseHandler`                         |
+| `ResponseSentHandlerContract`    | `GrpcMiddlewareServiceProvider` | `ResponseSentHandler`                            |
+| `ServiceHandlerContract`         | `GrpcServerServiceProvider`     | `ServiceHandler`                                 |
 
 Warning: no provider binds `ServiceAdapterContract`. An adapter starts from the
 entry class of the runtime, and the entry class holds the handler.
