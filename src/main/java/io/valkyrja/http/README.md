@@ -29,19 +29,28 @@ steps.
 3. `send(response)` writes the status line, the headers, and the body.
 4. `terminate(request, response)` runs the `ResponseSent` stage.
 
-`handle` catches every `Throwable`. It builds a response from the throwable, and
-it runs the `ThrowableCaught` stage with that response.
+`handle` catches every `Throwable`.
+
+Warning: the debug branch runs first, and it ends the request. When `debugMode`
+is `true` the handler wraps the throwable in a `java.lang.RuntimeException` and
+throws that out of `handle`. Nothing below this warning then happens: the
+`ThrowableCaught` stage does not run, `run` never reaches `sendingResponse`,
+`send`, or `terminate`, and no response reaches the client. A `catch` clause
+that names the original type does not match the wrapper, so read the cause.
+`HttpServerServiceProvider` reads `app.getDebugMode()` and passes it to the
+constructor.
+
+Warning: `HttpConfig` lists `LogThrowableCaughtMiddleware` by default, and debug
+mode skips the stage that runs it. The one middleware the framework ships logs
+nothing in the mode a developer runs.
+
+Outside debug mode the handler builds a response from the throwable, and it runs
+the `ThrowableCaught` stage with that response.
 
 - A `HttpResponseException` that holds a response returns that response.
 - A `HttpResponseException` that holds none returns a response with the status
   code of the exception.
 - Every other throwable returns a 500 response.
-
-Warning: the handler wraps the throwable in a `java.lang.RuntimeException` and
-throws that, when the application runs in debug mode. A `catch` clause that
-names the original type does not match it, so read the cause.
-`HttpServerServiceProvider` reads `app.getDebugMode()` and passes it to the
-constructor.
 
 ## The router
 

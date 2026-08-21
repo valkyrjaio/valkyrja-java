@@ -31,15 +31,18 @@ the [http component](../http/README.md), and the two read alike.
 | `terminate(call, response)` | Runs the `ResponseSent` stage                |
 | `run(call)`                 | Calls `handle`, and then `sending`           |
 
-`handle` catches every `Throwable`. A `CancelledException` returns a cancelled
-response, and every other throwable returns a response with the `INTERNAL`
-status. The `ThrowableCaught` stage then runs with that response.
+`handle` catches every `Throwable`.
 
-Warning: the handler wraps the throwable in a `java.lang.RuntimeException` and
-throws that, when the application runs in debug mode. A `catch` clause that
-names the original type does not match it, so read the cause.
-`GrpcServerServiceProvider` reads `app.getDebugMode()` and passes it to the
-constructor.
+Warning: the debug branch runs first, and it ends the call. When `debugMode` is
+`true` the handler wraps the throwable in a `java.lang.RuntimeException` and
+throws that out of `handle`, so the `ThrowableCaught` stage does not run and
+`run` never reaches `sending`. A `catch` clause that names the original type
+does not match the wrapper, so read the cause. `GrpcServerServiceProvider` reads
+`app.getDebugMode()` and passes it to the constructor.
+
+Outside debug mode a `CancelledException` returns a cancelled response, and
+every other throwable returns a response with the `INTERNAL` status. The
+`ThrowableCaught` stage then runs with that response.
 
 ## The router
 
