@@ -326,9 +326,12 @@ stays in the child.
 Warning: the two implementations differ for a factory that the parent holds.
 `NativeChildContainer` reads the factory of the parent and applies it with the
 child. `ChildContainer` delegates to `parent.getService`, which applies the
-factory with the parent, so the instance and its dependencies come from the
-parent. A parent that published a key before the first request therefore serves
-every request from that one instance.
+factory with the parent, so a dependency that the request bound into the child
+is invisible to that factory.
+
+The factory still runs for each call, so each request gets its own instance.
+Only a key that the parent resolved into its instance cache is shared across
+requests.
 
 ### Using a child container
 
