@@ -31,13 +31,13 @@ call.
 Warning: `instantiate` is not a factory. Two callers that ask for the same class
 get the same object, so never call it for a type that holds mutable state.
 
-`constructor` returns the declared no-argument constructor of the class. `method`
-returns a public method, and the parameter types select the overload.
+`constructor` returns the declared no-argument constructor of the class.
+`method` returns a public method, and the parameter types select the overload.
 
-Each cache is a `ConcurrentHashMap`. The instance cache and the constructor cache
-use the class as the key. The method cache builds a string key from the class
-name, the method name, and the parameter type names, so two overloads hold two
-entries.
+Each cache is a `ConcurrentHashMap`. The instance cache and the constructor
+cache use the class as the key. The method cache builds a string key from the
+class name, the method name, and the parameter type names, so two overloads hold
+two entries.
 
 Warning: the cache holds every class a caller asks for, and it never evicts an
 entry. `Reflection` is for a type the application resolves once. It is not for a

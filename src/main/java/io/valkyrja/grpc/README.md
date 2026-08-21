@@ -16,8 +16,8 @@ The component references no gRPC library and no generated protobuf type. A
 message crosses the boundary as an `Object`, and the handler of the application
 decodes it. An adapter connects a gRPC server to the component.
 
-Warning: this component has no counterpart in the PHP port. The shape follows the
-[http component](../http/README.md), and the two read alike.
+Warning: this component has no counterpart in the PHP port. The shape follows
+the [http component](../http/README.md), and the two read alike.
 
 ## The service handler
 
@@ -36,8 +36,8 @@ response, and every other throwable returns a response with the `INTERNAL`
 status. The `ThrowableCaught` stage then runs with that response.
 
 Warning: the handler rethrows the throwable when the application runs in debug
-mode. `GrpcServerServiceProvider` reads `app.getDebugMode()` and passes it to the
-constructor.
+mode. `GrpcServerServiceProvider` reads `app.getDebugMode()` and passes it to
+the constructor.
 
 ## The router
 
@@ -53,8 +53,8 @@ publishes as `RouteCollectionContract`. The key is the full method, which reads
    binds the call and the route in the container.
 3. The router runs the cancellation check. A cancelled call returns without the
    dispatch.
-4. The router runs the `RouteMatched` stage. A middleware that returns a response
-   stops the dispatch.
+4. The router runs the `RouteMatched` stage. A middleware that returns a
+   response stops the dispatch.
 5. The router calls the handler of the route.
 6. The router runs the cancellation check again, and then the `RouteDispatched`
    stage.
@@ -99,8 +99,8 @@ public final class AppGreeterController {
 `@Middleware` is repeatable.
 
 `io.valkyrja.grpc.routing.collector.AttributeRouteCollector` reads each class
-that carries `@Service`, and each method of that class that carries `@Method`. It
-builds the key from the two names, and it wires the method as the handler.
+that carries `@Service`, and each method of that class that carries `@Method`.
+It builds the key from the two names, and it wires the method as the handler.
 
 Warning: the collector constructs the controller with its no-argument
 constructor, and it calls the method through reflection. The method takes a
@@ -133,9 +133,9 @@ side of one call.
 
 The component dispatches a call under one of two models.
 
-**The buffered model.** The adapter reads every inbound message, and it calls the
-handler after the client half-closes. `getMessages()` returns the fixed list, and
-the handler returns its messages on the response. A unary call, a
+**The buffered model.** The adapter reads every inbound message, and it calls
+the handler after the client half-closes. `getMessages()` returns the fixed
+list, and the handler returns its messages on the response. A unary call, a
 server-streaming call, and a client-streaming call each use this model.
 
 **The streaming model.** The adapter calls the handler at once. `getMessages()`
@@ -147,8 +147,8 @@ Warning: `send` throws `GrpcNonStreamingSendException` under the buffered model.
 Return the messages on the response instead.
 
 Warning: `send` throws `GrpcConcurrentSendException` for a second call that
-starts while the first one runs. The transport is not thread-safe, so a streaming
-handler emits from one thread.
+starts while the first one runs. The transport is not thread-safe, so a
+streaming handler emits from one thread.
 
 Warning: under the streaming model the inbound stream ends on a half-close, and
 it ends on a cancellation as well. Read `getCancellation()` after the loop to
@@ -172,14 +172,14 @@ if (call.getCancellation().isCancelled()) {
 cancelled already runs the listener at once.
 
 `io.valkyrja.grpc.message.enum_.CancellationReason` holds two cases:
-`CLIENT_CANCELLED` and `DEADLINE_EXCEEDED`. The component unifies the two causes,
-so code tests the cancellation, and it reads the reason when the difference
-matters.
+`CLIENT_CANCELLED` and `DEADLINE_EXCEEDED`. The component unifies the two
+causes, so code tests the cancellation, and it reads the reason when the
+difference matters.
 
-`io.valkyrja.grpc.support.Cancellation.checkAndFinalize(call, response)` runs the
-check at each boundary. It asks two questions. Has the call cancelled? Does the
-response in hand carry a cancellation status? It returns a response to exit with,
-or `null` to continue.
+`io.valkyrja.grpc.support.Cancellation.checkAndFinalize(call, response)` runs
+the check at each boundary. It asks two questions. Has the call cancelled? Does
+the response in hand carry a cancellation status? It returns a response to exit
+with, or `null` to continue.
 
 `call.cancellable(source)` wraps an iterable, and the iteration stops when the
 call cancels.
@@ -188,8 +188,8 @@ call cancels.
 
 `io.valkyrja.grpc.message.status.Status` holds a code and a message.
 `io.valkyrja.grpc.message.enum_.StatusCode` holds the seventeen gRPC codes, from
-`OK` at 0 to `UNAUTHENTICATED` at 16. `Status` holds a named constructor for each
-one.
+`OK` at 0 to `UNAUTHENTICATED` at 16. `Status` holds a named constructor for
+each one.
 
 ```java
 ServiceResponseContract response = ServiceResponse.of(Status.notFound("No such user."));
@@ -212,8 +212,8 @@ in `-bin` carries a `byte[]` value, and every other key carries a `String`.
 
 Warning: `Metadata` validates on construction. It throws
 `MetadataInvalidKeyException` for a key that breaks the rule, and
-`MetadataInvalidValueException` for a value whose type does not match the kind of
-its key.
+`MetadataInvalidValueException` for a value whose type does not match the kind
+of its key.
 
 ## Middleware
 
@@ -242,9 +242,9 @@ Warning: the handler resolves a middleware through `container.get`, so every
 middleware class needs a binding. The
 [container component](../container/README.md) describes the rule.
 
-Under the streaming model each stage runs once for the call.
-`SendingResponse` runs at the stream open, against an OK response whose initial
-metadata becomes the headers. `ResponseSent` runs at the close.
+Under the streaming model each stage runs once for the call. `SendingResponse`
+runs at the stream open, against an OK response whose initial metadata becomes
+the headers. `ResponseSent` runs at the close.
 
 ## The adapter
 
@@ -257,9 +257,10 @@ void start(ServiceHandlerContract handler);
 void stop();
 ```
 
-An adapter accepts a native call, builds a `ServiceCall`, hands it to the service
-handler, and writes the response back through the API of its library. The TLS
-settings, the thread pool, and the port binding live on the implementation.
+An adapter accepts a native call, builds a `ServiceCall`, hands it to the
+service handler, and writes the response back through the API of its library.
+The TLS settings, the thread pool, and the port binding live on the
+implementation.
 
 The framework runs each handler on its own virtual thread, off the thread that
 the library used to deliver the call. Two guarantees follow. The delivery of a
@@ -267,9 +268,9 @@ call returns without a wait, and the library reaches the framework with a later
 event for the same call while the handler runs.
 
 `io.valkyrja.application.entry.grpc.GrpcBridge` implements the bridge for
-grpc-java. It depends on `io.grpc` alone, so every grpc-java transport shares it.
-`NettyGrpc`, `JettyGrpc`, and `TomcatGrpc` build on it, and each one declares its
-own SDK as `compileOnly`. The
+grpc-java. It depends on `io.grpc` alone, so every grpc-java transport shares
+it. `NettyGrpc`, `JettyGrpc`, and `TomcatGrpc` build on it, and each one
+declares its own SDK as `compileOnly`. The
 [application component](../application/README.md) describes the entry classes.
 
 `GrpcConfigContract.maxInboundMessages` bounds the inbound side, and the default
@@ -298,8 +299,8 @@ entry class of the runtime, and the entry class holds the handler.
 
 ## Exceptions
 
-`GrpcThrowable` is the contract of the component, and each sub-component contract
-extends it: `GrpcRoutingThrowable`, `GrpcMiddlewareThrowable`, and
+`GrpcThrowable` is the contract of the component, and each sub-component
+contract extends it: `GrpcRoutingThrowable`, `GrpcMiddlewareThrowable`, and
 `GrpcServerThrowable`.
 
 | Exception                        | The component throws it when                        |
@@ -313,5 +314,5 @@ extends it: `GrpcRoutingThrowable`, `GrpcMiddlewareThrowable`, and
 
 `RouteCollection.get` throws `GrpcRoutingInvalidMethodException` for a method
 that the service map does not hold. The router calls `has` first, so the router
-never reaches it. The [throwable component](../throwable/README.md) describes the
-hierarchy.
+never reaches it. The [throwable component](../throwable/README.md) describes
+the hierarchy.

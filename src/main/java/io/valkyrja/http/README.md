@@ -38,8 +38,8 @@ it runs the `ThrowableCaught` stage with that response.
 - Every other throwable returns a 500 response.
 
 Warning: the handler rethrows the throwable when the application runs in debug
-mode. `HttpServerServiceProvider` reads `app.getDebugMode()` and passes it to the
-constructor.
+mode. `HttpServerServiceProvider` reads `app.getDebugMode()` and passes it to
+the constructor.
 
 ## The router
 
@@ -53,13 +53,14 @@ dispatches the route.
    returns a 404 response. Each one runs the `RouteNotMatched` stage.
 3. The router appends the middleware of the route to five stage handlers, and it
    binds the route as `RouteContract`.
-4. The router runs the `RouteMatched` stage. A middleware that returns a response
-   stops the dispatch.
+4. The router runs the `RouteMatched` stage. A middleware that returns a
+   response stops the dispatch.
 5. The router calls the handler of the route.
 6. The router runs the `RouteDispatched` stage with the response of the handler.
 
-The handler is a `BiFunction<ContainerContract, RouteContract, ResponseContract>`,
-so a handler resolves its own dependencies from the container.
+The handler is a
+`BiFunction<ContainerContract, RouteContract, ResponseContract>`, so a handler
+resolves its own dependencies from the container.
 
 ## The matcher
 
@@ -92,12 +93,11 @@ Warning: the regex is a native Java pattern, and it carries no delimiter.
 `java.util.regex.Pattern` takes no delimiter, and it reads a slash as a literal
 character.
 
-`io.valkyrja.http.routing.constant.Regex` holds the regex of each parameter type,
-such as `NUM`, `SLUG`, `ALPHA`, `UUID`, and `ULID`.
+`io.valkyrja.http.routing.constant.Regex` holds the regex of each parameter
+type, such as `NUM`, `SLUG`, `ALPHA`, `UUID`, and `ULID`.
 
 Warning: the `regex` member of `@Parameter` defaults to an empty string, and the
-processor then writes an empty capture group. Name a regex for every
-parameter.
+processor then writes an empty capture group. Name a regex for every parameter.
 
 An optional parameter takes the slash before it into the group, so
 `/users/{id?}` matches `/users` as well.
@@ -149,10 +149,10 @@ public final class AppUserController {
 
 `@Route`, `@DynamicRoute`, `@Middleware`, and `@Parameter` are repeatable.
 
-`io.valkyrja.http.routing.attribute.route.requestmethod` holds one annotation for
-each method: `@Get`, `@Post`, `@Put`, `@Patch`, `@Delete`, `@Head`, `@Options`,
-`@Connect`, `@Trace`, and `@Any`. Each one is a `@RequestMethod` annotation with
-its own method set.
+`io.valkyrja.http.routing.attribute.route.requestmethod` holds one annotation
+for each method: `@Get`, `@Post`, `@Put`, `@Patch`, `@Delete`, `@Head`,
+`@Options`, `@Connect`, `@Trace`, and `@Any`. Each one is a `@RequestMethod`
+annotation with its own method set.
 
 `io.valkyrja.http.routing.collector.AttributeRouteCollector` reads the
 annotations of each declared method. It joins the `@Path` of the class, the
@@ -173,8 +173,8 @@ List<Class<?>> getControllerClasses();
 List<RouteContract> getRoutes();
 ```
 
-`HttpRoutingServiceProvider.publishRouteCollection` reads every route provider of
-the application. In debug mode it collects the routes from the annotations on
+`HttpRoutingServiceProvider.publishRouteCollection` reads every route provider
+of the application. In debug mode it collects the routes from the annotations on
 each boot. Otherwise it reads `HttpRoutingDataContract`, whose handlers are
 direct method references, and no reflection runs.
 
@@ -199,8 +199,9 @@ The component holds seven stages.
 
 `RequestReceived` returns a `RequestReceivedResult`, which holds a request and a
 nullable response. `RouteMatched` returns a `RouteMatchedResult`, which holds a
-route and a nullable response. A result that holds a response stops the dispatch.
-Each other stage returns a response, and `ResponseSent` returns nothing.
+route and a nullable response. A result that holds a response stops the
+dispatch. Each other stage returns a response, and `ResponseSent` returns
+nothing.
 
 ```java
 public final class AppTimerMiddleware implements RouteDispatchedMiddlewareContract {
@@ -220,8 +221,8 @@ A middleware calls the handler to reach the next middleware of the stage. A
 middleware that returns without the call stops the stage.
 
 `HttpConfigContract` holds one list for each stage, and each list holds the
-middleware of the whole application. A `@Middleware` annotation adds a middleware
-to one route, and the router appends it when the route matches.
+middleware of the whole application. A `@Middleware` annotation adds a
+middleware to one route, and the router appends it when the route matches.
 
 Warning: the handler appends each middleware, and it removes no duplicate. A
 middleware that a config lists and an annotation names as well runs twice.
@@ -242,11 +243,12 @@ middleware class needs a binding. The
 | `ViewRouteNotMatchedMiddleware`   | `RouteNotMatched`                 | Renders an error template into the body of the response                     |
 | `CacheResponseMiddleware`         | `RequestReceived`, `ResponseSent` | Writes the response to a cache file                                         |
 
-`HttpConfig` lists `LogThrowableCaughtMiddleware` in its `throwableCaughtMiddleware`, and it lists no
-other middleware. An application that wants one of the others lists it in its own config.
+`HttpConfig` lists `LogThrowableCaughtMiddleware` in its
+`throwableCaughtMiddleware`, and it lists no other middleware. An application
+that wants one of the others lists it in its own config.
 
-Warning: `CacheResponseMiddleware` writes a cache file, and it deletes a file that
-is older than its 1800-second lifetime. It returns no cached response, so a
+Warning: `CacheResponseMiddleware` writes a cache file, and it deletes a file
+that is older than its 1800-second lifetime. It returns no cached response, so a
 cached file serves no request today.
 
 ## Structs

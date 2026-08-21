@@ -89,15 +89,15 @@ collection.addListener(listener);
 
 Four methods take an event instance: `hasListenersForEvent`,
 `getListenersForEvent`, `setListenersForEvent`, and `removeListenersForEvent`.
-Each of the four has a variant that ends in `ById` and takes the event class as a
-`Class<?>`.
+Each of the four has a variant that ends in `ById` and takes the event class as
+a `Class<?>`.
 
-`hasListener` and `removeListener` take a listener. Each of the two has a variant
-that ends in `ById` and takes the name of the listener as a `String`.
+`hasListener` and `removeListener` take a listener. Each of the two has a
+variant that ends in `ById` and takes the name of the listener as a `String`.
 
 Warning: `setListenersForEvent` adds each listener. It removes no listener that
-the collection holds already. Call `removeListenersForEvent` first to replace the
-listeners of an event.
+the collection holds already. Call `removeListenersForEvent` first to replace
+the listeners of an event.
 
 Warning: the collection matches the exact class of the event. A listener that is
 registered for a parent class does not run for a subclass.
@@ -161,14 +161,13 @@ List<Class<?>> getListenerClasses();
 List<ListenerContract> getListeners();
 ```
 
-A component provider returns its listener providers from `getEventProviders`, and
-`ApplicationContract.getEventProviders` collects them from every component. The
-[application component](../application/README.md) describes the collection.
+A component provider returns its listener providers from `getEventProviders`,
+and `ApplicationContract.getEventProviders` collects them from every component.
+The [application component](../application/README.md) describes the collection.
 
 Warning: no component of the framework reads that list into a collection. An
-application that uses a listener provider reads
-`app.getEventProviders()` itself, and it adds each listener to its own
-collection.
+application that uses a listener provider reads `app.getEventProviders()`
+itself, and it adds each listener to its own collection.
 
 ## Snapshots
 
@@ -183,5 +182,5 @@ nothing.
 
 `EventInvalidEventException` extends `EventInvalidArgumentException`, and the
 component also ships `EventRuntimeException`. Each one implements
-`EventThrowable`. The [throwable component](../throwable/README.md) describes the
-hierarchy.
+`EventThrowable`. The [throwable component](../throwable/README.md) describes
+the hierarchy.

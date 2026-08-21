@@ -49,10 +49,10 @@ ValidatorContract validate(ServerRequestContract request);
 `getValidationRules` returns an empty map, and `validate` returns a lambda that
 reads the map.
 
-`RequestStructMiddleware` calls `validate(request).validateRules()` for a matched
-route that holds a request struct. A `false` result returns a 400 response, and
-the route handler does not run. The [http component](../http/README.md)
-describes the middleware.
+`RequestStructMiddleware` calls `validate(request).validateRules()` for a
+matched route that holds a request struct. A `false` result returns a 400
+response, and the route handler does not run. The
+[http component](../http/README.md) describes the middleware.
 
 Warning: `RequestStruct.validateAllRules` returns `true` for every map of rules,
 so the framework evaluates no rule. A struct that returns rules from

@@ -111,8 +111,8 @@ Each of the four methods returns the container, so a caller chains the calls.
 The container resolves a key through a cached instance, a bound factory, or an
 alias. It builds nothing that a binding does not describe.
 
-Warning: `get` throws `ContainerInvalidReferenceException` for a key that none of
-the three resolves. The container does not construct the class that the key
+Warning: `get` throws `ContainerInvalidReferenceException` for a key that none
+of the three resolves. The container does not construct the class that the key
 names.
 
 ```java
@@ -129,22 +129,22 @@ container.bindSingleton(
 handler.add(AppAuthMiddleware.class);
 ```
 
-The rule holds for every class that a config or a route names by class object. It
-covers a middleware, a request struct, and a command. One place states how the
-framework builds each service.
+The rule holds for every class that a config or a route names by class object.
+It covers a middleware, a request struct, and a command. One place states how
+the framework builds each service.
 
 ## Resolving services
 
 `get(Class<T> id)` and `get(Class<T> id, Map<String, Object> arguments)` read a
-cached singleton first, then a service factory, then an alias. Use `get` when the
-registration type of the key is unknown.
+cached singleton first, then a service factory, then an alias. Use `get` when
+the registration type of the key is unknown.
 
 ```java
 MatcherContract matcher = container.get(MatcherContract.class);
 ```
 
-`getSingleton(Class<T> id)` resolves a singleton. The first call runs the binding
-or the publisher, and it caches the result.
+`getSingleton(Class<T> id)` resolves a singleton. The first call runs the
+binding or the publisher, and it caches the result.
 
 `getService(Class<T> id, Map<String, Object> arguments)` resolves a service
 factory, and it passes the arguments to that factory.
@@ -152,9 +152,9 @@ factory, and it passes the arguments to that factory.
 `getAliased(Class<T> id, Map<String, Object> arguments)` resolves an alias.
 
 Warning: each of the four methods throws `ContainerInvalidReferenceException`
-when it resolves nothing. `getSingleton` throws for a key that a factory binds as
-a service, and `getService` throws for a key that holds a cached instance. Call
-the method that matches how the provider bound the key.
+when it resolves nothing. `getSingleton` throws for a key that a factory binds
+as a service, and `getService` throws for a key that holds a cached instance.
+Call the method that matches how the provider bound the key.
 
 ## Inspecting the container
 
@@ -208,8 +208,8 @@ public class LogServiceProvider implements ServiceProviderContract {
 ```
 
 A publisher resolves another key from the container, and the container publishes
-that key first. The example above resolves `FileLogger`, so
-`publishFileLogger` runs before `publishLogger` returns.
+that key first. The example above resolves `FileLogger`, so `publishFileLogger`
+runs before `publishLogger` returns.
 
 ### Deferred publication
 
@@ -275,8 +275,8 @@ not reach the record.
 `getData()` returns a snapshot of the container. `setFromData(data)` merges a
 snapshot into the container. `App.loadContainerData` calls both at boot. An
 application that ships a generated data class binds it as
-`ContainerDataContract` before boot, and the container then registers no provider
-at all.
+`ContainerDataContract` before boot, and the container then registers no
+provider at all.
 
 Warning: `ContainerData` holds no built instance. A snapshot describes how to
 build each service, and it never holds the service.
@@ -315,8 +315,8 @@ A child resolves a service, and an alias, from its own maps first, and from the
 parent second.
 
 Warning: the factory runs with the child as its argument. A dependency that the
-factory resolves therefore comes from the child, and the instance it builds stays
-in the child.
+factory resolves therefore comes from the child, and the instance it builds
+stays in the child.
 
 ### Using a child container
 
@@ -337,7 +337,8 @@ describes the worker entry classes.
 | `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias |
 | `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback            |
 
-`ContainerInvalidReferenceException` extends `ContainerInvalidArgumentException`,
-and `ContainerInvalidPublishCallbackException` extends
-`ContainerRuntimeException`. Both are unchecked. The
-[throwable component](../throwable/README.md) describes the hierarchy.
+`ContainerInvalidReferenceException` extends
+`ContainerInvalidArgumentException`, and
+`ContainerInvalidPublishCallbackException` extends `ContainerRuntimeException`.
+Both are unchecked. The [throwable component](../throwable/README.md) describes
+the hierarchy.

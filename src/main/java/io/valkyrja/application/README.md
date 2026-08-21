@@ -128,9 +128,10 @@ public record AppHttpConfig(...) implements HttpConfigContract {}
 ```
 
 Warning: the container publishes the config under the contract it implements.
-`App.bootstrapServices` binds `ConfigContract`, and it binds `CliConfigContract`,
-`HttpConfigContract`, or `GrpcConfigContract` when the config implements that
-contract. Resolve the config through a contract, and never through the record.
+`App.bootstrapServices` binds `ConfigContract`, and it binds
+`CliConfigContract`, `HttpConfigContract`, or `GrpcConfigContract` when the
+config implements that contract. Resolve the config through a contract, and
+never through the record.
 
 ```java
 HttpConfigContract config = container.getSingleton(HttpConfigContract.class);
@@ -153,12 +154,13 @@ HttpConfigContract config = container.getSingleton(HttpConfigContract.class);
 `loadContainerData` publishes `ContainerDataContract` when no binding holds it,
 and it merges the result into the container.
 `io.valkyrja.container.provider.ServiceProvider.publishData` performs the
-publication. It reads every service provider of the application, and it registers
-each one. The [container component](../container/README.md) describes the
-registration.
+publication. It reads every service provider of the application, and it
+registers each one. The [container component](../container/README.md) describes
+the registration.
 
-Warning: an application that binds `ContainerDataContract` before this step ships
-a generated data class, and the framework then registers no provider at all.
+Warning: an application that binds `ContainerDataContract` before this step
+ships a generated data class, and the framework then registers no provider at
+all.
 
 Each method of `App` is `public static`, so a runtime that cannot extend the
 class still reproduces the sequence.
@@ -188,8 +190,8 @@ A component provider returns the component providers it depends on from
 ### Loading order
 
 `Valkyrja.getProviders` reads `config.providers()`, and it walks each one. The
-walk is depth first, and it adds a nested provider before the provider that holds
-it.
+walk is depth first, and it adds a nested provider before the provider that
+holds it.
 
 Warning: the container holds one publisher for each key, and the provider that
 registers last owns the key. List the component provider of the application so
@@ -271,9 +273,9 @@ snapshot, and each child copies from it.
 `bootstrapParentServices(app)` is empty. Override it to resolve an expensive
 shared service at startup, so the first request does not pay for it.
 
-`bootstrapThrowableHandler(app, container)` is empty as well. The framework ships
-no error display handler. The [throwable component](../throwable/README.md)
-describes the handler contract.
+`bootstrapThrowableHandler(app, container)` is empty as well. The framework
+ships no error display handler. The
+[throwable component](../throwable/README.md) describes the handler contract.
 
 ## Directories
 

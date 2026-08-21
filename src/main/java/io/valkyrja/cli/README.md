@@ -2,8 +2,8 @@
 
 ## Introduction
 
-The CLI component runs a command from the arguments of the process. It holds four
-sub-components.
+The CLI component runs a command from the arguments of the process. It holds
+four sub-components.
 
 | Sub-component | Holds                                                    |
 | :------------ | :------------------------------------------------------- |
@@ -13,8 +13,8 @@ sub-components.
 | `server`      | The input handler, the built-in commands, and the exiter |
 
 `io.valkyrja.application.entry.Cli` starts the component. The
-[application component](../application/README.md) describes the entry classes and
-the config.
+[application component](../application/README.md) describes the entry classes
+and the config.
 
 ```java
 Cli.run(new CliConfig(), args);
@@ -96,10 +96,12 @@ The example above names the command `app.list.list`.
 
 `@RouteHandler` names a class with a no-argument constructor, and a method that
 takes a `ContainerContract` and a `RouteContract` and returns an
-`OutputContract`. A command with no `@RouteHandler` returns a new `Output` that holds no message.
+`OutputContract`. A command with no `@RouteHandler` returns a new `Output` that
+holds no message.
 
-Warning: the collector reads the `@Middleware` annotation for the middleware of a
-route. It does not read the four middleware members of the `@Route` annotation.
+Warning: the collector reads the `@Middleware` annotation for the middleware of
+a route. It does not read the four middleware members of the `@Route`
+annotation.
 
 The collector reads the mode of each parameter from the annotation.
 
@@ -112,8 +114,8 @@ The collector reads the mode of each parameter from the annotation.
 
 ## Route providers
 
-`io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract` declares two
-methods.
+`io.valkyrja.cli.routing.provider.contract.CliRouteProviderContract` declares
+two methods.
 
 ```java
 List<Class<?>> getControllerClasses();
@@ -142,8 +144,8 @@ collection.
 4. The router binds each option of the input to an option of the route. It
    matches the long name, and it matches each short name.
 5. Each bound parameter runs `validateValues`.
-6. The router runs the `RouteMatched` stage, binds the route as
-   `RouteContract`, and calls the handler of the route.
+6. The router runs the `RouteMatched` stage, binds the route as `RouteContract`,
+   and calls the handler of the route.
 7. The router runs the `RouteDispatched` stage with the output of the handler.
 
 The handler is a `BiFunction<ContainerContract, RouteContract, OutputContract>`,
@@ -163,8 +165,8 @@ the middleware of that stage in order.
 | `ThrowableCaught` | `ThrowableCaughtMiddlewareContract` | After a throwable reached the input handler |
 | `ProcessExiting`  | `ProcessExitingMiddlewareContract`  | Before the process exits                    |
 
-`InputReceived` returns an `InputContract` to continue, or an `OutputContract` to
-stop. `RouteMatched` returns a `RouteContract` to continue, or an
+`InputReceived` returns an `InputContract` to continue, or an `OutputContract`
+to stop. `RouteMatched` returns a `RouteContract` to continue, or an
 `OutputContract` to stop. Each of the other four returns the type of its stage.
 
 ```java
@@ -211,26 +213,26 @@ builds one of five output types.
 | `createFileOutput(filepath, ...)` | `FileOutput`   | A file                                   |
 | `createStreamOutput(stream, ...)` | `StreamOutput` | A stream                                 |
 
-Each method takes an `ExitCode` and the messages, and each one has a variant that
-takes the messages alone. The variant uses `ExitCode.SUCCESS`.
+Each method takes an `ExitCode` and the messages, and each one has a variant
+that takes the messages alone. The variant uses `ExitCode.SUCCESS`.
 
 Warning: `FileOutput.outputMessage` and `StreamOutput.outputMessage` hold no
 implementation, so neither type writes a message today.
 
-`writeMessages()` writes each message that the output holds.
-`InputHandler.run` calls it once, after the router returns.
+`writeMessages()` writes each message that the output holds. `InputHandler.run`
+calls it once, after the router returns.
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
 unwritten list. The new output holds each message as written. `InputHandler.run`
-discards the return value, so the messages reach the terminal while the output it
-holds still reports each one as unwritten. Keep the return value when the moved
-state matters.
+discards the return value, so the messages reach the terminal while the output
+it holds still reports each one as unwritten. Keep the return value when the
+moved state matters.
 
 Three flags control the write. `isSilent` stops every write. `isQuiet` stops the
-write while the exit code is `ExitCode.SUCCESS`. `isInteractive` states whether a
-question reads an answer from the terminal.
-`io.valkyrja.cli.interaction.data.CliInteractionConfig` holds the defaults, which
-are interactive, and neither quiet nor silent.
+write while the exit code is `ExitCode.SUCCESS`. `isInteractive` states whether
+a question reads an answer from the terminal.
+`io.valkyrja.cli.interaction.data.CliInteractionConfig` holds the defaults,
+which are interactive, and neither quiet nor silent.
 
 Warning: `Output` writes each message directly, and it consults no writer. An
 output holds a list of `WriterContract`, and a subclass that overrides
@@ -256,8 +258,8 @@ MessageContract message = new Message("Routes:", new HighlightedTextFormatter())
 ## The exit code
 
 `io.valkyrja.cli.interaction.enum_.ExitCode` holds the `sysexits` codes, from
-`SUCCESS` at `0` to `AUTO_EXIT` at `255`. `OutputContract.withExitCode` takes the
-enum, and it takes an `int` as well.
+`SUCCESS` at `0` to `AUTO_EXIT` at `255`. `OutputContract.withExitCode` takes
+the enum, and it takes an `int` as well.
 
 `InputHandler.run` reads the code from the output, and
 `io.valkyrja.cli.server.support.Exiter` ends the process with it.
@@ -278,8 +280,8 @@ enum, and it takes an `int` as well.
 | `RouteCollectionContract`        | `CliRoutingServiceProvider`     | `RouteCollection`, filled from the route providers                                             |
 | `InputHandlerContract`           | `CliServerServiceProvider`      | `InputHandler`                                                                                 |
 
-Each middleware handler reads its list from `CliConfigContract`, so the config of
-the application decides the middleware of each stage.
+Each middleware handler reads its list from `CliConfigContract`, so the config
+of the application decides the middleware of each stage.
 
 The framework ships one default for each key, and an application replaces a
 default with a publisher of its own. To run a different input handler, implement
@@ -325,11 +327,10 @@ six global option names.
 | `no-interaction` | `N`        |
 | `token`          | `t`        |
 
-Three `InputReceived` middleware read them.
-`CheckForHelpOptionsMiddleware` and `CheckForVersionOptionsMiddleware` replace
-the command name when the input holds the option.
-`CheckGlobalInteractionOptionsMiddleware` reads the quiet, silent, and
-no-interaction options.
+Three `InputReceived` middleware read them. `CheckForHelpOptionsMiddleware` and
+`CheckForVersionOptionsMiddleware` replace the command name when the input holds
+the option. `CheckGlobalInteractionOptionsMiddleware` reads the quiet, silent,
+and no-interaction options.
 
 Warning: `CliConfig` lists no middleware, so an application that wants these
 three lists them in its own config.
