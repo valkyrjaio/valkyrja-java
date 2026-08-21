@@ -210,11 +210,20 @@ trailing metadata stays open until the handler returns.
 ## Metadata
 
 `io.valkyrja.grpc.message.metadata.Metadata` holds the key and value pairs of a
-call. A key holds a lowercase letter, a digit, `-`, `_`, or `.`. A key that ends
-in `-bin` carries a `byte[]` value, and every other key carries a `String`.
+call. `Metadata` lowercases each key, so a key is case insensitive. The
+constructor and each accessor lowercase the key first.
+
+Both rules read the lowercase form. A key holds a letter, a digit, `-`, `_`, or
+`.`. A key that ends in `-bin` carries a `byte[]` value, and every other key
+carries a `String`.
+
+```java
+new Metadata(Map.of("X-Trace-Id", List.of("abc"))); // Stored as x-trace-id
+new Metadata(Map.of("Trace-BIN", List.of(bytes)));  // Binary, because -BIN lowercases to -bin
+```
 
 Warning: `Metadata` validates on construction. It throws
-`MetadataInvalidKeyException` for a key that breaks the rule, and
+`MetadataInvalidKeyException` for a key that breaks the charset rule, and
 `MetadataInvalidValueException` for a value whose type does not match the kind
 of its key.
 
