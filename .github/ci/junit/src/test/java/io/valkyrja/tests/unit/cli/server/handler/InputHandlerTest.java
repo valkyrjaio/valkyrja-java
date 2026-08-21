@@ -10,6 +10,7 @@ package io.valkyrja.tests.unit.cli.server.handler;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -111,10 +112,17 @@ final class InputHandlerTest {
     void runHandlesWritesExitsWithEnumExitCode() {
         Exiter.freeze();
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
-        when(router.dispatch(any())).thenReturn(new Output());
+        // A silent output records the message without writing it to stdout.
+        when(router.dispatch(any()))
+                .thenReturn(new Output().withIsSilent(true).withAddedMessage(new Message("hi")));
 
         assertDoesNotThrow(() -> handler().run(input));
-        verify(processExitingHandler).processExiting(any(), any());
+
+        var exited = ArgumentCaptor.forClass(OutputContract.class);
+        verify(processExitingHandler).processExiting(any(), exited.capture());
+        assertTrue(exited.getValue().hasWrittenMessage());
+        assertFalse(exited.getValue().hasUnwrittenMessage());
+        assertSame(exited.getValue(), container.getSingleton(OutputContract.class));
     }
 
     @Test
@@ -160,6 +168,8 @@ final class InputHandlerTest {
         var exited = ArgumentCaptor.forClass(OutputContract.class);
         verify(processExitingHandler).processExiting(any(), exited.capture());
         assertEquals(ExitCode.ERROR, exited.getValue().getExitCode());
+        assertTrue(exited.getValue().hasWrittenMessage());
+        assertFalse(exited.getValue().hasUnwrittenMessage());
         assertSame(exited.getValue(), container.getSingleton(OutputContract.class));
     }
 
