@@ -227,8 +227,13 @@ The kernel caches each list after the first call, so the walk runs once.
 | `GrpcApplicationComponentProvider`        | The application component, and the three gRPC components                                             |
 
 `CliWithHttpApplicationComponentProvider` is the default of `CliConfig`, so a
-command reaches an HTTP service. The HTTP routing command is `http:list`, and it
-lists the routes of the application.
+command reaches an HTTP service.
+
+Warning: `HttpRoutingCliRouteProvider` returns
+`io.valkyrja.http.routing.cli.command.ListCommand` as a controller class, and
+that class carries no `@Route` annotation. The collector reads no route from it,
+so the framework registers no `http:list` command. An application that wants the
+command declares a route for it.
 
 ## Accessing the application
 
