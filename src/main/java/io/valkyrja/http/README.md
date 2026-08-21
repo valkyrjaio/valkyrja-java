@@ -37,9 +37,11 @@ it runs the `ThrowableCaught` stage with that response.
   code of the exception.
 - Every other throwable returns a 500 response.
 
-Warning: the handler rethrows the throwable when the application runs in debug
-mode. `HttpServerServiceProvider` reads `app.getDebugMode()` and passes it to
-the constructor.
+Warning: the handler wraps the throwable in a `java.lang.RuntimeException` and
+throws that, when the application runs in debug mode. A `catch` clause that
+names the original type does not match it, so read the cause.
+`HttpServerServiceProvider` reads `app.getDebugMode()` and passes it to the
+constructor.
 
 ## The router
 

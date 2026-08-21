@@ -35,9 +35,11 @@ the [http component](../http/README.md), and the two read alike.
 response, and every other throwable returns a response with the `INTERNAL`
 status. The `ThrowableCaught` stage then runs with that response.
 
-Warning: the handler rethrows the throwable when the application runs in debug
-mode. `GrpcServerServiceProvider` reads `app.getDebugMode()` and passes it to
-the constructor.
+Warning: the handler wraps the throwable in a `java.lang.RuntimeException` and
+throws that, when the application runs in debug mode. A `catch` clause that
+names the original type does not match it, so read the cause.
+`GrpcServerServiceProvider` reads `app.getDebugMode()` and passes it to the
+constructor.
 
 ## The router
 
