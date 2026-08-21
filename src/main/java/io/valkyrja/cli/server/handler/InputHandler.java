@@ -71,15 +71,14 @@ public class InputHandler implements InputHandlerContract {
         OutputContract output = handle(input);
 
         try {
-            output.writeMessages();
+            output = output.writeMessages();
         } catch (Throwable throwable) {
             output =
                     throwableCaughtHandler.throwableCaught(
                             input, getOutputFromThrowable(input, throwable), throwable);
-            container.setSingleton(OutputContract.class, output);
 
             try {
-                output.writeMessages();
+                output = output.writeMessages();
             } catch (Throwable recoveryThrowable) {
                 // A middleware can return an output whose destination is the one that failed. This
                 // last resort leads with the throwable the command's own destination raised, and it
@@ -90,9 +89,10 @@ public class InputHandler implements InputHandlerContract {
                                         new NewLine(),
                                         new ErrorMessage("Recovery message:"),
                                         new Message(" " + recoveryThrowable.getMessage()));
-                container.setSingleton(OutputContract.class, output);
-                output.writeMessages();
+                output = output.writeMessages();
             }
+
+            container.setSingleton(OutputContract.class, output);
         }
 
         exit(input, output);
