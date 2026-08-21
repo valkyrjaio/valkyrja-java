@@ -316,7 +316,8 @@ ResponseContract response =
 ```
 
 `io.valkyrja.http.message.response.factory.contract.ResponseFactoryContract`
-builds a response of each kind.
+declares five methods: `createResponse`, `createTextResponse`,
+`createJsonResponse`, `createJsonpResponse`, and `createRedirectResponse`.
 
 ```java
 ResponseContract response = responseFactory.createJsonResponse(
@@ -325,6 +326,9 @@ ResponseContract response = responseFactory.createJsonResponse(
 
 Each method takes a nullable status code and a nullable header collection. The
 factory uses `StatusCode.OK` and an empty collection for a `null`.
+
+Warning: the factory holds no method for `HtmlResponse`, `XmlResponse`, and
+`EmptyResponse`. Construct one of the three directly.
 
 ## The client
 
