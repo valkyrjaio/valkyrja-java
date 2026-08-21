@@ -142,7 +142,7 @@ final class InputHandlerTest {
     }
 
     @Test
-    void runFallsBackToAnEchoingOutputWhenTheRecoveryWriteAlsoFails() {
+    void runFallsBackToAPrintingOutputWhenTheRecoveryWriteAlsoFails() {
         Exiter.freeze();
 
         var unwritablePath = directory.resolve("missing").resolve(FILENAME).toString();
@@ -157,7 +157,10 @@ final class InputHandlerTest {
 
         assertDoesNotThrow(() -> handler().run(input));
 
-        verify(processExitingHandler).processExiting(any(), any());
+        var exited = ArgumentCaptor.forClass(OutputContract.class);
+        verify(processExitingHandler).processExiting(any(), exited.capture());
+        assertEquals(ExitCode.ERROR, exited.getValue().getExitCode());
+        assertSame(exited.getValue(), container.getSingleton(OutputContract.class));
     }
 
     @Test

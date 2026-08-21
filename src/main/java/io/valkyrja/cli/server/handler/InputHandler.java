@@ -80,12 +80,13 @@ public class InputHandler implements InputHandlerContract {
 
             try {
                 output.writeMessages();
-            } catch (Throwable ignored) {
+            } catch (Throwable recoveryThrowable) {
                 // A middleware can return an output whose destination is the one that failed. This
                 // last resort reports the throwable the command's own destination raised.
+                throwable.addSuppressed(recoveryThrowable);
                 output = getOutputFromThrowable(input, throwable);
-                output.writeMessages();
                 container.setSingleton(OutputContract.class, output);
+                output.writeMessages();
             }
         }
 
@@ -119,7 +120,7 @@ public class InputHandler implements InputHandlerContract {
      */
     protected OutputContract getOutputFromThrowable(InputContract input, Throwable throwable) {
         // OutputThrowableCaughtMiddleware builds the component's full error report. This is the
-        // minimal fallback that prints when no throwable caught middleware is registered.
+        // minimal fallback that prints when no middleware replaces these messages.
         return new Output()
                 .withExitCode(ExitCode.ERROR)
                 .withMessages(
