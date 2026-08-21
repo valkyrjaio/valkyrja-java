@@ -152,9 +152,14 @@ factory, and it passes the arguments to that factory.
 `getAliased(Class<T> id, Map<String, Object> arguments)` resolves an alias.
 
 Warning: each of the four methods throws `ContainerInvalidReferenceException`
-when it resolves nothing. `getSingleton` throws for a key that a factory binds
-as a service, and `getService` throws for a key that holds a cached instance.
-Call the method that matches how the provider bound the key.
+when it resolves nothing. `getSingleton` throws for a key that `bind` holds, and
+`getService` throws for a key that `setSingleton` holds. Call the method that
+matches how the provider bound the key.
+
+Warning: `getService` does not throw for a key that `bindSingleton` holds.
+`bindSingleton` writes the factory into the service map as well, so `getService`
+runs that factory and returns a second instance while the cached one stands. The
+call defeats the singleton, and nothing reports it.
 
 ## Inspecting the container
 
