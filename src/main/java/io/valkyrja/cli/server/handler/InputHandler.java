@@ -80,18 +80,11 @@ public class InputHandler implements InputHandlerContract {
             try {
                 output = output.writeMessages();
             } catch (Throwable recoveryThrowable) {
-                // A middleware can return an output whose destination is the one that failed. This
-                // last resort leads with the throwable the command's own destination raised, and it
-                // names both failures.
-                output =
-                        getOutputFromThrowable(input, throwable)
-                                .withAddedMessages(
-                                        new NewLine(),
-                                        new ErrorMessage("Recovery message:"),
-                                        new Message(" " + recoveryThrowable.getMessage()));
+                // A middleware can return an output whose destination is the one that failed.
+                output = getOutputFromThrowable(input, throwable, recoveryThrowable);
                 output = output.writeMessages();
             }
-
+        } finally {
             container.setSingleton(OutputContract.class, output);
         }
 
@@ -123,6 +116,23 @@ public class InputHandler implements InputHandlerContract {
      * @param throwable the throwable the write raised
      * @return the output that reports the throwable
      */
+    /**
+     * Build the output that reports a throwable and the throwable the recovery write raised.
+     *
+     * @param input the input the command ran with
+     * @param throwable the throwable the write raised
+     * @param recoveryThrowable the throwable the recovery write raised
+     * @return the output that reports both throwables
+     */
+    protected OutputContract getOutputFromThrowable(
+            InputContract input, Throwable throwable, Throwable recoveryThrowable) {
+        return getOutputFromThrowable(input, throwable)
+                .withAddedMessages(
+                        new NewLine(),
+                        new ErrorMessage("Recovery message:"),
+                        new Message(" " + recoveryThrowable.getMessage()));
+    }
+
     protected OutputContract getOutputFromThrowable(InputContract input, Throwable throwable) {
         // OutputThrowableCaughtMiddleware builds the component's full error report. This is the
         // minimal fallback that prints when no middleware replaces these messages.
