@@ -344,10 +344,23 @@ six global option names.
 Three `InputReceived` middleware read them. `CheckForHelpOptionsMiddleware` and
 `CheckForVersionOptionsMiddleware` replace the command name when the input holds
 the option. `CheckGlobalInteractionOptionsMiddleware` reads the quiet, silent,
-and no-interaction options.
+and no-interaction options. The component ships a fourth,
+`CheckCommandForTypoMiddleware`, which runs at the `RouteNotMatched` stage.
 
-Warning: `CliConfig` lists no middleware, so an application that wants these
-three lists them in its own config.
+Warning: `CliConfig` lists none of the four, and no provider binds them. An
+application publishes a binding for the middleware as well as listing it in its
+config. Without the binding the handler throws
+`ContainerInvalidReferenceException` on the first run.
+
+None of the four holds a no-argument constructor, so the binding supplies the
+arguments.
+
+| Middleware                                | Constructor takes                                                                |
+| :---------------------------------------- | :------------------------------------------------------------------------------- |
+| `CheckForHelpOptionsMiddleware`           | The command name, the option name, and the short name                            |
+| `CheckForVersionOptionsMiddleware`        | The command name, the option name, and the short name                            |
+| `CheckGlobalInteractionOptionsMiddleware` | The interaction config, and the name and short name of each of the three options |
+| `CheckCommandForTypoMiddleware`           | The router, the route collection, and an optional default answer                 |
 
 ## Exceptions
 
