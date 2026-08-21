@@ -52,13 +52,17 @@ and a cause.
 An error of the application is not an error of the JVM.
 
 Every component exception in the framework extends `RuntimeException` or
-`InvalidArgumentException`, so no framework method declares a `throws` clause
-for a framework exception. A method that calls a JDK or an SDK method still
-declares the checked exception of that call. `ExchangeHttp.run` declares
-`IOException`, and `NettyHttp.run` declares `InterruptedException`.
+`InvalidArgumentException`, so no method declares a `throws` clause for a
+component exception.
 
 Each of the three exception classes holds a static `throwException(String)`
 method that constructs the exception and throws it.
+
+Warning: `Exception.throwException` declares `throws Exception`, because the
+base `Exception` is checked. It is the one framework throwable that a caller
+declares. A method that calls a JDK or an SDK method also declares the checked
+exception of that call. `ExchangeHttp.run` declares `IOException`, and
+`NettyHttp.run` declares `InterruptedException`.
 
 ## The trace code
 
