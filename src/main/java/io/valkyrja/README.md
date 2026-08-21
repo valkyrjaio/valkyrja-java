@@ -28,27 +28,31 @@
   registration, arguments and options, the middleware pipeline, and interactive
   input/output
 
+### gRPC
+
+- [gRPC Services](grpc) — Service providers, attribute-based registration, the
+  middleware pipeline, the buffered and streaming models, and cancellation
+
 ### Events
 
-- [Event Dispatching](event) — Event dispatcher, listeners, and annotation-based
-  registration
+- [Event Dispatching](event) — Event dispatcher, listeners, and the listener
+  collection
 
 ## Data & Types
 
-- [Type System](type) — Type contracts, primitive wrappers, enums, models, and
-  collections
+- [Type System](type) — The route parameter cast, and the arrayable contract
 
 ## Validation
 
-- [Validation](validation) — Rule contracts, built-in rules, and the validator
+- [Validation](validation) — The rule contract and the validator contract
 
 ## Internals
 
-- [Reflection](reflection) — Cached reflection wrapper for classes, methods,
-  fields, constructors, and dependency extraction
+- [Reflection](reflection) — Cached reflection wrapper for instances,
+  constructors, and methods
 - [Support](support) — Time/clock freeze utilities and file generator helpers
 - [Throwable](throwable) — Exception hierarchy and throwable handler contract
 
 ## Services
 
-- [Log](log) — Logging contract with concrete and null implementations
+- [Log](log) — Logging contract with file and null implementations
