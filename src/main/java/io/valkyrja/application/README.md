@@ -286,10 +286,9 @@ hides a static method in a subclass instead of overriding it, so `bootstrap`
 still calls the empty base method. A subclass that declares either name
 compiles, runs, and does nothing.
 
-Every method of `App` and of the worker classes is `public static` for that
-reason: an application reproduces the sequence in its own entry class rather
-than extending one. Call the steps in order, and call your own method where the
-seam sits.
+Every method that an entry class calls is `public static` for that reason: an
+application reproduces the sequence in its own entry class rather than extending
+one. Call the steps in order, and call your own method where a seam sits.
 
 ```java
 public final class AppHttp {
@@ -297,10 +296,14 @@ public final class AppHttp {
     public static ApplicationContract bootstrap(HttpConfigContract config) {
         ApplicationContract app = WorkerHttp.start(config);
 
-        WorkerHttp.bootstrapThrowableHandler(app, app.getContainer());
+        registerThrowableHandler(app);
         warmTheRouteCollection(app);
 
         return app;
+    }
+
+    private static void registerThrowableHandler(ApplicationContract app) {
+        // Bind the throwable handler of the application here.
     }
 
     private static void warmTheRouteCollection(ApplicationContract app) {
