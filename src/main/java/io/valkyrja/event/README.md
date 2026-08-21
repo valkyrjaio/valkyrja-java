@@ -87,8 +87,13 @@ collection.addListener(listener);
 | `getEvents()`                             | Returns every event class that holds a listener               |
 | `getEventsWithListeners()`                | Returns each event class with its listeners                   |
 
-Each method takes an event instance, and each one has a variant that takes the
-event class. The variant ends in `ById`, and it takes a `Class<?>`.
+Four methods take an event instance: `hasListenersForEvent`,
+`getListenersForEvent`, `setListenersForEvent`, and `removeListenersForEvent`.
+Each of the four has a variant that ends in `ById` and takes the event class as a
+`Class<?>`.
+
+`hasListener` and `removeListener` take a listener. Each of the two has a variant
+that ends in `ById` and takes the name of the listener as a `String`.
 
 Warning: `setListenersForEvent` adds each listener. It removes no listener that
 the collection holds already. Call `removeListenersForEvent` first to replace the
