@@ -35,8 +35,12 @@ runtime, and the protocol is the name of the class.
 | `io.valkyrja.application.entry.tomcat.TomcatHttp`        | Tomcat               | Once         |
 | `io.valkyrja.application.entry.tomcat.TomcatGrpc`        | Tomcat               | Once         |
 
-Each entry class holds a static `run` method that takes the config of its
-protocol.
+Each entry class holds static methods that take the config of its protocol. Ten
+of the eleven hold a `run` method.
+
+Warning: `io.valkyrja.application.entry.Grpc` holds no `run` method. It holds
+`bootstrap(config)`, which returns the application, and `handle(config, call)`,
+which dispatches one call.
 
 ```java
 public final class App {
