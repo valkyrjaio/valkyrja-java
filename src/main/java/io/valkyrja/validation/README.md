@@ -59,9 +59,21 @@ so the framework evaluates no rule. A struct that returns rules from
 `getValidationRules` also overrides `validateAllRules`, and the override
 evaluates them.
 
+`RuleContract` declares no method, so the application declares what a rule does.
+The example below reads an `AppRule` that extends `RuleContract` and adds
+`isValid()`.
+
 ```java
 @Override
 protected boolean validateAllRules(Map<String, List<RuleContract>> rules) {
-    // Evaluate each rule for each key, and return the result.
+    for (List<RuleContract> rulesForKey : rules.values()) {
+        for (RuleContract rule : rulesForKey) {
+            if (rule instanceof AppRule appRule && !appRule.isValid()) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 ```
