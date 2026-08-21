@@ -146,9 +146,14 @@ collection.
 4. The router binds each option of the input to an option of the route. It
    matches the long name, and it matches each short name.
 5. Each bound parameter runs `validateValues`.
-6. The router runs the `RouteMatched` stage, binds the route as `RouteContract`,
-   and calls the handler of the route.
-7. The router runs the `RouteDispatched` stage with the output of the handler.
+6. The router appends the middleware of the route to the `RouteMatched`,
+   `RouteDispatched`, `ThrowableCaught`, and `ProcessExiting` handlers, and it
+   binds the route as `RouteContract`.
+7. The router runs the `RouteMatched` stage. A middleware that returns an output
+   stops the dispatch.
+8. The router binds the route that the stage returned, and it calls the handler
+   of that route.
+9. The router runs the `RouteDispatched` stage with the output of the handler.
 
 The handler is a `BiFunction<ContainerContract, RouteContract, OutputContract>`,
 so a handler resolves its own dependencies from the container.
