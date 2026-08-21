@@ -314,9 +314,16 @@ A child resolves a singleton in three steps.
 A child resolves a service, and an alias, from its own maps first, and from the
 parent second.
 
-Warning: the factory runs with the child as its argument. A dependency that the
-factory resolves therefore comes from the child, and the instance it builds
+A factory that the child itself publishes runs with the child as its argument,
+so the dependencies it resolves come from the child and the instance it builds
 stays in the child.
+
+Warning: the two implementations differ for a factory that the parent holds.
+`NativeChildContainer` reads the factory of the parent and applies it with the
+child. `ChildContainer` delegates to `parent.getService`, which applies the
+factory with the parent, so the instance and its dependencies come from the
+parent. A parent that published a key before the first request therefore serves
+every request from that one instance.
 
 ### Using a child container
 
