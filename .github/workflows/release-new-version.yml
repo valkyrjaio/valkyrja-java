@@ -41,6 +41,9 @@ jobs:
 
   publish:
     needs: release
+    # A release that finds no pending commit skips the jobs that write a version, and this
+    # job would then offer the registry a version it holds already, which fails the run.
+    if: needs.release.outputs.should-release == 'true'
     uses: valkyrjaio/.github/.github/workflows/_java-release-maven-publish.yml@3a2c0cb7cd96194c8f2169a5550fc316b45ae01d
     secrets:
       MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
