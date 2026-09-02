@@ -44,13 +44,13 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.2")
     compileOnly("org.jspecify:jspecify:1.0.1")
-    implementation("io.grpc:grpc-api:1.83.1")
+    implementation("io.grpc:grpc-api:1.84.0")
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testImplementation("org.mockito:mockito-core:5.23.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
     // Test-only: a real HTTP/2 transport (server + client) for the gRPC end-to-end test. Not a
     // framework dependency — the published artifact keeps io.grpc compileOnly.
-    testImplementation("io.grpc:grpc-netty-shaded:1.83.1")
+    testImplementation("io.grpc:grpc-netty-shaded:1.84.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Runtime-entry SDKs for the optional worker adapters in application.entry.{jetty,netty,tomcat}.
@@ -61,13 +61,13 @@ dependencies {
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.12")
     compileOnly("io.netty:netty-codec-http:4.2.17.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.25")
-    compileOnly("io.grpc:grpc-servlet-jakarta:1.83.1")
-    compileOnly("io.grpc:grpc-netty-shaded:1.83.1")
+    compileOnly("io.grpc:grpc-servlet-jakarta:1.84.0")
+    compileOnly("io.grpc:grpc-netty-shaded:1.84.0")
     testImplementation("org.eclipse.jetty:jetty-server:12.1.12")
     testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.12")
     testImplementation("io.netty:netty-codec-http:4.2.17.Final")
     testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.25")
-    testImplementation("io.grpc:grpc-servlet-jakarta:1.83.1")
+    testImplementation("io.grpc:grpc-servlet-jakarta:1.84.0")
 }
 
 fun isNonStable(version: String): Boolean {
