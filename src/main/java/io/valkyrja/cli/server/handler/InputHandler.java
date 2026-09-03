@@ -104,8 +104,9 @@ public class InputHandler implements InputHandlerContract {
                 // this report is the only trace the failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
             } catch (Throwable reportThrowable) {
-                // getRecoveryOutput raises nothing, and it writes through a plain Output, whose
-                // PrintStream takes no throwable of its own, so this write needs no guard.
+                // getRecoveryOutput raises nothing, because it takes no override and reads
+                // each message through messageOf. It writes framework messages through a plain
+                // Output, whose PrintStream raises none, so this write needs no guard.
                 getRecoveryOutput(input, exitThrowable, reportThrowable).writeMessages();
             }
         }
@@ -205,7 +206,7 @@ public class InputHandler implements InputHandlerContract {
      * @param throwable the throwable to report
      * @return the messages that report the throwable
      */
-    protected MessageContract[] getThrowableMessages(InputContract input, Throwable throwable) {
+    private MessageContract[] getThrowableMessages(InputContract input, Throwable throwable) {
         return new MessageContract[] {
             new ErrorMessage("Cli Server Error:"),
             new NewLine(),
@@ -220,7 +221,7 @@ public class InputHandler implements InputHandlerContract {
      * @param recoveryThrowable the throwable the recovery raised
      * @return the messages that report the recovery throwable
      */
-    protected MessageContract[] getRecoveryMessages(Throwable recoveryThrowable) {
+    private MessageContract[] getRecoveryMessages(Throwable recoveryThrowable) {
         return new MessageContract[] {
             new ErrorMessage("Recovery message:"),
             new Message(" " + messageOf(recoveryThrowable)),
