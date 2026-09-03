@@ -137,7 +137,7 @@ public class InputHandler implements InputHandlerContract {
      * @param recoveryThrowable the throwable the recovery raised
      * @return the messages that report both throwables
      */
-    protected MessageContract[] getFallbackThrowableMessages(
+    private MessageContract[] getFallbackThrowableMessages(
             Throwable throwable, Throwable recoveryThrowable) {
         // This report answers a report that raised, so no call it makes can raise again. It
         // spells the recovery lines out rather than calling getRecoveryMessages, and it reads
