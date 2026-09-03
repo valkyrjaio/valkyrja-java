@@ -37,6 +37,7 @@ import io.valkyrja.cli.server.handler.InputHandler;
 import io.valkyrja.cli.server.support.Exiter;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.tests.fixtures.cli.interaction.input.RaisingCommandNameInputFixture;
+import io.valkyrja.tests.fixtures.cli.interaction.output.RaisingExitCodeOutputFixture;
 import io.valkyrja.tests.fixtures.cli.server.handler.RaisingMessageThrowableFixture;
 import io.valkyrja.tests.fixtures.cli.server.handler.UnwritableReportInputHandlerFixture;
 import java.io.ByteArrayOutputStream;
@@ -401,6 +402,20 @@ final class InputHandlerTest {
 
         assertTrue(printed.contains("list: the throwable reports no message"));
         assertFalse(printed.contains("list: null"));
+    }
+
+    @Test
+    void runExitsWithTheErrorCodeWhenTheOutputRaisesOnItsCode() {
+        Exiter.freeze();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        // An output supplies the code, and this one raises on the read.
+        when(router.dispatch(any())).thenReturn(new RaisingExitCodeOutputFixture());
+
+        var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
+
+        // The code still reaches the shell, and the run reports an error.
+        assertEquals(String.valueOf(ExitCode.ERROR.value), printed);
     }
 
     @Test

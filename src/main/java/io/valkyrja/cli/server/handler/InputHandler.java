@@ -111,9 +111,25 @@ public class InputHandler implements InputHandlerContract {
             }
         }
 
-        Object exitCode = output.getExitCode();
-        int code = exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
-        Exiter.exit(code);
+        Exiter.exit(exitCodeOf(output));
+    }
+
+    /**
+     * Read the code an output ends the process with.
+     *
+     * <p>An output supplies this value, and a contract implementation can raise on the read or hold
+     * a value the cast refuses. The code must reach the shell either way.
+     *
+     * @param output the output the run ends with
+     * @return the code the output holds, or the error code when the read gives none
+     */
+    private static int exitCodeOf(OutputContract output) {
+        try {
+            Object exitCode = output.getExitCode();
+            return exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
+        } catch (Throwable ignored) {
+            return ExitCode.ERROR.value;
+        }
     }
 
     protected OutputContract dispatchRouter(InputContract input) {
