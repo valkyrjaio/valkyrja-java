@@ -135,7 +135,26 @@ The collector reads the annotations of each controller class. A route in
 
 A component provider returns its route providers from `getCliProviders`.
 `CliRoutingServiceProvider.publishRouteCollection` reads every route provider of
-the application, collects the routes, and adds them to the collection.
+the application, and it adds the routes of `getRoutes` to the collection.
+
+Warning: the framework publishes no binding for
+`io.valkyrja.cli.routing.collector.contract.RouteCollectorContract`.
+`publishRouteCollection` runs the collector only when
+`container.isSingleton(RouteCollectorContract.class)` is `true`, so
+`getControllerClasses` contributes nothing until an application publishes the
+binding. Every annotation above this section then reaches no collection, and the
+command it declares does not run.
+
+Publish `AttributeRouteCollector` from a service provider of the application to
+close the gap.
+
+```java
+container.setSingleton(RouteCollectorContract.class, new AttributeRouteCollector());
+```
+
+Warning: `isSingleton` reads no callback, so a deferred publisher for the key
+leaves the guard `false` as well. Bind the collector with `setSingleton` or with
+`bindSingleton`, and publish it before the collection resolves.
 
 ## The router
 
