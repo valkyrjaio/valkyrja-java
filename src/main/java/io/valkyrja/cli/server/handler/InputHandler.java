@@ -243,8 +243,8 @@ public class InputHandler implements InputHandlerContract {
 
     /**
      * Build a recovery report, which names a throwable and the throwable that ended the attempt to
-     * answer it. It names the one throwable where no attempt ran, and a third when building its own
-     * full report raises.
+     * answer it. It names the one throwable where no attempt ran. It names the throwable that ended
+     * its own full report as well, whenever that build raises.
      *
      * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
      * can point at any destination. This method is private, so no override reaches the report that
@@ -261,7 +261,7 @@ public class InputHandler implements InputHandlerContract {
      * @param throwable the throwable this handler caught
      * @param recoveryThrowable the throwable that ended the attempt to answer it, or null where no
      *     attempt ran
-     * @return the output that reports the throwables
+     * @return the output that carries the report
      */
     private OutputContract getRecoveryOutput(
             InputContract input, Throwable throwable, @Nullable Throwable recoveryThrowable) {
