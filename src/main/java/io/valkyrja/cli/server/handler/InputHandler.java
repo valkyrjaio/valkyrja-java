@@ -220,9 +220,10 @@ public class InputHandler implements InputHandlerContract {
     /**
      * Build the output that reports a throwable and the throwable a recovery raised.
      *
-     * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides.
-     * This report answers a report that already failed, so it takes no override: an override could
-     * hold the destination that just failed, which is the failure this report answers.
+     * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
+     * can point at any destination. This report answers a report that already failed, so it builds
+     * a plain {@link Output} itself. No override redirects it to the destination that just failed,
+     * which is the failure this report answers.
      *
      * @param input the input the command ran with
      * @param throwable the throwable the write raised

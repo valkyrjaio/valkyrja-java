@@ -213,11 +213,11 @@ The `ProcessExiting` stage runs under a guard of its own. A middleware that
 throws there makes `run` print the error report, and the code the command set
 still reaches `Exiter.exit`.
 
-A first report comes from `getOutputFromThrowable`, which a subclass overrides.
-A report that answers a failed report takes no override, because an override
-could hold the destination that just failed. That report names the command, and
-it names none when reading the command name from the input is itself what
-raised.
+A first report comes from `getOutputFromThrowable`, which a subclass overrides
+and can point at any destination. A report that answers a failed report builds a
+plain `Output` itself, so no override redirects it to the destination that just
+failed. That report names the command, and it names none when reading the
+command name from the input is itself what raised.
 
 Warning: the stage receives a `null` output from `InputHandler.handle`. That
 call passes the result of `emptyOutput()`, which is `null`, so a middleware of
