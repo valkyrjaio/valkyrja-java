@@ -444,6 +444,8 @@ the component, and each sub-component contract extends it:
 | `CliInteractionExpectedQuestionOutputException` | A message that is not a question reaches `QuestionWriter`                  |
 | `CliInteractionNoFormatterException`            | `Message.getFormatter` runs, and the message holds none                    |
 | `CliInteractionNoValidationCallableException`   | `Answer.getValidationCallable` runs, and the answer holds none             |
+| `CliInteractionFileWriteException`              | `FileOutput.outputMessage` runs, and the write to the file fails           |
+| `CliInteractionStreamWriteException`            | `StreamOutput.outputMessage` runs, and the write to the stream fails       |
 | `CliRoutingInvalidRouteNameException`           | `RouteCollection.get` runs, and the collection holds no route of that name |
 | `CliRoutingInvalidArgumentNameException`        | `Route.getArgument` runs, and the route holds no argument of that name     |
 | `CliRoutingInvalidOptionNameException`          | `Route.getOption` runs, and the route holds no option of that name         |
