@@ -224,10 +224,11 @@ Every report reads a throwable's message through one call, which stands in the
 text `the throwable reports no message` when the throwable carries none and when
 reading it raises.
 
-Warning: the stage receives a `null` output from `InputHandler.handle`. That
-call passes the result of `emptyOutput()`, which is `null`, so a middleware of
-that stage builds its own output. A middleware that reads the output it receives
-throws a `NullPointerException` on the first throwable that `handle` catches.
+Warning: the `ThrowableCaught` stage receives a `null` output from
+`InputHandler.handle`. That call passes the result of `emptyOutput()`, which is
+`null`, so a middleware of that stage builds its own output. A middleware that
+reads the output it receives throws a `NullPointerException` on the first
+throwable that `handle` catches.
 
 Warning: the `ThrowableCaught` stage needs a middleware. The handler ends in
 `Objects.requireNonNull` for the output, and `CliConfig` lists no middleware at
