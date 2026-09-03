@@ -307,8 +307,9 @@ wrapping the `IOException` as its cause.
 and the caller owns truncation.
 
 `writeMessages()` writes each message that the output holds. `InputHandler.run`
-calls it after `handle` returns, again for each output that a failed write
-recovers to, and again for the report of a throwable the exit stage raised.
+calls it after `handle` returns, again for each of the two outputs that a failed
+write recovers to, and again for each of the two reports of a throwable the exit
+stage raised.
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
 unwritten list. Keep the return value when the moved state matters.
