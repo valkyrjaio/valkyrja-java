@@ -213,6 +213,12 @@ The `ProcessExiting` stage runs under a guard of its own. A middleware that
 throws there makes `run` print the error report, and the code the command set
 still reaches `Exiter.exit`.
 
+A first report comes from `getOutputFromThrowable`, which a subclass overrides.
+A report that answers a failed report takes no override, because an override
+could hold the destination that just failed. That report names the command, and
+it names none when reading the command name from the input is itself what
+raised.
+
 Warning: the stage receives a `null` output from `InputHandler.handle`. That
 call passes the result of `emptyOutput()`, which is `null`, so a middleware of
 that stage builds its own output. A middleware that reads the output it receives
@@ -298,8 +304,8 @@ wrapping the `IOException` as its cause.
 and the caller owns truncation.
 
 `writeMessages()` writes each message that the output holds. `InputHandler.run`
-calls it after `handle` returns, and again for each output that a failed write
-recovers to.
+calls it after `handle` returns, again for each output that a failed write
+recovers to, and again for the report of a throwable the exit stage raised.
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
 unwritten list. Keep the return value when the moved state matters.
