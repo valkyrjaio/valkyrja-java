@@ -105,7 +105,7 @@ public class InputHandler implements InputHandlerContract {
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
             } catch (Throwable reportThrowable) {
                 try {
-                    getFallbackOutputFromThrowable(exitThrowable, reportThrowable).writeMessages();
+                    getRecoveryOutput(input, exitThrowable, reportThrowable).writeMessages();
                 } catch (Throwable ignored) {
                     // The report is the last write, so a failure here leaves no trace to write.
                 }
@@ -143,13 +143,6 @@ public class InputHandler implements InputHandlerContract {
      * @param recoveryThrowable the throwable the recovery write raised
      * @return the output that reports both throwables
      */
-    private OutputContract getFallbackOutputFromThrowable(
-            Throwable throwable, Throwable recoveryThrowable) {
-        return new Output()
-                .withExitCode(ExitCode.ERROR)
-                .withMessages(getFallbackThrowableMessages(throwable, recoveryThrowable));
-    }
-
     /**
      * Build the messages that report two throwables without reading the input.
      *
