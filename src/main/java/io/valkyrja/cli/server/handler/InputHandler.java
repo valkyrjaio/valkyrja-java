@@ -184,10 +184,11 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build the output that reports a throwable the configured destination could not carry.
+     * Build the first report of a throwable, which a subclass overrides to reach a destination of
+     * its own.
      *
      * @param input the input the command ran with
-     * @param throwable the throwable the write raised
+     * @param throwable the throwable a dispatch, a write, or the exit stage raised
      * @return the output that reports the throwable
      */
     protected OutputContract getOutputFromThrowable(InputContract input, Throwable throwable) {
