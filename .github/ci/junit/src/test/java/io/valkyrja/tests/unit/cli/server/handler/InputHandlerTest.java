@@ -423,6 +423,28 @@ final class InputHandlerTest {
     }
 
     @Test
+    void runEndsTheReportThatReadsNoInputWithANewLine() {
+        Exiter.freeze();
+
+        // The exit code raises, and the report of that raise reads a command name that raises
+        // as well, so the report that reads no input takes its place.
+        var raisingInput = new RaisingCommandNameInputFixture();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(raisingInput);
+        when(router.dispatch(any())).thenReturn(new RaisingExitCodeOutputFixture());
+
+        var printed = capture(() -> assertDoesNotThrow(() -> handler().run(raisingInput)));
+
+        assertTrue(printed.contains("exit code"));
+        // The report reads no input, so it names no command, and it names the raise that
+        // removed the command from it.
+        assertFalse(printed.contains("list:"));
+        assertTrue(printed.contains("Report message:"));
+        // The report ends the line it wrote, so the shell prompt does not land on it.
+        assertTrue(printed.endsWith("\n" + ExitCode.ERROR.value));
+    }
+
+    @Test
     void runExitsWithTheErrorCodeWhenTheCastRefusesTheOutputCode() {
         Exiter.freeze();
 
