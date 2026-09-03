@@ -279,8 +279,14 @@ The compact constructor copies each map, so a later write to the source map does
 not reach the record.
 
 `getData()` returns a snapshot of the container. `setFromData(data)` merges a
-snapshot into the container. `App.loadContainerData` calls both at boot. An
-application that ships a generated data class publishes it as
+snapshot into the container.
+
+`App.loadContainerData` calls `setFromData` at boot, with the snapshot it
+resolves from `ContainerDataContract`. It reaches `getData()` only through
+`ServiceProvider.publishData`, which runs when no binding holds that key. A
+worker calls `getData()` itself, to capture the snapshot each child copies from.
+
+An application that ships a generated data class publishes it as
 `ContainerDataContract` before boot, and the container then registers no
 provider at all.
 
