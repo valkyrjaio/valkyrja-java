@@ -242,8 +242,8 @@ final class InputHandlerTest {
         // The report is the only trace the failure leaves.
         assertTrue(printed.contains("Cli Server Error:"));
         assertTrue(printed.contains("exiting"));
-        // The frozen exiter prints the code, so the command's own code reaches the shell.
-        assertTrue(printed.endsWith(String.valueOf(ExitCode.USAGE_ERROR.value)));
+        // The report ends its own line, and the frozen exiter prints the code after it.
+        assertTrue(printed.endsWith("\n" + ExitCode.USAGE_ERROR.value));
     }
 
     @Test
