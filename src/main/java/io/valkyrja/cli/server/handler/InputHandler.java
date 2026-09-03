@@ -158,7 +158,7 @@ public class InputHandler implements InputHandlerContract {
      * Read the message a throwable carries.
      *
      * <p>{@code getMessage} is overridable, so a throwable can raise on the call that reports it. A
-     * report must not raise, and this call runs in the report that answers a raise.
+     * report must not raise, and every report this class builds reads a message through here.
      *
      * @param throwable the throwable to read
      * @return the message the throwable carries, or a stand-in when it carries none or when reading
