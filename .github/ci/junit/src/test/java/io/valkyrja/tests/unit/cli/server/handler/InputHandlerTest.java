@@ -326,6 +326,45 @@ final class InputHandlerTest {
     }
 
     @Test
+    void handleStandsInForARecoveryThrowableWhoseMessageRaises() {
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        when(router.dispatch(any())).thenThrow(new IllegalStateException("command"));
+        // The middleware's throwable raises on its own message.
+        when(throwableCaughtHandler.throwableCaught(any(), isNull(), any()))
+                .thenThrow(new RaisingMessageThrowableFixture());
+
+        var output = handler().handle(input);
+        var printed = capture(output::writeMessages);
+
+        // The full report still names the command, so getRecoveryMessages stood in rather
+        // than raising into the report that reads no input.
+        assertTrue(printed.contains("list: command"));
+        assertTrue(printed.contains("Recovery message:"));
+        assertTrue(printed.contains("the throwable reports no message"));
+    }
+
+    @Test
+    void runStandsInForAnExitStageThrowableWhoseMessageRaisesWhenTheInputRaises() {
+        Exiter.freeze();
+
+        // Reading the input raises, so the run reaches the report that reads no input, and
+        // that report names a throwable whose own message raises.
+        var raisingInput = new RaisingCommandNameInputFixture();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(raisingInput);
+        when(router.dispatch(any()))
+                .thenReturn(new Output().withIsSilent(true).withExitCode(ExitCode.USAGE_ERROR));
+        doThrow(new RaisingMessageThrowableFixture())
+                .when(processExitingHandler)
+                .processExiting(any(), any());
+
+        var printed = capture(() -> assertDoesNotThrow(() -> handler().run(raisingInput)));
+
+        assertTrue(printed.contains("the throwable reports no message"));
+        assertTrue(printed.endsWith("\n" + ExitCode.USAGE_ERROR.value));
+    }
+
+    @Test
     void runWithIntegerExitCode() {
         Exiter.freeze();
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
