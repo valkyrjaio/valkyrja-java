@@ -219,6 +219,16 @@ Warning: the `ThrowableCaught` stage needs a middleware. The handler ends in
 that stage. A command that throws therefore ends in a `NullPointerException` out
 of `handle`, and `run` never reaches `writeMessages`, `exit`, or `Exiter`.
 
+`InputHandler.run` dispatches the stage a second time when the output write
+throws, and that dispatch passes a non-null output. A middleware of this stage
+therefore receives `CliInteractionFileWriteException` and
+`CliInteractionStreamWriteException` as well as a throwable a command raised.
+
+Warning: the second dispatch runs no middleware when a throwable already
+escaped dispatch. `Handler` advances an index that it never rewinds, and
+`CliMiddlewareServiceProvider` publishes one handler as a singleton, so the
+pass that `handle` starts exhausts the chain. Issue #182 tracks it.
+
 ```java
 public final class AppTimerMiddleware implements RouteDispatchedMiddlewareContract {
 
@@ -266,17 +276,22 @@ builds one of five output types.
 Each method takes an `ExitCode` and the messages, and each one has a variant
 that takes the messages alone. The variant uses `ExitCode.SUCCESS`.
 
-Warning: `FileOutput.outputMessage` and `StreamOutput.outputMessage` hold no
-implementation, so neither type writes a message today.
+`FileOutput` appends the formatted text to the filepath, and it makes the file
+when the file does not exist. `StreamOutput` writes the formatted text to the
+stream and flushes it. A failed write throws `CliInteractionFileWriteException`
+or `CliInteractionStreamWriteException`, each wrapping the `IOException` as its
+cause.
+
+`FileOutput` never truncates. The file keeps the messages of each earlier run,
+and the caller owns truncation.
 
 `writeMessages()` writes each message that the output holds. `InputHandler.run`
 calls it once, after the router returns.
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
-unwritten list. The new output holds each message as written. `InputHandler.run`
-discards the return value, so the messages reach the terminal while the output
-it holds still reports each one as unwritten. Keep the return value when the
-moved state matters.
+unwritten list. Keep the return value when the moved state matters.
+`InputHandler.run` keeps it, and registers it as the `OutputContract`
+singleton.
 
 Two flags control the write. `isSilent` stops it. `isQuiet` stops it while the
 exit code is `ExitCode.SUCCESS`. A third flag, `isInteractive`, reaches no write
