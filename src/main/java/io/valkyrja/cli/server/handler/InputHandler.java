@@ -95,7 +95,15 @@ public class InputHandler implements InputHandlerContract {
             container.setSingleton(OutputContract.class, output);
         }
 
-        exit(input, output);
+        try {
+            exit(input, output);
+        } catch (Throwable exitThrowable) {
+            // A middleware runs here, and the command's code still reaches the shell, so this
+            // report is the only trace the failure leaves. The report prints to System.out,
+            // which raises no throwable of its own.
+            getOutputFromThrowable(input, exitThrowable).writeMessages();
+        }
+
         Object exitCode = output.getExitCode();
         int code = exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
         Exiter.exit(code);

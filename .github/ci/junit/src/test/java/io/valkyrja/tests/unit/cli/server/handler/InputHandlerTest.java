@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -222,6 +223,27 @@ final class InputHandlerTest {
         assertTrue(printed.contains("command"));
         assertTrue(printed.contains("Recovery message:"));
         assertTrue(printed.contains("middleware"));
+    }
+
+    @Test
+    void runReportsAProcessExitingThrowableAndKeepsTheExitCode() {
+        Exiter.freeze();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        // A silent output writes nothing, so only the report of the exit throwable prints.
+        when(router.dispatch(any()))
+                .thenReturn(new Output().withIsSilent(true).withExitCode(ExitCode.USAGE_ERROR));
+        doThrow(new IllegalStateException("exiting"))
+                .when(processExitingHandler)
+                .processExiting(any(), any());
+
+        var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
+
+        // The report is the only trace the failure leaves.
+        assertTrue(printed.contains("Cli Server Error:"));
+        assertTrue(printed.contains("exiting"));
+        // The frozen exiter prints the code, so the command's own code reaches the shell.
+        assertTrue(printed.endsWith(String.valueOf(ExitCode.USAGE_ERROR.value)));
     }
 
     @Test
