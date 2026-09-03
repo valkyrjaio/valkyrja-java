@@ -287,10 +287,11 @@ Each method takes an `ExitCode` and the messages, and each one has a variant
 that takes the messages alone. The variant uses `ExitCode.SUCCESS`.
 
 `FileOutput` appends the formatted text to the filepath, and it makes the file
-when the file does not exist. `StreamOutput` writes the formatted text to the
-stream and flushes it. A failed write throws `CliInteractionFileWriteException`
-or `CliInteractionStreamWriteException`, each wrapping the `IOException` as its
-cause.
+when the file does not exist. It makes no directory, so a filepath under a
+directory that does not exist fails the write. `StreamOutput` writes the
+formatted text to the stream and flushes it. A failed write throws
+`CliInteractionFileWriteException` or `CliInteractionStreamWriteException`, each
+wrapping the `IOException` as its cause.
 
 `FileOutput` never truncates. The file keeps the messages of each earlier run,
 and the caller owns truncation.
