@@ -104,7 +104,11 @@ public class InputHandler implements InputHandlerContract {
                 // this report is the only trace the failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
             } catch (Throwable reportThrowable) {
-                getFallbackOutputFromThrowable(exitThrowable, reportThrowable).writeMessages();
+                try {
+                    getFallbackOutputFromThrowable(exitThrowable, reportThrowable).writeMessages();
+                } catch (Throwable ignored) {
+                    // The report is the last write, so a failure here leaves no trace to write.
+                }
             }
         }
 

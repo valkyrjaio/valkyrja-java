@@ -37,6 +37,7 @@ import io.valkyrja.cli.server.handler.InputHandler;
 import io.valkyrja.cli.server.support.Exiter;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.tests.fixtures.cli.interaction.input.RaisingCommandNameInputFixture;
+import io.valkyrja.tests.fixtures.cli.server.handler.RaisingMessageThrowableFixture;
 import io.valkyrja.tests.fixtures.cli.server.handler.UnwritableReportInputHandlerFixture;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -300,6 +301,24 @@ final class InputHandlerTest {
         assertTrue(printed.contains("Cli Server Error:"));
         assertTrue(printed.contains("Recovery message:"));
         assertTrue(printed.contains("input"));
+    }
+
+    @Test
+    void runSignalsTheExitCodeWhenEveryReportOfTheExitStageRaises() {
+        Exiter.freeze();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        when(router.dispatch(any()))
+                .thenReturn(new Output().withIsSilent(true).withExitCode(ExitCode.USAGE_ERROR));
+        // The throwable's own message raises, so every report that names it raises with it.
+        doThrow(new RaisingMessageThrowableFixture())
+                .when(processExitingHandler)
+                .processExiting(any(), any());
+
+        var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
+
+        // Neither report leaves a trace, and the command's own code still reaches the shell.
+        assertEquals(String.valueOf(ExitCode.USAGE_ERROR.value), printed);
     }
 
     @Test
