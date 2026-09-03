@@ -101,8 +101,13 @@ public class ArgumentParameter extends Parameter implements ArgumentParameterCon
     }
 
     @Override
-    public boolean hasFirstValue() {
+    public boolean isProvided() {
         return !arguments.isEmpty();
+    }
+
+    @Override
+    public boolean hasFirstValue() {
+        return !getFirstValue().isEmpty();
     }
 
     @Override

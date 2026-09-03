@@ -220,8 +220,13 @@ public class OptionParameter extends Parameter implements OptionParameterContrac
     }
 
     @Override
-    public boolean hasFirstValue() {
+    public boolean isProvided() {
         return !options.isEmpty();
+    }
+
+    @Override
+    public boolean hasFirstValue() {
+        return !getFirstValue().isEmpty();
     }
 
     @Override

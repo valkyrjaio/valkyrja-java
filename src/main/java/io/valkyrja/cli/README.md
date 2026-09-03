@@ -185,6 +185,53 @@ collection.
 The handler is a `BiFunction<ContainerContract, RouteContract, OutputContract>`,
 so a handler resolves its own dependencies from the container.
 
+### Reading a parameter
+
+The router keeps every parameter the route declares, and it attaches input only
+to the parameters the caller passed. `hasOption` and `hasArgument` therefore
+report the **declaration**, and they are true whether or not the caller passed
+anything.
+
+| Method                                                    | Reports                                                                    |
+| :-------------------------------------------------------- | :------------------------------------------------------------------------- |
+| `RouteContract.hasOption` / `hasArgument`                 | The route declares the parameter                                           |
+| `RouteContract.hasProvidedOption` / `hasProvidedArgument` | The caller passed the parameter                                            |
+| `RouteContract.getOptionValue(name)`                      | The first value the caller gave, or the `defaultValue` the option declares |
+| `RouteContract.getOptionValue(name, default)`             | The first value the caller gave, or the default you pass                   |
+| `RouteContract.getArgumentValue(name)`                    | The first value the caller gave, or an empty string                        |
+| `RouteContract.getArgumentValue(name, default)`           | The first value the caller gave, or the default you pass                   |
+| `ParameterContract.isProvided`                            | The caller passed the parameter                                            |
+| `ParameterContract.hasFirstValue`                         | The caller gave a first value that is not empty                            |
+
+Use `hasProvidedOption` for a flag. An option whose value mode is `NONE` carries
+no value, so `hasFirstValue` is false for a flag the caller passed.
+
+The value methods read the first value only. `getOptionValue` reads three
+sources in this order:
+
+1. The first value the caller gave, when that value is not empty.
+2. A default given at the call site, when the call gives one.
+3. The `defaultValue` the option declares.
+
+The one-argument `getOptionValue(name)` skips step 2. An empty string given at
+the call site counts as a default, so it suppresses the declared one. Call
+`getOptionValue(name)`, or pass `null`, to reach step 3.
+
+`getArgumentValue` reads step 1 and step 2, because an argument declares no
+default. Read the parameter's own `getCastValues()` for every value of a
+parameter in `ARRAY` value mode.
+
+```java
+boolean isShort = route.hasProvidedOption("short");
+String namespace = route.getOptionValue("namespace");
+```
+
+`hasProvidedOption`, `hasProvidedArgument`, `getOptionValue`, and
+`getArgumentValue` never throw. A name the route does not declare therefore
+reads as "the caller passed nothing" through those methods. `getOption` and
+`getArgument` throw on that name instead. `Route` matches a parameter by the
+long name only, so pass the long name and not a short name.
+
 ## Middleware
 
 The component holds six stages. A stage has a contract, and a handler that runs
@@ -363,9 +410,8 @@ order.
 ## The built-in commands
 
 The `server` sub-component ships four command classes: `HelpCommand`,
-`ListCommand`, `ListBashCommand`, and `VersionCommand`. Each one extends the
-abstract `io.valkyrja.cli.server.command.abstract_.Command`, which takes the
-route, and each one returns an output from `run()`.
+`ListCommand`, `ListBashCommand`, and `VersionCommand`. Each one holds the route
+it runs for, and each one returns an output from `run()`.
 
 Warning: the four constructors differ, and none of them takes the route alone.
 `HelpCommand` and `ListCommand` take the namespace of the application, its

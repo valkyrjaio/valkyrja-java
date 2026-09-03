@@ -16,10 +16,10 @@ import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
-import io.valkyrja.cli.server.command.abstract_.Command;
 
-public class VersionCommand extends Command {
+public class VersionCommand {
 
+    protected RouteContract route;
     protected String appNamespace;
     protected String appVersion;
     protected OutputFactoryContract outputFactory;
@@ -29,7 +29,7 @@ public class VersionCommand extends Command {
             String appNamespace,
             String appVersion,
             RouteContract route) {
-        super(route);
+        this.route = route;
         this.outputFactory = outputFactory;
         this.appNamespace = appNamespace;
         this.appVersion = appVersion;
@@ -40,11 +40,11 @@ public class VersionCommand extends Command {
     }
 
     public OutputContract run() {
-        if (hasSpelledOption("short")) {
+        if (route.hasProvidedOption("short")) {
             return outputFactory.createOutput().withMessages(new Message(appVersion));
         }
 
-        if (hasSpelledOption("plain")) {
+        if (route.hasProvidedOption("plain")) {
             return outputFactory
                     .createOutput()
                     .withMessages(

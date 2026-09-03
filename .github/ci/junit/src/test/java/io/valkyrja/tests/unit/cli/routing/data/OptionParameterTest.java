@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.cli.interaction.enum_.OptionType;
 import io.valkyrja.cli.interaction.option.Option;
 import io.valkyrja.cli.routing.data.OptionParameter;
+import io.valkyrja.cli.routing.data.contract.OptionParameterContract;
 import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingInvalidOptionWithValueException;
@@ -207,5 +208,29 @@ final class OptionParameterTest {
                         .withOptions(new Option("verbose", "a", OptionType.LONG));
 
         assertSame(valid, valid.validateValues());
+    }
+
+    @Test
+    void isProvidedSeparatesTheFlagFromTheValue() {
+        OptionParameterContract flag =
+                new OptionParameter("dry-run", "Preview without applying")
+                        .withValueMode(OptionValueMode.NONE);
+
+        assertFalse(flag.isProvided());
+        assertFalse(flag.hasFirstValue());
+
+        OptionParameterContract spelledFlag =
+                flag.withOptions(new Option("dry-run", OptionType.LONG));
+
+        // A NONE option carries no value, so the caller passed it and it holds none.
+        assertTrue(spelledFlag.isProvided());
+        assertFalse(spelledFlag.hasFirstValue());
+
+        OptionParameterContract parameter = new OptionParameter("format", "The format");
+        OptionParameterContract withValue =
+                parameter.withOptions(new Option("format", "csv", OptionType.LONG));
+
+        assertTrue(withValue.isProvided());
+        assertTrue(withValue.hasFirstValue());
     }
 }
