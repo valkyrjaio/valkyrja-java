@@ -244,13 +244,13 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build a plain report, which names a throwable and the throwable that ended the attempt to
+     * Build a direct report, which names a throwable and the throwable that ended the attempt to
      * answer it. It names the one throwable where no attempt ran, and a third when building its own
      * full report raises.
      *
      * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
      * can point at any destination. This report answers an attempt that already failed, so it
-     * builds a plain {@link Output} itself. No override and no flag reaches it.
+     * builds an {@link Output} itself. No override and no flag reaches it.
      *
      * @param input the input the command ran with
      * @param throwable the throwable this handler caught
