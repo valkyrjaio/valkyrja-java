@@ -469,7 +469,11 @@ final class InputHandlerTest {
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
         when(router.dispatch(any())).thenReturn(new Output().withExitCode(5));
 
-        assertDoesNotThrow(() -> handler().run(input));
+        var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
+
+        // The int arm of the read reaches Exiter.exit, so a guard that swallowed a raise here
+        // would substitute the error code for this one.
+        assertEquals("5", printed);
     }
 
     @Test
