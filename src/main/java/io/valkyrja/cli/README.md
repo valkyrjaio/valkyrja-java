@@ -361,7 +361,10 @@ MessageContract message = new Message("Routes:", new HighlightedTextFormatter())
 the enum, and it takes an `int` as well.
 
 `InputHandler.run` reads the code from the output, and
-`io.valkyrja.cli.server.support.Exiter` ends the process with it.
+`io.valkyrja.cli.server.support.Exiter` ends the process with it. The read
+carries a guard, so an output that raises on it, or holds a value that fits no
+code, ends the process with `ERROR`. That guard prints a report naming the
+raise.
 
 ## Container bindings
 
