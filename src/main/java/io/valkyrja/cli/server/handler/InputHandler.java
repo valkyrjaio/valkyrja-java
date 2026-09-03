@@ -134,7 +134,7 @@ public class InputHandler implements InputHandlerContract {
     /**
      * Build the messages that report two throwables without reading the input.
      *
-     * @param throwable the throwable the write raised
+     * @param throwable the throwable a dispatch, a write, or the exit stage raised
      * @param recoveryThrowable the throwable the recovery raised
      * @return the messages that report both throwables
      */
@@ -188,7 +188,7 @@ public class InputHandler implements InputHandlerContract {
      * its own.
      *
      * @param input the input the command ran with
-     * @param throwable the throwable a dispatch, a write, or the exit stage raised
+     * @param throwable the throwable a write or the exit stage raised
      * @return the output that reports the throwable
      */
     protected OutputContract getOutputFromThrowable(InputContract input, Throwable throwable) {
@@ -238,7 +238,7 @@ public class InputHandler implements InputHandlerContract {
      * which is the failure this report answers.
      *
      * @param input the input the command ran with
-     * @param throwable the throwable the write raised
+     * @param throwable the throwable a dispatch, a write, or the exit stage raised
      * @param recoveryThrowable the throwable the recovery raised
      * @return the output that reports both throwables
      */
