@@ -385,6 +385,21 @@ final class InputHandlerTest {
     }
 
     @Test
+    void handleStandsInForAThrowableThatCarriesNoMessage() {
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        // getMessage returns null rather than raising, which is the other half of the stand-in.
+        when(router.dispatch(any())).thenThrow(new IllegalStateException());
+        when(throwableCaughtHandler.throwableCaught(any(), isNull(), any()))
+                .thenThrow(new IllegalStateException("middleware"));
+
+        var output = handler().handle(input);
+        var printed = capture(output::writeMessages);
+
+        assertTrue(printed.contains("list: the throwable reports no message"));
+        assertFalse(printed.contains("list: null"));
+    }
+
+    @Test
     void runWithIntegerExitCode() {
         Exiter.freeze();
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
