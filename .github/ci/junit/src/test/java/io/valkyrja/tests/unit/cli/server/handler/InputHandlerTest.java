@@ -311,7 +311,8 @@ final class InputHandlerTest {
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
         when(router.dispatch(any()))
                 .thenReturn(new Output().withIsSilent(true).withExitCode(ExitCode.USAGE_ERROR));
-        // The throwable's own message raises, so every report that names it raises with it.
+        // The throwable's own message raises, so every report that names it reads the
+        // stand-in rather than raising.
         doThrow(new RaisingMessageThrowableFixture())
                 .when(processExitingHandler)
                 .processExiting(any(), any());

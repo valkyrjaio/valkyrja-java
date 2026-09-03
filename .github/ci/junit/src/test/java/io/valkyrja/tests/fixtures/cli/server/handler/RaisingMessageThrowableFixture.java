@@ -8,7 +8,7 @@
 
 package io.valkyrja.tests.fixtures.cli.server.handler;
 
-/** Testable throwable whose message raises, so a report that names it raises with it. */
+/** Testable throwable whose message raises, so a report that names it reads the stand-in. */
 public final class RaisingMessageThrowableFixture extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
