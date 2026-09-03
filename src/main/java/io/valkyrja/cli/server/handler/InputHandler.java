@@ -250,7 +250,7 @@ public class InputHandler implements InputHandlerContract {
      *
      * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
      * can point at any destination. This method is private, so no override reaches the report that
-     * a failed attempt falls back to.
+     * this handler falls back to.
      *
      * @param input the input the command ran with
      * @param throwable the throwable this handler caught
