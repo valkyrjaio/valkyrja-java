@@ -257,7 +257,8 @@ public class InputHandler implements InputHandlerContract {
      *   <li>the method takes no override
      *   <li>its own try guards the one call that reads the input
      *   <li>every message reads through {@code messageOf}
-     *   <li>it returns a plain {@code Output}, whose {@code PrintStream} raises none on the write
+     *   <li>it returns a plain {@code Output}, whose write goes to {@code System.out} and raises
+     *       nothing
      * </ul>
      *
      * <p>No call site guards the call to this method, and three of the four write its return
