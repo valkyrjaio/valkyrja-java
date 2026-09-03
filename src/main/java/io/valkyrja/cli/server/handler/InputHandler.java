@@ -155,14 +155,18 @@ public class InputHandler implements InputHandlerContract {
      */
     protected MessageContract[] getFallbackThrowableMessages(
             Throwable throwable, Throwable recoveryThrowable) {
-        return concat(
-                new MessageContract[] {
-                    new ErrorMessage("Cli Server Error:"),
-                    new NewLine(),
-                    new Message(" " + throwable.getMessage()),
-                    new NewLine()
-                },
-                getRecoveryMessages(recoveryThrowable));
+        // This report answers a report that raised, so it repeats no call of it. It spells the
+        // recovery lines out rather than calling getRecoveryMessages, which the caller's try
+        // already ran.
+        return new MessageContract[] {
+            new ErrorMessage("Cli Server Error:"),
+            new NewLine(),
+            new Message(" " + throwable.getMessage()),
+            new NewLine(),
+            new ErrorMessage("Recovery message:"),
+            new Message(" " + recoveryThrowable.getMessage()),
+            new NewLine()
+        };
     }
 
     private static MessageContract[] concat(MessageContract[] first, MessageContract[] second) {
