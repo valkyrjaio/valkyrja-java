@@ -218,8 +218,8 @@ A first report comes from `getOutputFromThrowable`, which a subclass overrides
 and can point at any destination. `InputHandler` builds a recovery report
 through a private method, so no override reaches it. Both reports this class
 builds take an `Output` with the default flags, so a `--silent` run prints them.
-An overridden first report takes whatever flags its own destination carries. A
-recovery report names the command, and it names no command when reading the
+
+A recovery report names the command, and it names no command when reading the
 command name from the input is itself what raised. That one report carries a
 `Report message:` line, which names the raise that removed the command. Every
 report reads a throwable's message through one call, which stands in the text
