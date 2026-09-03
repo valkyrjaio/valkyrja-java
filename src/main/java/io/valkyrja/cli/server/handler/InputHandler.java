@@ -244,17 +244,19 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build the output that reports a throwable and the throwable that ended the first report of
-     * it. It names a third throwable when building its own full report raises as well.
+     * Build a second report, which names a throwable and the throwable that ended a first report of
+     * it. It names the one throwable where no first report ran, and a third when building its own
+     * full report raises.
      *
      * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
-     * can point at any destination. This report answers a report that already failed, so it builds
-     * a plain {@link Output} itself. No override redirects it to the destination that just failed,
-     * which is the failure this report answers.
+     * can point at any destination. This report answers a first report that failed, or a read that
+     * had none, so it builds a plain {@link Output} itself. No override redirects it to a
+     * destination that already failed.
      *
      * @param input the input the command ran with
      * @param throwable the throwable this handler caught
-     * @param recoveryThrowable the throwable that ended the first report of it
+     * @param recoveryThrowable the throwable that ended the first report of it, or null where no
+     *     first report ran
      * @return the output that reports the throwables
      */
     private OutputContract getRecoveryOutput(
