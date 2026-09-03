@@ -87,8 +87,9 @@ public class InputHandler implements InputHandlerContract {
                                 input, getOutputFromThrowable(input, throwable), throwable);
                 output = output.writeMessages();
             } catch (Throwable recoveryThrowable) {
-                // The dispatch or the recovery write failed. A middleware can throw, or it can
-                // return an output whose destination is the one that failed.
+                // Building the first report, the dispatch, or the recovery write failed.
+                // The build reads the command name, a middleware can throw, and a middleware
+                // can return an output whose destination is the one that failed.
                 output = getRecoveryOutput(input, throwable, recoveryThrowable);
                 output = output.writeMessages();
             }
