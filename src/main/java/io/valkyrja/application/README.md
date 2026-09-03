@@ -231,11 +231,13 @@ The kernel caches each list after the first call, so the walk runs once.
 `CliWithHttpApplicationComponentProvider` is the default of `CliConfig`, so a
 command reaches an HTTP service.
 
-Warning: `HttpRoutingCliRouteProvider` returns
+Warning: the framework registers no `http:list` command, and two things stop it.
+`HttpRoutingCliRouteProvider` returns
 `io.valkyrja.http.routing.cli.command.ListCommand` as a controller class, and
-that class carries no `@Route` annotation. The collector reads no route from it,
-so the framework registers no `http:list` command. An application that wants the
-command declares a route for it.
+that class carries no `@Route` annotation. The provider is a CLI route provider,
+so the CLI collector would read it, and the framework publishes no binding for
+that collector. An annotation alone therefore changes nothing. The
+[cli component](../cli/README.md) describes the binding the collector needs.
 
 ## Accessing the application
 
