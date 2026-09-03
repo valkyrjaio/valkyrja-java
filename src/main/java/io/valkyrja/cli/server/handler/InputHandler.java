@@ -55,7 +55,12 @@ public class InputHandler implements InputHandlerContract {
         try {
             output = dispatchRouter(input);
         } catch (Throwable throwable) {
-            output = throwableCaughtHandler.throwableCaught(input, emptyOutput(), throwable);
+            try {
+                // A middleware runs here, so the dispatch belongs under a guard of its own.
+                output = throwableCaughtHandler.throwableCaught(input, emptyOutput(), throwable);
+            } catch (Throwable recoveryThrowable) {
+                output = getOutputFromThrowable(input, throwable, recoveryThrowable);
+            }
         }
         container.setSingleton(OutputContract.class, output);
         return output;

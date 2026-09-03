@@ -35,6 +35,9 @@ import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.server.handler.InputHandler;
 import io.valkyrja.cli.server.support.Exiter;
 import io.valkyrja.container.manager.Container;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +56,7 @@ final class InputHandlerTest {
     private ThrowableCaughtHandlerContract throwableCaughtHandler;
     private ProcessExitingHandlerContract processExitingHandler;
     private final Input input = new Input();
+    private final PrintStream originalOut = System.out;
 
     @TempDir Path directory;
 
@@ -67,7 +71,16 @@ final class InputHandlerTest {
 
     @AfterEach
     void unfreeze() {
+        System.setOut(originalOut);
         Exiter.unfreeze();
+    }
+
+    private String capture(Runnable runnable) {
+        var buffer = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(buffer, true, StandardCharsets.UTF_8));
+        runnable.run();
+        System.setOut(originalOut);
+        return buffer.toString(StandardCharsets.UTF_8);
     }
 
     private InputHandler handler() {
@@ -193,6 +206,22 @@ final class InputHandlerTest {
         var exited = ArgumentCaptor.forClass(OutputContract.class);
         verify(processExitingHandler).processExiting(any(), exited.capture());
         assertEquals(ExitCode.ERROR, exited.getValue().getExitCode());
+    }
+
+    @Test
+    void handleReportsBothThrowablesWhenTheThrowableCaughtMiddlewareThrows() {
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        when(router.dispatch(any())).thenThrow(new IllegalStateException("command"));
+        when(throwableCaughtHandler.throwableCaught(any(), isNull(), any()))
+                .thenThrow(new IllegalStateException("middleware"));
+
+        var output = handler().handle(input);
+        var printed = capture(output::writeMessages);
+
+        assertEquals(ExitCode.ERROR, output.getExitCode());
+        assertTrue(printed.contains("command"));
+        assertTrue(printed.contains("Recovery message:"));
+        assertTrue(printed.contains("middleware"));
     }
 
     @Test

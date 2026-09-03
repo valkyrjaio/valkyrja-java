@@ -224,6 +224,10 @@ run passes a non-null output. A middleware of this stage therefore receives
 `CliInteractionFileWriteException` and `CliInteractionStreamWriteException` as
 well as a throwable a command raised.
 
+A middleware of this stage can itself throw. `handle` then builds an output that
+names the throwable it caught and the middleware's, and the caller still
+receives an output.
+
 Warning: the run in `run` resumes the chain rather than restarting it.
 `Handler` advances its index once for each middleware it resolves and never
 rewinds it, and `CliMiddlewareServiceProvider` publishes one handler as a
