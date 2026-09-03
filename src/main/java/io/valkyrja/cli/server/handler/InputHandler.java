@@ -104,9 +104,9 @@ public class InputHandler implements InputHandlerContract {
                 // this report is the only trace the failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
             } catch (Throwable reportThrowable) {
-                // getRecoveryOutput raises nothing, because it takes no override and reads
-                // each message through messageOf. It writes framework messages through a plain
-                // Output, whose PrintStream raises none, so this write needs no guard.
+                // getRecoveryOutput raises nothing: it takes no override, its own try guards
+                // the one call that reads the input, and every message reads through
+                // messageOf. It writes through a plain Output, whose PrintStream raises none.
                 getRecoveryOutput(input, exitThrowable, reportThrowable).writeMessages();
             }
         }
@@ -141,8 +141,7 @@ public class InputHandler implements InputHandlerContract {
     private MessageContract[] getFallbackThrowableMessages(
             Throwable throwable, Throwable recoveryThrowable) {
         // This report answers a report that raised, so no call it makes can raise again. It
-        // spells the recovery lines out rather than calling getRecoveryMessages, and it reads
-        // each message through messageOf, which the caller's try may have raised on.
+        // reads each message through messageOf, and it reads the input not at all.
         return new MessageContract[] {
             new ErrorMessage("Cli Server Error:"),
             new NewLine(),
