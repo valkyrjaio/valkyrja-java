@@ -177,6 +177,25 @@ final class InputHandlerTest {
     }
 
     @Test
+    void runRecoversWhenTheThrowableCaughtMiddlewareItselfThrows() {
+        Exiter.freeze();
+
+        var unwritablePath = directory.resolve("missing").resolve(FILENAME).toString();
+        var unwritable = new FileOutput(unwritablePath).withAddedMessage(new Message("hello"));
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        when(router.dispatch(any())).thenReturn(unwritable);
+        when(throwableCaughtHandler.throwableCaught(any(), any(), any()))
+                .thenThrow(new IllegalStateException("middleware"));
+
+        assertDoesNotThrow(() -> handler().run(input));
+
+        var exited = ArgumentCaptor.forClass(OutputContract.class);
+        verify(processExitingHandler).processExiting(any(), exited.capture());
+        assertEquals(ExitCode.ERROR, exited.getValue().getExitCode());
+    }
+
+    @Test
     void runWithIntegerExitCode() {
         Exiter.freeze();
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
