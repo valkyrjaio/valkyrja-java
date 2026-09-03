@@ -215,14 +215,13 @@ destination. A raise while `run` builds or writes that report makes it print the
 report that answers it. The code the command set still reaches `Exiter.exit`.
 
 A first report comes from `getOutputFromThrowable`, which a subclass overrides
-and can point at any destination. A second report builds a plain `Output`
-itself, so no override redirects it to a destination that already failed. A
-second report names the command, and it names none when reading the command name
-from the input is itself what raised. That one report carries a `Report
-message:` line, which names the raise that removed the command. Every report
-reads a throwable's message through one call, which stands in the text `the
-throwable reports no message` when the throwable carries none and when reading
-it raises.
+and can point at any destination. A plain report builds an `Output` itself, so
+no override and no flag reaches it. A plain report names the command, and it
+names none when reading the command name from the input is itself what raised.
+That one report carries a `Report message:` line, which names the raise that
+removed the command. Every report reads a throwable's message through one call,
+which stands in the text `the throwable reports no message` when the throwable
+carries none and when reading it raises.
 
 Warning: the `ThrowableCaught` stage receives a `null` output from
 `InputHandler.handle`. That call passes the result of `emptyOutput()`, which is
@@ -363,7 +362,7 @@ the enum, and it takes an `int` as well.
 `InputHandler.run` reads the code from the output, and
 `io.valkyrja.cli.server.support.Exiter` ends the process with it. The read
 carries a guard, so an output that raises on it, or holds a value that fits no
-code, ends the process with `ERROR`. That guard prints a second report, which
+code, ends the process with `ERROR`. That guard prints a plain report, which
 names the raise and names the command whenever the input reads.
 
 ## Container bindings
