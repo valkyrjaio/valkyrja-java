@@ -161,6 +161,7 @@ public class InputHandler implements InputHandlerContract {
         return new MessageContract[] {
             new ErrorMessage("Cli Server Error:"),
             new NewLine(),
+            new ErrorMessage("Message:"),
             new Message(" " + throwable.getMessage()),
             new NewLine(),
             new ErrorMessage("Recovery message:"),
