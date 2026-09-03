@@ -181,6 +181,16 @@ the middleware of that stage in order.
 to stop. `RouteMatched` returns a `RouteContract` to continue, or an
 `OutputContract` to stop. Each of the other four returns the type of its stage.
 
+Warning: `ThrowableCaught` receives a `null` output. `InputHandler.handle` calls
+the stage with the result of `emptyOutput()`, which is `null`, so a middleware
+of that stage builds its own output. A middleware that reads the output it
+receives throws a `NullPointerException` on the first throwable.
+
+Warning: the `ThrowableCaught` stage needs a middleware. The handler ends in
+`Objects.requireNonNull` for the output, and `CliConfig` lists no middleware at
+that stage. A command that throws therefore ends in a `NullPointerException` out
+of `handle`, and `run` never reaches `writeMessages`, `exit`, or `Exiter`.
+
 ```java
 public final class AppTimerMiddleware implements RouteDispatchedMiddlewareContract {
 
