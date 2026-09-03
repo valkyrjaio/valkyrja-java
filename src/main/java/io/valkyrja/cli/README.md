@@ -145,16 +145,19 @@ Warning: the framework publishes no binding for
 binding. Every annotation above this section then reaches no collection, and the
 command it declares does not run.
 
-Publish `AttributeRouteCollector` from a service provider of the application to
-close the gap.
+Warning: a service provider does not close the gap. `isSingleton` reads no
+callback, and `publishRouteCollection` runs on the first resolution of
+`RouteCollectionContract`, so a deferred publisher for the collector leaves the
+guard `false`. The application calls `setSingleton` for the collector before
+anything resolves the collection.
 
 ```java
 container.setSingleton(RouteCollectorContract.class, new AttributeRouteCollector());
 ```
 
-Warning: `isSingleton` reads no callback, so a deferred publisher for the key
-leaves the guard `false` as well. Bind the collector with `setSingleton` or with
-`bindSingleton`, and publish it before the collection resolves.
+The two sibling components differ. `HttpRoutingServiceProvider` publishes its
+own collector and reads it with no guard. `GrpcRoutingServiceProvider` publishes
+its own collector and guards on `container.has`, which does read the callbacks.
 
 ## The router
 
@@ -370,8 +373,10 @@ version, the route, the collection, and the output factory. `ListBashCommand`
 takes the route, the collection, and the output factory. `VersionCommand` takes
 the output factory, the namespace, the version, and the route.
 
-Warning: no route provider of the framework registers these four commands, so an
-application that wants one declares a route for it.
+Warning: no route provider of the framework registers these four commands. An
+annotation on one of them registers nothing either, because the collector that
+reads an annotation carries no binding. An application that wants one returns a
+prebuilt `RouteContract` from `getRoutes()`.
 
 `io.valkyrja.cli.server.constant.CliCommandName` holds the three command names,
 and `io.valkyrja.cli.routing.constant.OptionName` and `OptionShortName` hold the
