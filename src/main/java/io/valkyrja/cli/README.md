@@ -209,10 +209,10 @@ Warning: a `ProcessExiting` middleware returns `void`, so it cannot change the
 output. The exit code that `InputHandler.run` reads is already fixed when the
 stage runs.
 
-Warning: `ThrowableCaught` receives a `null` output. `InputHandler.handle` calls
-the stage with the result of `emptyOutput()`, which is `null`, so a middleware
-of that stage builds its own output. A middleware that reads the output it
-receives throws a `NullPointerException` on the first throwable.
+Warning: the stage receives a `null` output from `InputHandler.handle`. That
+call passes the result of `emptyOutput()`, which is `null`, so a middleware of
+that stage builds its own output. A middleware that reads the output it receives
+throws a `NullPointerException` on the first throwable a command raises.
 
 Warning: the `ThrowableCaught` stage needs a middleware. The handler ends in
 `Objects.requireNonNull` for the output, and `CliConfig` lists no middleware at
