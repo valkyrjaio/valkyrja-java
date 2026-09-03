@@ -287,7 +287,8 @@ cause.
 and the caller owns truncation.
 
 `writeMessages()` writes each message that the output holds. `InputHandler.run`
-calls it once, after the router returns.
+calls it after `handle` returns, and again for each output that a failed write
+recovers to.
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
 unwritten list. Keep the return value when the moved state matters.
