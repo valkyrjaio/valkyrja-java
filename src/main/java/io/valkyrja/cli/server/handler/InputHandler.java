@@ -99,10 +99,13 @@ public class InputHandler implements InputHandlerContract {
         try {
             exit(input, output);
         } catch (Throwable exitThrowable) {
-            // A middleware runs here, and the command's code still reaches the shell, so this
-            // report is the only trace the failure leaves. The base report prints to
-            // System.out, which raises no throwable of its own.
-            getOutputFromThrowable(input, exitThrowable).writeMessages();
+            try {
+                // A middleware runs here, and the command's code still reaches the shell, so
+                // this report is the only trace the failure leaves.
+                getOutputFromThrowable(input, exitThrowable).writeMessages();
+            } catch (Throwable ignored) {
+                // The report is the last write, so a failure here leaves no trace to write.
+            }
         }
 
         Object exitCode = output.getExitCode();

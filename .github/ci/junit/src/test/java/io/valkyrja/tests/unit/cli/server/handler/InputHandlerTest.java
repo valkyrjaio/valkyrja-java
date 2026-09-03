@@ -36,6 +36,7 @@ import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.server.handler.InputHandler;
 import io.valkyrja.cli.server.support.Exiter;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.tests.fixtures.cli.server.handler.UnwritableReportInputHandlerFixture;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -244,6 +245,36 @@ final class InputHandlerTest {
         assertTrue(printed.contains("exiting"));
         // The report ends its own line, and the frozen exiter prints the code after it.
         assertTrue(printed.endsWith("\n" + ExitCode.USAGE_ERROR.value));
+    }
+
+    @Test
+    void runSignalsTheExitCodeWhenTheExitStageReportAlsoFails() {
+        Exiter.freeze();
+
+        var unwritablePath = directory.resolve("missing").resolve(FILENAME).toString();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        when(router.dispatch(any()))
+                .thenReturn(new Output().withIsSilent(true).withExitCode(ExitCode.USAGE_ERROR));
+        doThrow(new IllegalStateException("exiting"))
+                .when(processExitingHandler)
+                .processExiting(any(), any());
+
+        // An override of the report can hold a destination that takes no write.
+        var handler =
+                new UnwritableReportInputHandlerFixture(
+                        container,
+                        router,
+                        inputReceivedHandler,
+                        throwableCaughtHandler,
+                        processExitingHandler,
+                        mock(CliInteractionConfigContract.class),
+                        unwritablePath);
+
+        var printed = capture(() -> assertDoesNotThrow(() -> handler.run(input)));
+
+        // The report leaves no trace, and the command's own code still reaches the shell.
+        assertEquals(String.valueOf(ExitCode.USAGE_ERROR.value), printed);
     }
 
     @Test
