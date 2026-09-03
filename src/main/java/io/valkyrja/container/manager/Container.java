@@ -234,7 +234,8 @@ public class Container extends ProvidersAware {
     /** Resolve a service via its registered callable without ensuring publication. */
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        BiFunction<ContainerContract, Map<String, Object>, Object> callable = getServiceCallable(id);
+        BiFunction<ContainerContract, Map<String, Object>, Object> callable =
+                getServiceCallable(id);
         if (callable == null) {
             return null;
         }
