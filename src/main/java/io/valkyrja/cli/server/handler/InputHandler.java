@@ -73,11 +73,12 @@ public class InputHandler implements InputHandlerContract {
         try {
             output = output.writeMessages();
         } catch (Throwable throwable) {
-            output =
-                    throwableCaughtHandler.throwableCaught(
-                            input, getOutputFromThrowable(input, throwable), throwable);
-
             try {
+                // A middleware runs here, so the dispatch belongs under the same guard as the
+                // write.
+                output =
+                        throwableCaughtHandler.throwableCaught(
+                                input, getOutputFromThrowable(input, throwable), throwable);
                 output = output.writeMessages();
             } catch (Throwable recoveryThrowable) {
                 // A middleware can return an output whose destination is the one that failed.
