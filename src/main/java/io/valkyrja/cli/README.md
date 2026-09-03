@@ -315,9 +315,11 @@ stage raised.
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
 unwritten list. Keep the return value when the moved state matters.
-`InputHandler.run` keeps it for the three writes of the command's own output,
-and registers that output as the `OutputContract` singleton. It discards the
-return of each exit-stage report, which no later stage reads.
+`InputHandler.run` keeps it for the write of the command's own output, and for
+the write of each of the two outputs that a failed write recovers to. It
+registers the output it holds after those writes as the `OutputContract`
+singleton. It discards the return of each exit-stage report, which no later
+stage reads.
 
 Two flags control the write. `isSilent` stops it. `isQuiet` stops it while the
 exit code is `ExitCode.SUCCESS`. A third flag, `isInteractive`, reaches no write
