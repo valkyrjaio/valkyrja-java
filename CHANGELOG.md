@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.14...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.15...26.x)
+
+## [v26.9.15](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.14...v26.9.15) - 2026-09-03
+
+* [README] docs(#183): Add a README to each component in the source tree by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/184
 
 ## [v26.9.14](https://github.com/valkyrjaio/valkyrja-java/compare/v26.9.13...v26.9.14) - 2026-09-02
 
