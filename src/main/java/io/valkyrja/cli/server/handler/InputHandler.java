@@ -135,7 +135,7 @@ public class InputHandler implements InputHandlerContract {
      * Build the messages that report two throwables without reading the input.
      *
      * @param throwable the throwable this handler caught
-     * @param recoveryThrowable the throwable that ended the first attempt to report it
+     * @param recoveryThrowable the throwable that ended the first report of it
      * @return the messages that report both throwables
      */
     private MessageContract[] getFallbackThrowableMessages(
@@ -216,9 +216,9 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build the messages that report the throwable a recovery raised.
+     * Build the messages that report the throwable that ended a first report.
      *
-     * @param recoveryThrowable the throwable that ended the first attempt to report it
+     * @param recoveryThrowable the throwable that ended a first report
      * @return the messages that report the recovery throwable
      */
     private MessageContract[] getRecoveryMessages(Throwable recoveryThrowable) {
@@ -230,7 +230,8 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build the output that reports a throwable and the throwable a recovery raised.
+     * Build the output that reports a throwable and the throwable that ended the first report of
+     * it.
      *
      * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
      * can point at any destination. This report answers a report that already failed, so it builds
@@ -239,7 +240,7 @@ public class InputHandler implements InputHandlerContract {
      *
      * @param input the input the command ran with
      * @param throwable the throwable this handler caught
-     * @param recoveryThrowable the throwable that ended the first attempt to report it
+     * @param recoveryThrowable the throwable that ended the first report of it
      * @return the output that reports both throwables
      */
     private OutputContract getRecoveryOutput(
