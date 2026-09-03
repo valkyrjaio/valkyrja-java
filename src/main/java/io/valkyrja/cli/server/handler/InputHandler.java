@@ -161,8 +161,8 @@ public class InputHandler implements InputHandlerContract {
      * report must not raise, and this call runs in the report that answers a raise.
      *
      * @param throwable the throwable to read
-     * @return the message the throwable carries, or a stand-in when it carries none and when
-     *     reading it raises
+     * @return the message the throwable carries, or a stand-in when it carries none or when reading
+     *     it raises
      */
     private static String messageOf(Throwable throwable) {
         String message;
@@ -209,7 +209,7 @@ public class InputHandler implements InputHandlerContract {
         return new MessageContract[] {
             new ErrorMessage("Cli Server Error:"),
             new NewLine(),
-            new Message(input.getCommandName() + ": " + throwable.getMessage()),
+            new Message(input.getCommandName() + ": " + messageOf(throwable)),
             new NewLine()
         };
     }
@@ -223,7 +223,7 @@ public class InputHandler implements InputHandlerContract {
     protected MessageContract[] getRecoveryMessages(Throwable recoveryThrowable) {
         return new MessageContract[] {
             new ErrorMessage("Recovery message:"),
-            new Message(" " + recoveryThrowable.getMessage()),
+            new Message(" " + messageOf(recoveryThrowable)),
             new NewLine()
         };
     }
