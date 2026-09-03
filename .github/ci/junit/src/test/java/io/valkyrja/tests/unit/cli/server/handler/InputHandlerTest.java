@@ -416,6 +416,8 @@ final class InputHandlerTest {
 
         // The guard names what it swallowed, and the input reads, so it names the command.
         assertTrue(printed.contains("list: exit code"));
+        // No attempt preceded this read, so the report carries no recovery line.
+        assertFalse(printed.contains("Recovery message:"));
         assertTrue(printed.endsWith("\n" + ExitCode.ERROR.value));
     }
 
