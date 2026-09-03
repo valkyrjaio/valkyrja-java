@@ -10,7 +10,11 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
@@ -38,9 +42,17 @@ import org.jspecify.annotations.Nullable;
  *
  * <ol>
  *   <li>Child's own cached instance
- *   <li>Parent's cached instance ({@code isSingletonInstance} via contract — safe reuse, frozen)
+ *   <li>Parent's cached instance ({@code getSingletonInstance} via contract — safe reuse, frozen)
  *   <li>Child's copied singleton binding → create in child via base class logic
  * </ol>
+ *
+ * <p>A binding the parent holds runs here, with the child as the container, so the dependencies it
+ * resolves come from the child. No lookup asks the parent to build, publish, or cache anything, so
+ * no request can change the frozen parent.
+ *
+ * <p>An alias that only the parent declares points at the parent's binding, and this container
+ * resolves that binding in its own scope. A chain of parent aliases that returns to a type it
+ * already reached throws {@link ContainerCyclicAliasException}.
  *
  * @see NativeChildContainer for a direct field-access alternative requiring a concrete parent type
  */
@@ -51,7 +63,7 @@ public class ChildContainer extends Container {
     public ChildContainer(ContainerContract parent, ContainerData parentData) {
         this.parent = parent;
         // Copy only the two maps the child needs for self-sufficient singleton resolution.
-        // All other resolution delegates to the parent via contract.
+        // All other resolution reads the parent through the contract, and runs in the child.
         // parentData is immutable (record with Map.copyOf) — safe to reuse across requests.
         this.singletons.putAll(parentData.singletons());
         this.callbacks.putAll(parentData.callbacks());
@@ -65,29 +77,124 @@ public class ChildContainer extends Container {
      */
     @Override
     protected @Nullable <T> T getSingletonWithoutChecks(Class<T> id) {
-        // Parent has a resolved instance and child does not — reuse it (frozen, safe)
+        // The parent holds a resolved instance and the child does not, so the child reuses
+        // the parent's copy. The read builds nothing and publishes nothing.
         if (!super.isSingletonInstance(id) && parent.isSingletonInstance(id)) {
-            return parent.getSingleton(id);
+            return parent.getSingletonInstance(id);
         }
 
-        // Child's own instances (step 1) and child's copied binding → create in child (step 3)
         return super.getSingletonWithoutChecks(id);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected @Nullable <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        if (!super.isService(id) && parent.isService(id)) {
-            return parent.getService(id, arguments);
+        // The parent declares the binding and the child does not, so the child runs the
+        // parent's factory with itself as the container. The factory then resolves its own
+        // dependencies in the request scope.
+        if (super.getServiceCallable(id) == null) {
+            BiFunction<ContainerContract, Map<String, Object>, Object> callable =
+                    parent.getServiceCallable(id);
+
+            if (callable != null) {
+                return (T) callable.apply(this, arguments);
+            }
         }
+
         return super.getServiceWithoutChecks(id, arguments);
     }
 
     @Override
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        if (!super.isAlias(id) && parent.isAlias(id)) {
-            return parent.getAliased(id, arguments);
+        if (super.isAlias(id)) {
+            return super.getAliasedWithoutChecks(id, arguments);
         }
-        return super.getAliasedWithoutChecks(id, arguments);
+
+        Class<?> aliasedId = getParentAliasTarget(id);
+
+        if (aliasedId == null) {
+            return null;
+        }
+
+        return getParentAliasedTarget(aliasedId, arguments);
+    }
+
+    /**
+     * Walk the parent's alias chain to the first type that resolves.
+     *
+     * @param id the alias type
+     * @return the type to resolve, or null when the chain reaches none
+     */
+    private @Nullable Class<?> getParentAliasTarget(Class<?> id) {
+        Set<Class<?>> seen = new HashSet<>();
+        Class<?> current = id;
+        Class<?> aliasedId;
+
+        while ((aliasedId = parent.getAliasedId(current)) != null) {
+            if (!seen.add(aliasedId)) {
+                throw new ContainerCyclicAliasException(
+                        id.getName(), current.getName(), aliasedId.getName());
+            }
+
+            current = aliasedId;
+
+            if (isResolvable(current)) {
+                return current;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the target of an alias that only the parent declares.
+     *
+     * @param <T> the service type
+     * @param id the target type
+     * @param arguments arguments passed to the service factory
+     * @return the resolved instance
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T getParentAliasedTarget(Class<?> id, Map<String, Object> arguments) {
+        // The alias belongs to the parent, so it points at the parent's copy first, and at
+        // the copy the child built for an earlier lookup second.
+        Object instance = parent.getSingletonInstance(id);
+
+        if (instance == null) {
+            instance = super.getSingletonInstance(id);
+        }
+
+        if (instance != null) {
+            return (T) instance;
+        }
+
+        BiFunction<ContainerContract, Map<String, Object>, Object> callable =
+                parent.getServiceCallable(id);
+
+        // The parent declares no binding, so the child answers from its own maps.
+        if (callable == null) {
+            return (T) get(id, arguments);
+        }
+
+        // The parent's binding runs with the child as the container.
+        Object built = callable.apply(this, arguments);
+
+        // A singleton caches in the child, so one request holds one instance.
+        if (isSingletonBinding(id)) {
+            instances.put(id, built);
+        }
+
+        return (T) built;
+    }
+
+    /**
+     * Check whether a type resolves without a further alias hop.
+     *
+     * @param id the service type
+     * @return true when the child or the parent can answer it
+     */
+    private boolean isResolvable(Class<?> id) {
+        return isSingleton(id) || isService(id) || super.isDeferred(id);
     }
 
     /**
@@ -111,6 +218,13 @@ public class ChildContainer extends Container {
     }
 
     @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        Class<?> aliased = super.getAliasedId(alias);
+
+        return aliased != null ? aliased : parent.getAliasedId(alias);
+    }
+
+    @Override
     public boolean isService(Class<?> id) {
         return super.isService(id) || parent.isService(id);
     }
@@ -118,6 +232,22 @@ public class ChildContainer extends Container {
     @Override
     public boolean isSingletonInstance(Class<?> id) {
         return super.isSingletonInstance(id) || parent.isSingletonInstance(id);
+    }
+
+    @Override
+    public @Nullable <T> T getSingletonInstance(Class<T> id) {
+        T instance = super.getSingletonInstance(id);
+
+        return instance != null ? instance : parent.getSingletonInstance(id);
+    }
+
+    @Override
+    public @Nullable BiFunction<ContainerContract, Map<String, Object>, Object> getServiceCallable(
+            Class<?> id) {
+        BiFunction<ContainerContract, Map<String, Object>, Object> callable =
+                super.getServiceCallable(id);
+
+        return callable != null ? callable : parent.getServiceCallable(id);
     }
 
     // isSingletonBinding is NOT overridden — child's copied singletons map is checked by

@@ -9,7 +9,10 @@
 package io.valkyrja.container.manager;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
@@ -21,7 +24,12 @@ import org.jspecify.annotations.Nullable;
  * at construction — parent fields are read directly, giving zero per-request allocation beyond the
  * child's own empty maps.
  *
- * <p>All writes go to the child's own maps only. The parent is never mutated after bootstrap.
+ * <p>All writes go to the child's own maps only. The parent is never mutated after bootstrap, and
+ * no lookup asks the parent to build, publish, or cache anything.
+ *
+ * <p>An alias that only the parent declares points at the parent's binding, and this container
+ * resolves that binding in its own scope. A chain of parent aliases that returns to a type it
+ * already reached throws {@link ContainerCyclicAliasException}.
  *
  * <p>Singleton resolution order:
  *
@@ -86,13 +94,92 @@ public class NativeChildContainer extends Container {
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
         Class<?> aliased = aliases.get(id);
-        if (aliased == null) {
-            aliased = parent.aliases.get(id);
+        if (aliased != null) {
+            return get((Class<T>) aliased, arguments);
         }
-        if (aliased == null) {
+
+        Class<?> aliasedId = getParentAliasTarget(id);
+        if (aliasedId == null) {
             return null;
         }
-        return get((Class<T>) aliased, arguments);
+
+        return getParentAliasedTarget(aliasedId, arguments);
+    }
+
+    /**
+     * Walk the parent's alias chain to the first type that resolves.
+     *
+     * @param id the alias type
+     * @return the type to resolve, or null when the chain reaches none
+     */
+    private @Nullable Class<?> getParentAliasTarget(Class<?> id) {
+        Set<Class<?>> seen = new HashSet<>();
+        Class<?> current = id;
+        Class<?> aliasedId;
+
+        while ((aliasedId = parent.aliases.get(current)) != null) {
+            if (!seen.add(aliasedId)) {
+                throw new ContainerCyclicAliasException(
+                        id.getName(), current.getName(), aliasedId.getName());
+            }
+
+            current = aliasedId;
+
+            if (isResolvable(current)) {
+                return current;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the target of an alias that only the parent declares.
+     *
+     * @param <T> the service type
+     * @param id the target type
+     * @param arguments arguments passed to the service factory
+     * @return the resolved instance
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T getParentAliasedTarget(Class<?> id, Map<String, Object> arguments) {
+        // The alias belongs to the parent, so it points at the parent's copy first, and at
+        // the copy the child built for an earlier lookup second.
+        Object instance = parent.instances.get(id);
+        if (instance == null) {
+            instance = instances.get(id);
+        }
+        if (instance != null) {
+            return (T) instance;
+        }
+
+        BiFunction<ContainerContract, Map<String, Object>, Object> callable =
+                parent.services.get(id);
+
+        // The parent declares no binding, so the child answers from its own maps.
+        if (callable == null) {
+            return (T) get(id, arguments);
+        }
+
+        // The parent's binding runs with the child as the container.
+        Object built = callable.apply(this, arguments);
+
+        // A singleton caches in the child, so one request holds one instance.
+        if (isSingletonBinding(id)) {
+            instances.put(id, built);
+        }
+
+        return (T) built;
+    }
+
+    /**
+     * Check whether a type resolves without a further alias hop.
+     *
+     * @param id the service type
+     * @return true when the child or the parent can answer it
+     */
+    private boolean isResolvable(Class<?> id) {
+        return isSingleton(id) || isService(id) || isDeferred(id);
     }
 
     /**
@@ -113,31 +200,50 @@ public class NativeChildContainer extends Container {
         published.put(id, true);
     }
 
-    /**
-     * A service is available if the child knows it, or the parent does — including deferred
-     * providers.
-     */
-    @Override
-    public boolean has(Class<?> id) {
-        return super.has(id) || parent.getCallback(id) != null;
-    }
-
     /** Publish a deferred provider registered in either the child or the parent on first access. */
     @Override
     protected void publishUnpublishedDeferred(Class<?> id) {
-        if ((callbacks.containsKey(id) || parent.getCallback(id) != null) && !isPublished(id)) {
+        if (isDeferred(id) && !isPublished(id)) {
             publish(id);
         }
     }
 
     @Override
+    public boolean isDeferred(Class<?> id) {
+        return super.isDeferred(id) || parent.getCallback(id) != null;
+    }
+
+    @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        Class<?> aliased = aliases.get(alias);
+
+        return aliased != null ? aliased : parent.aliases.get(alias);
+    }
+
+    @Override
     public boolean isAlias(Class<?> id) {
-        return aliases.containsKey(id) || parent.aliases.containsKey(id);
+        return getAliasedId(id) != null;
     }
 
     @Override
     public boolean isService(Class<?> id) {
         return services.containsKey(id) || parent.services.containsKey(id);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public @Nullable <T> T getSingletonInstance(Class<T> id) {
+        Object instance = instances.get(id);
+
+        return (T) (instance != null ? instance : parent.instances.get(id));
+    }
+
+    @Override
+    public @Nullable BiFunction<ContainerContract, Map<String, Object>, Object> getServiceCallable(
+            Class<?> id) {
+        BiFunction<ContainerContract, Map<String, Object>, Object> callable = services.get(id);
+
+        return callable != null ? callable : parent.services.get(id);
     }
 
     @Override

@@ -11,6 +11,7 @@ package io.valkyrja.container.manager.contract;
 import io.valkyrja.container.data.contract.ContainerDataContract;
 import java.util.Map;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.Nullable;
 
 public interface ContainerContract extends ProvidersAwareContract {
 
@@ -141,6 +142,14 @@ public interface ContainerContract extends ProvidersAwareContract {
     <T> T get(Class<T> id, Map<String, Object> arguments);
 
     /**
+     * Get the type that an alias points to.
+     *
+     * @param alias the alias type
+     * @return the aliased type, or null when the type is not an alias
+     */
+    @Nullable Class<?> getAliasedId(Class<?> alias);
+
+    /**
      * Resolve an aliased service type.
      *
      * @param <T> the service type
@@ -161,6 +170,17 @@ public interface ContainerContract extends ProvidersAwareContract {
     <T> T getService(Class<T> id, Map<String, Object> arguments);
 
     /**
+     * Read the factory bound for a service type.
+     *
+     * <p>The factory does not run, so the caller chooses the container it receives.
+     *
+     * @param id the service type
+     * @return the factory, or null when the type has no service binding
+     */
+    @Nullable BiFunction<ContainerContract, Map<String, Object>, Object> getServiceCallable(
+            Class<?> id);
+
+    /**
      * Resolve a singleton-bound service type.
      *
      * @param <T> the service type
@@ -168,4 +188,15 @@ public interface ContainerContract extends ProvidersAwareContract {
      * @return the singleton instance
      */
     <T> T getSingleton(Class<T> id);
+
+    /**
+     * Read the cached instance for a service type.
+     *
+     * <p>The container builds nothing and publishes nothing.
+     *
+     * @param <T> the service type
+     * @param id the service type
+     * @return the cached instance, or null when the container has not built one
+     */
+    @Nullable <T> T getSingletonInstance(Class<T> id);
 }

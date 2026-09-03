@@ -79,7 +79,7 @@ public class Container extends ProvidersAware {
 
     @Override
     public boolean has(Class<?> id) {
-        return callbacks.containsKey(id) || isSingleton(id) || isService(id) || isAlias(id);
+        return isDeferred(id) || isSingleton(id) || isService(id) || isAlias(id);
     }
 
     @Override
@@ -115,6 +115,11 @@ public class Container extends ProvidersAware {
     @Override
     public boolean isAlias(Class<?> id) {
         return aliases.containsKey(id);
+    }
+
+    @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        return aliases.get(alias);
     }
 
     @Override
@@ -196,7 +201,7 @@ public class Container extends ProvidersAware {
     /** Resolve an aliased service without ensuring publication. */
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        Class<?> aliased = aliases.get(id);
+        Class<?> aliased = getAliasedId(id);
         if (aliased == null) {
             return null;
         }
@@ -209,11 +214,10 @@ public class Container extends ProvidersAware {
      * <p>Returns a cached instance if available, or creates and caches one if the service is
      * registered as a singleton.
      */
-    @SuppressWarnings("unchecked")
     protected @Nullable <T> T getSingletonWithoutChecks(Class<T> id) {
-        Object cached = instances.get(id);
+        T cached = getSingletonInstance(id);
         if (cached != null) {
-            return (T) cached;
+            return cached;
         }
 
         if (!singletons.containsKey(id)) {
@@ -230,11 +234,24 @@ public class Container extends ProvidersAware {
     /** Resolve a service via its registered callable without ensuring publication. */
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        BiFunction<ContainerContract, Map<String, Object>, Object> callable = services.get(id);
+        BiFunction<ContainerContract, Map<String, Object>, Object> callable =
+                getServiceCallable(id);
         if (callable == null) {
             return null;
         }
         return (T) callable.apply(this, arguments);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public @Nullable <T> T getSingletonInstance(Class<T> id) {
+        return (T) instances.get(id);
+    }
+
+    @Override
+    public @Nullable BiFunction<ContainerContract, Map<String, Object>, Object> getServiceCallable(
+            Class<?> id) {
+        return services.get(id);
     }
 
     /**
@@ -247,7 +264,7 @@ public class Container extends ProvidersAware {
 
     /** Publish a deferred service if it has not been published yet. */
     protected void publishUnpublishedDeferred(Class<?> id) {
-        if (callbacks.containsKey(id) && !isPublished(id)) {
+        if (isDeferred(id) && !isPublished(id)) {
             publish(id);
         }
     }

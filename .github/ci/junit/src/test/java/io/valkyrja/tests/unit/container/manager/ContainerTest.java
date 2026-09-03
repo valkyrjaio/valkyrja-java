@@ -10,7 +10,9 @@ package io.valkyrja.tests.unit.container.manager;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -210,5 +212,41 @@ final class ContainerTest {
         assertThrows(
                 ContainerInvalidArgumentException.class,
                 () -> container.getSingleton(SingletonFixture.class));
+    }
+
+    @Test
+    void getSingletonInstanceReadsTheCacheWithoutBuilding() {
+        var container = new Container();
+        var instance = new SingletonFixture();
+        container.setSingleton(SingletonFixture.class, instance);
+
+        assertSame(instance, container.getSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void getSingletonInstanceReturnsNullForAnUnresolvedBinding() {
+        var container = new Container();
+        container.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+
+        assertNull(container.getSingletonInstance(SingletonFixture.class));
+        assertNull(container.getSingletonInstance(ServiceFixture.class));
+    }
+
+    @Test
+    void getServiceCallableReturnsTheBinding() {
+        var container = new Container();
+        container.bind(ServiceFixture.class, ServiceFixture::make);
+
+        var callable = container.getServiceCallable(ServiceFixture.class);
+
+        assertNotNull(callable);
+        assertInstanceOf(ServiceFixture.class, callable.apply(container, Map.of()));
+    }
+
+    @Test
+    void getServiceCallableReturnsNullForAnUnboundType() {
+        var container = new Container();
+
+        assertNull(container.getServiceCallable(ServiceFixture.class));
     }
 }

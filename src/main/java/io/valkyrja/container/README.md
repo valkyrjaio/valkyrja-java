@@ -156,6 +156,30 @@ when it resolves nothing. `getSingleton` throws for a key that `bind` holds, and
 `getService` throws for a key that `setSingleton` holds. Call the method that
 matches how the provider bound the key.
 
+`getSingletonInstance(Class<T> id)` reads the cached instance for a key, and
+returns null when the container has not built one. It builds nothing, and it
+publishes nothing:
+
+```java
+LoggerContract logger = container.getSingletonInstance(LoggerContract.class);
+
+if (logger != null) {
+    logger.info("Shutting down.");
+}
+```
+
+`getServiceCallable(Class<?> id)` reads the factory bound for a key, and returns
+null when no service binding holds it. The factory does not run, so the caller
+chooses the container it receives:
+
+```java
+var factory = container.getServiceCallable(LoggerContract.class);
+
+if (factory != null) {
+    Object logger = factory.apply(otherContainer, Map.of());
+}
+```
+
 Warning: `getService` does not throw for a key that `bindSingleton` holds.
 `bindSingleton` writes the factory into the service map as well, so `getService`
 runs that factory and returns a second instance while the cached one stands. The
@@ -174,7 +198,8 @@ call defeats the singleton, and nothing reports it.
 
 `isSingletonInstance` reports a built instance, and `isSingletonBinding` reports
 a registration. Read `isSingletonInstance` to find what the container built
-already, and never to find what it can build.
+already, and never to find what it can build. `getSingletonInstance` returns
+that instance, and `getServiceCallable` returns the factory behind `isService`.
 
 Warning: the two are not exclusive. `bindSingleton` writes the key into the
 registration map, and the first resolution adds the instance without removing
@@ -331,19 +356,45 @@ A child resolves a singleton in three steps.
 A child resolves a service, and an alias, from its own maps first, and from the
 parent second.
 
-A factory that the child itself publishes runs with the child as its argument,
-so the dependencies it resolves come from the child and the instance it builds
-stays in the child.
+Every factory runs with the child as its argument, whichever container holds the
+binding, so the dependencies it resolves come from the child and the instance it
+builds stays in the child. A child reads the cached instance of the parent, and
+it reads the factory of the parent, and it never asks the parent to build,
+publish, or cache anything.
 
-Warning: the two implementations differ for a factory that the parent holds.
-`NativeChildContainer` reads the factory of the parent and applies it with the
-child. `ChildContainer` delegates to `parent.getService`, which applies the
-factory with the parent, so a dependency that the request bound into the child
-is invisible to that factory.
+Both implementations answer every lookup the same way. They differ in how they
+read the parent, and therefore in speed.
 
 The factory still runs for each call, so each request gets its own instance.
 Only a key that the parent resolved into its instance cache is shared across
 requests.
+
+### Where an alias resolves
+
+An alias resolves in the container that declares it, so an alias that only the
+parent declares reaches the binding of the parent. This is the one way to reach
+the copy of the parent for a key that the child also binds.
+
+```java
+// Once, at boot. The child never declares this alias.
+parent.bind(SlackNotifier.class, SlackNotifier::make);
+parent.bindAlias(NotifierContract.class, SlackNotifier.class);
+
+// Per request, the child binds its own.
+child.bind(SlackNotifier.class, SlackNotifier::make);
+
+child.get(SlackNotifier.class);     // the binding of the child
+child.get(NotifierContract.class);  // the binding of the parent, built by the child
+```
+
+The alias selects the binding, and the child stays the scope. A lookup reads the
+cached instance of the parent when the parent holds one, and the binding of the
+parent when it does not.
+
+A lookup walks the chain of aliases of the parent to the first key that resolves.
+A chain that returns to a key it already reached throws
+`ContainerCyclicAliasException`, and a chain that reaches no target throws
+`ContainerInvalidReferenceException`.
 
 ### Using a child container
 
@@ -363,9 +414,10 @@ describes the worker entry classes.
 | :----------------------------------------- | :------------------------------------------------------- |
 | `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias |
 | `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback            |
+| `ContainerCyclicAliasException`            | A chain of parent aliases returns to a key it reached    |
 
-`ContainerInvalidReferenceException` extends
+`ContainerInvalidReferenceException` and `ContainerCyclicAliasException` extend
 `ContainerInvalidArgumentException`, and
 `ContainerInvalidPublishCallbackException` extends `ContainerRuntimeException`.
-Both are unchecked. The [throwable component](../throwable/README.md) describes
+All are unchecked. The [throwable component](../throwable/README.md) describes
 the hierarchy.

@@ -40,6 +40,11 @@ public abstract class ProvidersAware implements ProvidersAwareContract, Containe
     }
 
     @Override
+    public boolean isDeferred(Class<?> id) {
+        return callbacks.containsKey(id);
+    }
+
+    @Override
     public boolean isPublished(Class<?> id) {
         return Boolean.TRUE.equals(published.get(id));
     }

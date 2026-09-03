@@ -20,6 +20,14 @@ public interface ProvidersAwareContract {
     void register(ServiceProviderContract provider);
 
     /**
+     * Determine whether a publish callback is registered for a given service.
+     *
+     * @param id the service type
+     * @return true if a publish callback is registered
+     */
+    boolean isDeferred(Class<?> id);
+
+    /**
      * Determine whether a given service has been published.
      *
      * @param id the service type
