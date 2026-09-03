@@ -54,8 +54,9 @@ publishes as `RouteCollectionContract`. The key is the full method, which reads
 
 1. A method that the service map does not hold returns an `UNIMPLEMENTED`
    response, and the `RouteNotMatched` stage runs.
-2. The router appends the middleware of the route to five stage handlers, and it
-   binds the call as `ServiceCallContract`.
+2. The router appends the middleware of the route to five stage handlers. It
+   then builds a copy of the call that carries the route, and it binds that copy
+   as `ServiceCallContract`.
 3. The router runs the cancellation check. A cancelled call returns without the
    dispatch.
 4. The router runs the `RouteMatched` stage, and it then binds the route that
@@ -134,6 +135,14 @@ side of one call.
 | `getMessages()`     | The inbound messages                                   |
 | `isStreaming()`     | Whether the call runs under the streaming model        |
 | `send(message)`     | Pushes one outbound message, under the streaming model |
+| `getRoute()`        | The route of the call, or `null` before the router ran |
+| `hasRoute()`        | Whether the call carries a route                       |
+| `withRoute(route)`  | A copy of the call that carries the route              |
+
+Warning: the router binds the copy, and not the call that
+`ServiceHandler.dispatchRouter` bound. A `CallReceived` middleware that keeps a
+reference reads a call with no route. Resolve `ServiceCallContract` from the
+container to read the current one.
 
 ## The two models
 
