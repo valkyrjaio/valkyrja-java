@@ -254,8 +254,8 @@ public class InputHandler implements InputHandlerContract {
      * override, its own try guards the one call that reads the input, every message reads through
      * {@code messageOf}, and it writes through a plain {@code Output}, whose {@code PrintStream}
      * raises none. No call site guards the call to this method, and three of the four write its
-     * return without a guard, so a raise from either would leave the caller and the run would
-     * reach no {@code Exiter.exit}.
+     * return without a guard, so a raise from either would leave the caller and the run would reach
+     * no {@code Exiter.exit}.
      *
      * @param input the input the command ran with
      * @param throwable the throwable this handler caught
