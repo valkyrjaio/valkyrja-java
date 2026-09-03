@@ -227,9 +227,9 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build the messages that report the throwable that ended a first report.
+     * Build the messages that report the throwable that ended the attempt to answer another.
      *
-     * @param recoveryThrowable the throwable that ended a first report
+     * @param recoveryThrowable the throwable that ended the attempt to answer another
      * @return the messages that report the recovery throwable
      */
     private MessageContract[] getRecoveryMessages(Throwable recoveryThrowable) {
