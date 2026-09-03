@@ -423,7 +423,7 @@ final class InputHandlerTest {
     }
 
     @Test
-    void runEndsTheReportThatReadsNoInputWithANewLine() {
+    void runNamesNoRecoveryInTheReportThatReadsNoInput() {
         Exiter.freeze();
 
         // The exit code raises, and the report of that raise reads a command name that raises
@@ -440,6 +440,8 @@ final class InputHandlerTest {
         // removed the command from it.
         assertFalse(printed.contains("list:"));
         assertTrue(printed.contains("Report message:"));
+        // No attempt preceded this read, so the report carries no recovery line.
+        assertFalse(printed.contains("Recovery message:"));
         // The report ends the line it wrote, so the shell prompt does not land on it.
         assertTrue(printed.endsWith("\n" + ExitCode.ERROR.value));
     }
