@@ -82,8 +82,19 @@ log entry with one failure point. It does not identify an exception class.
 
 ## The throwable handler
 
-`io.valkyrja.throwable.handler.contract.ThrowableHandlerContract` declares the
-handler, and `ThrowableHandler` implements the trace code for a subclass.
+`io.valkyrja.throwable.handler.contract.ThrowableHandlerContract` is a marker.
+Its one method is `static`, and Java neither inherits nor overrides a static
+interface method, so the contract holds no abstract method. Any class satisfies
+`implements ThrowableHandlerContract` with an empty body.
+
+Warning: `ThrowableHandlerContract.getTraceCode` always throws
+`UnsupportedOperationException`, and that call is the only way to reach it. Java
+forbids a call to a static interface method through an instance.
+
+`ThrowableHandler.getTraceCode` is the working method. It is a static method of
+the abstract class, so a subclass inherits it and a caller reaches it as
+`AppThrowableHandler.getTraceCode(throwable)`. The contract plays no part in
+that.
 
 The framework ships no concrete handler. `App.bootstrapThrowableHandler` does
 nothing.
