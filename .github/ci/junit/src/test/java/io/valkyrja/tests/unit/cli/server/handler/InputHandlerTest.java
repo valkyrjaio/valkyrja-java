@@ -223,7 +223,8 @@ final class InputHandlerTest {
         var printed = capture(output::writeMessages);
 
         assertEquals(ExitCode.ERROR, output.getExitCode());
-        assertTrue(printed.contains("command"));
+        // The full report names the command, which the report that reads no input cannot.
+        assertTrue(printed.contains("list: command"));
         assertTrue(printed.contains("Recovery message:"));
         assertTrue(printed.contains("middleware"));
     }
