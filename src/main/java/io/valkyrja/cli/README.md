@@ -219,15 +219,16 @@ Warning: the `ThrowableCaught` stage needs a middleware. The handler ends in
 that stage. A command that throws therefore ends in a `NullPointerException` out
 of `handle`, and `run` never reaches `writeMessages`, `exit`, or `Exiter`.
 
-`InputHandler.run` dispatches the stage a second time when the output write
-throws, and that dispatch passes a non-null output. A middleware of this stage
-therefore receives `CliInteractionFileWriteException` and
+`InputHandler.run` runs the stage a second time when the output write throws,
+and that run passes a non-null output. A middleware of this stage therefore
+receives `CliInteractionFileWriteException` and
 `CliInteractionStreamWriteException` as well as a throwable a command raised.
 
-Warning: the second dispatch runs no middleware when a throwable already
-escaped dispatch. `Handler` advances an index that it never rewinds, and
-`CliMiddlewareServiceProvider` publishes one handler as a singleton, so the
-pass that `handle` starts exhausts the chain. Issue #182 tracks it.
+Warning: the second run resumes the chain rather than restarting it. `Handler`
+advances its index once for each middleware it resolves and never rewinds it,
+and `CliMiddlewareServiceProvider` publishes one handler as a singleton. A
+first run that reached the end of the chain therefore leaves no middleware for
+the second one. Issue #182 tracks it.
 
 ```java
 public final class AppTimerMiddleware implements RouteDispatchedMiddlewareContract {
