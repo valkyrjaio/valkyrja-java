@@ -129,7 +129,7 @@ public class InputHandler implements InputHandlerContract {
             Object exitCode = output.getExitCode();
             return exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
         } catch (Throwable codeThrowable) {
-            // Every other guard names what it swallowed, and this one runs last.
+            // This read runs last, so the report is the only trace the failure leaves.
             new Output()
                     .withExitCode(ExitCode.ERROR)
                     .withMessages(getBareThrowableMessages(codeThrowable))
