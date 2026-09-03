@@ -161,14 +161,19 @@ public class InputHandler implements InputHandlerContract {
      * report must not raise, and this call runs in the report that answers a raise.
      *
      * @param throwable the throwable to read
-     * @return the message the throwable carries, which is null when it carries none
+     * @return the message the throwable carries, or a stand-in when it carries none and when
+     *     reading it raises
      */
-    private static @Nullable String messageOf(Throwable throwable) {
+    private static String messageOf(Throwable throwable) {
+        String message;
+
         try {
-            return throwable.getMessage();
+            message = throwable.getMessage();
         } catch (Throwable ignored) {
-            return "the throwable reports no message";
+            message = null;
         }
+
+        return message == null ? "the throwable reports no message" : message;
     }
 
     private static MessageContract[] concat(MessageContract[] first, MessageContract[] second) {
