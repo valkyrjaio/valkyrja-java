@@ -214,11 +214,10 @@ public class Container extends ProvidersAware {
      * <p>Returns a cached instance if available, or creates and caches one if the service is
      * registered as a singleton.
      */
-    @SuppressWarnings("unchecked")
     protected @Nullable <T> T getSingletonWithoutChecks(Class<T> id) {
-        Object cached = instances.get(id);
+        T cached = getSingletonInstance(id);
         if (cached != null) {
-            return (T) cached;
+            return cached;
         }
 
         if (!singletons.containsKey(id)) {
@@ -235,11 +234,23 @@ public class Container extends ProvidersAware {
     /** Resolve a service via its registered callable without ensuring publication. */
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getServiceWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        BiFunction<ContainerContract, Map<String, Object>, Object> callable = services.get(id);
+        BiFunction<ContainerContract, Map<String, Object>, Object> callable = getServiceCallable(id);
         if (callable == null) {
             return null;
         }
         return (T) callable.apply(this, arguments);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public @Nullable <T> T getSingletonInstance(Class<T> id) {
+        return (T) instances.get(id);
+    }
+
+    @Override
+    public @Nullable BiFunction<ContainerContract, Map<String, Object>, Object> getServiceCallable(
+            Class<?> id) {
+        return services.get(id);
     }
 
     /**

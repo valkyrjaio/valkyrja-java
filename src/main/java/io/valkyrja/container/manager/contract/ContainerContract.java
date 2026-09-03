@@ -170,6 +170,17 @@ public interface ContainerContract extends ProvidersAwareContract {
     <T> T getService(Class<T> id, Map<String, Object> arguments);
 
     /**
+     * Read the factory bound for a service type.
+     *
+     * <p>The factory does not run, so the caller chooses the container it receives.
+     *
+     * @param id the service type
+     * @return the factory, or null when the type has no service binding
+     */
+    @Nullable BiFunction<ContainerContract, Map<String, Object>, Object> getServiceCallable(
+            Class<?> id);
+
+    /**
      * Resolve a singleton-bound service type.
      *
      * @param <T> the service type
@@ -177,4 +188,15 @@ public interface ContainerContract extends ProvidersAwareContract {
      * @return the singleton instance
      */
     <T> T getSingleton(Class<T> id);
+
+    /**
+     * Read the cached instance for a service type.
+     *
+     * <p>The container builds nothing and publishes nothing.
+     *
+     * @param <T> the service type
+     * @param id the service type
+     * @return the cached instance, or null when the container has not built one
+     */
+    @Nullable <T> T getSingletonInstance(Class<T> id);
 }

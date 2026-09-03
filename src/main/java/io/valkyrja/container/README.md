@@ -156,6 +156,30 @@ when it resolves nothing. `getSingleton` throws for a key that `bind` holds, and
 `getService` throws for a key that `setSingleton` holds. Call the method that
 matches how the provider bound the key.
 
+`getSingletonInstance(Class<T> id)` reads the cached instance for a key, and
+returns null when the container has not built one. It builds nothing, and it
+publishes nothing:
+
+```java
+LoggerContract logger = container.getSingletonInstance(LoggerContract.class);
+
+if (logger != null) {
+    logger.info("Shutting down.");
+}
+```
+
+`getServiceCallable(Class<?> id)` reads the factory bound for a key, and returns
+null when no service binding holds it. The factory does not run, so the caller
+chooses the container it receives:
+
+```java
+var factory = container.getServiceCallable(LoggerContract.class);
+
+if (factory != null) {
+    Object logger = factory.apply(otherContainer, Map.of());
+}
+```
+
 Warning: `getService` does not throw for a key that `bindSingleton` holds.
 `bindSingleton` writes the factory into the service map as well, so `getService`
 runs that factory and returns a second instance while the cached one stands. The
@@ -174,7 +198,8 @@ call defeats the singleton, and nothing reports it.
 
 `isSingletonInstance` reports a built instance, and `isSingletonBinding` reports
 a registration. Read `isSingletonInstance` to find what the container built
-already, and never to find what it can build.
+already, and never to find what it can build. `getSingletonInstance` returns
+that instance, and `getServiceCallable` returns the factory behind `isService`.
 
 Warning: the two are not exclusive. `bindSingleton` writes the key into the
 registration map, and the first resolution adds the instance without removing
