@@ -131,8 +131,8 @@ public class InputHandler implements InputHandlerContract {
             return exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
         } catch (Throwable codeThrowable) {
             // This read runs last, so the report is the only trace the failure leaves.
-            // getRecoveryOutput takes no override and raises nothing, so this write needs no
-            // guard of its own.
+            // getRecoveryOutput takes no override and raises nothing, and it writes through a
+            // plain Output, whose PrintStream raises none. This write needs no guard.
             getRecoveryOutput(input, codeThrowable, null).writeMessages();
 
             return ExitCode.ERROR.value;
