@@ -179,7 +179,13 @@ the middleware of that stage in order.
 
 `InputReceived` returns an `InputContract` to continue, or an `OutputContract`
 to stop. `RouteMatched` returns a `RouteContract` to continue, or an
-`OutputContract` to stop. Each of the other four returns the type of its stage.
+`OutputContract` to stop. `RouteNotMatched`, `RouteDispatched`, and
+`ThrowableCaught` each return an `OutputContract`, and `ProcessExiting` returns
+nothing.
+
+Warning: a `ProcessExiting` middleware returns `void`, so it cannot change the
+output. The exit code that `InputHandler.run` reads is already fixed when the
+stage runs.
 
 Warning: `ThrowableCaught` receives a `null` output. `InputHandler.handle` calls
 the stage with the result of `emptyOutput()`, which is `null`, so a middleware
