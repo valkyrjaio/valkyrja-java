@@ -218,10 +218,10 @@ A first report comes from `getOutputFromThrowable`, which a subclass overrides
 and can point at any destination. A report that answers a failed report builds a
 plain `Output` itself, so no override redirects it to the destination that just
 failed. That report names the command, and it names none when reading the
-command name from the input is itself what raised. A report that names no
-command carries a `Report message:` line, which names the raise that removed it.
-Every report reads a throwable's message through one call, which stands in the
-text `the throwable reports no message` when the throwable carries none and when
+command name from the input is itself what raised. That one report carries a
+`Report message:` line, which names the raise that removed the command. Every
+report reads a throwable's message through one call, which stands in the text
+`the throwable reports no message` when the throwable carries none and when
 reading it raises.
 
 Warning: the `ThrowableCaught` stage receives a `null` output from
@@ -312,7 +312,7 @@ and the caller owns truncation.
 `writeMessages()` writes each message that the output holds. `InputHandler.run`
 calls it after `handle` returns, again for each of the two outputs that a failed
 write recovers to, again for each of the two reports of a throwable the exit
-stage raised, and again for the report of a read of the exit code that raised.
+stage raised, and again for the report of an exit code the run could not use.
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
 unwritten list. Keep the return value when the moved state matters.
