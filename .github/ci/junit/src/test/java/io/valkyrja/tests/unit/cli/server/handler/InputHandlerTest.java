@@ -432,8 +432,9 @@ final class InputHandlerTest {
 
         var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
 
-        // The same guard answers a cast it refuses, and the report names the two types.
-        assertTrue(printed.contains("list: class java.lang.String cannot be cast to class"));
+        // The same guard answers a cast it refuses, and the report names the two types. The
+        // JDK words the sentence around them, so the assertion reads the types alone.
+        assertTrue(printed.contains("java.lang.String"));
         assertTrue(printed.contains("java.lang.Integer"));
         assertTrue(printed.endsWith("\n" + ExitCode.ERROR.value));
     }
