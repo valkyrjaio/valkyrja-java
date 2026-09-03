@@ -311,16 +311,16 @@ and the caller owns truncation.
 
 `writeMessages()` writes each message that the output holds. `InputHandler.run`
 calls it after `handle` returns, again for each of the two outputs that a failed
-write recovers to, and again for each of the two reports of a throwable the exit
-stage raised.
+write recovers to, again for each of the two reports of a throwable the exit
+stage raised, and again for the report of a read of the exit code that raised.
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
 unwritten list. Keep the return value when the moved state matters.
 `InputHandler.run` keeps it for the write of the command's own output, and for
 the write of each of the two outputs that a failed write recovers to. It
 registers the output it holds after those writes as the `OutputContract`
-singleton. It discards the return of each exit-stage report, which no later
-stage reads.
+singleton. It discards the return of each exit-stage report and of the exit code
+report, which no later stage reads.
 
 Two flags control the write. `isSilent` stops it. `isQuiet` stops it while the
 exit code is `ExitCode.SUCCESS`. A third flag, `isInteractive`, reaches no write
