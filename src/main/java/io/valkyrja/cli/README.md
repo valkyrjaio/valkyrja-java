@@ -211,8 +211,8 @@ stage runs.
 
 The `ProcessExiting` stage runs under a guard of its own. A middleware that
 throws there makes `run` print a first report, which a subclass can point at any
-destination. A raise inside that report makes `run` print the report that
-answers it. The code the command set still reaches `Exiter.exit`.
+destination. A raise while `run` builds or writes that report makes it print the
+report that answers it. The code the command set still reaches `Exiter.exit`.
 
 A first report comes from `getOutputFromThrowable`, which a subclass overrides
 and can point at any destination. A report that answers a failed report builds a
