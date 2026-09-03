@@ -100,8 +100,8 @@ public class InputHandler implements InputHandlerContract {
             exit(input, output);
         } catch (Throwable exitThrowable) {
             try {
-                // The exit stage above runs a middleware, and the command's code still reaches
-                // the shell, so a report is the only trace its failure leaves.
+                // The exit stage above runs a middleware, and its failure leaves the exit code
+                // alone, so a report is the only trace that failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
             } catch (Throwable recoveryThrowable) {
                 // getRecoveryOutput raises nothing: it takes no override, its own try guards
