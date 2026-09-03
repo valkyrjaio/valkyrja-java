@@ -122,7 +122,7 @@ public class InputHandler implements InputHandlerContract {
      *
      * @param input the input the command ran with
      * @param output the output the run ends with
-     * @return the code the output holds, or the error code when the read raises and when the value
+     * @return the code the output holds, or the error code when the read raises or when the value
      *     fits no code
      */
     private int exitCodeOf(InputContract input, OutputContract output) {
