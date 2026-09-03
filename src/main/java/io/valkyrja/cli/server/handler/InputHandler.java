@@ -111,7 +111,7 @@ public class InputHandler implements InputHandlerContract {
             }
         }
 
-        Exiter.exit(exitCodeOf(output));
+        Exiter.exit(exitCodeOf(input, output));
     }
 
     /**
@@ -120,20 +120,18 @@ public class InputHandler implements InputHandlerContract {
      * <p>An output supplies this value, and a contract implementation can raise on the read or hold
      * a value the cast refuses. The code must reach the shell either way.
      *
+     * @param input the input the command ran with
      * @param output the output the run ends with
      * @return the code the output holds, or the error code when the read raises and when the value
      *     fits no code
      */
-    private int exitCodeOf(OutputContract output) {
+    private int exitCodeOf(InputContract input, OutputContract output) {
         try {
             Object exitCode = output.getExitCode();
             return exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
         } catch (Throwable codeThrowable) {
             // This read runs last, so the report is the only trace the failure leaves.
-            new Output()
-                    .withExitCode(ExitCode.ERROR)
-                    .withMessages(getBareThrowableMessages(codeThrowable))
-                    .writeMessages();
+            getRecoveryOutput(input, codeThrowable, null).writeMessages();
 
             return ExitCode.ERROR.value;
         }
@@ -152,20 +150,6 @@ public class InputHandler implements InputHandlerContract {
 
     protected @Nullable OutputContract emptyOutput() {
         return null;
-    }
-
-    /**
-     * Build the messages that report two throwables without reading the input.
-     *
-     * @param throwable the throwable this handler caught
-     * @param recoveryThrowable the throwable that ended the first report of it
-     * @return the messages that report both throwables
-     */
-    private MessageContract[] getFallbackThrowableMessages(
-            Throwable throwable, Throwable recoveryThrowable) {
-        // This report answers a report that raised, so no call it makes can raise again. It
-        // reads each message through messageOf, and it reads the input not at all.
-        return concat(getBareThrowableMessages(throwable), getRecoveryMessages(recoveryThrowable));
     }
 
     /**
@@ -274,21 +258,22 @@ public class InputHandler implements InputHandlerContract {
      * @return the output that reports the throwables
      */
     private OutputContract getRecoveryOutput(
-            InputContract input, Throwable throwable, Throwable recoveryThrowable) {
+            InputContract input, Throwable throwable, @Nullable Throwable recoveryThrowable) {
+        MessageContract[] recoveryMessages =
+                recoveryThrowable == null
+                        ? new MessageContract[0]
+                        : getRecoveryMessages(recoveryThrowable);
         MessageContract[] messages;
 
         try {
-            messages =
-                    concat(
-                            getThrowableMessages(input, throwable),
-                            getRecoveryMessages(recoveryThrowable));
+            messages = concat(getThrowableMessages(input, throwable), recoveryMessages);
         } catch (Throwable reportThrowable) {
             // The full report reads the command name from the input, so an input that raises
             // there takes the report with it. Naming that raise tells the reader why this
             // report holds no command.
             messages =
                     concat(
-                            getFallbackThrowableMessages(throwable, recoveryThrowable),
+                            concat(getBareThrowableMessages(throwable), recoveryMessages),
                             new MessageContract[] {
                                 new ErrorMessage("Report message:"),
                                 new Message(" " + messageOf(reportThrowable)),
