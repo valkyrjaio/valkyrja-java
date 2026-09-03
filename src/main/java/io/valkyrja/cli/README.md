@@ -367,7 +367,7 @@ the enum, and it takes an `int` as well.
 `io.valkyrja.cli.server.support.Exiter` ends the process with it. The read
 carries a guard, so an output that raises on it, or holds a value that fits no
 code, ends the process with `ERROR`. That guard prints a recovery report, which
-names the raise and names the command whenever the input reads.
+names the throwable it caught and names the command whenever the input reads.
 
 ## Container bindings
 
