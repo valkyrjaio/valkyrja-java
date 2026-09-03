@@ -103,11 +103,11 @@ public class InputHandler implements InputHandlerContract {
                 // A middleware runs here, and the command's code still reaches the shell, so
                 // this report is the only trace the failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
-            } catch (Throwable reportThrowable) {
+            } catch (Throwable writeThrowable) {
                 // getRecoveryOutput raises nothing: it takes no override, its own try guards
                 // the one call that reads the input, and every message reads through
                 // messageOf. It writes through a plain Output, whose PrintStream raises none.
-                getRecoveryOutput(input, exitThrowable, reportThrowable).writeMessages();
+                getRecoveryOutput(input, exitThrowable, writeThrowable).writeMessages();
             }
         }
 
@@ -231,7 +231,7 @@ public class InputHandler implements InputHandlerContract {
 
     /**
      * Build the output that reports a throwable and the throwable that ended the first report of
-     * it.
+     * it, plus the throwable that ended this report's own first attempt.
      *
      * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
      * can point at any destination. This report answers a report that already failed, so it builds
