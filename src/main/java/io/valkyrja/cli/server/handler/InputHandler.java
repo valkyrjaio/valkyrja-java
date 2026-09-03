@@ -133,17 +133,6 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build the output that reports a throwable when the full report raised.
-     *
-     * <p>The full report reads the command name from the input, so an input that raises there takes
-     * the report with it. This one reads the throwables alone, and it builds a plain output, so no
-     * override of the full report can redirect it.
-     *
-     * @param throwable the throwable the write raised
-     * @param recoveryThrowable the throwable the recovery write raised
-     * @return the output that reports both throwables
-     */
-    /**
      * Build the messages that report two throwables without reading the input.
      *
      * @param throwable the throwable the write raised
