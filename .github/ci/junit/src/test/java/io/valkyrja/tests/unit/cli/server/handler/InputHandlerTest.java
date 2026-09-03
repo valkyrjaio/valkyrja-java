@@ -381,8 +381,11 @@ final class InputHandlerTest {
 
         assertTrue(printed.contains("command"));
         assertTrue(printed.contains("the throwable reports no message"));
-        // The report reads no input, so it names no command.
+        // The report reads no input, so it names no command, and it names the raise that
+        // removed the command from it.
         assertFalse(printed.contains("list:"));
+        assertTrue(printed.contains("Report message:"));
+        assertTrue(printed.contains("input"));
     }
 
     @Test

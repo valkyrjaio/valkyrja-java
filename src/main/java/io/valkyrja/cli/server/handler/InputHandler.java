@@ -254,8 +254,16 @@ public class InputHandler implements InputHandlerContract {
                             getRecoveryMessages(recoveryThrowable));
         } catch (Throwable reportThrowable) {
             // The full report reads the command name from the input, so an input that raises
-            // there takes the report with it.
-            messages = getFallbackThrowableMessages(throwable, recoveryThrowable);
+            // there takes the report with it. Naming that raise tells the reader why this
+            // report holds no command.
+            messages =
+                    concat(
+                            getFallbackThrowableMessages(throwable, recoveryThrowable),
+                            new MessageContract[] {
+                                new ErrorMessage("Report message:"),
+                                new Message(" " + messageOf(reportThrowable)),
+                                new NewLine()
+                            });
         }
 
         return new Output().withExitCode(ExitCode.ERROR).withMessages(messages);
