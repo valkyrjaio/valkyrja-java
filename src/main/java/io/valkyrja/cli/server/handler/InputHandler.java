@@ -104,11 +104,9 @@ public class InputHandler implements InputHandlerContract {
                 // this report is the only trace the failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
             } catch (Throwable reportThrowable) {
-                try {
-                    getRecoveryOutput(input, exitThrowable, reportThrowable).writeMessages();
-                } catch (Throwable ignored) {
-                    // The report is the last write, so a failure here leaves no trace to write.
-                }
+                // getRecoveryOutput raises nothing, and it writes through a plain Output, whose
+                // PrintStream takes no throwable of its own, so this write needs no guard.
+                getRecoveryOutput(input, exitThrowable, reportThrowable).writeMessages();
             }
         }
 
@@ -141,19 +139,36 @@ public class InputHandler implements InputHandlerContract {
      */
     protected MessageContract[] getFallbackThrowableMessages(
             Throwable throwable, Throwable recoveryThrowable) {
-        // This report answers a report that raised, so it repeats no call of it. It spells the
-        // recovery lines out rather than calling getRecoveryMessages, which the caller's try
-        // already ran.
+        // This report answers a report that raised, so no call it makes can raise again. It
+        // spells the recovery lines out rather than calling getRecoveryMessages, and it reads
+        // each message through messageOf, which the caller's try may have raised on.
         return new MessageContract[] {
             new ErrorMessage("Cli Server Error:"),
             new NewLine(),
             new ErrorMessage("Message:"),
-            new Message(" " + throwable.getMessage()),
+            new Message(" " + messageOf(throwable)),
             new NewLine(),
             new ErrorMessage("Recovery message:"),
-            new Message(" " + recoveryThrowable.getMessage()),
+            new Message(" " + messageOf(recoveryThrowable)),
             new NewLine()
         };
+    }
+
+    /**
+     * Read the message a throwable carries.
+     *
+     * <p>{@code getMessage} is overridable, so a throwable can raise on the call that reports it. A
+     * report must not raise, and this call runs in the report that answers a raise.
+     *
+     * @param throwable the throwable to read
+     * @return the message the throwable carries, which is null when it carries none
+     */
+    private static @Nullable String messageOf(Throwable throwable) {
+        try {
+            return throwable.getMessage();
+        } catch (Throwable ignored) {
+            return "the throwable reports no message";
+        }
     }
 
     private static MessageContract[] concat(MessageContract[] first, MessageContract[] second) {

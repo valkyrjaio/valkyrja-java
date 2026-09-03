@@ -276,7 +276,6 @@ final class InputHandlerTest {
 
         var printed = capture(() -> assertDoesNotThrow(() -> handler.run(input)));
 
-        // The report that reads no input takes the place of the one that failed.
         assertTrue(printed.contains("exiting"));
         assertTrue(printed.contains("Recovery message:"));
         // The command's own code still reaches the shell.
@@ -305,7 +304,7 @@ final class InputHandlerTest {
     }
 
     @Test
-    void runSignalsTheExitCodeWhenEveryReportOfTheExitStageRaises() {
+    void runReportsAnExitStageThrowableWhoseMessageRaises() {
         Exiter.freeze();
 
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
@@ -318,8 +317,10 @@ final class InputHandlerTest {
 
         var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
 
-        // Neither report leaves a trace, and the command's own code still reaches the shell.
-        assertEquals(String.valueOf(ExitCode.USAGE_ERROR.value), printed);
+        // The report reads each message through a call that cannot raise, so it still prints.
+        assertTrue(printed.contains("the throwable reports no message"));
+        // The command's own code still reaches the shell.
+        assertTrue(printed.endsWith("\n" + ExitCode.USAGE_ERROR.value));
     }
 
     @Test
