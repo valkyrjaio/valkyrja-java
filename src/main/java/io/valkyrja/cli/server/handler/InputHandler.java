@@ -250,12 +250,19 @@ public class InputHandler implements InputHandlerContract {
      * can point at any destination. This method is private, so no override reaches the report that
      * this handler falls back to.
      *
-     * <p>This method raises nothing, and the write of its return raises nothing: it takes no
-     * override, its own try guards the one call that reads the input, every message reads through
-     * {@code messageOf}, and it writes through a plain {@code Output}, whose {@code PrintStream}
-     * raises none. No call site guards the call to this method, and three of the four write its
-     * return without a guard, so a raise from either would leave the caller and the run would reach
-     * no {@code Exiter.exit}.
+     * <p>This method raises nothing, and the write of its return raises nothing. Four properties
+     * give that result:
+     *
+     * <ul>
+     *   <li>the method takes no override
+     *   <li>its own try guards the one call that reads the input
+     *   <li>every message reads through {@code messageOf}
+     *   <li>it writes through a plain {@code Output}, whose {@code PrintStream} raises none
+     * </ul>
+     *
+     * <p>No call site guards the call to this method, and three of the four write its return
+     * without a guard. A raise from this method, or from that write, would leave the caller. The
+     * run would then reach no {@code Exiter.exit}.
      *
      * @param input the input the command ran with
      * @param throwable the throwable this handler caught
