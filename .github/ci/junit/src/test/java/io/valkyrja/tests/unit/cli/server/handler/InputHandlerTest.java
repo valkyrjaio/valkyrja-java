@@ -276,7 +276,8 @@ final class InputHandlerTest {
 
         var printed = capture(() -> assertDoesNotThrow(() -> handler.run(input)));
 
-        assertTrue(printed.contains("exiting"));
+        // The input reads, so the report that answers the failed one still names the command.
+        assertTrue(printed.contains("list: exiting"));
         assertTrue(printed.contains("Recovery message:"));
         // The command's own code still reaches the shell.
         assertTrue(printed.endsWith("\n" + ExitCode.USAGE_ERROR.value));
