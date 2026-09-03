@@ -365,7 +365,7 @@ final class InputHandlerTest {
     }
 
     @Test
-    void handleStandsInForBothThrowablesWhenTheInputRaisesToo() {
+    void handleStandsInForTheRecoveryThrowableWhenTheInputRaisesToo() {
         // Reading the input raises, so the report that reads no input takes over, and the
         // throwable it names raises on its own message.
         var raisingInput = new RaisingCommandNameInputFixture();
