@@ -14,6 +14,7 @@ import io.valkyrja.cli.interaction.input.contract.InputContract;
 import io.valkyrja.cli.interaction.message.ErrorMessage;
 import io.valkyrja.cli.interaction.message.Message;
 import io.valkyrja.cli.interaction.message.NewLine;
+import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.Output;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.middleware.handler.contract.InputReceivedHandlerContract;
@@ -59,7 +60,7 @@ public class InputHandler implements InputHandlerContract {
                 // A middleware runs here, so the dispatch belongs under a guard of its own.
                 output = throwableCaughtHandler.throwableCaught(input, emptyOutput(), throwable);
             } catch (Throwable recoveryThrowable) {
-                output = getFallbackOutputFromThrowable(throwable, recoveryThrowable);
+                output = getRecoveryOutput(input, throwable, recoveryThrowable);
             }
         }
         container.setSingleton(OutputContract.class, output);
@@ -87,9 +88,8 @@ public class InputHandler implements InputHandlerContract {
                 output = output.writeMessages();
             } catch (Throwable recoveryThrowable) {
                 // The dispatch or the recovery write failed. A middleware can throw, or it can
-                // return an output whose destination is the one that failed. This last resort
-                // reads no input, so the call that may have raised does not run again.
-                output = getFallbackOutputFromThrowable(throwable, recoveryThrowable);
+                // return an output whose destination is the one that failed.
+                output = getRecoveryOutput(input, throwable, recoveryThrowable);
                 output = output.writeMessages();
             }
         } finally {
@@ -103,8 +103,8 @@ public class InputHandler implements InputHandlerContract {
                 // A middleware runs here, and the command's code still reaches the shell, so
                 // this report is the only trace the failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
-            } catch (Throwable ignored) {
-                // The report is the last write, so a failure here leaves no trace to write.
+            } catch (Throwable reportThrowable) {
+                getFallbackOutputFromThrowable(exitThrowable, reportThrowable).writeMessages();
             }
         }
 
@@ -139,19 +139,37 @@ public class InputHandler implements InputHandlerContract {
      * @param recoveryThrowable the throwable the recovery write raised
      * @return the output that reports both throwables
      */
-    protected OutputContract getFallbackOutputFromThrowable(
+    private OutputContract getFallbackOutputFromThrowable(
             Throwable throwable, Throwable recoveryThrowable) {
         return new Output()
                 .withExitCode(ExitCode.ERROR)
-                .withMessages(
-                        new ErrorMessage("Cli Server Error:"),
-                        new NewLine(),
-                        new ErrorMessage("Message:"),
-                        new Message(" " + throwable.getMessage()),
-                        new NewLine(),
-                        new ErrorMessage("Recovery message:"),
-                        new Message(" " + recoveryThrowable.getMessage()),
-                        new NewLine());
+                .withMessages(getFallbackThrowableMessages(throwable, recoveryThrowable));
+    }
+
+    /**
+     * Build the messages that report two throwables without reading the input.
+     *
+     * @param throwable the throwable the write raised
+     * @param recoveryThrowable the throwable the recovery raised
+     * @return the messages that report both throwables
+     */
+    protected MessageContract[] getFallbackThrowableMessages(
+            Throwable throwable, Throwable recoveryThrowable) {
+        return concat(
+                new MessageContract[] {
+                    new ErrorMessage("Cli Server Error:"),
+                    new NewLine(),
+                    new Message(" " + throwable.getMessage()),
+                    new NewLine()
+                },
+                getRecoveryMessages(recoveryThrowable));
+    }
+
+    private static MessageContract[] concat(MessageContract[] first, MessageContract[] second) {
+        MessageContract[] all = new MessageContract[first.length + second.length];
+        System.arraycopy(first, 0, all, 0, first.length);
+        System.arraycopy(second, 0, all, first.length, second.length);
+        return all;
     }
 
     /**
@@ -166,10 +184,66 @@ public class InputHandler implements InputHandlerContract {
         // minimal fallback that prints when no middleware replaces these messages.
         return new Output()
                 .withExitCode(ExitCode.ERROR)
-                .withMessages(
-                        new ErrorMessage("Cli Server Error:"),
-                        new NewLine(),
-                        new Message(input.getCommandName() + ": " + throwable.getMessage()),
-                        new NewLine());
+                .withMessages(getThrowableMessages(input, throwable));
+    }
+
+    /**
+     * Build the messages that report a throwable.
+     *
+     * @param input the input the command ran with
+     * @param throwable the throwable to report
+     * @return the messages that report the throwable
+     */
+    protected MessageContract[] getThrowableMessages(InputContract input, Throwable throwable) {
+        return new MessageContract[] {
+            new ErrorMessage("Cli Server Error:"),
+            new NewLine(),
+            new Message(input.getCommandName() + ": " + throwable.getMessage()),
+            new NewLine()
+        };
+    }
+
+    /**
+     * Build the messages that report the throwable a recovery raised.
+     *
+     * @param recoveryThrowable the throwable the recovery raised
+     * @return the messages that report the recovery throwable
+     */
+    protected MessageContract[] getRecoveryMessages(Throwable recoveryThrowable) {
+        return new MessageContract[] {
+            new ErrorMessage("Recovery message:"),
+            new Message(" " + recoveryThrowable.getMessage()),
+            new NewLine()
+        };
+    }
+
+    /**
+     * Build the output that reports a throwable and the throwable a recovery raised.
+     *
+     * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides.
+     * This report answers a report that already failed, so it takes no override: an override could
+     * hold the destination that just failed, which is the failure this report answers.
+     *
+     * @param input the input the command ran with
+     * @param throwable the throwable the write raised
+     * @param recoveryThrowable the throwable the recovery raised
+     * @return the output that reports both throwables
+     */
+    private OutputContract getRecoveryOutput(
+            InputContract input, Throwable throwable, Throwable recoveryThrowable) {
+        MessageContract[] messages;
+
+        try {
+            messages =
+                    concat(
+                            getThrowableMessages(input, throwable),
+                            getRecoveryMessages(recoveryThrowable));
+        } catch (Throwable reportThrowable) {
+            // The full report reads the command name from the input, so an input that raises
+            // there takes the report with it.
+            messages = getFallbackThrowableMessages(throwable, recoveryThrowable);
+        }
+
+        return new Output().withExitCode(ExitCode.ERROR).withMessages(messages);
     }
 }

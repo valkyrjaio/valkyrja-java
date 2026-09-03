@@ -36,6 +36,7 @@ import io.valkyrja.cli.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.cli.server.handler.InputHandler;
 import io.valkyrja.cli.server.support.Exiter;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.tests.fixtures.cli.interaction.input.RaisingCommandNameInputFixture;
 import io.valkyrja.tests.fixtures.cli.server.handler.UnwritableReportInputHandlerFixture;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -273,8 +274,32 @@ final class InputHandlerTest {
 
         var printed = capture(() -> assertDoesNotThrow(() -> handler.run(input)));
 
-        // The report leaves no trace, and the command's own code still reaches the shell.
-        assertEquals(String.valueOf(ExitCode.USAGE_ERROR.value), printed);
+        // The report that reads no input takes the place of the one that failed.
+        assertTrue(printed.contains("exiting"));
+        assertTrue(printed.contains("Recovery message:"));
+        // The command's own code still reaches the shell.
+        assertTrue(printed.endsWith("\n" + ExitCode.USAGE_ERROR.value));
+    }
+
+    @Test
+    void runTakesTheReportThatReadsNoInputWhenTheFullReportRaises() {
+        Exiter.freeze();
+
+        var unwritablePath = directory.resolve("missing").resolve(FILENAME).toString();
+        var unwritable = new FileOutput(unwritablePath).withAddedMessage(new Message("hello"));
+        // The full report reads the command name, so every report that reads the input raises.
+        var raisingInput = new RaisingCommandNameInputFixture();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(raisingInput);
+        when(router.dispatch(any())).thenReturn(unwritable);
+
+        var printed = capture(() -> assertDoesNotThrow(() -> handler().run(raisingInput)));
+
+        // The write fails, the full report raises on the command name, and the report that
+        // reads no input names both.
+        assertTrue(printed.contains("Cli Server Error:"));
+        assertTrue(printed.contains("Recovery message:"));
+        assertTrue(printed.contains("input"));
     }
 
     @Test
