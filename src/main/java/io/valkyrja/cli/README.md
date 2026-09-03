@@ -210,8 +210,8 @@ output. The exit code that `InputHandler.run` reads is already fixed when the
 stage runs.
 
 The `ProcessExiting` stage runs under a guard of its own. A middleware that
-throws there prints the error banner, and the code the command set still reaches
-`Exiter.exit`.
+throws there makes `run` print the error report, and the code the command set
+still reaches `Exiter.exit`.
 
 Warning: the stage receives a `null` output from `InputHandler.handle`. That
 call passes the result of `emptyOutput()`, which is `null`, so a middleware of
