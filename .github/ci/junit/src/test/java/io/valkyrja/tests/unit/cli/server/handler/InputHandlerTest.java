@@ -170,6 +170,9 @@ final class InputHandlerTest {
         assertEquals(ExitCode.ERROR, exited.getValue().getExitCode());
         assertTrue(exited.getValue().hasWrittenMessage());
         assertFalse(exited.getValue().hasUnwrittenMessage());
+        assertTrue(
+                exited.getValue().getWrittenMessages().stream()
+                        .anyMatch(m -> m.getText().equals("Recovery message:")));
         assertSame(exited.getValue(), container.getSingleton(OutputContract.class));
     }
 
