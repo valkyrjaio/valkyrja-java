@@ -88,7 +88,7 @@ public class InputHandler implements InputHandlerContract {
                 output = output.writeMessages();
             } catch (Throwable recoveryThrowable) {
                 // The build of the first report, the dispatch, or the recovery write failed.
-                // A dispatch that returns the failed destination is how that write fails.
+                // The write fails on any output that holds the destination that just failed.
                 output = getRecoveryOutput(input, throwable, recoveryThrowable);
                 output = output.writeMessages();
             }
