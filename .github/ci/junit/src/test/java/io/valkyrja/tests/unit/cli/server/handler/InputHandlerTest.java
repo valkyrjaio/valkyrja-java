@@ -365,6 +365,26 @@ final class InputHandlerTest {
     }
 
     @Test
+    void handleStandsInForBothThrowablesWhenTheInputRaisesToo() {
+        // Reading the input raises, so the report that reads no input takes over, and the
+        // throwable it names raises on its own message.
+        var raisingInput = new RaisingCommandNameInputFixture();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(raisingInput);
+        when(router.dispatch(any())).thenThrow(new IllegalStateException("command"));
+        when(throwableCaughtHandler.throwableCaught(any(), isNull(), any()))
+                .thenThrow(new RaisingMessageThrowableFixture());
+
+        var output = handler().handle(raisingInput);
+        var printed = capture(output::writeMessages);
+
+        assertTrue(printed.contains("command"));
+        assertTrue(printed.contains("the throwable reports no message"));
+        // The report reads no input, so it names no command.
+        assertFalse(printed.contains("list:"));
+    }
+
+    @Test
     void runWithIntegerExitCode() {
         Exiter.freeze();
         when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
