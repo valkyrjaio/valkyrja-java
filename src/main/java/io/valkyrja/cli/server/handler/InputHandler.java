@@ -59,7 +59,7 @@ public class InputHandler implements InputHandlerContract {
                 // A middleware runs here, so the dispatch belongs under a guard of its own.
                 output = throwableCaughtHandler.throwableCaught(input, emptyOutput(), throwable);
             } catch (Throwable recoveryThrowable) {
-                output = getOutputFromThrowable(input, throwable, recoveryThrowable);
+                output = getFallbackOutputFromThrowable(throwable, recoveryThrowable);
             }
         }
         container.setSingleton(OutputContract.class, output);
@@ -87,8 +87,9 @@ public class InputHandler implements InputHandlerContract {
                 output = output.writeMessages();
             } catch (Throwable recoveryThrowable) {
                 // The dispatch or the recovery write failed. A middleware can throw, or it can
-                // return an output whose destination is the one that failed.
-                output = getOutputFromThrowable(input, throwable, recoveryThrowable);
+                // return an output whose destination is the one that failed. This last resort
+                // reads no input, so the call that may have raised does not run again.
+                output = getFallbackOutputFromThrowable(throwable, recoveryThrowable);
                 output = output.writeMessages();
             }
         } finally {
@@ -99,8 +100,8 @@ public class InputHandler implements InputHandlerContract {
             exit(input, output);
         } catch (Throwable exitThrowable) {
             // A middleware runs here, and the command's code still reaches the shell, so this
-            // report is the only trace the failure leaves. The report prints to System.out,
-            // which raises no throwable of its own.
+            // report is the only trace the failure leaves. The base report prints to
+            // System.out, which raises no throwable of its own.
             getOutputFromThrowable(input, exitThrowable).writeMessages();
         }
 
@@ -125,17 +126,25 @@ public class InputHandler implements InputHandlerContract {
     }
 
     /**
-     * Build the output that reports a throwable and the throwable the recovery write raised.
+     * Build the output that reports a throwable when the full report raised.
      *
-     * @param input the input the command ran with
+     * <p>The full report reads the command name from the input, so an input that raises there takes
+     * the report with it. This one reads the throwables alone, and it builds a plain output, so no
+     * override of the full report can redirect it.
+     *
      * @param throwable the throwable the write raised
      * @param recoveryThrowable the throwable the recovery write raised
      * @return the output that reports both throwables
      */
-    protected OutputContract getOutputFromThrowable(
-            InputContract input, Throwable throwable, Throwable recoveryThrowable) {
-        return getOutputFromThrowable(input, throwable)
-                .withAddedMessages(
+    protected OutputContract getFallbackOutputFromThrowable(
+            Throwable throwable, Throwable recoveryThrowable) {
+        return new Output()
+                .withExitCode(ExitCode.ERROR)
+                .withMessages(
+                        new ErrorMessage("Cli Server Error:"),
+                        new NewLine(),
+                        new ErrorMessage("Message:"),
+                        new Message(" " + throwable.getMessage()),
                         new NewLine(),
                         new ErrorMessage("Recovery message:"),
                         new Message(" " + recoveryThrowable.getMessage()),
