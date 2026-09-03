@@ -38,6 +38,7 @@ import io.valkyrja.cli.server.support.Exiter;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.tests.fixtures.cli.interaction.input.RaisingCommandNameInputFixture;
 import io.valkyrja.tests.fixtures.cli.interaction.output.RaisingExitCodeOutputFixture;
+import io.valkyrja.tests.fixtures.cli.interaction.output.UncastableExitCodeOutputFixture;
 import io.valkyrja.tests.fixtures.cli.server.handler.RaisingMessageThrowableFixture;
 import io.valkyrja.tests.fixtures.cli.server.handler.UnwritableReportInputHandlerFixture;
 import java.io.ByteArrayOutputStream;
@@ -418,6 +419,21 @@ final class InputHandlerTest {
         assertTrue(printed.contains("list: exit code"));
         // No attempt preceded this read, so the report carries no recovery line.
         assertFalse(printed.contains("Recovery message:"));
+        assertTrue(printed.endsWith("\n" + ExitCode.ERROR.value));
+    }
+
+    @Test
+    void runExitsWithTheErrorCodeWhenTheCastRefusesTheOutputCode() {
+        Exiter.freeze();
+
+        when(inputReceivedHandler.inputReceived(any())).thenReturn(input);
+        // The contract types the code as Object, so an implementation can hold any value.
+        when(router.dispatch(any())).thenReturn(new UncastableExitCodeOutputFixture());
+
+        var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
+
+        // The same guard answers a cast it refuses, and it names what it refused.
+        assertTrue(printed.contains("list: "));
         assertTrue(printed.endsWith("\n" + ExitCode.ERROR.value));
     }
 
