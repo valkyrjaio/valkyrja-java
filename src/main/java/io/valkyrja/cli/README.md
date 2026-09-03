@@ -220,8 +220,9 @@ throws a `NullPointerException` on the first throwable that `handle` catches.
 
 Warning: the `ThrowableCaught` stage needs a middleware. The handler ends in
 `Objects.requireNonNull` for the output, and `CliConfig` lists no middleware at
-that stage. A command that throws therefore ends in a `NullPointerException` out
-of `handle`, and `run` never reaches `writeMessages`, `exit`, or `Exiter`.
+that stage. A command that throws therefore makes the handler raise a
+`NullPointerException`, which `handle` catches and reports as the recovery
+throwable.
 
 `InputHandler.run` runs the stage again when the output write throws, and that
 run passes a non-null output. A middleware of this stage therefore receives
