@@ -138,7 +138,8 @@ public class InputHandler implements InputHandlerContract {
                 .withAddedMessages(
                         new NewLine(),
                         new ErrorMessage("Recovery message:"),
-                        new Message(" " + recoveryThrowable.getMessage()));
+                        new Message(" " + recoveryThrowable.getMessage()),
+                        new NewLine());
     }
 
     /**
@@ -156,6 +157,7 @@ public class InputHandler implements InputHandlerContract {
                 .withMessages(
                         new ErrorMessage("Cli Server Error:"),
                         new NewLine(),
-                        new Message(input.getCommandName() + ": " + throwable.getMessage()));
+                        new Message(input.getCommandName() + ": " + throwable.getMessage()),
+                        new NewLine());
     }
 }
