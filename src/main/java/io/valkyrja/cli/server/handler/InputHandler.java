@@ -103,11 +103,11 @@ public class InputHandler implements InputHandlerContract {
                 // A middleware runs here, and the command's code still reaches the shell, so
                 // this report is the only trace the failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
-            } catch (Throwable writeThrowable) {
+            } catch (Throwable reportThrowable) {
                 // getRecoveryOutput raises nothing: it takes no override, its own try guards
                 // the one call that reads the input, and every message reads through
                 // messageOf. It writes through a plain Output, whose PrintStream raises none.
-                getRecoveryOutput(input, exitThrowable, writeThrowable).writeMessages();
+                getRecoveryOutput(input, exitThrowable, reportThrowable).writeMessages();
             }
         }
 
@@ -231,7 +231,7 @@ public class InputHandler implements InputHandlerContract {
 
     /**
      * Build the output that reports a throwable and the throwable that ended the first report of
-     * it, plus the throwable that ended this report's own first attempt.
+     * it. It names a third throwable when building its own full report raises as well.
      *
      * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
      * can point at any destination. This report answers a report that already failed, so it builds
@@ -241,7 +241,7 @@ public class InputHandler implements InputHandlerContract {
      * @param input the input the command ran with
      * @param throwable the throwable this handler caught
      * @param recoveryThrowable the throwable that ended the first report of it
-     * @return the output that reports both throwables
+     * @return the output that reports the throwables
      */
     private OutputContract getRecoveryOutput(
             InputContract input, Throwable throwable, Throwable recoveryThrowable) {
@@ -252,7 +252,7 @@ public class InputHandler implements InputHandlerContract {
                     concat(
                             getThrowableMessages(input, throwable),
                             getRecoveryMessages(recoveryThrowable));
-        } catch (Throwable reportThrowable) {
+        } catch (Throwable buildThrowable) {
             // The full report reads the command name from the input, so an input that raises
             // there takes the report with it. Naming that raise tells the reader why this
             // report holds no command.
@@ -261,7 +261,7 @@ public class InputHandler implements InputHandlerContract {
                             getFallbackThrowableMessages(throwable, recoveryThrowable),
                             new MessageContract[] {
                                 new ErrorMessage("Report message:"),
-                                new Message(" " + messageOf(reportThrowable)),
+                                new Message(" " + messageOf(buildThrowable)),
                                 new NewLine()
                             });
         }
