@@ -104,9 +104,6 @@ public class InputHandler implements InputHandlerContract {
                 // alone, so a report is the only trace that failure leaves.
                 getOutputFromThrowable(input, exitThrowable).writeMessages();
             } catch (Throwable recoveryThrowable) {
-                // getRecoveryOutput raises nothing: it takes no override, its own try guards
-                // the one call that reads the input, and every message reads through
-                // messageOf. It writes through a plain Output, whose PrintStream raises none.
                 getRecoveryOutput(input, exitThrowable, recoveryThrowable).writeMessages();
             }
         }
@@ -131,8 +128,6 @@ public class InputHandler implements InputHandlerContract {
             return exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
         } catch (Throwable codeThrowable) {
             // This read runs last, so the report is the only trace the failure leaves.
-            // getRecoveryOutput takes no override and raises nothing, and it writes through a
-            // plain Output, whose PrintStream raises none. This write needs no guard.
             getRecoveryOutput(input, codeThrowable, null).writeMessages();
 
             return ExitCode.ERROR.value;
@@ -253,6 +248,11 @@ public class InputHandler implements InputHandlerContract {
      * <p>A first report goes through {@code getOutputFromThrowable}, which a subclass overrides and
      * can point at any destination. This method is private, so no override reaches the report that
      * this handler falls back to.
+     *
+     * <p>This method raises nothing, and the write of its return raises nothing: it takes no
+     * override, its own try guards the one call that reads the input, every message reads through
+     * {@code messageOf}, and it writes through a plain {@code Output}, whose {@code PrintStream}
+     * raises none. Each caller therefore writes the report without a guard of its own.
      *
      * @param input the input the command ran with
      * @param throwable the throwable this handler caught
