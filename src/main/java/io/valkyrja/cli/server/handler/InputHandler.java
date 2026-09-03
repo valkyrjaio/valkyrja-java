@@ -127,7 +127,7 @@ public class InputHandler implements InputHandlerContract {
             Object exitCode = output.getExitCode();
             return exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
         } catch (Throwable codeThrowable) {
-            // This read runs last, so the report is the only trace the failure leaves.
+            // The report names the failure that ExitCode.ERROR alone leaves unexplained.
             getRecoveryOutput(input, codeThrowable, null).writeMessages();
 
             return ExitCode.ERROR.value;
