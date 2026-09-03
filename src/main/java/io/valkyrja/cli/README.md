@@ -313,9 +313,12 @@ wrapping the `IOException` as its cause.
 and the caller owns truncation.
 
 `writeMessages()` writes each message that the output holds. `InputHandler.run`
-calls it after `handle` returns, again for each of the two outputs that a failed
-write recovers to, again for each of the two reports of a throwable the exit
-stage raised, and again for the report of an exit code the run could not use.
+calls it at four groups of call sites:
+
+- after `handle` returns
+- for each of the two outputs that a failed write recovers to
+- for each of the two reports of a throwable the exit stage raised
+- for the report of an exit code the run could not use
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
 unwritten list. Keep the return value when the moved state matters.
