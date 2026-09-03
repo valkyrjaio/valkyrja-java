@@ -121,13 +121,20 @@ public class InputHandler implements InputHandlerContract {
      * a value the cast refuses. The code must reach the shell either way.
      *
      * @param output the output the run ends with
-     * @return the code the output holds, or the error code when the read gives none
+     * @return the code the output holds, or the error code when the read raises and when the value
+     *     fits no code
      */
-    private static int exitCodeOf(OutputContract output) {
+    private int exitCodeOf(OutputContract output) {
         try {
             Object exitCode = output.getExitCode();
             return exitCode instanceof ExitCode ec ? ec.value : (int) exitCode;
-        } catch (Throwable ignored) {
+        } catch (Throwable codeThrowable) {
+            // Every other guard names what it swallowed, and this one runs last.
+            new Output()
+                    .withExitCode(ExitCode.ERROR)
+                    .withMessages(getBareThrowableMessages(codeThrowable))
+                    .writeMessages();
+
             return ExitCode.ERROR.value;
         }
     }
@@ -158,14 +165,21 @@ public class InputHandler implements InputHandlerContract {
             Throwable throwable, Throwable recoveryThrowable) {
         // This report answers a report that raised, so no call it makes can raise again. It
         // reads each message through messageOf, and it reads the input not at all.
+        return concat(getBareThrowableMessages(throwable), getRecoveryMessages(recoveryThrowable));
+    }
+
+    /**
+     * Build the messages that report one throwable without reading the input.
+     *
+     * @param throwable the throwable to report
+     * @return the messages that report the throwable
+     */
+    private MessageContract[] getBareThrowableMessages(Throwable throwable) {
         return new MessageContract[] {
             new ErrorMessage("Cli Server Error:"),
             new NewLine(),
             new ErrorMessage("Message:"),
             new Message(" " + messageOf(throwable)),
-            new NewLine(),
-            new ErrorMessage("Recovery message:"),
-            new Message(" " + messageOf(recoveryThrowable)),
             new NewLine()
         };
     }

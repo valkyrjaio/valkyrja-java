@@ -414,8 +414,9 @@ final class InputHandlerTest {
 
         var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
 
-        // The code still reaches the shell, and the run reports an error.
-        assertEquals(String.valueOf(ExitCode.ERROR.value), printed);
+        // The guard names what it swallowed, and the code still reaches the shell.
+        assertTrue(printed.contains("exit code"));
+        assertTrue(printed.endsWith(String.valueOf(ExitCode.ERROR.value)));
     }
 
     @Test
