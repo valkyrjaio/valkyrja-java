@@ -318,8 +318,9 @@ final class InputHandlerTest {
 
         var printed = capture(() -> assertDoesNotThrow(() -> handler().run(input)));
 
-        // The report reads each message through a call that cannot raise, so it still prints.
-        assertTrue(printed.contains("the throwable reports no message"));
+        // messageOf stands in for the message, so the first report names the command and
+        // prints rather than raising.
+        assertTrue(printed.contains("list: the throwable reports no message"));
         // The command's own code still reaches the shell.
         assertTrue(printed.endsWith("\n" + ExitCode.USAGE_ERROR.value));
     }
