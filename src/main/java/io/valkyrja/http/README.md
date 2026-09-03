@@ -407,7 +407,8 @@ The message sub-component nests its own six under `HttpMessageThrowable`:
 `catch` clause that names `HttpMessageThrowable` therefore covers a URI failure,
 a header failure, a stream failure, and an uploaded file failure as well.
 
-Three exceptions carry a response, and the request handler reads them.
+Three exceptions carry a response, and the request handler reads them outside
+debug mode.
 
 | Exception                       | Carries                                          |
 | :------------------------------ | :----------------------------------------------- |
@@ -416,5 +417,10 @@ Three exceptions carry a response, and the request handler reads them.
 | `HttpRedirectResponseException` | The same, for a redirect                         |
 
 Throw one of the three from a route handler to end the request with a response.
-Every other throwable reaches the `ThrowableCaught` stage as a 500 response. The
-[throwable component](../throwable/README.md) describes the hierarchy.
+Every other throwable reaches the `ThrowableCaught` stage as a 500 response.
+
+Warning: neither sentence holds in debug mode. The debug branch runs before the
+handler reads the type of the throwable, so it wraps every throwable and ends
+the request. The request handler section above describes that branch.
+
+The [throwable component](../throwable/README.md) describes the hierarchy.
