@@ -218,7 +218,9 @@ A first report comes from `getOutputFromThrowable`, which a subclass overrides
 and can point at any destination. A report that answers a failed report builds a
 plain `Output` itself, so no override redirects it to the destination that just
 failed. That report names the command, and it names none when reading the
-command name from the input is itself what raised.
+command name from the input is itself what raised. Every report reads a
+throwable's message through one call, which stands in the text `the throwable
+reports no message` when the throwable carries none and when reading it raises.
 
 Warning: the stage receives a `null` output from `InputHandler.handle`. That
 call passes the result of `emptyOutput()`, which is `null`, so a middleware of
