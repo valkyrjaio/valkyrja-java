@@ -21,13 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.NativeChildContainer;
-import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.BindingProviderFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
+import io.valkyrja.tests.fixtures.container.provider.PublishingProviderFixture;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -385,22 +385,30 @@ final class NativeChildContainerTest {
     }
 
     @Test
-    void getAliasedThrowsForACycleThatArrivedThroughData() {
-        // setFromData bypasses bindAlias, so the parent's map can hold a cycle
-        parent.setFromData(
-                new ContainerData(
-                        Map.of(
-                                CharSequence.class,
-                                Runnable.class,
-                                Runnable.class,
-                                CharSequence.class),
-                        Map.of(),
-                        Map.of(),
-                        Map.of()));
-        child = new NativeChildContainer(parent);
+    void getAliasedPublishesADeferredParentTargetInTheChild() {
+        parent.register(new PublishingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
 
-        assertThrows(
-                ContainerCyclicAliasException.class, () -> child.get(CharSequence.class, Map.of()));
+        // The child holds the same callback, so it publishes into itself
+        Object fromId = child.get(ProvidedFixture.class, Map.of());
+        Object fromAlias = child.get(CharSequence.class, Map.of());
+
+        assertSame(fromId, fromAlias);
+        assertFalse(parent.isPublished(ProvidedFixture.class));
+        assertFalse(parent.isSingletonInstance(ProvidedFixture.class));
+    }
+
+    @Test
+    void getAliasedStopsWhereTheParentStops() {
+        // The parent answers Runnable as a singleton, so it never reaches the rest
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        parent.bindSingleton(raw(Runnable.class), SingletonFixture::make);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+
+        assertInstanceOf(
+                SingletonFixture.class, child.getAliased(CharSequence.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(Runnable.class));
     }
 
     @Test
@@ -416,5 +424,38 @@ final class NativeChildContainerTest {
         assertInstanceOf(SingletonFixture.class, instance);
         assertSame(instance, child.get(SingletonFixture.class, Map.of()));
         assertFalse(parent.isSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void getAliasedReusesAParentTargetTheParentAlreadyPublished() {
+        parent.register(new PublishingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        // The parent publishes at boot, so the request reuses what it holds
+        Object shared = parent.get(ProvidedFixture.class, Map.of());
+
+        assertSame(shared, child.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedStopsAtAParentServiceInTheChain() {
+        // The parent answers Runnable as a service, so it never reaches the rest
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        parent.bind(raw(Runnable.class), ServiceFixture::make);
+        parent.bindAlias(Runnable.class, raw(SingletonFixture.class));
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+
+        assertInstanceOf(
+                ServiceFixture.class, child.getAliased(CharSequence.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void isSingletonBindingReadsTheChildThenTheParent() {
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        child.bindSingleton(ServiceFixture.class, ServiceFixture::make);
+
+        assertTrue(child.isSingletonBinding(ServiceFixture.class));
+        assertTrue(child.isSingletonBinding(SingletonFixture.class));
+        assertFalse(child.isSingletonBinding(Runnable.class));
     }
 }
