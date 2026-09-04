@@ -6,12 +6,12 @@
  * Released under the MIT License. See LICENSE.md for details.
  */
 
-package io.valkyrja.tests.unit.cli.routing.constant;
+package io.valkyrja.tests.unit.type.constant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.valkyrja.cli.routing.constant.CastArgument;
+import io.valkyrja.type.constant.CastArgument;
 import java.lang.reflect.Constructor;
 import org.junit.jupiter.api.Test;
 
