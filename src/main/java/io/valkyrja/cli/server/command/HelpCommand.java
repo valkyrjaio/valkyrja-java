@@ -34,12 +34,12 @@ import io.valkyrja.cli.routing.data.option.VersionOptionParameter;
 import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
-import io.valkyrja.cli.server.command.abstract_.Command;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HelpCommand extends Command {
+public class HelpCommand {
 
+    protected RouteContract route;
     protected RouteContract helpRoute;
     protected String appNamespace;
     protected String appVersion;
@@ -52,7 +52,7 @@ public class HelpCommand extends Command {
             RouteContract route,
             RouteCollectionContract collection,
             OutputFactoryContract outputFactory) {
-        super(route);
+        this.route = route;
         this.appNamespace = appNamespace;
         this.appVersion = appVersion;
         this.collection = collection;
@@ -65,8 +65,7 @@ public class HelpCommand extends Command {
     }
 
     public OutputContract run() {
-        OptionParameterContract commandOption = spelledOption("command");
-        String commandName = commandOption != null ? commandOption.getFirstValue() : "";
+        String commandName = route.getOptionValue("command");
 
         if (!collection.has(commandName)) {
             return outputFactory

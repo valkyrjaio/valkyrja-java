@@ -24,6 +24,7 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import org.jspecify.annotations.Nullable;
@@ -156,18 +157,39 @@ public class Route implements RouteContract {
 
     @Override
     public boolean hasArgument(String name) {
-        return arguments.stream().anyMatch(a -> a.getName().equals(name));
+        return findArgument(name).isPresent();
     }
 
     @Override
     public ArgumentParameterContract getArgument(String name) {
-        return arguments.stream()
-                .filter(a -> a.getName().equals(name))
-                .findFirst()
+        return findArgument(name)
                 .orElseThrow(
                         () ->
                                 new CliRoutingInvalidArgumentNameException(
                                         "The argument `" + name + "` was not found"));
+    }
+
+    @Override
+    public boolean hasProvidedArgument(String name) {
+        return findArgument(name).map(ArgumentParameterContract::isProvided).orElse(false);
+    }
+
+    @Override
+    public String getArgumentValue(String name) {
+        return getArgumentValue(name, "");
+    }
+
+    @Override
+    public String getArgumentValue(String name, String defaultValue) {
+        return findArgument(name)
+                .filter(ArgumentParameterContract::hasFirstValue)
+                .map(ArgumentParameterContract::getFirstValue)
+                .orElse(defaultValue);
+    }
+
+    /** Returns the declared argument of that name, and an empty optional if there is none. */
+    protected Optional<ArgumentParameterContract> findArgument(String name) {
+        return arguments.stream().filter(a -> a.getName().equals(name)).findFirst();
     }
 
     @Override
@@ -197,18 +219,49 @@ public class Route implements RouteContract {
 
     @Override
     public boolean hasOption(String name) {
-        return options.stream().anyMatch(o -> o.getName().equals(name));
+        return findOption(name).isPresent();
     }
 
     @Override
     public OptionParameterContract getOption(String name) {
-        return options.stream()
-                .filter(o -> o.getName().equals(name))
-                .findFirst()
+        return findOption(name)
                 .orElseThrow(
                         () ->
                                 new CliRoutingInvalidOptionNameException(
                                         "The option `" + name + "` was not found"));
+    }
+
+    @Override
+    public boolean hasProvidedOption(String name) {
+        return findOption(name).map(OptionParameterContract::isProvided).orElse(false);
+    }
+
+    @Override
+    public String getOptionValue(String name) {
+        return getOptionValue(name, null);
+    }
+
+    @Override
+    public String getOptionValue(String name, @Nullable String defaultValue) {
+        Optional<OptionParameterContract> option = findOption(name);
+        Optional<String> given =
+                option.filter(OptionParameterContract::hasFirstValue)
+                        .map(OptionParameterContract::getFirstValue);
+
+        if (given.isPresent()) {
+            return given.get();
+        }
+
+        if (defaultValue != null) {
+            return defaultValue;
+        }
+
+        return option.map(OptionParameterContract::getDefaultValue).orElse("");
+    }
+
+    /** Returns the declared option of that name, and an empty optional if there is none. */
+    protected Optional<OptionParameterContract> findOption(String name) {
+        return options.stream().filter(o -> o.getName().equals(name)).findFirst();
     }
 
     @Override

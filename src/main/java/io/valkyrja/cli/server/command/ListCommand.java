@@ -22,15 +22,14 @@ import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
-import io.valkyrja.cli.routing.data.contract.OptionParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
-import io.valkyrja.cli.server.command.abstract_.Command;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListCommand extends Command {
+public class ListCommand {
 
+    protected RouteContract route;
     protected String appNamespace;
     protected String appVersion;
     protected RouteCollectionContract collection;
@@ -42,7 +41,7 @@ public class ListCommand extends Command {
             RouteContract route,
             RouteCollectionContract collection,
             OutputFactoryContract outputFactory) {
-        super(route);
+        this.route = route;
         this.appNamespace = appNamespace;
         this.appVersion = appVersion;
         this.collection = collection;
@@ -54,18 +53,14 @@ public class ListCommand extends Command {
     }
 
     public OutputContract run() {
-        String namespace = "";
         List<RouteContract> routes =
                 collection.all().values().stream().collect(Collectors.toList());
+        String namespace = route.getOptionValue("namespace");
 
-        OptionParameterContract namespaceOption = spelledOption("namespace");
-
-        if (namespaceOption != null) {
-            namespace = namespaceOption.getFirstValue();
-            final String ns = namespace;
+        if (!namespace.isEmpty()) {
             routes =
                     routes.stream()
-                            .filter(r -> r.getName().startsWith(ns))
+                            .filter(r -> r.getName().startsWith(namespace))
                             .collect(Collectors.toList());
         }
 

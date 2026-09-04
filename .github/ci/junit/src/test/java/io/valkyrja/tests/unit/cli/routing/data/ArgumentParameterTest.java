@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.cli.interaction.argument.Argument;
 import io.valkyrja.cli.routing.data.ArgumentParameter;
+import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.enum_.ArgumentMode;
 import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingArgumentValuesValidationException;
@@ -96,5 +97,23 @@ final class ArgumentParameterTest {
         var invalid =
                 (ArgumentParameter) new ArgumentParameter("n", "d").withMode(ArgumentMode.REQUIRED);
         assertThrows(CliRoutingArgumentValuesValidationException.class, invalid::validateValues);
+    }
+
+    @Test
+    void isProvidedSeparatesThePresenceFromTheValue() {
+        ArgumentParameter parameter = new ArgumentParameter("target", "The target");
+
+        assertFalse(parameter.isProvided());
+        assertFalse(parameter.hasFirstValue());
+
+        ArgumentParameterContract empty = parameter.withArguments(new Argument(""));
+
+        assertTrue(empty.isProvided());
+        assertFalse(empty.hasFirstValue());
+
+        ArgumentParameterContract withValue = parameter.withArguments(new Argument("host"));
+
+        assertTrue(withValue.isProvided());
+        assertTrue(withValue.hasFirstValue());
     }
 }

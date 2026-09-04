@@ -18,6 +18,7 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import org.jspecify.annotations.Nullable;
 
 public interface RouteContract {
 
@@ -45,6 +46,12 @@ public interface RouteContract {
 
     ArgumentParameterContract getArgument(String name);
 
+    boolean hasProvidedArgument(String name);
+
+    String getArgumentValue(String name);
+
+    String getArgumentValue(String name, String defaultValue);
+
     RouteContract withArguments(ArgumentParameterContract... arguments);
 
     RouteContract withAddedArguments(ArgumentParameterContract... arguments);
@@ -56,6 +63,12 @@ public interface RouteContract {
     boolean hasOption(String name);
 
     OptionParameterContract getOption(String name);
+
+    boolean hasProvidedOption(String name);
+
+    String getOptionValue(String name);
+
+    String getOptionValue(String name, @Nullable String defaultValue);
 
     RouteContract withOptions(OptionParameterContract... options);
 

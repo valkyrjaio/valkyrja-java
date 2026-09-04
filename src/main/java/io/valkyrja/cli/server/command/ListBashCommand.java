@@ -13,14 +13,13 @@ import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.interaction.output.factory.contract.OutputFactoryContract;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
-import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
-import io.valkyrja.cli.server.command.abstract_.Command;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ListBashCommand extends Command {
+public class ListBashCommand {
 
+    protected RouteContract route;
     protected RouteCollectionContract collection;
     protected OutputFactoryContract outputFactory;
 
@@ -28,7 +27,7 @@ public class ListBashCommand extends Command {
             RouteContract route,
             RouteCollectionContract collection,
             OutputFactoryContract outputFactory) {
-        super(route);
+        this.route = route;
         this.collection = collection;
         this.outputFactory = outputFactory;
     }
@@ -43,17 +42,14 @@ public class ListBashCommand extends Command {
         List<RouteContract> routes =
                 collection.all().values().stream().collect(Collectors.toList());
 
+        String namespace = route.getArgumentValue("namespace");
         int colonAt = -1;
 
-        ArgumentParameterContract namespaceArgument = spelledArgument("namespace");
-
-        if (namespaceArgument != null) {
-            String namespace = namespaceArgument.getFirstValue();
+        if (!namespace.isEmpty()) {
             colonAt = namespace.indexOf(':');
-            final String ns = namespace;
             routes =
                     routes.stream()
-                            .filter(r -> r.getName().startsWith(ns))
+                            .filter(r -> r.getName().startsWith(namespace))
                             .collect(Collectors.toList());
         }
 

@@ -20,6 +20,8 @@ public interface ParameterContract {
 
     ParameterContract withDescription(String description);
 
+    boolean isProvided();
+
     boolean hasFirstValue();
 
     String getFirstValue();

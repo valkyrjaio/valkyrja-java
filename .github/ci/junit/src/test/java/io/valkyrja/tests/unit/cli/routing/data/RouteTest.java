@@ -14,8 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.valkyrja.cli.interaction.argument.Argument;
+import io.valkyrja.cli.interaction.enum_.OptionType;
 import io.valkyrja.cli.interaction.message.Message;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
+import io.valkyrja.cli.interaction.option.Option;
 import io.valkyrja.cli.interaction.output.EmptyOutput;
 import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.middleware.contract.ProcessExitingMiddlewareContract;
@@ -121,5 +124,81 @@ final class RouteTest {
         assertTrue(route.getRouteDispatchedMiddleware().isEmpty());
         assertTrue(route.getThrowableCaughtMiddleware().isEmpty());
         assertTrue(route.getProcessExitingMiddleware().isEmpty());
+    }
+
+    @Test
+    void providedOptionReportsTheInputRatherThanTheDeclaration() {
+        RouteContract bare = route();
+        RouteContract declared = bare.withOptions(new OptionParameter("namespace", "A namespace"));
+        RouteContract provided =
+                bare.withOptions(
+                        new OptionParameter("namespace", "A namespace")
+                                .withOptions(new Option("namespace", "db:", OptionType.LONG)));
+
+        assertFalse(bare.hasProvidedOption("namespace"));
+        assertEquals("all", bare.getOptionValue("namespace", "all"));
+
+        assertTrue(declared.hasOption("namespace"));
+        assertFalse(declared.hasProvidedOption("namespace"));
+        assertEquals("all", declared.getOptionValue("namespace", "all"));
+
+        assertTrue(provided.hasProvidedOption("namespace"));
+        assertEquals("db:", provided.getOptionValue("namespace", "all"));
+
+        RouteContract flag =
+                bare.withOptions(
+                        new OptionParameter("namespace", "A namespace")
+                                .withOptions(new Option("namespace", OptionType.LONG)));
+
+        assertTrue(flag.hasProvidedOption("namespace"));
+        assertEquals("all", flag.getOptionValue("namespace", "all"));
+
+        RouteContract withDefault =
+                bare.withOptions(
+                        new OptionParameter("namespace", "A namespace").withDefaultValue("app:"));
+
+        // The option declares a default, and the invocation gave no value.
+        assertEquals("app:", withDefault.getOptionValue("namespace", null));
+        // A default given at the call site overrides the declared one.
+        assertEquals("all", withDefault.getOptionValue("namespace", "all"));
+        // An option that declares no default falls back to an empty string.
+        assertEquals("", declared.getOptionValue("namespace", null));
+        // The one-argument form reads the declared default.
+        assertEquals("app:", withDefault.getOptionValue("namespace"));
+        // An empty string given at the call site counts as given, so it suppresses the
+        // declared default.
+        assertEquals("", withDefault.getOptionValue("namespace", ""));
+    }
+
+    @Test
+    void providedArgumentReportsTheInputRatherThanTheDeclaration() {
+        RouteContract bare = route();
+        RouteContract declared =
+                bare.withArguments(new ArgumentParameter("namespace", "A namespace"));
+        RouteContract provided =
+                bare.withArguments(
+                        new ArgumentParameter("namespace", "A namespace")
+                                .withArguments(new Argument("db:")));
+
+        assertFalse(bare.hasProvidedArgument("namespace"));
+        assertEquals("all", bare.getArgumentValue("namespace", "all"));
+
+        assertTrue(declared.hasArgument("namespace"));
+        assertFalse(declared.hasProvidedArgument("namespace"));
+        assertEquals("all", declared.getArgumentValue("namespace", "all"));
+
+        assertTrue(provided.hasProvidedArgument("namespace"));
+        assertEquals("db:", provided.getArgumentValue("namespace", "all"));
+
+        RouteContract empty =
+                bare.withArguments(
+                        new ArgumentParameter("namespace", "A namespace")
+                                .withArguments(new Argument("")));
+
+        assertTrue(empty.hasProvidedArgument("namespace"));
+        assertEquals("all", empty.getArgumentValue("namespace", "all"));
+        // The one-argument form falls back to an empty string.
+        assertEquals("", empty.getArgumentValue("namespace"));
+        assertEquals("db:", provided.getArgumentValue("namespace"));
     }
 }
