@@ -29,6 +29,7 @@ import io.valkyrja.http.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.SendingResponseHandlerContract;
 import io.valkyrja.http.middleware.handler.contract.ThrowableCaughtHandlerContract;
+import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.dispatcher.contract.RouterContract;
 import io.valkyrja.http.routing.matcher.Matcher;
@@ -55,7 +56,7 @@ public class Router implements RouterContract {
     public Router(ContainerContract container) {
         this(
                 container,
-                new Matcher(),
+                new Matcher(new RouteCollection(), container),
                 new ResponseFactory(),
                 new ThrowableCaughtHandler(container),
                 new RouteMatchedHandler(container),
