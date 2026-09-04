@@ -209,15 +209,51 @@ Warning: a `ProcessExiting` middleware returns `void`, so it cannot change the
 output. The exit code that `InputHandler.run` reads is already fixed when the
 stage runs.
 
-Warning: `ThrowableCaught` receives a `null` output. `InputHandler.handle` calls
-the stage with the result of `emptyOutput()`, which is `null`, so a middleware
-of that stage builds its own output. A middleware that reads the output it
-receives throws a `NullPointerException` on the first throwable.
+The `ProcessExiting` stage runs under a guard of its own. A middleware that
+throws there makes `run` print a first report, which a subclass can point at any
+destination. A raise while `run` builds or writes that report makes it print the
+report that answers it. `Exiter.exit` runs after this stage, with the code the
+output holds or with `ERROR`.
+
+A first report comes from `getOutputFromThrowable`, which a subclass overrides
+and can point at any destination. `InputHandler` builds a recovery report
+through a private method, so no override reaches it. Both reports this class
+builds take an `Output` with the default flags, so a `--silent` run prints them.
+
+A recovery report names the command, and it names no command when reading the
+command name from the input is itself what raised. That one report carries a
+`Report message:` line, which names the raise that removed the command. Every
+report reads a throwable's message through one call, which stands in the text
+`the throwable reports no message` when the throwable carries none and when
+reading it raises.
+
+Warning: the `ThrowableCaught` stage receives a `null` output from
+`InputHandler.handle`. That call passes the result of `emptyOutput()`, which is
+`null`, so a middleware of that stage builds its own output. A middleware that
+reads the output it receives throws a `NullPointerException` on the first
+throwable that `handle` catches.
 
 Warning: the `ThrowableCaught` stage needs a middleware. The handler ends in
 `Objects.requireNonNull` for the output, and `CliConfig` lists no middleware at
-that stage. A command that throws therefore ends in a `NullPointerException` out
-of `handle`, and `run` never reaches `writeMessages`, `exit`, or `Exiter`.
+that stage. A command that throws therefore makes the handler raise a
+`NullPointerException`, which `handle` catches and reports as the recovery
+throwable.
+
+`InputHandler.run` runs the stage again when the output write throws, and that
+run passes a non-null output. A middleware of this stage therefore receives
+`CliInteractionFileWriteException` and `CliInteractionStreamWriteException` as
+well as a throwable a command raised.
+
+A middleware of this stage can itself throw. `handle` and `run` each build an
+output then, which names the throwable it caught and the middleware's. `handle`
+returns that output, and `run` writes it.
+
+Warning: the run in `run` resumes the chain rather than restarting it.
+`Handler` advances its index once for each middleware it resolves and never
+rewinds it, and `CliMiddlewareServiceProvider` publishes one handler as a
+singleton. A command that throws makes `handle` run the stage first, so a first
+run that reached the end of the chain leaves no middleware for the one in
+`run`. Issue #182 tracks it.
 
 ```java
 public final class AppTimerMiddleware implements RouteDispatchedMiddlewareContract {
@@ -266,17 +302,31 @@ builds one of five output types.
 Each method takes an `ExitCode` and the messages, and each one has a variant
 that takes the messages alone. The variant uses `ExitCode.SUCCESS`.
 
-Warning: `FileOutput.outputMessage` and `StreamOutput.outputMessage` hold no
-implementation, so neither type writes a message today.
+`FileOutput` appends the formatted text to the filepath, and it makes the file
+when the file does not exist. It makes no directory, so a filepath under a
+directory that does not exist fails the write. `StreamOutput` writes the
+formatted text to the stream and flushes it. A failed write throws
+`CliInteractionFileWriteException` or `CliInteractionStreamWriteException`, each
+wrapping the `IOException` as its cause.
+
+`FileOutput` never truncates. The file keeps the messages of each earlier run,
+and the caller owns truncation.
 
 `writeMessages()` writes each message that the output holds. `InputHandler.run`
-calls it once, after the router returns.
+calls it at four groups of call sites:
+
+- after `handle` returns
+- for each of the two outputs that a failed write recovers to
+- for each of the two reports of a throwable the exit stage raised
+- for the report of an exit code the run could not use
 
 Warning: `writeMessages()` returns a new output, and the receiver keeps its
-unwritten list. The new output holds each message as written. `InputHandler.run`
-discards the return value, so the messages reach the terminal while the output
-it holds still reports each one as unwritten. Keep the return value when the
-moved state matters.
+unwritten list. Keep the return value when the moved state matters.
+`InputHandler.run` keeps it for the write of the command's own output, and for
+the write of each of the two outputs that a failed write recovers to. It
+registers the output it holds after those writes as the `OutputContract`
+singleton. It discards the return of each exit-stage report and of the exit code
+report, which no later stage reads.
 
 Two flags control the write. `isSilent` stops it. `isQuiet` stops it while the
 exit code is `ExitCode.SUCCESS`. A third flag, `isInteractive`, reaches no write
@@ -317,7 +367,10 @@ MessageContract message = new Message("Routes:", new HighlightedTextFormatter())
 the enum, and it takes an `int` as well.
 
 `InputHandler.run` reads the code from the output, and
-`io.valkyrja.cli.server.support.Exiter` ends the process with it.
+`io.valkyrja.cli.server.support.Exiter` ends the process with it. The read
+carries a guard, so an output that raises on it, or holds a value that fits no
+code, ends the process with `ERROR`. That guard prints a recovery report, which
+names the throwable it caught and names the command whenever the input reads.
 
 ## Container bindings
 
@@ -427,6 +480,8 @@ the component, and each sub-component contract extends it:
 | `CliInteractionExpectedQuestionOutputException` | A message that is not a question reaches `QuestionWriter`                  |
 | `CliInteractionNoFormatterException`            | `Message.getFormatter` runs, and the message holds none                    |
 | `CliInteractionNoValidationCallableException`   | `Answer.getValidationCallable` runs, and the answer holds none             |
+| `CliInteractionFileWriteException`              | `FileOutput.outputMessage` runs, and the write to the file fails           |
+| `CliInteractionStreamWriteException`            | `StreamOutput.outputMessage` runs, and the write to the stream fails       |
 | `CliRoutingInvalidRouteNameException`           | `RouteCollection.get` runs, and the collection holds no route of that name |
 | `CliRoutingInvalidArgumentNameException`        | `Route.getArgument` runs, and the route holds no argument of that name     |
 | `CliRoutingInvalidOptionNameException`          | `Route.getOption` runs, and the route holds no option of that name         |

@@ -11,7 +11,10 @@ package io.valkyrja.cli.interaction.output;
 import io.valkyrja.cli.interaction.enum_.ExitCode;
 import io.valkyrja.cli.interaction.message.contract.MessageContract;
 import io.valkyrja.cli.interaction.output.contract.StreamOutputContract;
+import io.valkyrja.cli.interaction.throwable.exception.CliInteractionStreamWriteException;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class StreamOutput extends Output implements StreamOutputContract {
 
@@ -46,7 +49,13 @@ public class StreamOutput extends Output implements StreamOutputContract {
 
     @Override
     protected void outputMessage(MessageContract message) {
-        // TODO: Implement
+        try {
+            stream.write(message.getFormattedText().getBytes(StandardCharsets.UTF_8));
+            stream.flush();
+        } catch (IOException exception) {
+            throw new CliInteractionStreamWriteException(
+                    "Unable to write to the stream", exception);
+        }
     }
 
     @Override
