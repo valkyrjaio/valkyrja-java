@@ -22,6 +22,8 @@ import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingInvalidOptionWithValueException;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingOptionValuesValidationException;
+import io.valkyrja.tests.fixtures.type.TypeFixture;
+import io.valkyrja.type.data.Cast;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link OptionParameter}. */
@@ -82,7 +84,7 @@ final class OptionParameterTest {
                         .withAddedOptions(new Option("verbose", "2", OptionType.LONG));
 
         assertEquals(2, param.getOptions().size());
-        assertEquals(java.util.List.of("1", "2"), param.getCastValues());
+        assertEquals(java.util.List.of("1", "2"), param.getValues());
         assertTrue(param.hasFirstValue());
         assertEquals("1", param.getFirstValue());
     }
@@ -232,5 +234,19 @@ final class OptionParameterTest {
 
         assertTrue(withValue.isProvided());
         assertTrue(withValue.hasFirstValue());
+    }
+
+    @Test
+    void castAccessorsReportAndClearTheCast() {
+        var cast = new Cast(TypeFixture.class);
+        var param = new OptionParameter("verbose", "d");
+
+        assertFalse(param.hasCast());
+
+        var withCast = param.withCast(cast);
+
+        assertTrue(withCast.hasCast());
+        assertSame(cast, withCast.getCast());
+        assertFalse(withCast.withoutCast().hasCast());
     }
 }
