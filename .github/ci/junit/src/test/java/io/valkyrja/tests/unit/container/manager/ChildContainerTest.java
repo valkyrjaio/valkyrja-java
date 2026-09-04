@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
@@ -357,5 +358,40 @@ final class ChildContainerTest {
 
         // The parent holds the instance, so the alias reaches it rather than rebuilding
         assertSame(shared, localChild.get(Runnable.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsForACycleThatArrivedThroughData() {
+        // setFromData bypasses bindAlias, so the parent's map can hold a cycle
+        parent.setFromData(
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of()));
+        ChildContainer localChild = createChild();
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> localChild.get(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void aChainOntoAnUnbuiltParentSingletonResolvesInTheChild() {
+        // outer → middle → the singleton, none of it built in the parent
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindAlias(Runnable.class, raw(SingletonFixture.class));
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = createChild();
+
+        Object instance = localChild.get(CharSequence.class, Map.of());
+
+        assertInstanceOf(SingletonFixture.class, instance);
+        assertSame(instance, localChild.get(SingletonFixture.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
     }
 }

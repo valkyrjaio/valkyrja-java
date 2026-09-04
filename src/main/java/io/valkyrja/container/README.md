@@ -95,6 +95,10 @@ private static <T> Class<T> raw(Class<?> type) {
 container.bindAlias(MatcherContract.class, raw(Matcher.class));
 ```
 
+`bindAlias` throws `ContainerCyclicAliasException` when the target already
+resolves back to the alias, and when the two are the same type, because such a
+chain has no end. The check runs at registration, not at resolution.
+
 ### setSingleton
 
 `setSingleton` registers an instance that the caller built. The container caches
