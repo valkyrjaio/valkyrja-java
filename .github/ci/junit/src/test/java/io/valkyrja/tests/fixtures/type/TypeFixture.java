@@ -8,8 +8,8 @@
 
 package io.valkyrja.tests.fixtures.type;
 
-import io.valkyrja.cli.routing.constant.CastArgument;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.type.constant.CastArgument;
 import io.valkyrja.type.contract.TypeContract;
 import java.util.Map;
 import java.util.function.UnaryOperator;

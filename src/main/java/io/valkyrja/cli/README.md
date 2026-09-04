@@ -8,7 +8,7 @@ four sub-components.
 | Sub-component | Holds                                                    |
 | :------------ | :------------------------------------------------------- |
 | `interaction` | The input, the output, the messages, and the formatters  |
-| `routing`     | The route, the collection, the collector, and the router |
+| `routing`     | The route, the collection, the collector, the caster, and the router |
 | `middleware`  | The six middleware stages and their handlers             |
 | `server`      | The input handler, the built-in commands, and the exiter |
 
@@ -244,19 +244,22 @@ raw values. The HTTP matcher holds the same position for a route parameter.
 value to the container under the key `CastArgument.VALUE`.
 
 ```java
-import io.valkyrja.cli.routing.constant.CastArgument;
+import io.valkyrja.type.constant.CastArgument;
 
 container.bind(Slug.class, (c, arguments) -> new Slug(String.valueOf(arguments.get(CastArgument.VALUE))));
 
 var parameter = new ArgumentParameter("target", "The target").withCast(new Cast(Slug.class));
-var values = container.getSingleton(CasterContract.class).getCastValues(parameter);
+var values =
+        container
+                .getSingleton(io.valkyrja.cli.routing.caster.contract.CasterContract.class)
+                .getCastValues(parameter);
 ```
 
-Warning: register a cast type with `bind`. `getService()` skips the singleton
-cache, so a type that `bindSingleton` registers is built for each value, and not
-once for the application. An alias, and an instance that `setSingleton` holds,
-raise `ContainerInvalidReferenceException`. See
-[the type component](../type/README.md).
+Warning: `getService()` reads only a service binding, and it skips the singleton
+cache. An alias, and an instance that `setSingleton` holds, raise
+`ContainerInvalidReferenceException`. A type that `bindSingleton` registers is
+built for each value, and not once for the application. Register a cast type
+with `bind`. See [the type component](../type/README.md).
 
 ## Middleware
 
@@ -459,6 +462,7 @@ names the throwable it caught and names the command whenever the input reads.
 | `ProcessExitingHandlerContract`  | `CliMiddlewareServiceProvider`  | `ProcessExitingHandler`                                                                        |
 | `RouterContract`                 | `CliRoutingServiceProvider`     | `Router`                                                                                       |
 | `RouteCollectionContract`        | `CliRoutingServiceProvider`     | `RouteCollection`, filled from the route providers                                             |
+| `CasterContract`                 | `CliRoutingServiceProvider`     | `Caster`, which applies a parameter cast                                                       |
 | `InputHandlerContract`           | `CliServerServiceProvider`      | `InputHandler`                                                                                 |
 
 Each middleware handler reads its list from `CliConfigContract`, so the config
@@ -561,9 +565,9 @@ the component, and each sub-component contract extends it:
 | `CliRoutingArgumentValuesValidationException`   | An argument fails `validateValues`                                         |
 | `CliRoutingOptionValuesValidationException`     | An option fails `validateValues`                                           |
 | `CliRoutingNoHelpTextException`                 | `Route.getHelpText` runs, and the route holds none                         |
+| `CliRoutingNoCastException`                     | `Parameter.getCast` runs, and the parameter holds none                     |
 
-The component also ships `CliRoutingNoCastException`,
-`CliRoutingInvalidHelpTextCallableException`, and
+The component also ships `CliRoutingInvalidHelpTextCallableException` and
 `CliRoutingNoOutputDispatchException`. No class throws them today.
 
 The [throwable component](../throwable/README.md) describes the hierarchy.

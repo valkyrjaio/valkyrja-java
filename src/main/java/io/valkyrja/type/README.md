@@ -24,8 +24,8 @@ public Cast(Class<? extends TypeContract> type);
 The one-argument constructor sets `convert` to `true` and `isArray` to `false`.
 Three getters read the state back: `getType()`, `isConvert()`, and `isArray()`.
 
-Warning: no framework code reads `isArray()`. The CLI parameter converts each
-value one at a time, whatever the flag holds.
+Warning: no framework code reads `isArray()`. The caster converts each value one
+at a time, whatever the flag holds.
 
 A route parameter holds an optional cast. The CLI parameter and the HTTP
 parameter both read it through `hasCast()` and `getCast()`, and `withCast(Cast)`
@@ -52,15 +52,15 @@ method on a variable class, so this port leaves the method out. The application
 binds an implementation, and the container builds it. See
 [STATIC_METHODS.md](https://github.com/valkyrjaio/architecture/blob/26.x/STATIC_METHODS.md).
 
-Warning: no framework code calls `asFlatValue()` or `modify()`. The CLI
-parameter calls `asValue()` only. The contract mirrors PHP's `TypeContract`,
-which every PHP value object implements.
+Warning: no framework code calls `asFlatValue()` or `modify()`. The caster calls
+`asValue()` only. The contract mirrors PHP's `TypeContract`, which every PHP
+value object implements.
 
 This port ships no implementation of the contract. An application supplies its
 own type:
 
 ```java
-import io.valkyrja.cli.routing.constant.CastArgument;
+import io.valkyrja.type.constant.CastArgument;
 
 container.bind(Slug.class, (c, arguments) -> new Slug(String.valueOf(arguments.get(CastArgument.VALUE))));
 
@@ -70,21 +70,22 @@ var parameter = new ArgumentParameter("target", "The target").withCast(new Cast(
 ### Where the framework applies a cast
 
 `io.valkyrja.cli.routing.caster.Caster` applies the cast, and the parameter
-applies nothing. The caster holds the container, so the data object needs none.
+applies nothing. The container publishes it under
+`io.valkyrja.cli.routing.caster.contract.CasterContract`. The caster holds the container, so the data object needs none.
 `getCastValues()` on the caster asks the container for the type that `getType()`
 names, and it passes the raw value under the key `CastArgument.VALUE`. It
 returns the converted value when `isConvert()` is `true`, and the type itself
 when `isConvert()` is `false`. A parameter that holds no cast returns each raw
 value. The [cli component](../cli/README.md) describes the parameters.
 
-Warning: register a cast type with `bind`. The caster calls `getService()`,
-which reads only a service binding. An alias, and an instance that
-`setSingleton` holds, raise `ContainerInvalidReferenceException`.
+Warning: `getService()` reads only a service binding. An alias, and an instance
+that `setSingleton` holds, raise `ContainerInvalidReferenceException`. Register
+a cast type with `bind`.
 
 `bindSingleton` also registers a callable, so a cast type that `bindSingleton`
 registers still resolves. `getService()` skips the singleton cache, so the
 caster builds one instance for each value. That is not the lifetime that
-`bindSingleton` states, which is why a cast type takes `bind`.
+`bindSingleton` states, which is the second reason a cast type takes `bind`.
 
 Warning: `Matcher.castMatchValue` returns the matched value without a change, so
 the HTTP matcher applies no conversion. `Cast` carries the intent of the route,

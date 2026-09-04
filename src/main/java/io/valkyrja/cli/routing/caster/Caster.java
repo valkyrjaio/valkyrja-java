@@ -9,9 +9,9 @@
 package io.valkyrja.cli.routing.caster;
 
 import io.valkyrja.cli.routing.caster.contract.CasterContract;
-import io.valkyrja.cli.routing.constant.CastArgument;
 import io.valkyrja.cli.routing.data.contract.ParameterContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.type.constant.CastArgument;
 import io.valkyrja.type.contract.TypeContract;
 import io.valkyrja.type.data.Cast;
 import java.util.ArrayList;

@@ -6,7 +6,7 @@
  * Released under the MIT License. See LICENSE.md for details.
  */
 
-package io.valkyrja.cli.routing.constant;
+package io.valkyrja.type.constant;
 
 public final class CastArgument {
 
