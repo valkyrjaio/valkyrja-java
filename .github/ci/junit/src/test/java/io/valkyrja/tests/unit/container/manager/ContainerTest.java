@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
+import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
@@ -245,5 +246,34 @@ final class ContainerTest {
         assertEquals(Runnable.class, container.getAliasedId(CharSequence.class));
         assertEquals(ServiceFixture.class, container.getAliasedId(Runnable.class));
         assertNull(container.getAliasedId(SingletonFixture.class));
+    }
+
+    @Test
+    void bindAliasRejectsAnAliasOfItself() {
+        var container = new Container();
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> container.bindAlias(ServiceFixture.class, raw(ServiceFixture.class)));
+    }
+
+    @Test
+    void bindAliasStopsOnACycleThatArrivedThroughData() {
+        var container = new Container();
+        // setFromData bypasses bindAlias, so the map can already hold a cycle
+        container.setFromData(
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of()));
+
+        container.bindAlias(ServiceFixture.class, raw(CharSequence.class));
+
+        assertEquals(CharSequence.class, container.getAliasedId(ServiceFixture.class));
     }
 }

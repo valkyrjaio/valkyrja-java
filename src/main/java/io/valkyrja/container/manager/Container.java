@@ -15,7 +15,9 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
@@ -107,12 +109,23 @@ public class Container extends ProvidersAware {
      * @param id the type the alias points at
      */
     protected void validateAliasIsNotCyclic(Class<?> alias, Class<?> id) {
+        if (alias.equals(id)) {
+            throw new ContainerCyclicAliasException(alias.getName(), id.getName());
+        }
+
+        Set<Class<?>> seen = new HashSet<>();
         Class<?> current = id;
         Class<?> aliasedId;
 
         while ((aliasedId = getAliasedId(current)) != null) {
             if (aliasedId.equals(alias)) {
                 throw new ContainerCyclicAliasException(alias.getName(), id.getName());
+            }
+
+            // A map that arrived through setFromData() can already hold a cycle this
+            // binding is no part of, so the walk stops rather than spinning on it.
+            if (!seen.add(aliasedId)) {
+                return;
             }
 
             current = aliasedId;

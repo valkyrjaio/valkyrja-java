@@ -10,7 +10,10 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
@@ -90,7 +93,7 @@ public class ChildContainer extends Container {
             return get((Class<T>) ownAlias, arguments);
         }
 
-        Class<?> aliasedId = parent.getAliasedId(id);
+        Class<?> aliasedId = getParentAliasTarget(id);
         if (aliasedId == null) {
             return null;
         }
@@ -154,5 +157,31 @@ public class ChildContainer extends Container {
     @Override
     public boolean isPublished(Class<?> id) {
         return super.isPublished(id) || parent.isPublished(id);
+    }
+
+    /**
+     * Walk the parent's chain of aliases to the type it ends at.
+     *
+     * @param id the alias type
+     * @return the type the chain ends at, or null when the type is not an alias
+     */
+    private @Nullable Class<?> getParentAliasTarget(Class<?> id) {
+        Set<Class<?>> seen = new HashSet<>();
+        Class<?> current = id;
+        Class<?> target = null;
+        Class<?> aliasedId;
+
+        while ((aliasedId = parent.getAliasedId(current)) != null) {
+            // bindAlias rejects a cycle, so one here arrived through setFromData.
+            // Delegating to the parent would follow it until the stack ends.
+            if (!seen.add(aliasedId)) {
+                throw new ContainerCyclicAliasException(current.getName(), aliasedId.getName());
+            }
+
+            target = aliasedId;
+            current = aliasedId;
+        }
+
+        return target;
     }
 }
