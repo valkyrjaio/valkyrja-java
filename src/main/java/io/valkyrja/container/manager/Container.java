@@ -12,8 +12,9 @@ import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.data.contract.ContainerDataContract;
 import io.valkyrja.container.manager.abstract_.ProvidersAware;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -37,17 +38,17 @@ import org.jspecify.annotations.Nullable;
 public class Container extends ProvidersAware {
 
     /** alias type → target type */
-    protected final Map<Class<?>, Class<?>> aliases = new HashMap<>();
+    protected final Map<Class<?>, Class<?>> aliases = new ConcurrentHashMap<>();
 
     /** service type → cached singleton instance */
-    protected final Map<Class<?>, Object> instances = new HashMap<>();
+    protected final Map<Class<?>, Object> instances = new ConcurrentHashMap<>();
 
     /** service type → factory callable */
     protected final Map<Class<?>, BiFunction<ContainerContract, Map<String, Object>, Object>>
-            services = new HashMap<>();
+            services = new ConcurrentHashMap<>();
 
     /** service type → itself (self-map, tracks which service types are singletons) */
-    protected final Map<Class<?>, Class<?>> singletons = new HashMap<>();
+    protected final Map<Class<?>, Class<?>> singletons = new ConcurrentHashMap<>();
 
     public Container() {
         this(new ContainerData());
@@ -93,8 +94,29 @@ public class Container extends ProvidersAware {
 
     @Override
     public <T> ContainerContract bindAlias(Class<T> alias, Class<T> id) {
+        validateAliasIsNotCyclic(alias, id);
+
         aliases.put(alias, id);
         return this;
+    }
+
+    /**
+     * Validate that an alias does not point at a chain that returns to it.
+     *
+     * @param alias the alias being bound
+     * @param id the type the alias points at
+     */
+    protected void validateAliasIsNotCyclic(Class<?> alias, Class<?> id) {
+        Class<?> current = id;
+        Class<?> aliasedId;
+
+        while ((aliasedId = getAliasedId(current)) != null) {
+            if (aliasedId.equals(alias)) {
+                throw new ContainerCyclicAliasException(alias.getName(), id.getName());
+            }
+
+            current = aliasedId;
+        }
     }
 
     @Override
@@ -110,6 +132,11 @@ public class Container extends ProvidersAware {
         instances.put(id, singleton);
         published.put(id, true);
         return this;
+    }
+
+    @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        return aliases.get(alias);
     }
 
     @Override
