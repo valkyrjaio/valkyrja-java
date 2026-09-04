@@ -8,7 +8,6 @@
 
 package io.valkyrja.http.routing.matcher;
 
-import io.valkyrja.cli.routing.constant.CastArgument;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
@@ -19,6 +18,7 @@ import io.valkyrja.http.routing.data.contract.ParameterContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.matcher.contract.MatcherContract;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRoutePathException;
+import io.valkyrja.type.constant.CastArgument;
 import io.valkyrja.type.contract.TypeContract;
 import io.valkyrja.type.data.Cast;
 import java.util.ArrayList;

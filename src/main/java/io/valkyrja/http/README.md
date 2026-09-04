@@ -85,9 +85,18 @@ A dynamic route reads its parameters from the named groups of the regex. A group
 that the path does not fill takes the default of the parameter, and a parameter
 with no default and no match keeps no value.
 
-Warning: `Matcher.castMatchValue` returns the matched value without a change, so
-the matcher applies no cast. A subclass performs the conversion. The
+`Matcher.castMatchValue` applies the cast that the parameter declares. It asks
+`getService()` for the type that `Cast.getType()` names, and it passes the
+matched text under the key `CastArgument.VALUE`. It returns the converted value
+when `isConvert()` is `true`, and the type itself when `isConvert()` is `false`.
+The matcher holds the container, so no data object reaches it. The
 [type component](../type/README.md) describes `Cast`.
+
+Warning: `getService()` reads only a service binding, and it skips the singleton
+cache. An alias, and an instance that `setSingleton` holds, raise
+`ContainerInvalidReferenceException`, which escapes `match()`. A type that
+`bindSingleton` registers is built for each match, and not once for the
+application. Register a cast type with `bind`.
 
 ## The processor
 
