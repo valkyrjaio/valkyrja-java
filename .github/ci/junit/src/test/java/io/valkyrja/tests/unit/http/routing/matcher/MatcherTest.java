@@ -109,7 +109,10 @@ final class MatcherTest {
 
         var matched = (DynamicRouteContract) matcher.match("/posts/9", RequestMethod.GET);
 
-        assertInstanceOf(TypeFixture.class, matched.getParameter("id").getValue());
+        TypeFixture value =
+                assertInstanceOf(TypeFixture.class, matched.getParameter("id").getValue());
+
+        assertEquals("cast:9", value.asValue());
     }
 
     @Test
