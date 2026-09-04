@@ -156,9 +156,11 @@ public class ChildContainer extends Container {
             target = aliasedId;
             current = aliasedId;
 
-            // The parent answers a singleton or a service before it follows an alias,
-            // so it never reaches the rest of the chain.
-            if (parent.isSingleton(current) || parent.isService(current)) {
+            // The parent publishes, then reads its maps, and only then follows an
+            // alias, so it never reaches the rest of the chain from any of these.
+            if (parent.isDeferred(current)
+                    || parent.isSingleton(current)
+                    || parent.isService(current)) {
                 break;
             }
         }
