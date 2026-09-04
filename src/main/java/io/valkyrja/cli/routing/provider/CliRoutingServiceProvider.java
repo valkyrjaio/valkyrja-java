@@ -15,6 +15,8 @@ import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContrac
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
+import io.valkyrja.cli.routing.caster.Caster;
+import io.valkyrja.cli.routing.caster.contract.CasterContract;
 import io.valkyrja.cli.routing.collection.RouteCollection;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.cli.routing.collector.contract.RouteCollectorContract;
@@ -34,8 +36,16 @@ public class CliRoutingServiceProvider implements ServiceProviderContract {
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
-                RouterContract.class, CliRoutingServiceProvider::publishRouter,
-                RouteCollectionContract.class, CliRoutingServiceProvider::publishRouteCollection);
+                RouterContract.class,
+                CliRoutingServiceProvider::publishRouter,
+                RouteCollectionContract.class,
+                CliRoutingServiceProvider::publishRouteCollection,
+                CasterContract.class,
+                CliRoutingServiceProvider::publishCaster);
+    }
+
+    public static void publishCaster(ContainerContract container) {
+        container.setSingleton(CasterContract.class, new Caster(container));
     }
 
     public static void publishRouter(ContainerContract container) {
