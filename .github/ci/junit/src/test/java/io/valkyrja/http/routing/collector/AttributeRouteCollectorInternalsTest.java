@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.http.routing.data.Parameter;
+import io.valkyrja.tests.fixtures.type.TypeFixture;
 import io.valkyrja.type.data.Cast;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,8 @@ final class AttributeRouteCollectorInternalsTest {
     @Test
     void convertToDataParameterPreservesCastWhenPresent() {
         var collector = new AttributeRouteCollector();
-        var withCast = new Parameter("id", "\\d+", new Cast("int"), false, true, null, null);
+        var withCast =
+                new Parameter("id", "\\d+", new Cast(TypeFixture.class), false, true, null, null);
         var withoutCast = new Parameter("id", "\\d+", null, false, true, null, null);
 
         assertTrue(collector.convertToDataParameter(withCast).hasCast());

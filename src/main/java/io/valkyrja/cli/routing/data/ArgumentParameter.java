@@ -14,12 +14,13 @@ import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.enum_.ArgumentMode;
 import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingArgumentValuesValidationException;
+import io.valkyrja.type.data.Cast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class ArgumentParameter extends Parameter implements ArgumentParameterContract {
+public class ArgumentParameter extends Parameter<ArgumentParameter>
+        implements ArgumentParameterContract {
 
     protected ArgumentMode mode;
     protected ArgumentValueMode valueMode;
@@ -47,7 +48,7 @@ public class ArgumentParameter extends Parameter implements ArgumentParameterCon
     }
 
     @Override
-    protected ArgumentParameter copy() {
+    protected ArgumentParameter createCopy() {
         return new ArgumentParameter(name, description, mode, valueMode, arguments);
     }
 
@@ -96,8 +97,22 @@ public class ArgumentParameter extends Parameter implements ArgumentParameterCon
     }
 
     @Override
-    public List<String> getCastValues() {
-        return arguments.stream().map(ArgumentContract::getValue).collect(Collectors.toList());
+    public ArgumentParameterContract withCast(Cast cast) {
+        ArgumentParameter copy = copy();
+        copy.cast = cast;
+        return copy;
+    }
+
+    @Override
+    public ArgumentParameterContract withoutCast() {
+        ArgumentParameter copy = copy();
+        copy.cast = null;
+        return copy;
+    }
+
+    @Override
+    public List<String> getValues() {
+        return arguments.stream().map(ArgumentContract::getValue).toList();
     }
 
     @Override

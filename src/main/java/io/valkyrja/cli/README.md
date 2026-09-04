@@ -218,8 +218,8 @@ the call site counts as a default, so it suppresses the declared one. Call
 `getOptionValue(name)`, or pass `null`, to reach step 3.
 
 `getArgumentValue` reads step 1 and step 2, because an argument declares no
-default. Read the parameter's own `getCastValues()` for every value of a
-parameter in `ARRAY` value mode.
+default. Read `Caster.getCastValues()` for every value of a parameter in
+`ARRAY` value mode.
 
 ```java
 boolean isShort = route.hasProvidedOption("short");
@@ -231,6 +231,32 @@ String namespace = route.getOptionValue("namespace");
 reads as "the caller passed nothing" through those methods. `getOption` and
 `getArgument` throw on that name instead. `Route` matches a parameter by the
 long name only, so pass the long name and not a short name.
+
+### Value casting
+
+`io.valkyrja.cli.routing.caster.Caster` applies the cast, and the parameter
+applies nothing. The caster holds the container, so the data object needs none.
+The parameter holds the cast and the raw values, and `getValues()` returns those
+raw values. The HTTP matcher holds the same position for a route parameter.
+
+`Caster.getCastValues()` returns the converted value when `isConvert()` is
+`true`, and the type itself when `isConvert()` is `false`. It passes the raw
+value to the container under the key `CastArgument.VALUE`.
+
+```java
+import io.valkyrja.cli.routing.constant.CastArgument;
+
+container.bind(Slug.class, (c, arguments) -> new Slug(String.valueOf(arguments.get(CastArgument.VALUE))));
+
+var parameter = new ArgumentParameter("target", "The target").withCast(new Cast(Slug.class));
+var values = container.getSingleton(CasterContract.class).getCastValues(parameter);
+```
+
+Warning: register a cast type with `bind`. `getService()` skips the singleton
+cache, so a type that `bindSingleton` registers is built for each value, and not
+once for the application. An alias, and an instance that `setSingleton` holds,
+raise `ContainerInvalidReferenceException`. See
+[the type component](../type/README.md).
 
 ## Middleware
 
