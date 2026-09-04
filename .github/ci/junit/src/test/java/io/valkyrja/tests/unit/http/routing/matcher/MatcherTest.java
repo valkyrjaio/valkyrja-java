@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.EmptyResponse;
@@ -80,11 +81,35 @@ final class MatcherTest {
                                         new Parameter("id", "\\d+")
                                                 .withCast(new Cast(TypeFixture.class))),
                         HANDLER);
-        var matcher = new Matcher(collectionWith(dynamic));
+        var container = new Container();
+        container.bind(TypeFixture.class, TypeFixture::make);
+        var matcher = new Matcher(collectionWith(dynamic), container);
 
         var matched = (DynamicRouteContract) matcher.match("/users/42", RequestMethod.GET);
 
-        assertEquals("42", matched.getParameter("id").getValue());
+        assertEquals("cast:42", matched.getParameter("id").getValue());
+    }
+
+    @Test
+    void returnsTheTypeWhenTheCastDoesNotConvert() {
+        var dynamic =
+                new DynamicRoute(
+                        "/posts/{id}",
+                        "posts.show",
+                        "/posts/(?<id>\\d+)",
+                        List.of(
+                                (io.valkyrja.http.routing.data.contract.ParameterContract)
+                                        new Parameter("id", "\\d+")
+                                                .withCast(
+                                                        new Cast(TypeFixture.class, false, false))),
+                        HANDLER);
+        var container = new Container();
+        container.bind(TypeFixture.class, TypeFixture::make);
+        var matcher = new Matcher(collectionWith(dynamic), container);
+
+        var matched = (DynamicRouteContract) matcher.match("/posts/9", RequestMethod.GET);
+
+        assertInstanceOf(TypeFixture.class, matched.getParameter("id").getValue());
     }
 
     @Test
