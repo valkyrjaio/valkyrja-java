@@ -11,12 +11,6 @@ package io.valkyrja.event.provider.contract;
 import io.valkyrja.event.data.contract.ListenerContract;
 import java.util.List;
 
-/**
- * Contract for event listener providers.
- *
- * <p>PHP: static methods {@code getListenerClasses()} and {@code getListeners()}. Java uses
- * instance methods since interface static methods cannot be overridden.
- */
 public interface ListenerProviderContract {
 
     /**
