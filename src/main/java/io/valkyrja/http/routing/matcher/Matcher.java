@@ -8,6 +8,9 @@
 
 package io.valkyrja.http.routing.matcher;
 
+import io.valkyrja.cli.routing.constant.CastArgument;
+import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
@@ -16,6 +19,7 @@ import io.valkyrja.http.routing.data.contract.ParameterContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.matcher.contract.MatcherContract;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRoutePathException;
+import io.valkyrja.type.contract.TypeContract;
 import io.valkyrja.type.data.Cast;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +31,19 @@ import org.jspecify.annotations.Nullable;
 public class Matcher implements MatcherContract {
 
     protected RouteCollectionContract collection;
+    protected ContainerContract container;
 
     public Matcher() {
         this(new RouteCollection());
     }
 
     public Matcher(RouteCollectionContract collection) {
+        this(collection, new Container());
+    }
+
+    public Matcher(RouteCollectionContract collection, ContainerContract container) {
         this.collection = collection;
+        this.container = container;
     }
 
     @Override
@@ -100,21 +110,23 @@ public class Matcher implements MatcherContract {
                 continue;
             }
 
-            Object value = checkAndCastMatchValue(parameter, match);
+            @Nullable Object value = checkAndCastMatchValue(parameter, match);
             parametersWithValues.add(parameter.withValue(value));
         }
 
         return route.withParameters(parametersWithValues.toArray(new ParameterContract[0]));
     }
 
-    protected Object checkAndCastMatchValue(ParameterContract parameter, String match) {
+    protected @Nullable Object checkAndCastMatchValue(ParameterContract parameter, String match) {
         if (parameter.hasCast()) {
             return castMatchValue(parameter.getCast(), match);
         }
         return match;
     }
 
-    protected Object castMatchValue(Cast cast, String match) {
-        return match;
+    protected @Nullable Object castMatchValue(Cast cast, String match) {
+        TypeContract type = container.getService(cast.getType(), Map.of(CastArgument.VALUE, match));
+
+        return cast.isConvert() ? type.asValue() : type;
     }
 }
