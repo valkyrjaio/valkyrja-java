@@ -12,9 +12,12 @@ import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.data.contract.ContainerDataContract;
 import io.valkyrja.container.manager.abstract_.ProvidersAware;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
@@ -37,17 +40,17 @@ import org.jspecify.annotations.Nullable;
 public class Container extends ProvidersAware {
 
     /** alias type → target type */
-    protected final Map<Class<?>, Class<?>> aliases = new HashMap<>();
+    protected final Map<Class<?>, Class<?>> aliases = new ConcurrentHashMap<>();
 
     /** service type → cached singleton instance */
-    protected final Map<Class<?>, Object> instances = new HashMap<>();
+    protected final Map<Class<?>, Object> instances = new ConcurrentHashMap<>();
 
     /** service type → factory callable */
     protected final Map<Class<?>, BiFunction<ContainerContract, Map<String, Object>, Object>>
-            services = new HashMap<>();
+            services = new ConcurrentHashMap<>();
 
     /** service type → itself (self-map, tracks which service types are singletons) */
-    protected final Map<Class<?>, Class<?>> singletons = new HashMap<>();
+    protected final Map<Class<?>, Class<?>> singletons = new ConcurrentHashMap<>();
 
     public Container() {
         this(new ContainerData());
@@ -58,6 +61,8 @@ public class Container extends ProvidersAware {
         callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
+
+        validateAliasesAreNotCyclic();
     }
 
     @Override
@@ -71,15 +76,27 @@ public class Container extends ProvidersAware {
 
     @Override
     public void setFromData(ContainerDataContract data) {
+        Map<Class<?>, Class<?>> originalAliases = Map.copyOf(aliases);
+
         aliases.putAll(data.aliases());
         callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
+
+        try {
+            validateAliasesAreNotCyclic();
+        } catch (ContainerCyclicAliasException exception) {
+            // A caller that catches this keeps the container it had, not a cyclic map
+            aliases.clear();
+            aliases.putAll(originalAliases);
+
+            throw exception;
+        }
     }
 
     @Override
     public boolean has(Class<?> id) {
-        return callbacks.containsKey(id) || isSingleton(id) || isService(id) || isAlias(id);
+        return isDeferred(id) || isSingleton(id) || isService(id) || isAlias(id);
     }
 
     @Override
@@ -93,8 +110,52 @@ public class Container extends ProvidersAware {
 
     @Override
     public <T> ContainerContract bindAlias(Class<T> alias, Class<T> id) {
+        validateAliasIsNotCyclic(alias, id);
+
         aliases.put(alias, id);
         return this;
+    }
+
+    /**
+     * Validate that an alias does not point at a chain that returns to it.
+     *
+     * @param alias the alias being bound
+     * @param id the type the alias points at
+     */
+    protected void validateAliasIsNotCyclic(Class<?> alias, Class<?> id) {
+        if (alias.equals(id)) {
+            throw new ContainerCyclicAliasException(alias.getName(), id.getName());
+        }
+
+        Set<Class<?>> seen = new HashSet<>();
+        Class<?> current = id;
+        Class<?> aliasedId;
+
+        while ((aliasedId = getAliasedId(current)) != null) {
+            if (aliasedId.equals(alias)) {
+                throw new ContainerCyclicAliasException(alias.getName(), id.getName());
+            }
+
+            // A cycle this alias is no part of would spin here. The sweep below reaches
+            // every alias, so the walk that starts inside that cycle throws for it.
+            if (!seen.add(aliasedId)) {
+                return;
+            }
+
+            current = aliasedId;
+        }
+    }
+
+    /**
+     * Validate that no alias in the map points at a chain that returns to it.
+     *
+     * <p>Private, because a constructor calls it. An overridable method there reaches a subclass
+     * before the subclass is initialized.
+     */
+    private void validateAliasesAreNotCyclic() {
+        for (var alias : aliases.entrySet()) {
+            validateAliasIsNotCyclic(alias.getKey(), alias.getValue());
+        }
     }
 
     @Override
@@ -110,6 +171,11 @@ public class Container extends ProvidersAware {
         instances.put(id, singleton);
         published.put(id, true);
         return this;
+    }
+
+    @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        return aliases.get(alias);
     }
 
     @Override
@@ -247,7 +313,7 @@ public class Container extends ProvidersAware {
 
     /** Publish a deferred service if it has not been published yet. */
     protected void publishUnpublishedDeferred(Class<?> id) {
-        if (callbacks.containsKey(id) && !isPublished(id)) {
+        if (isDeferred(id) && !isPublished(id)) {
             publish(id);
         }
     }

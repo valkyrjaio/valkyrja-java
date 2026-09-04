@@ -11,7 +11,6 @@ package io.valkyrja.container.manager;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import java.util.Map;
-import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -83,26 +82,32 @@ public class ChildContainer extends Container {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        if (!super.isAlias(id) && parent.isAlias(id)) {
-            return parent.getAliased(id, arguments);
+        if (super.isAlias(id)) {
+            return super.getAliasedWithoutChecks(id, arguments);
         }
-        return super.getAliasedWithoutChecks(id, arguments);
+
+        Class<?> target = getParentAliasTarget(id);
+        if (target == null) {
+            return null;
+        }
+
+        // The parent would resolve this target for the first time, and the child holds
+        // the same registration, so letting the parent do it would leave the request
+        // with one copy for the alias and another for the id.
+        if (isUnbuiltInParent(target)) {
+            return get((Class<T>) target, arguments);
+        }
+
+        return parent.getAliased(id, arguments);
     }
 
-    /**
-     * Publish a deferred service using the child's copied callbacks. The callback's presence is
-     * sufficient guard. Runs with the child as the container so bindings register into the child's
-     * own maps.
-     */
     @Override
-    public void publish(Class<?> id) {
-        Consumer<ContainerContract> callback = callbacks.get(id);
-        if (callback == null) {
-            return;
-        }
-        callback.accept(this);
-        published.put(id, true);
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        Class<?> aliased = super.getAliasedId(alias);
+
+        return aliased != null ? aliased : parent.getAliasedId(alias);
     }
 
     @Override
@@ -120,8 +125,10 @@ public class ChildContainer extends Container {
         return super.isSingletonInstance(id) || parent.isSingletonInstance(id);
     }
 
-    // isSingletonBinding is NOT overridden — child's copied singletons map is checked by
-    // Container.isSingletonBinding (super) via this.singletons, which is sufficient.
+    @Override
+    public boolean isSingletonBinding(Class<?> id) {
+        return super.isSingletonBinding(id) || parent.isSingletonBinding(id);
+    }
 
     /**
      * Parent check must come first. If the parent already published a provider at bootstrap, the
@@ -132,5 +139,51 @@ public class ChildContainer extends Container {
     @Override
     public boolean isPublished(Class<?> id) {
         return super.isPublished(id) || parent.isPublished(id);
+    }
+
+    /**
+     * Walk the parent's chain of aliases to the type the parent would answer.
+     *
+     * @param id the alias type
+     * @return the type the parent answers, or null when the type is not an alias
+     */
+    private @Nullable Class<?> getParentAliasTarget(Class<?> id) {
+        Class<?> current = id;
+        Class<?> target = null;
+        Class<?> aliasedId;
+
+        while ((aliasedId = parent.getAliasedId(current)) != null) {
+            target = aliasedId;
+            current = aliasedId;
+
+            // The parent publishes, then reads its maps, and only then follows an
+            // alias, so it never reaches the rest of the chain from any of these.
+            if (parent.isDeferred(current)
+                    || parent.isSingleton(current)
+                    || parent.isService(current)) {
+                break;
+            }
+        }
+
+        return target;
+    }
+
+    /**
+     * Check whether the parent would resolve a type for the first time.
+     *
+     * @param id the target type
+     * @return true if the parent would write while answering it
+     */
+    private boolean isUnbuiltInParent(Class<?> id) {
+        // The parent publishes before it reads any map, so this test comes first.
+        if (parent.isDeferred(id) && !parent.isPublished(id)) {
+            return true;
+        }
+
+        if (parent.isSingletonInstance(id)) {
+            return false;
+        }
+
+        return parent.isSingletonBinding(id);
     }
 }

@@ -85,49 +85,64 @@ public class NativeChildContainer extends Container {
     @Override
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        Class<?> aliased = aliases.get(id);
-        if (aliased == null) {
-            aliased = parent.aliases.get(id);
+        if (aliases.containsKey(id)) {
+            return super.getAliasedWithoutChecks(id, arguments);
         }
-        if (aliased == null) {
+
+        Class<?> target = getParentAliasTarget(id);
+        if (target == null) {
             return null;
         }
-        return get((Class<T>) aliased, arguments);
+
+        // The parent would resolve this target for the first time, and the child holds
+        // the same registration, so letting the parent do it would leave the request
+        // with one copy for the alias and another for the id.
+        if (isUnbuiltInParent(target)) {
+            return get((Class<T>) target, arguments);
+        }
+
+        return parent.getAliased(id, arguments);
     }
 
     /**
-     * Publish a deferred service using child or parent callbacks. Consults parent via the
-     * package-private {@link Container#getCallback} accessor when the child has no callback of its
-     * own. Runs with the child as the container so bindings register into the child's own maps.
+     * Read a publish callback from the child, then the parent.
+     *
+     * <p>PHP reads the parent's callbacks through this one accessor, and the base publish follows
+     * it. Java cannot: callbacks lives in a different sub-package, so a protected accessor is
+     * unreachable on a sibling instance, and publish reads the map itself. The two overrides below
+     * carry what the accessor carries in PHP.
      */
     @Override
-    public void publish(Class<?> id) {
+    @Nullable Consumer<ContainerContract> getCallback(Class<?> id) {
         Consumer<ContainerContract> callback = callbacks.get(id);
-        if (callback == null) {
-            callback = parent.getCallback(id);
-        }
+
+        return callback != null ? callback : parent.getCallback(id);
+    }
+
+    @Override
+    public boolean isDeferred(Class<?> id) {
+        return getCallback(id) != null;
+    }
+
+    /** Run the callback with the child as the container, so its bindings land in the child. */
+    @Override
+    public void publish(Class<?> id) {
+        Consumer<ContainerContract> callback = getCallback(id);
+
         if (callback == null) {
             return;
         }
+
         callback.accept(this);
+
         published.put(id, true);
     }
 
-    /**
-     * A service is available if the child knows it, or the parent does — including deferred
-     * providers.
-     */
     @Override
-    public boolean has(Class<?> id) {
-        return super.has(id) || parent.getCallback(id) != null;
-    }
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        Class<?> aliased = aliases.get(alias);
 
-    /** Publish a deferred provider registered in either the child or the parent on first access. */
-    @Override
-    protected void publishUnpublishedDeferred(Class<?> id) {
-        if ((callbacks.containsKey(id) || parent.getCallback(id) != null) && !isPublished(id)) {
-            publish(id);
-        }
+        return aliased != null ? aliased : parent.aliases.get(alias);
     }
 
     @Override
@@ -156,5 +171,52 @@ public class NativeChildContainer extends Container {
     public boolean isPublished(Class<?> id) {
         // published is in ProvidersAware (different sub-package) — use contract
         return super.isPublished(id) || parent.isPublished(id);
+    }
+
+    /**
+     * Walk the parent's chain of aliases to the type the parent would answer.
+     *
+     * @param id the alias type
+     * @return the type the parent answers, or null when the type is not an alias
+     */
+    private @Nullable Class<?> getParentAliasTarget(Class<?> id) {
+        Class<?> current = id;
+        Class<?> target = null;
+        Class<?> aliasedId;
+
+        while ((aliasedId = parent.aliases.get(current)) != null) {
+            target = aliasedId;
+            current = aliasedId;
+
+            // The parent publishes, then reads its maps, and only then follows an
+            // alias, so it never reaches the rest of the chain from any of these.
+            if (parent.getCallback(current) != null
+                    || parent.singletons.containsKey(current)
+                    || parent.instances.containsKey(current)
+                    || parent.services.containsKey(current)) {
+                break;
+            }
+        }
+
+        return target;
+    }
+
+    /**
+     * Check whether the parent would resolve a type for the first time.
+     *
+     * @param id the target type
+     * @return true if the parent would write while answering it
+     */
+    private boolean isUnbuiltInParent(Class<?> id) {
+        // The parent publishes before it reads any map, so this test comes first.
+        if (parent.isDeferred(id) && !parent.isPublished(id)) {
+            return true;
+        }
+
+        if (parent.instances.containsKey(id)) {
+            return false;
+        }
+
+        return parent.singletons.containsKey(id);
     }
 }
