@@ -87,10 +87,11 @@ registers still resolves. `getService()` skips the singleton cache, so the
 caster builds one instance for each value. That is not the lifetime that
 `bindSingleton` states, which is the second reason a cast type takes `bind`.
 
-Warning: `Matcher.castMatchValue` returns the matched value without a change, so
-the HTTP matcher applies no conversion. `Cast` carries the intent of the route,
-and a subclass of `Matcher` performs the conversion. The
-[http component](../http/README.md) describes the matcher.
+The HTTP matcher applies the cast the same way. `Matcher.castMatchValue` asks
+`getService()` for the type that `getType()` names, and it passes the matched
+text under the key `CastArgument.VALUE`. The matcher holds the container, so no
+data object reaches it. The [http component](../http/README.md) describes the
+matcher.
 
 ## ArrayableContract
 
