@@ -10,6 +10,7 @@ package io.valkyrja.container.manager.contract;
 
 import io.valkyrja.container.data.contract.ContainerDataContract;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 import java.util.function.BiFunction;
 
 public interface ContainerContract extends ProvidersAwareContract {
@@ -139,6 +140,14 @@ public interface ContainerContract extends ProvidersAwareContract {
      * @return the resolved instance
      */
     <T> T get(Class<T> id, Map<String, Object> arguments);
+
+    /**
+     * Get the type that an alias points to.
+     *
+     * @param alias the alias type
+     * @return the aliased type, or null when the type is not an alias
+     */
+    @Nullable Class<?> getAliasedId(Class<?> alias);
 
     /**
      * Resolve an aliased service type.

@@ -12,17 +12,18 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.manager.contract.ProvidersAwareContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.container.throwable.exception.ContainerInvalidPublishCallbackException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public abstract class ProvidersAware implements ProvidersAwareContract, ContainerContract {
 
     /** service type → publish callback */
-    protected final Map<Class<?>, Consumer<ContainerContract>> callbacks = new HashMap<>();
+    protected final Map<Class<?>, Consumer<ContainerContract>> callbacks =
+            new ConcurrentHashMap<>();
 
     /** service type → published flag */
-    protected final Map<Class<?>, Boolean> published = new HashMap<>();
+    protected final Map<Class<?>, Boolean> published = new ConcurrentHashMap<>();
 
     @Override
     public void register(ServiceProviderContract provider) {
@@ -37,6 +38,11 @@ public abstract class ProvidersAware implements ProvidersAwareContract, Containe
 
             callbacks.put(provided, callback);
         }
+    }
+
+    @Override
+    public boolean isDeferred(Class<?> id) {
+        return callbacks.containsKey(id);
     }
 
     @Override

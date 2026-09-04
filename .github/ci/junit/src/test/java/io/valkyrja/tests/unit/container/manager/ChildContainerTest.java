@@ -9,6 +9,7 @@
 package io.valkyrja.tests.unit.container.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -308,5 +309,53 @@ final class ChildContainerTest {
         assertThrows(
                 ContainerInvalidArgumentException.class,
                 () -> child.getAliased(Runnable.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedIdReadsTheChildThenTheParent() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+
+        assertEquals(ServiceFixture.class, localChild.getAliasedId(CharSequence.class));
+        assertNull(localChild.getAliasedId(Runnable.class));
+
+        localChild.bindAlias(Runnable.class, raw(SingletonFixture.class));
+
+        assertEquals(SingletonFixture.class, localChild.getAliasedId(Runnable.class));
+    }
+
+    @Test
+    void snapshotChildResolvesAnUnbuiltParentSingletonItself() {
+        // Boot: two singletons on the parent, one resolved before any child exists
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        Object shared = parent.getSingleton(SingletonFixture.class);
+
+        // The request loop begins from one snapshot
+        ChildContainer localChild = createChild();
+
+        // The resolved one is shared, and the unresolved one is the child's own
+        assertSame(shared, localChild.get(SingletonFixture.class, Map.of()));
+        assertInstanceOf(ServiceFixture.class, localChild.get(ServiceFixture.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(ServiceFixture.class));
+
+        // The alias reaches the same copy, so the request holds one instance of it
+        assertSame(
+                localChild.get(ServiceFixture.class, Map.of()),
+                localChild.get(CharSequence.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(ServiceFixture.class));
+    }
+
+    @Test
+    void getAliasedReusesAParentSingletonTheParentAlreadyBuilt() {
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindAlias(Runnable.class, raw(SingletonFixture.class));
+        Object shared = parent.getSingleton(SingletonFixture.class);
+        ChildContainer localChild = createChild();
+
+        // The parent holds the instance, so the alias reaches it rather than rebuilding
+        assertSame(shared, localChild.get(Runnable.class, Map.of()));
     }
 }

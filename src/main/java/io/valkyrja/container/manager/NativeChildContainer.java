@@ -85,14 +85,24 @@ public class NativeChildContainer extends Container {
     @Override
     @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        Class<?> aliased = aliases.get(id);
-        if (aliased == null) {
-            aliased = parent.aliases.get(id);
+        Class<?> ownAlias = aliases.get(id);
+        if (ownAlias != null) {
+            return get((Class<T>) ownAlias, arguments);
         }
-        if (aliased == null) {
+
+        Class<?> aliasedId = parent.aliases.get(id);
+        if (aliasedId == null) {
             return null;
         }
-        return get((Class<T>) aliased, arguments);
+
+        // The parent holds the target as a singleton it has not built. Resolving it there
+        // would build a second copy for a request that already holds the binding, so the
+        // child builds its own.
+        if (parent.singletons.containsKey(aliasedId) && !parent.instances.containsKey(aliasedId)) {
+            return get((Class<T>) aliasedId, arguments);
+        }
+
+        return parent.getAliased(id, arguments);
     }
 
     /**
@@ -131,6 +141,13 @@ public class NativeChildContainer extends Container {
     }
 
     @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        Class<?> aliased = aliases.get(alias);
+
+        return aliased != null ? aliased : parent.aliases.get(alias);
+    }
+
+    @Override
     public boolean isAlias(Class<?> id) {
         return aliases.containsKey(id) || parent.aliases.containsKey(id);
     }
@@ -150,6 +167,11 @@ public class NativeChildContainer extends Container {
     public boolean isSingletonBinding(Class<?> id) {
         // singletons is in Container (same package) — direct field access works
         return singletons.containsKey(id) || parent.singletons.containsKey(id);
+    }
+
+    @Override
+    public boolean isDeferred(Class<?> id) {
+        return super.isDeferred(id) || parent.getCallback(id) != null;
     }
 
     @Override

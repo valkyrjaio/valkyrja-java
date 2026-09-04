@@ -83,11 +83,26 @@ public class ChildContainer extends Container {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        if (!super.isAlias(id) && parent.isAlias(id)) {
-            return parent.getAliased(id, arguments);
+        Class<?> ownAlias = aliases.get(id);
+        if (ownAlias != null) {
+            return get((Class<T>) ownAlias, arguments);
         }
-        return super.getAliasedWithoutChecks(id, arguments);
+
+        Class<?> aliasedId = parent.getAliasedId(id);
+        if (aliasedId == null) {
+            return null;
+        }
+
+        // The parent holds the target as a singleton it has not built. Resolving it there
+        // would build a second copy for a request that already holds the binding, so the
+        // child builds its own.
+        if (parent.isSingletonBinding(aliasedId) && !parent.isSingletonInstance(aliasedId)) {
+            return get((Class<T>) aliasedId, arguments);
+        }
+
+        return parent.getAliased(id, arguments);
     }
 
     /**
@@ -103,6 +118,13 @@ public class ChildContainer extends Container {
         }
         callback.accept(this);
         published.put(id, true);
+    }
+
+    @Override
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        Class<?> aliased = super.getAliasedId(alias);
+
+        return aliased != null ? aliased : parent.getAliasedId(alias);
     }
 
     @Override

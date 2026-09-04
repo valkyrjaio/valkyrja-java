@@ -8,15 +8,18 @@
 
 package io.valkyrja.tests.unit.container.manager;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
@@ -210,5 +213,37 @@ final class ContainerTest {
         assertThrows(
                 ContainerInvalidArgumentException.class,
                 () -> container.getSingleton(SingletonFixture.class));
+    }
+
+    @Test
+    void bindAliasRejectsAChainThatReturnsToTheAlias() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(Runnable.class));
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> container.bindAlias(Runnable.class, raw(CharSequence.class)));
+    }
+
+    @Test
+    void bindAliasRejectsALongerChainThatReturnsToTheAlias() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(Runnable.class));
+        container.bindAlias(Runnable.class, raw(ServiceFixture.class));
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> container.bindAlias(ServiceFixture.class, raw(CharSequence.class)));
+    }
+
+    @Test
+    void bindAliasAllowsAChainThatDoesNotReturn() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(Runnable.class));
+        container.bindAlias(Runnable.class, raw(ServiceFixture.class));
+
+        assertEquals(Runnable.class, container.getAliasedId(CharSequence.class));
+        assertEquals(ServiceFixture.class, container.getAliasedId(Runnable.class));
+        assertNull(container.getAliasedId(SingletonFixture.class));
     }
 }
