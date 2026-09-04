@@ -14,7 +14,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("io.valkyrja:ci-spotless:26.1.21")
+        classpath("io.valkyrja:ci-spotless:26.1.22")
     }
 }
 
