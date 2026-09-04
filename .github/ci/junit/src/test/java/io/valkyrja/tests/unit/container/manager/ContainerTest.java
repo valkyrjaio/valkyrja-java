@@ -258,10 +258,10 @@ final class ContainerTest {
     }
 
     @Test
-    void bindAliasStopsOnACycleThatArrivedThroughData() {
+    void setFromDataRejectsACyclicAliasMap() {
         var container = new Container();
-        // setFromData bypasses bindAlias, so the map can already hold a cycle
-        container.setFromData(
+        // setFromData is an entry point for aliases, so it validates them too
+        var data =
                 new ContainerData(
                         Map.of(
                                 CharSequence.class,
@@ -270,10 +270,55 @@ final class ContainerTest {
                                 CharSequence.class),
                         Map.of(),
                         Map.of(),
-                        Map.of()));
+                        Map.of());
 
-        container.bindAlias(ServiceFixture.class, raw(CharSequence.class));
+        assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
+    }
 
-        assertEquals(CharSequence.class, container.getAliasedId(ServiceFixture.class));
+    @Test
+    void constructorAcceptsAMapOfAliasesThatDoNotReturn() {
+        var data =
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                ServiceFixture.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        var container = new Container(data);
+
+        assertEquals(Runnable.class, container.getAliasedId(CharSequence.class));
+        assertEquals(ServiceFixture.class, container.getAliasedId(Runnable.class));
+    }
+
+    @Test
+    void constructorRejectsACyclicAliasMapAnAliasIsNoPartOf() {
+        // ServiceFixture sits outside the cycle, so its walk needs a bound
+        var aliases = new java.util.LinkedHashMap<Class<?>, Class<?>>();
+        aliases.put(ServiceFixture.class, CharSequence.class);
+        aliases.put(CharSequence.class, Runnable.class);
+        aliases.put(Runnable.class, CharSequence.class);
+        var data = new ContainerData(aliases, Map.of(), Map.of(), Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
+    }
+
+    @Test
+    void constructorRejectsACyclicAliasMap() {
+        var data =
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
     }
 }

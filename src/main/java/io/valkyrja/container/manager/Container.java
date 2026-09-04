@@ -61,6 +61,8 @@ public class Container extends ProvidersAware {
         callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
+
+        validateAliasesAreNotCyclic();
     }
 
     @Override
@@ -78,11 +80,13 @@ public class Container extends ProvidersAware {
         callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
+
+        validateAliasesAreNotCyclic();
     }
 
     @Override
     public boolean has(Class<?> id) {
-        return callbacks.containsKey(id) || isSingleton(id) || isService(id) || isAlias(id);
+        return isDeferred(id) || isSingleton(id) || isService(id) || isAlias(id);
     }
 
     @Override
@@ -122,13 +126,25 @@ public class Container extends ProvidersAware {
                 throw new ContainerCyclicAliasException(alias.getName(), id.getName());
             }
 
-            // A map that arrived through setFromData() can already hold a cycle this
-            // binding is no part of, so the walk stops rather than spinning on it.
+            // A cycle this alias is no part of would spin here. The sweep below reaches
+            // every alias, so the walk that starts inside that cycle throws for it.
             if (!seen.add(aliasedId)) {
                 return;
             }
 
             current = aliasedId;
+        }
+    }
+
+    /**
+     * Validate that no alias in the map points at a chain that returns to it.
+     *
+     * <p>Private, because a constructor calls it. An overridable method there reaches a subclass
+     * before the subclass is initialized.
+     */
+    private void validateAliasesAreNotCyclic() {
+        for (var alias : aliases.entrySet()) {
+            validateAliasIsNotCyclic(alias.getKey(), alias.getValue());
         }
     }
 
@@ -287,7 +303,7 @@ public class Container extends ProvidersAware {
 
     /** Publish a deferred service if it has not been published yet. */
     protected void publishUnpublishedDeferred(Class<?> id) {
-        if (callbacks.containsKey(id) && !isPublished(id)) {
+        if (isDeferred(id) && !isPublished(id)) {
             publish(id);
         }
     }

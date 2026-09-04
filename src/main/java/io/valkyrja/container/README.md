@@ -95,9 +95,10 @@ private static <T> Class<T> raw(Class<?> type) {
 container.bindAlias(MatcherContract.class, raw(Matcher.class));
 ```
 
-`bindAlias` throws `ContainerCyclicAliasException` when the target already
-resolves back to the alias, and when the two are the same type, because such a
-chain has no end. The check runs at registration, not at resolution.
+An alias that points at a chain that returns to it has no end, so every entry
+point rejects one with `ContainerCyclicAliasException`: `bindAlias` for the pair
+it is asked to store, and the constructor and `setFromData` for the map they
+receive. The check runs at registration, not at resolution.
 
 ### setSingleton
 
