@@ -76,12 +76,22 @@ public class Container extends ProvidersAware {
 
     @Override
     public void setFromData(ContainerDataContract data) {
+        Map<Class<?>, Class<?>> originalAliases = Map.copyOf(aliases);
+
         aliases.putAll(data.aliases());
         callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
 
-        validateAliasesAreNotCyclic();
+        try {
+            validateAliasesAreNotCyclic();
+        } catch (ContainerCyclicAliasException exception) {
+            // A caller that catches this keeps the container it had, not a cyclic map
+            aliases.clear();
+            aliases.putAll(originalAliases);
+
+            throw exception;
+        }
     }
 
     @Override

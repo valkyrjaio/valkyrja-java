@@ -458,4 +458,32 @@ final class NativeChildContainerTest {
         assertTrue(child.isSingletonBinding(SingletonFixture.class));
         assertFalse(child.isSingletonBinding(Runnable.class));
     }
+
+    @Test
+    void getAliasedStopsAtADeferredHopInTheChain() {
+        // The parent publishes before it reads any map, so it stops at the deferred hop
+        parent.register(new PublishingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        parent.bindAlias(ProvidedFixture.class, raw(ServiceFixture.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+
+        // The child holds the same callback, so it publishes into itself
+        Object fromId = child.get(ProvidedFixture.class, Map.of());
+
+        assertSame(fromId, child.getAliased(CharSequence.class, Map.of()));
+        assertFalse(parent.isPublished(ProvidedFixture.class));
+        assertFalse(parent.isSingletonInstance(ProvidedFixture.class));
+    }
+
+    @Test
+    void getAliasedStopsAtAParentInstanceInTheChain() {
+        // The parent holds Runnable as an instance, so it never reaches the rest
+        var shared = new SingletonFixture();
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        parent.setSingleton(raw(Runnable.class), shared);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+
+        assertSame(shared, child.getAliased(CharSequence.class, Map.of()));
+    }
 }

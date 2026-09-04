@@ -295,6 +295,28 @@ final class ContainerTest {
     }
 
     @Test
+    void setFromDataLeavesTheAliasMapAloneWhenItIsCyclic() {
+        var container = new Container();
+        container.bindAlias(SingletonFixture.class, raw(ServiceFixture.class));
+        var data =
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
+
+        // The container a caller keeps holds no part of the rejected map
+        assertEquals(ServiceFixture.class, container.getAliasedId(SingletonFixture.class));
+        assertNull(container.getAliasedId(CharSequence.class));
+    }
+
+    @Test
     void constructorRejectsACyclicAliasMapAnAliasIsNoPartOf() {
         // ServiceFixture sits outside the cycle, so its walk needs a bound
         var aliases = new java.util.LinkedHashMap<Class<?>, Class<?>>();
