@@ -52,8 +52,8 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
-    compileOnly("org.eclipse.jetty:jetty-server:12.1.12")
-    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.12")
+    compileOnly("org.eclipse.jetty:jetty-server:12.1.13")
+    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.13")
     compileOnly("io.netty:netty-codec-http:4.2.17.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.25")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.84.0")
@@ -68,8 +68,8 @@ dependencies {
     "testTreeImplementation"("io.grpc:grpc-api:1.84.0")
     "testTreeImplementation"("io.grpc:grpc-netty-shaded:1.84.0")
     "testTreeImplementation"("io.grpc:grpc-servlet-jakarta:1.84.0")
-    "testTreeImplementation"("org.eclipse.jetty:jetty-server:12.1.12")
-    "testTreeImplementation"("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.12")
+    "testTreeImplementation"("org.eclipse.jetty:jetty-server:12.1.13")
+    "testTreeImplementation"("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.13")
     "testTreeImplementation"("io.netty:netty-codec-http:4.2.17.Final")
     "testTreeImplementation"("org.apache.tomcat.embed:tomcat-embed-core:11.0.25")
 }
