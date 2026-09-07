@@ -9,11 +9,11 @@
 package io.valkyrja.tests.unit.container.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,9 +27,11 @@ import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.BindingProviderFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.PublishingProviderFixture;
-import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 /** Per-request child container delegating to the parent through the contract only. */
 final class ChildContainerTest {
@@ -424,8 +426,7 @@ final class ChildContainerTest {
         parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
         ChildContainer localChild = createChild();
 
-        assertInstanceOf(
-                ServiceFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+        assertInstanceOf(ServiceFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
         assertFalse(parent.isSingletonInstance(SingletonFixture.class));
     }
 
@@ -469,5 +470,20 @@ final class ChildContainerTest {
         ChildContainer localChild = createChild();
 
         assertSame(shared, localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void bindAliasEndsTheWalkOnACycleAcrossTheTwoContainers() {
+        // Each map is validated alone, so the two together can still close a chain
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = createChild();
+        localChild.setFromData(
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of()));
+
+        // The pair is no part of that chain, so the walk ends rather than spinning
+        localChild.bindAlias(ServiceFixture.class, raw(CharSequence.class));
+
+        assertEquals(CharSequence.class, localChild.getAliasedId(ServiceFixture.class));
     }
 }

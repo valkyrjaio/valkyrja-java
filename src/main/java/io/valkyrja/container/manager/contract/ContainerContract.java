@@ -9,8 +9,10 @@
 package io.valkyrja.container.manager.contract;
 
 import io.valkyrja.container.data.contract.ContainerDataContract;
-import java.util.Map;
+
 import org.jspecify.annotations.Nullable;
+
+import java.util.Map;
 import java.util.function.BiFunction;
 
 public interface ContainerContract extends ProvidersAwareContract {

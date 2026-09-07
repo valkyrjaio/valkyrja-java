@@ -27,8 +27,10 @@ import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProviderFixture;
-import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 final class ContainerTest {
 
@@ -273,6 +275,18 @@ final class ContainerTest {
                         Map.of());
 
         assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
+    }
+
+    @Test
+    void constructorRejectsAnAliasOfItselfInTheMap() {
+        var data =
+                new ContainerData(
+                        Map.of(ServiceFixture.class, ServiceFixture.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
     }
 
     @Test

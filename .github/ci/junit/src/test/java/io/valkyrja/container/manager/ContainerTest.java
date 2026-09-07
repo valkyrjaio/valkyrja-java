@@ -20,10 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
+
+import org.junit.jupiter.api.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
-import org.junit.jupiter.api.Test;
 
 final class ContainerTest {
 

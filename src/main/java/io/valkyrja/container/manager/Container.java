@@ -14,13 +14,16 @@ import io.valkyrja.container.manager.abstract_.ProvidersAware;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
-import java.util.concurrent.ConcurrentHashMap;
+
+import org.jspecify.annotations.Nullable;
+
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Default dependency injection container implementation.
@@ -57,12 +60,12 @@ public class Container extends ProvidersAware {
     }
 
     public Container(ContainerDataContract data) {
+        validateAliasMapIsNotCyclic(data.aliases());
+
         aliases.putAll(data.aliases());
         callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
-
-        validateAliasesAreNotCyclic();
     }
 
     @Override
@@ -76,22 +79,17 @@ public class Container extends ProvidersAware {
 
     @Override
     public void setFromData(ContainerDataContract data) {
-        Map<Class<?>, Class<?>> originalAliases = Map.copyOf(aliases);
+        Map<Class<?>, Class<?>> merged = new HashMap<>(aliases);
+        merged.putAll(data.aliases());
+
+        // The whole merged map is validated before any of the four is installed, so a
+        // caller that catches the throw keeps every map the container already had.
+        validateAliasMapIsNotCyclic(merged);
 
         aliases.putAll(data.aliases());
         callbacks.putAll(data.callbacks());
         services.putAll(data.services());
         singletons.putAll(data.singletons());
-
-        try {
-            validateAliasesAreNotCyclic();
-        } catch (ContainerCyclicAliasException exception) {
-            // A caller that catches this keeps the container it had, not a cyclic map
-            aliases.clear();
-            aliases.putAll(originalAliases);
-
-            throw exception;
-        }
     }
 
     @Override
@@ -147,14 +145,29 @@ public class Container extends ProvidersAware {
     }
 
     /**
-     * Validate that no alias in the map points at a chain that returns to it.
+     * Validate that no alias in a map points at a chain that returns to it.
      *
-     * <p>Private, because a constructor calls it. An overridable method there reaches a subclass
-     * before the subclass is initialized.
+     * <p>Private, and it reads the map it is given rather than the container, because a constructor
+     * calls it. An overridable method there reaches a subclass before the subclass is initialized.
+     *
+     * @param aliases the alias map to validate
      */
-    private void validateAliasesAreNotCyclic() {
-        for (var alias : aliases.entrySet()) {
-            validateAliasIsNotCyclic(alias.getKey(), alias.getValue());
+    private void validateAliasMapIsNotCyclic(Map<Class<?>, Class<?>> aliases) {
+        for (var entry : aliases.entrySet()) {
+            Set<Class<?>> seen = new HashSet<>();
+            seen.add(entry.getKey());
+            Class<?> current = entry.getKey();
+            Class<?> aliasedId;
+
+            while ((aliasedId = aliases.get(current)) != null) {
+                // The walk reached this type once already, so the edge that closes the
+                // chain is the one it just took. Name that pair.
+                if (!seen.add(aliasedId)) {
+                    throw new ContainerCyclicAliasException(current.getName(), aliasedId.getName());
+                }
+
+                current = aliasedId;
+            }
         }
     }
 
