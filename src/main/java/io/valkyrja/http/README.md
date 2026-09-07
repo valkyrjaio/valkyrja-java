@@ -85,7 +85,9 @@ A dynamic route reads its parameters from the named groups of the regex. A group
 that the path does not fill takes the default of the parameter, and a parameter
 with no default and no match keeps no value.
 
-`Matcher.castMatchValue` applies the cast that the parameter declares. It asks
+`Matcher.castMatchValue` applies the cast that the parameter declares.
+`withCast` sets that cast, and `@Parameter` declares no cast element, so a route
+that needs one builds the parameter in code. It asks
 `getService()` for the type that `Cast.getType()` names, and it passes the
 matched text under the key `CastArgument.VALUE`. It returns the converted value
 when `isConvert()` is `true`, and the type itself when `isConvert()` is `false`.
