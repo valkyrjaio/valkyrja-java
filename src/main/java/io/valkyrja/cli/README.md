@@ -5,12 +5,12 @@
 The CLI component runs a command from the arguments of the process. It holds
 four sub-components.
 
-| Sub-component | Holds                                                    |
-| :------------ | :------------------------------------------------------- |
-| `interaction` | The input, the output, the messages, and the formatters  |
+| Sub-component | Holds                                                                |
+| :------------ | :------------------------------------------------------------------- |
+| `interaction` | The input, the output, the messages, and the formatters              |
 | `routing`     | The route, the collection, the collector, the caster, and the router |
-| `middleware`  | The six middleware stages and their handlers             |
-| `server`      | The input handler, the built-in commands, and the exiter |
+| `middleware`  | The six middleware stages and their handlers                         |
+| `server`      | The input handler, the built-in commands, and the exiter             |
 
 `io.valkyrja.application.entry.Cli` starts the component. The
 [application component](../application/README.md) describes the entry classes
@@ -218,8 +218,9 @@ the call site counts as a default, so it suppresses the declared one. Call
 `getOptionValue(name)`, or pass `null`, to reach step 3.
 
 `getArgumentValue` reads step 1 and step 2, because an argument declares no
-default. Read `Caster.getCastValues()` for every value of a parameter in
-`ARRAY` value mode.
+default. Read `ParameterContract.getValues()` for every raw value of a parameter
+in `ARRAY` value mode, and `Caster.getCastValues()` for every value with the
+cast applied.
 
 ```java
 boolean isShort = route.hasProvidedOption("short");
@@ -244,15 +245,13 @@ raw values. The HTTP matcher holds the same position for a route parameter.
 value to the container under the key `CastArgument.VALUE`.
 
 ```java
+import io.valkyrja.cli.routing.caster.contract.CasterContract;
 import io.valkyrja.type.constant.CastArgument;
 
 container.bind(Slug.class, (c, arguments) -> new Slug(String.valueOf(arguments.get(CastArgument.VALUE))));
 
 var parameter = new ArgumentParameter("target", "The target").withCast(new Cast(Slug.class));
-var values =
-        container
-                .getSingleton(io.valkyrja.cli.routing.caster.contract.CasterContract.class)
-                .getCastValues(parameter);
+var values = container.getSingleton(CasterContract.class).getCastValues(parameter);
 ```
 
 Warning: `getService()` reads only a service binding, and it skips the singleton
