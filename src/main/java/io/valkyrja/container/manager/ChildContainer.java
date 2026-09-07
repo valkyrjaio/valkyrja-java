@@ -10,8 +10,10 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
-import java.util.Map;
+
 import org.jspecify.annotations.Nullable;
+
+import java.util.Map;
 
 /**
  * A per-request child container that interacts with the parent exclusively through {@link
@@ -158,7 +160,7 @@ public class ChildContainer extends Container {
 
             // The parent publishes, then reads its maps, and only then follows an
             // alias, so it never reaches the rest of the chain from any of these.
-            if (parent.isDeferred(current)
+            if ((parent.isDeferred(current) && !parent.isPublished(current))
                     || parent.isSingleton(current)
                     || parent.isService(current)) {
                 break;

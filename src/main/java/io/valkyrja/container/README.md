@@ -368,9 +368,10 @@ describes the worker entry classes.
 | :----------------------------------------- | :------------------------------------------------------- |
 | `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias |
 | `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback            |
+| `ContainerCyclicAliasException`            | An alias points at a chain that returns to it            |
 
-`ContainerInvalidReferenceException` extends
+`ContainerInvalidReferenceException` and `ContainerCyclicAliasException` extend
 `ContainerInvalidArgumentException`, and
 `ContainerInvalidPublishCallbackException` extends `ContainerRuntimeException`.
-Both are unchecked. The [throwable component](../throwable/README.md) describes
+All three are unchecked. The [throwable component](../throwable/README.md) describes
 the hierarchy.

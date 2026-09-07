@@ -9,16 +9,15 @@
 package io.valkyrja.tests.unit.container.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.NativeChildContainer;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
@@ -28,9 +27,11 @@ import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.BindingProviderFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.PublishingProviderFixture;
-import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 /** Per-request child container with child-first reads and parent fallback via field access. */
 final class NativeChildContainerTest {
@@ -406,8 +407,7 @@ final class NativeChildContainerTest {
         parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
         parent.bind(ServiceFixture.class, ServiceFixture::make);
 
-        assertInstanceOf(
-                SingletonFixture.class, child.getAliased(CharSequence.class, Map.of()));
+        assertInstanceOf(SingletonFixture.class, child.getAliased(CharSequence.class, Map.of()));
         assertFalse(parent.isSingletonInstance(Runnable.class));
     }
 
@@ -444,8 +444,7 @@ final class NativeChildContainerTest {
         parent.bindAlias(Runnable.class, raw(SingletonFixture.class));
         parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
 
-        assertInstanceOf(
-                ServiceFixture.class, child.getAliased(CharSequence.class, Map.of()));
+        assertInstanceOf(ServiceFixture.class, child.getAliased(CharSequence.class, Map.of()));
         assertFalse(parent.isSingletonInstance(SingletonFixture.class));
     }
 

@@ -9,10 +9,12 @@
 package io.valkyrja.container.manager;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
+
+import org.jspecify.annotations.Nullable;
+
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import org.jspecify.annotations.Nullable;
 
 /**
  * A per-request child container that accesses parent state via direct protected field reads.
@@ -190,7 +192,7 @@ public class NativeChildContainer extends Container {
 
             // The parent publishes, then reads its maps, and only then follows an
             // alias, so it never reaches the rest of the chain from any of these.
-            if (parent.getCallback(current) != null
+            if ((parent.getCallback(current) != null && !parent.isPublished(current))
                     || parent.singletons.containsKey(current)
                     || parent.instances.containsKey(current)
                     || parent.services.containsKey(current)) {
