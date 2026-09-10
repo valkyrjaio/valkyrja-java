@@ -214,4 +214,17 @@ final class ContainerTest {
         assertNotNull(container.getCallback(Service.class) == null ? new Service() : null);
         assertInstanceOf(Service.class, container.get(Service.class));
     }
+
+    @Test
+    void validateAliasIsNotCyclicEndsOnACycleTheAliasIsNoPartOf() {
+        var container = new Container();
+        // The sweep reads the map in an order the container does not fix, so this
+        // reaches the walk that starts outside a cycle without relying on that order
+        container.aliases.put(Greeter.class, Unresolvable.class);
+        container.aliases.put(Unresolvable.class, Greeter.class);
+
+        container.validateAliasIsNotCyclic(Service.class, Greeter.class);
+
+        assertEquals(Unresolvable.class, container.getAliasedId(Greeter.class));
+    }
 }
