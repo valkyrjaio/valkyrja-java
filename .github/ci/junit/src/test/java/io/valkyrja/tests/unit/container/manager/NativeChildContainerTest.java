@@ -513,4 +513,42 @@ final class NativeChildContainerTest {
 
         assertThrows(ContainerCyclicAliasException.class, () -> child.setFromData(data));
     }
+
+    @Test
+    void getAliasedAnswersFromTheParentWhenTheChildHoldsTheTarget() {
+        var shared = new SingletonFixture();
+        var scoped = new SingletonFixture();
+        parent.setSingleton(SingletonFixture.class, shared);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        child.setSingleton(SingletonFixture.class, scoped);
+
+        // The alias belongs to the parent, so the parent answers it from its own maps
+        assertSame(shared, child.getAliased(CharSequence.class, Map.of()));
+        assertSame(scoped, child.get(SingletonFixture.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsWhenOnlyTheChildHoldsTheTarget() {
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        child.setSingleton(SingletonFixture.class, new SingletonFixture());
+
+        // The parent reads none of the child's maps, so it has nothing to answer with
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> child.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void onlyAParentDeclaredAliasRunsTheFactoryInTheParent() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        child.bindAlias(Runnable.class, raw(ServiceFixture.class));
+
+        Object fromParentAlias = child.getAliased(CharSequence.class, Map.of());
+        Object fromChildAlias = child.getAliased(Runnable.class, Map.of());
+
+        assertSame(parent, ((ServiceFixture) fromParentAlias).getContainer());
+        assertSame(child, ((ServiceFixture) fromChildAlias).getContainer());
+        assertSame(child, child.getService(ServiceFixture.class, Map.of()).getContainer());
+    }
 }

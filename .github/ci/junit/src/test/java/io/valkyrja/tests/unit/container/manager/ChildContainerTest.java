@@ -23,6 +23,7 @@ import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
@@ -515,6 +516,32 @@ final class ChildContainerTest {
                         Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of());
 
         assertThrows(ContainerCyclicAliasException.class, () -> localChild.setFromData(data));
+    }
+
+    @Test
+    void getAliasedAnswersFromTheParentWhenTheChildHoldsTheTarget() {
+        var shared = new SingletonFixture();
+        var scoped = new SingletonFixture();
+        parent.setSingleton(SingletonFixture.class, shared);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.setSingleton(SingletonFixture.class, scoped);
+
+        // The alias belongs to the parent, so the parent answers it from its own maps
+        assertSame(shared, localChild.getAliased(CharSequence.class, Map.of()));
+        assertSame(scoped, localChild.get(SingletonFixture.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsWhenOnlyTheChildHoldsTheTarget() {
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.setSingleton(SingletonFixture.class, new SingletonFixture());
+
+        // The parent reads none of the child's maps, so it has nothing to answer with
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
     }
 
     @Test
