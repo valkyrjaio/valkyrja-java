@@ -20,6 +20,9 @@ import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.enum_.ArgumentMode;
 import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingArgumentValuesValidationException;
+import io.valkyrja.cli.routing.throwable.exception.CliRoutingNoCastException;
+import io.valkyrja.tests.fixtures.type.TypeFixture;
+import io.valkyrja.type.data.Cast;
 import org.junit.jupiter.api.Test;
 
 /** Test the {@link ArgumentParameter}. */
@@ -56,7 +59,7 @@ final class ArgumentParameterTest {
                         .withAddedArguments(new Argument("b"));
 
         assertEquals(2, param.getArguments().size());
-        assertEquals(java.util.List.of("a", "b"), param.getCastValues());
+        assertEquals(java.util.List.of("a", "b"), param.getValues());
         assertTrue(param.hasFirstValue());
         assertEquals("a", param.getFirstValue());
     }
@@ -115,5 +118,20 @@ final class ArgumentParameterTest {
 
         assertTrue(withValue.isProvided());
         assertTrue(withValue.hasFirstValue());
+    }
+
+    @Test
+    void castAccessorsReportAndClearTheCast() {
+        var cast = new Cast(TypeFixture.class);
+        var param = new ArgumentParameter("n", "d");
+
+        assertFalse(param.hasCast());
+        assertThrows(CliRoutingNoCastException.class, param::getCast);
+
+        var withCast = param.withCast(cast);
+
+        assertTrue(withCast.hasCast());
+        assertSame(cast, withCast.getCast());
+        assertFalse(withCast.withoutCast().hasCast());
     }
 }

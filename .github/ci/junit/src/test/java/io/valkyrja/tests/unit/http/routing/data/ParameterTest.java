@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.http.routing.data.Parameter;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingNoCastException;
+import io.valkyrja.tests.fixtures.type.TypeFixture;
 import io.valkyrja.type.data.Cast;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +42,7 @@ final class ParameterTest {
     @Test
     void withMethodsReturnCopies() {
         var parameter = new Parameter("id", "\\d+");
-        var cast = new Cast("int");
+        var cast = new Cast(TypeFixture.class);
 
         assertEquals("slug", parameter.withName("slug").getName());
         assertEquals("\\w+", parameter.withRegex("\\w+").getRegex());
@@ -57,7 +58,7 @@ final class ParameterTest {
 
     @Test
     void fullConstructor() {
-        var cast = new Cast("int");
+        var cast = new Cast(TypeFixture.class);
         var parameter = new Parameter("id", "\\d+", cast, true, false, "d", "v");
 
         assertTrue(parameter.hasCast());

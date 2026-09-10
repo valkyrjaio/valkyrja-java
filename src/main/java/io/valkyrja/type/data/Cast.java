@@ -8,23 +8,25 @@
 
 package io.valkyrja.type.data;
 
+import io.valkyrja.type.contract.TypeContract;
+
 public class Cast {
 
-    private final String type;
+    private final Class<? extends TypeContract> type;
     private final boolean convert;
     private final boolean isArray;
 
-    public Cast(String type, boolean convert, boolean isArray) {
+    public Cast(Class<? extends TypeContract> type, boolean convert, boolean isArray) {
         this.type = type;
         this.convert = convert;
         this.isArray = isArray;
     }
 
-    public Cast(String type) {
+    public Cast(Class<? extends TypeContract> type) {
         this(type, true, false);
     }
 
-    public String getType() {
+    public Class<? extends TypeContract> getType() {
         return type;
     }
 
