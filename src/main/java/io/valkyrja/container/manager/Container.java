@@ -304,7 +304,7 @@ public class Container extends ProvidersAware {
             return (T) cached;
         }
 
-        if (!singletons.containsKey(id)) {
+        if (!isSingletonBinding(id)) {
             return null;
         }
 
