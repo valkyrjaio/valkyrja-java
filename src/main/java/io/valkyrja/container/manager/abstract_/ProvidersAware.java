@@ -12,7 +12,6 @@ import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.manager.contract.ProvidersAwareContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import io.valkyrja.container.throwable.exception.ContainerInvalidPublishCallbackException;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;

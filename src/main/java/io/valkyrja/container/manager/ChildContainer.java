@@ -10,10 +10,8 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
-
-import org.jspecify.annotations.Nullable;
-
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A per-request child container that interacts with the parent exclusively through {@link
