@@ -14,9 +14,6 @@ import io.valkyrja.container.manager.abstract_.ProvidersAware;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
-
-import org.jspecify.annotations.Nullable;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default dependency injection container implementation.

@@ -9,12 +9,10 @@
 package io.valkyrja.container.manager;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
-
-import org.jspecify.annotations.Nullable;
-
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A per-request child container that accesses parent state via direct protected field reads.
