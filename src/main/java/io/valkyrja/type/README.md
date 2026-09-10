@@ -78,7 +78,8 @@ var parameter = new ArgumentParameter("target", "The target").withCast(new Cast(
 
 `io.valkyrja.cli.routing.caster.Caster` applies the cast, and the parameter
 applies nothing. The container publishes it under
-`io.valkyrja.cli.routing.caster.contract.CasterContract`. The caster holds the container, so the data object needs none.
+`io.valkyrja.cli.routing.caster.contract.CasterContract`. The caster holds the
+container, so the data object needs none.
 `getCastValues()` on the caster asks the container for the type that `getType()`
 names, and it passes the raw value under the key `CastArgument.VALUE`. It
 returns the converted value when `isConvert()` is `true`, and the type itself
