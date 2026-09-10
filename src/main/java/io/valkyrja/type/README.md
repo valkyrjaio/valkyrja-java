@@ -3,9 +3,10 @@
 ## Introduction
 
 The type component holds the shared types that more than one component reads. It
-holds four: a cast descriptor for a route parameter, the key that a cast passes
-to the container, a contract for a type that converts a value, and a contract
-for a type that presents itself as a map and as a list.
+holds four: a cast descriptor for a route parameter, the key under which the
+framework passes a raw value to the container, a contract for a type that
+converts a value, and a contract for a type that presents itself as a map and as
+a list.
 
 The component publishes no container binding, and it holds no configuration.
 
@@ -30,6 +31,12 @@ at a time, whatever the flag holds.
 A route parameter holds an optional cast. The CLI parameter and the HTTP
 parameter both read it through `hasCast()` and `getCast()`, and `withCast(Cast)`
 returns a copy that holds a new one.
+
+## CastArgument
+
+`io.valkyrja.type.constant.CastArgument` holds the key that the caster passes to
+the container. `CastArgument.VALUE` names the raw value, so a factory reads the
+same key the framework writes.
 
 ## TypeContract
 
@@ -66,12 +73,6 @@ container.bind(Slug.class, (c, arguments) -> new Slug(String.valueOf(arguments.g
 
 var parameter = new ArgumentParameter("target", "The target").withCast(new Cast(Slug.class));
 ```
-
-## CastArgument
-
-`io.valkyrja.type.constant.CastArgument` holds the key that a cast passes to the
-container. `CastArgument.VALUE` names the raw value, so a factory reads the same
-key the framework writes.
 
 ### Where the framework applies a cast
 
