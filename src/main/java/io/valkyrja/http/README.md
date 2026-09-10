@@ -87,11 +87,11 @@ with no default and no match keeps no value.
 
 `Matcher.castMatchValue` applies the cast that the parameter declares.
 `withCast` sets that cast, and `@Parameter` declares no cast element, so a route
-that needs one builds the parameter in code. It asks
-`getService()` for the type that `Cast.getType()` names, and it passes the
-matched text under the key `CastArgument.VALUE`. It returns the converted value
-when `isConvert()` is `true`, and the type itself when `isConvert()` is `false`.
-The matcher holds the container, so no data object reaches it. The
+that needs one builds the parameter in code. The method asks `getService()` for
+the type that `Cast.getType()` names, and it passes the matched text under the
+key `CastArgument.VALUE`. The method returns the converted value when
+`isConvert()` is `true`, and the type itself when `isConvert()` is `false`. The
+matcher holds the container, so no data object reaches it. The
 [type component](../type/README.md) describes `Cast`.
 
 Warning: `getService()` reads only a service binding, and it skips the singleton
