@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.NativeChildContainer;
+import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
@@ -30,6 +31,7 @@ import io.valkyrja.tests.fixtures.container.provider.BindingProviderFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.PublishingProviderFixture;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -484,6 +486,22 @@ final class NativeChildContainerTest {
         parent.bind(ServiceFixture.class, ServiceFixture::make);
 
         assertSame(shared, child.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedWalksPastAHopTheParentPublishedWithoutBindingIt() {
+        // The publisher binds nothing for its own type, so the parent reads on past it
+        Map<Class<?>, Consumer<ContainerContract>> callbacks =
+                Map.of(ProvidedFixture.class, container -> {});
+        parent.setFromData(new ContainerData(Map.of(), callbacks, Map.of(), Map.of()));
+        parent.publish(ProvidedFixture.class);
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        parent.bindAlias(ProvidedFixture.class, raw(SingletonFixture.class));
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+
+        assertInstanceOf(SingletonFixture.class, child.getAliased(CharSequence.class, Map.of()));
+        // The walk reaches the unbuilt singleton, so the child builds it
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
     }
 
     @Test
