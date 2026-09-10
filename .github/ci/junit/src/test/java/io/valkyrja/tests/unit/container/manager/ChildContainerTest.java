@@ -496,4 +496,16 @@ final class ChildContainerTest {
 
         assertThrows(ContainerCyclicAliasException.class, () -> localChild.setFromData(data));
     }
+
+    @Test
+    void getSingletonBuildsAParentBindingTakenAfterTheSnapshot() {
+        ChildContainer localChild = createChild();
+        // A snapshot copies the parent's bindings, so only a later one reaches the fallback
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+
+        var instance = localChild.getSingleton(SingletonFixture.class);
+
+        assertSame(instance, localChild.getSingleton(SingletonFixture.class));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
+    }
 }
