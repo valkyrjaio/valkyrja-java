@@ -18,8 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.NativeChildContainer;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
@@ -482,5 +484,15 @@ final class NativeChildContainerTest {
         parent.bind(ServiceFixture.class, ServiceFixture::make);
 
         assertSame(shared, child.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void setFromDataRejectsAChainThatReturnsThroughTheParent() {
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        var data =
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> child.setFromData(data));
     }
 }

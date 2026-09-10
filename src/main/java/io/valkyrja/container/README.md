@@ -98,7 +98,8 @@ container.bindAlias(MatcherContract.class, raw(Matcher.class));
 An alias that points at a chain that returns to it has no end, so every entry
 point rejects one with `ContainerCyclicAliasException`: `bindAlias` for the pair
 it is asked to store, and the constructor and `setFromData` for the map they
-receive. The check runs at registration, not at resolution.
+receive. A child also follows each chain through its parent. The check runs at
+registration, not at resolution.
 
 ### setSingleton
 

@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -58,7 +59,8 @@ public class Container extends ProvidersAware {
     }
 
     public Container(ContainerDataContract data) {
-        validateAliasMapIsNotCyclic(data.aliases());
+        // Nothing is installed yet, so past the map there is nothing to read
+        validateAliasMapIsNotCyclic(data.aliases(), type -> null);
 
         aliases.putAll(data.aliases());
         callbacks.putAll(data.callbacks());
@@ -82,7 +84,7 @@ public class Container extends ProvidersAware {
 
         // The whole merged map is validated before any of the four is installed, so a
         // caller that catches the throw keeps every map the container already had.
-        validateAliasMapIsNotCyclic(merged);
+        validateAliasMapIsNotCyclic(merged, this::getAliasedId);
 
         aliases.putAll(data.aliases());
         callbacks.putAll(data.callbacks());
@@ -132,8 +134,8 @@ public class Container extends ProvidersAware {
                 throw new ContainerCyclicAliasException(alias.getName(), id.getName());
             }
 
-            // A cycle this alias is no part of would spin here. The sweep below reaches
-            // every alias, so the walk that starts inside that cycle throws for it.
+            // A parent that binds an alias after a child is built checks only its own map,
+            // so the two can hold a cycle this alias is no part of. End the walk there.
             if (!seen.add(aliasedId)) {
                 return;
             }
@@ -145,19 +147,28 @@ public class Container extends ProvidersAware {
     /**
      * Validate that no alias in a map points at a chain that returns to it.
      *
-     * <p>Private, and it reads the map it is given rather than the container, because a constructor
-     * calls it. An overridable method there reaches a subclass before the subclass is initialized.
+     * <p>Past the map, the walk reads {@code installed}. It is a parameter rather than a call to
+     * {@link #getAliasedId}, because a constructor calls this method, and an overridable method
+     * there reaches a subclass before the subclass is initialized.
      *
      * @param aliases the alias map to validate
+     * @param installed the read for a type the map does not hold
      */
-    private void validateAliasMapIsNotCyclic(Map<Class<?>, Class<?>> aliases) {
+    private void validateAliasMapIsNotCyclic(
+            Map<Class<?>, Class<?>> aliases, Function<Class<?>, @Nullable Class<?>> installed) {
         for (var entry : aliases.entrySet()) {
             Set<Class<?>> seen = new HashSet<>();
             seen.add(entry.getKey());
             Class<?> current = entry.getKey();
             Class<?> aliasedId;
 
-            while ((aliasedId = aliases.get(current)) != null) {
+            // Past the map, the walk reads what the container answers already. The map
+            // holds every alias the container declares, so that adds only a parent's.
+            while ((aliasedId =
+                            aliases.containsKey(current)
+                                    ? aliases.get(current)
+                                    : installed.apply(current))
+                    != null) {
                 // The walk reached this type once already, so the edge that closes the
                 // chain is the one it just took. Name that pair.
                 if (!seen.add(aliasedId)) {
