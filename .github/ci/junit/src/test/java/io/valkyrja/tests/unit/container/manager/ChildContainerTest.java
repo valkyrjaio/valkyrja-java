@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
@@ -472,16 +473,27 @@ final class ChildContainerTest {
 
     @Test
     void bindAliasEndsTheWalkOnACycleAcrossTheTwoContainers() {
-        // Each map is validated alone, so the two together can still close a chain
-        parent.bindAlias(CharSequence.class, raw(Runnable.class));
         ChildContainer localChild = createChild();
         localChild.setFromData(
                 new ContainerData(
                         Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of()));
+        // The parent checks only its own map, so a later binding can still close a chain
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
 
         // The pair is no part of that chain, so the walk ends rather than spinning
         localChild.bindAlias(ServiceFixture.class, raw(CharSequence.class));
 
         assertEquals(CharSequence.class, localChild.getAliasedId(ServiceFixture.class));
+    }
+
+    @Test
+    void setFromDataRejectsAChainThatReturnsThroughTheParent() {
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = createChild();
+        var data =
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> localChild.setFromData(data));
     }
 }
