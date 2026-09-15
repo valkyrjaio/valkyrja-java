@@ -11,7 +11,7 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 plugins {
     java
     id("com.vanniktech.maven.publish") version "0.37.0"
-    id("com.github.ben-manes.versions") version "0.63.0"
+    id("com.github.ben-manes.versions") version "0.63.1"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
@@ -47,7 +47,7 @@ dependencies {
     compileOnly("org.eclipse.jetty:jetty-server:12.1.13")
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.13")
     compileOnly("io.netty:netty-codec-http:4.2.18.Final")
-    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.25")
+    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.26")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.84.0")
     compileOnly("io.grpc:grpc-netty-shaded:1.84.0")
 }
