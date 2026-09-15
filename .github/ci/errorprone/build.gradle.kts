@@ -12,7 +12,7 @@ import net.ltgt.gradle.errorprone.errorprone
 plugins {
     java
     id("net.ltgt.errorprone") version "5.1.1"
-    id("com.github.ben-manes.versions") version "0.63.0"
+    id("com.github.ben-manes.versions") version "0.63.1"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
@@ -54,7 +54,7 @@ dependencies {
     compileOnly("org.eclipse.jetty:jetty-server:12.1.13")
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.13")
     compileOnly("io.netty:netty-codec-http:4.2.18.Final")
-    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.25")
+    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.26")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.84.0")
     compileOnly("io.grpc:grpc-netty-shaded:1.84.0")
 
@@ -69,7 +69,7 @@ dependencies {
     testImplementation("org.eclipse.jetty:jetty-server:12.1.13")
     testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.13")
     testImplementation("io.netty:netty-codec-http:4.2.18.Final")
-    testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.25")
+    testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.26")
 }
 
 // Compiling the tests is the point — running them is the JUnit build's job, so `build` compiles
