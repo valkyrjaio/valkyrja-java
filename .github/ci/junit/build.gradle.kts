@@ -46,8 +46,8 @@ dependencies {
     compileOnly("org.jspecify:jspecify:1.0.1")
     implementation("io.grpc:grpc-api:1.84.0")
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
-    testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
+    testImplementation("org.mockito:mockito-core:5.24.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.24.0")
     // Test-only: a real HTTP/2 transport (server + client) for the gRPC end-to-end test. Not a
     // framework dependency — the published artifact keeps io.grpc compileOnly.
     testImplementation("io.grpc:grpc-netty-shaded:1.84.0")
