@@ -95,6 +95,12 @@ private static <T> Class<T> raw(Class<?> type) {
 container.bindAlias(MatcherContract.class, raw(Matcher.class));
 ```
 
+An alias that points at a chain that returns to it has no end, so every entry
+point rejects one with `ContainerCyclicAliasException`: `bindAlias` for the pair
+it is asked to store, and the constructor and `setFromData` for the map they
+receive. A child also follows each chain through its parent. The check runs at
+registration, not at resolution.
+
 ### setSingleton
 
 `setSingleton` registers an instance that the caller built. The container caches
@@ -328,8 +334,9 @@ A child resolves a singleton in three steps.
 2. The cached instance of the parent.
 3. The singleton binding, which the child builds and caches in the child.
 
-A child resolves a service, and an alias, from its own maps first, and from the
-parent second.
+A child resolves a service, and an alias that the child declares, from its own
+maps first, and from the parent second. An alias that only the parent declares
+follows [Where an alias resolves](#where-an-alias-resolves).
 
 A factory that the child itself publishes runs with the child as its argument,
 so the dependencies it resolves come from the child and the instance it builds
@@ -344,6 +351,69 @@ is invisible to that factory.
 The factory still runs for each call, so each request gets its own instance.
 Only a key that the parent resolved into its instance cache is shared across
 requests.
+
+### Where an alias resolves
+
+An alias resolves in the container that declares it, so where you declare an
+alias selects the resolution scope. A child lookup of an alias that only the
+parent declares goes to the parent, and the parent answers it as it would for
+any caller:
+
+```java
+// Once, at boot. The child never declares this alias.
+parent.bind(SlackNotifier.class, SlackNotifier::make);
+parent.bindAlias(NotifierContract.class, raw(SlackNotifier.class));
+
+// For each request, the child binds its own.
+child.bind(SlackNotifier.class, SlackNotifier::make);
+
+child.get(SlackNotifier.class);    // built by the binding of the child
+child.get(NotifierContract.class); // built by the binding of the parent
+```
+
+There is one exception. When the parent would resolve the target for the first
+time, the child resolves the target itself. That is a singleton binding that the
+parent never built, or a publisher that the parent has not run. The child holds
+the same registration, so if the parent resolved it, the request would hold one
+copy for the alias and another for the target. The child reuses anything that
+the parent already built or published.
+
+Warning: that exception also decides which binding the alias reaches. When the
+parent never builds a singleton, a child that shadows the target gets its own
+binding through the alias, because the child resolves the target itself.
+
+Warning: outside that exception, both implementations give the call to the
+parent, so a factory that the parent holds receives the parent. A `bind` service
+is outside it, whether the parent built one or not. This is the one path where
+`NativeChildContainer` gives the parent for a lookup that it could answer
+itself.
+
+Warning: on that path the parent reads none of the maps of the child. An
+instance that the child holds for the target does not answer the alias. The
+alias returns the copy of the parent, or throws
+`ContainerInvalidReferenceException` when the parent holds none. To reach the
+copy of the child through an alias, declare the alias on the child:
+
+```java
+// Once, at boot.
+parent.setSingleton(ClockContract.class, bootClock);
+parent.bindAlias(TimeSourceContract.class, raw(ClockContract.class));
+
+// For each request.
+child.setSingleton(ClockContract.class, requestClock);
+
+child.get(ClockContract.class);      // requestClock
+child.get(TimeSourceContract.class); // bootClock, answered by the parent
+
+child.bindAlias(TimeSourceContract.class, raw(ClockContract.class));
+
+child.get(TimeSourceContract.class); // requestClock
+```
+
+On the exception path, the factory receiver follows the implementation, as
+[Resolution order](#resolution-order) states, and the instance caches in the
+child. A deferred target is the one case where both give the child, because the
+publish callback runs in the container that publishes it.
 
 ### Using a child container
 
@@ -363,9 +433,10 @@ describes the worker entry classes.
 | :----------------------------------------- | :------------------------------------------------------- |
 | `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias |
 | `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback            |
+| `ContainerCyclicAliasException`            | An alias points at a chain that returns to it            |
 
-`ContainerInvalidReferenceException` extends
+`ContainerInvalidReferenceException` and `ContainerCyclicAliasException` extend
 `ContainerInvalidArgumentException`, and
 `ContainerInvalidPublishCallbackException` extends `ContainerRuntimeException`.
-Both are unchecked. The [throwable component](../throwable/README.md) describes
+All three are unchecked. The [throwable component](../throwable/README.md) describes
 the hierarchy.
