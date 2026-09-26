@@ -11,6 +11,7 @@ package io.valkyrja.cli.routing.data.contract;
 import io.valkyrja.cli.interaction.option.contract.OptionContract;
 import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
+import io.valkyrja.type.data.Cast;
 import java.util.List;
 
 public interface OptionParameterContract extends ParameterContract {
@@ -52,6 +53,12 @@ public interface OptionParameterContract extends ParameterContract {
     OptionParameterContract withOptions(OptionContract... options);
 
     OptionParameterContract withAddedOptions(OptionContract... options);
+
+    @Override
+    OptionParameterContract withCast(Cast cast);
+
+    @Override
+    OptionParameterContract withoutCast();
 
     @Override
     OptionParameterContract validateValues();

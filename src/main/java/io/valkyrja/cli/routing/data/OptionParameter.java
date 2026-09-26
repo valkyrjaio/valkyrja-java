@@ -15,12 +15,12 @@ import io.valkyrja.cli.routing.enum_.OptionMode;
 import io.valkyrja.cli.routing.enum_.OptionValueMode;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingInvalidOptionWithValueException;
 import io.valkyrja.cli.routing.throwable.exception.CliRoutingOptionValuesValidationException;
+import io.valkyrja.type.data.Cast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class OptionParameter extends Parameter implements OptionParameterContract {
+public class OptionParameter extends Parameter<OptionParameter> implements OptionParameterContract {
 
     protected String valueDisplayName;
     protected String defaultValue;
@@ -64,7 +64,7 @@ public class OptionParameter extends Parameter implements OptionParameterContrac
     }
 
     @Override
-    protected OptionParameter copy() {
+    protected OptionParameter createCopy() {
         return new OptionParameter(
                 name,
                 description,
@@ -215,8 +215,22 @@ public class OptionParameter extends Parameter implements OptionParameterContrac
     }
 
     @Override
-    public List<String> getCastValues() {
-        return options.stream().map(OptionContract::getValue).collect(Collectors.toList());
+    public OptionParameterContract withCast(Cast cast) {
+        OptionParameter copy = copy();
+        copy.cast = cast;
+        return copy;
+    }
+
+    @Override
+    public OptionParameterContract withoutCast() {
+        OptionParameter copy = copy();
+        copy.cast = null;
+        return copy;
+    }
+
+    @Override
+    public List<String> getValues() {
+        return options.stream().map(OptionContract::getValue).toList();
     }
 
     @Override

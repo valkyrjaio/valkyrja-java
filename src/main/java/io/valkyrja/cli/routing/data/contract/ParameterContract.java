@@ -8,6 +8,7 @@
 
 package io.valkyrja.cli.routing.data.contract;
 
+import io.valkyrja.type.data.Cast;
 import java.util.List;
 
 public interface ParameterContract {
@@ -22,11 +23,19 @@ public interface ParameterContract {
 
     boolean isProvided();
 
+    boolean hasCast();
+
+    Cast getCast();
+
+    ParameterContract withCast(Cast cast);
+
+    ParameterContract withoutCast();
+
     boolean hasFirstValue();
 
     String getFirstValue();
 
-    List<String> getCastValues();
+    List<String> getValues();
 
     boolean areValuesValid();
 
