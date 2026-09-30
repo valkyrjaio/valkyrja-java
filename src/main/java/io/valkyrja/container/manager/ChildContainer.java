@@ -16,36 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
-/**
- * A per-request child container that interacts with the parent exclusively through {@link
- * ContainerContract} — no direct field access required.
- *
- * <p>Works across all languages regardless of whether they support class inheritance with protected
- * field access (Java, PHP, Python, C++, C#) or not (Go, Rust, C). This is the portable, universally
- * compatible implementation.
- *
- * <p>The constructor copies two maps from the parent's {@link ContainerData}:
- *
- * <ul>
- *   <li>{@code singletons} — singleton registrations. Used to create singleton instances in the
- *       child's own context when the parent has a binding but no cached instance yet.
- *   <li>{@code callbacks} — lazy provider callbacks. Enables the child to publish deferred
- *       providers into its own context on first access, independently of the parent.
- * </ul>
- *
- * <p>The same {@link ContainerData} reference can be stored once after bootstrap and reused across
- * all requests. Each child copies from it at construction, so the source is never mutated.
- *
- * <p>Singleton resolution order (in {@link #getSingletonWithoutChecks}):
- *
- * <ol>
- *   <li>Child's own cached instance
- *   <li>Parent's cached instance ({@code isSingletonInstance} via contract — safe reuse, frozen)
- *   <li>Child's copied singleton binding → create in child via base class logic
- * </ol>
- *
- * @see NativeChildContainer for a direct field-access alternative requiring a concrete parent type
- */
 public class ChildContainer extends Container {
 
     private final ContainerContract parent;
@@ -59,6 +29,9 @@ public class ChildContainer extends Container {
         this.callbacks.putAll(parentData.callbacks());
         // instances stays empty — child builds its own per request
     }
+
+    /** The alias targets this container is resolving. */
+    private final Set<Class<?>> targetsInFlight = new HashSet<>();
 
     /**
      * Intercepts only the case where the parent has a cached instance but the child does not. All
@@ -100,7 +73,7 @@ public class ChildContainer extends Container {
         // the same registration, so letting the parent do it would leave the request
         // with one copy for the alias and another for the id.
         if (isUnbuiltInParent(target)) {
-            return get((Class<T>) target, arguments);
+            return getTargetOnce(id, (Class<T>) target, arguments);
         }
 
         return parent.getAliased(id, arguments);
@@ -196,5 +169,27 @@ public class ChildContainer extends Container {
         }
 
         return parent.isSingletonBinding(id);
+    }
+
+    /**
+     * Resolve an alias target, and reject a chain that returns to one already in flight.
+     *
+     * @param id the alias
+     * @param target the target type
+     * @param arguments the arguments
+     * @return the instance the target resolves to
+     */
+    private <T> T getTargetOnce(Class<?> id, Class<T> target, Map<String, Object> arguments) {
+        // A walk ends at the first hop the parent would answer, so a chain that closes
+        // across two of them returns here rather than to one walk. Name the pair.
+        if (!targetsInFlight.add(target)) {
+            throw new ContainerCyclicAliasException(id.getName(), target.getName());
+        }
+
+        try {
+            return get(target, arguments);
+        } finally {
+            targetsInFlight.remove(target);
+        }
     }
 }

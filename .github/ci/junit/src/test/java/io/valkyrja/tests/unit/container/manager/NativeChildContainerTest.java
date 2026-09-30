@@ -551,4 +551,25 @@ final class NativeChildContainerTest {
         assertSame(child, ((ServiceFixture) fromChildAlias).getContainer());
         assertSame(child, child.getService(ServiceFixture.class, Map.of()).getContainer());
     }
+
+    @Test
+    void getAliasedThrowsForACycleTwoWalksCross() {
+        // Markers with no service entry, so each walk stops at the hop it reaches
+        parent.setFromData(
+                new ContainerData(
+                        Map.of(),
+                        Map.of(),
+                        Map.of(),
+                        Map.of(
+                                CharSequence.class,
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class)));
+        child.bindAlias(Runnable.class, raw(CharSequence.class));
+        // The parent closes the chain after the child was built
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+
+        assertThrows(
+                ContainerCyclicAliasException.class, () -> child.get(CharSequence.class, Map.of()));
+    }
 }
