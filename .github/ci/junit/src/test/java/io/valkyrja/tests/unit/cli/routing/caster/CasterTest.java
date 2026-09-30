@@ -10,6 +10,7 @@ package io.valkyrja.tests.unit.cli.routing.caster;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.valkyrja.cli.interaction.argument.Argument;
 import io.valkyrja.cli.interaction.enum_.OptionType;
@@ -18,6 +19,7 @@ import io.valkyrja.cli.routing.caster.Caster;
 import io.valkyrja.cli.routing.data.ArgumentParameter;
 import io.valkyrja.cli.routing.data.OptionParameter;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.tests.fixtures.type.TypeFixture;
 import io.valkyrja.type.data.Cast;
 import java.util.List;
@@ -61,7 +63,8 @@ final class CasterTest {
         var values = new Caster(containerWithType()).getCastValues(parameter);
 
         assertEquals(1, values.size());
-        assertInstanceOf(TypeFixture.class, values.get(0));
+        TypeFixture value = assertInstanceOf(TypeFixture.class, values.get(0));
+        assertEquals("cast:a", value.asValue());
     }
 
     @Test
@@ -84,5 +87,31 @@ final class CasterTest {
                         .withArguments(new Argument("a"), new Argument("b"));
 
         assertEquals(List.of("cast:a", "cast:b"), new Caster(container).getCastValues(parameter));
+    }
+
+    @Test
+    void throwsWhenTheCastTypeHasNoBinding() {
+        var parameter =
+                new ArgumentParameter("n", "d")
+                        .withCast(new Cast(TypeFixture.class))
+                        .withArguments(new Argument("a"));
+        var caster = new Caster(new Container());
+
+        assertThrows(
+                ContainerInvalidReferenceException.class, () -> caster.getCastValues(parameter));
+    }
+
+    @Test
+    void throwsWhenTheCastTypeIsASetSingleton() {
+        var container = new Container();
+        container.setSingleton(TypeFixture.class, new TypeFixture("held"));
+        var parameter =
+                new ArgumentParameter("n", "d")
+                        .withCast(new Cast(TypeFixture.class))
+                        .withArguments(new Argument("a"));
+        var caster = new Caster(container);
+
+        assertThrows(
+                ContainerInvalidReferenceException.class, () -> caster.getCastValues(parameter));
     }
 }
