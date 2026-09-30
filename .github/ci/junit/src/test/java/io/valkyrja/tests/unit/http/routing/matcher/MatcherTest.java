@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.http.message.enum_.RequestMethod;
 import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
@@ -113,6 +114,25 @@ final class MatcherTest {
                 assertInstanceOf(TypeFixture.class, matched.getParameter("id").getValue());
 
         assertEquals("cast:9", value.asValue());
+    }
+
+    @Test
+    void throwsWhenTheCastTypeHasNoBinding() {
+        var dynamic =
+                new DynamicRoute(
+                        "/tags/{id}",
+                        "tags.show",
+                        "/tags/(?<id>\\d+)",
+                        List.of(
+                                (ParameterContract)
+                                        new Parameter("id", "\\d+")
+                                                .withCast(new Cast(TypeFixture.class))),
+                        HANDLER);
+        var matcher = new Matcher(collectionWith(dynamic), new Container());
+
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> matcher.match("/tags/3", RequestMethod.GET));
     }
 
     @Test
