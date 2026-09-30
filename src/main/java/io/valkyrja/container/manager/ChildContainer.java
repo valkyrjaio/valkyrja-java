@@ -10,7 +10,10 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -151,8 +154,16 @@ public class ChildContainer extends Container {
         Class<?> current = id;
         Class<?> target = null;
         Class<?> aliasedId;
+        Set<Class<?>> seen = new HashSet<>();
+        seen.add(id);
 
         while ((aliasedId = parent.getAliasedId(current)) != null) {
+            // A parent that is itself a child reads its own map and its parent's, and a
+            // binding made on either after it was built can close a chain between them.
+            if (!seen.add(aliasedId)) {
+                throw new ContainerCyclicAliasException(current.getName(), aliasedId.getName());
+            }
+
             target = aliasedId;
             current = aliasedId;
 

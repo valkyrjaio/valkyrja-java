@@ -490,6 +490,30 @@ final class ChildContainerTest {
     }
 
     @Test
+    void getAliasedThrowsForACycleANestedParentHolds() {
+        ChildContainer middle = createChild();
+        middle.bindAlias(Runnable.class, raw(CharSequence.class));
+        // The grandparent checks only its own map, so a later binding closes a chain
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = new ChildContainer(middle, new ContainerData());
+
+        var exception =
+                assertThrows(
+                        ContainerCyclicAliasException.class,
+                        () -> localChild.get(CharSequence.class));
+
+        assertTrue(
+                exception
+                        .getMessage()
+                        .startsWith(
+                                "Alias `"
+                                        + Runnable.class.getName()
+                                        + "` cannot point at `"
+                                        + CharSequence.class.getName()
+                                        + "`"));
+    }
+
+    @Test
     void getAliasedWalksPastAHopTheParentPublishedWithoutBindingIt() {
         // The publisher binds nothing for its own type, so the parent reads on past it
         Map<Class<?>, Consumer<ContainerContract>> callbacks =
