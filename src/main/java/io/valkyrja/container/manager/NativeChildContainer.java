@@ -21,10 +21,6 @@ import org.jspecify.annotations.Nullable;
  * at construction — parent fields are read directly, giving zero per-request allocation beyond the
  * child's own empty maps.
  *
- * <p>What the child resolves itself caches in the child's own maps only. A parent-declared alias
- * whose target the parent answers is handed to the parent, so a factory there receives the parent
- * and caches in the parent any singleton it resolves.
- *
  * <p>Singleton resolution order:
  *
  * <ol>

@@ -99,9 +99,14 @@ An alias that points at a chain that returns to it has no end, so every entry
 point rejects one with `ContainerCyclicAliasException`: `bindAlias` for the pair
 it is asked to store, and the constructor and `setFromData` for the map they
 receive. A child also follows each chain through its parent. Each check covers
-the maps that exist when it runs, so a container that binds an alias after a
-child reads through it can still close a chain. A child throws for that chain
-when it walks the parent's aliases to resolve one.
+the maps that exist when it runs, and only the aliases the caller supplies start
+a walk. A container that writes an alias after a child reads through it is
+outside every check. A child's walk over the parent's aliases throws when the
+whole chain is visible to that walk: `ChildContainer` reads the parent through
+`getAliasedId`, so a parent that is itself a child shows it the whole chain.
+`NativeChildContainer` reads the parent's own map alone, and a chain the child
+closes with an alias of its own is outside either walk, so those lookups report
+a missing reference or do not end.
 
 ### setSingleton
 
@@ -312,8 +317,12 @@ A worker runtime boots the application once, and it serves many requests. A
 request that writes to the container of the worker changes what the next request
 reads. A child container removes that risk.
 
-The parent container is frozen after boot. Each request builds a child, resolves
-through the child, and discards the child. Every write reaches the child only.
+The parent container is frozen after boot, so no registration changes after that
+point. Each request builds a child, resolves through the child, and discards the
+child. A write of the child reaches the child only. An id the child cannot
+answer goes to the parent, and the parent answers it as it would for any caller,
+so a factory that the parent runs caches in the parent every singleton that the
+factory resolves.
 
 ### The two implementations
 
