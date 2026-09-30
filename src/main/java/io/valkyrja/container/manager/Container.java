@@ -165,26 +165,46 @@ public class Container extends ProvidersAware {
     private void validateAliasMapIsNotCyclic(
             Map<Class<?>, Class<?>> aliases, Function<Class<?>, @Nullable Class<?>> installed) {
         for (var entry : aliases.entrySet()) {
-            Set<Class<?>> seen = new HashSet<>();
-            seen.add(entry.getKey());
-            Class<?> current = entry.getKey();
-            Class<?> aliasedId;
+            validateAliasChainIsNotCyclic(entry.getKey(), aliases, installed);
+        }
+    }
 
-            // Past the map, the walk reads what the container answers already. The map
-            // holds every alias the container declares, so that adds only a parent's.
-            while ((aliasedId =
-                            aliases.containsKey(current)
-                                    ? aliases.get(current)
-                                    : installed.apply(current))
-                    != null) {
-                // The walk reached this type once already, so the edge that closes the
-                // chain is the one it just took. Name that pair.
-                if (!seen.add(aliasedId)) {
-                    throw new ContainerCyclicAliasException(current.getName(), aliasedId.getName());
-                }
+    /**
+     * Validate that the chain one alias starts does not return to it.
+     *
+     * @param alias the alias the walk starts from
+     * @param aliases the aliases that start a walk
+     * @param installed the read for a type the map does not hold
+     */
+    private void validateAliasChainIsNotCyclic(
+            Class<?> alias,
+            Map<Class<?>, Class<?>> aliases,
+            Function<Class<?>, @Nullable Class<?>> installed) {
+        Set<Class<?>> seen = new HashSet<>();
+        seen.add(alias);
+        Class<?> current = alias;
+        Class<?> aliasedId;
 
-                current = aliasedId;
+        // Past the supplied aliases, the walk reads what the container answers already,
+        // so it follows a chain the supplied map only reaches into.
+        while ((aliasedId =
+                        aliases.containsKey(current)
+                                ? aliases.get(current)
+                                : installed.apply(current))
+                != null) {
+            // The chain returns to the alias this walk started from, so the map the
+            // caller supplied is what closes it. Name the edge that took it there.
+            if (aliasedId.equals(alias)) {
+                throw new ContainerCyclicAliasException(current.getName(), aliasedId.getName());
             }
+
+            // A chain the container already held returns here. `bindAlias` ends its walk
+            // for that state, so this entry point answers it the same way.
+            if (!seen.add(aliasedId)) {
+                return;
+            }
+
+            current = aliasedId;
         }
     }
 
