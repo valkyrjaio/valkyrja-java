@@ -66,6 +66,7 @@ This port ships no implementation of the contract. An application supplies its
 own type:
 
 ```java
+import io.valkyrja.cli.routing.data.ArgumentParameter;
 import io.valkyrja.type.constant.CastArgument;
 
 container.bind(Slug.class, (c, arguments) -> new Slug(String.valueOf(arguments.get(CastArgument.VALUE))));
