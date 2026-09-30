@@ -616,4 +616,48 @@ final class ChildContainerTest {
         // The parent answers the alias, so what its factory resolves caches in the parent
         assertTrue(parent.isSingletonInstance(SingletonFixture.class));
     }
+
+    @Test
+    void getAliasedThrowsForACycleTwoWalksCross() {
+        // Markers with no service entry, so each walk stops at the hop it reaches
+        parent.setFromData(
+                new ContainerData(
+                        Map.of(),
+                        Map.of(),
+                        Map.of(),
+                        Map.of(
+                                CharSequence.class,
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class)));
+        ChildContainer middle = createChild();
+        middle.bindAlias(Runnable.class, raw(CharSequence.class));
+        // The parent closes the chain after the middle container was built
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        var localChild = new ChildContainer(middle, new ContainerData());
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> localChild.get(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void setFromDataAcceptsAnAliasThatOnlyReachesAChainItIsNoPartOf() {
+        ChildContainer localChild = createChild();
+        localChild.setFromData(
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of()));
+        // The parent closes the chain after the child was built
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+
+        // bindAlias accepts the same pair, so this entry point accepts it too
+        localChild.setFromData(
+                new ContainerData(
+                        Map.of(ServiceFixture.class, CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of()));
+
+        assertEquals(CharSequence.class, localChild.getAliasedId(ServiceFixture.class));
+    }
 }

@@ -9,7 +9,10 @@
 package io.valkyrja.container.manager;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
@@ -38,6 +41,9 @@ public class NativeChildContainer extends Container {
     public NativeChildContainer(Container parent) {
         this.parent = parent;
     }
+
+    /** The alias targets this container is resolving. */
+    private final Set<Class<?>> targetsInFlight = new HashSet<>();
 
     @Override
     @SuppressWarnings("unchecked")
@@ -96,7 +102,7 @@ public class NativeChildContainer extends Container {
         // the same registration, so letting the parent do it would leave the request
         // with one copy for the alias and another for the id.
         if (isUnbuiltInParent(target)) {
-            return get((Class<T>) target, arguments);
+            return getTargetOnce(id, (Class<T>) target, arguments);
         }
 
         return parent.getAliased(id, arguments);
@@ -216,5 +222,27 @@ public class NativeChildContainer extends Container {
         }
 
         return parent.singletons.containsKey(id);
+    }
+
+    /**
+     * Resolve an alias target, and reject a chain that returns to one already in flight.
+     *
+     * @param id the alias
+     * @param target the target type
+     * @param arguments the arguments
+     * @return the instance the target resolves to
+     */
+    private <T> T getTargetOnce(Class<?> id, Class<T> target, Map<String, Object> arguments) {
+        // A walk ends at the first hop the parent would answer, so a chain that closes
+        // across two of them returns here rather than to one walk. Name the pair.
+        if (!targetsInFlight.add(target)) {
+            throw new ContainerCyclicAliasException(id.getName(), target.getName());
+        }
+
+        try {
+            return get(target, arguments);
+        } finally {
+            targetsInFlight.remove(target);
+        }
     }
 }
