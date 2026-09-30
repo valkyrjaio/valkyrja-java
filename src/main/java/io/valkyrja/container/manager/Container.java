@@ -82,9 +82,17 @@ public class Container extends ProvidersAware {
         Map<Class<?>, Class<?>> merged = new HashMap<>(aliases);
         merged.putAll(data.aliases());
 
-        // The whole merged map is validated before any of the four is installed, so a
-        // caller that catches the throw keeps every map the container already had.
-        validateAliasMapIsNotCyclic(merged, this::getAliasedId);
+        // Only the incoming aliases start a walk, so a chain the container already held
+        // is no reason to reject this call. Each walk reads the whole merged map, and
+        // the container past it, so a chain the incoming data closes is still caught.
+        // Nothing is installed before the walks end, so a caught throw leaves all four.
+        validateAliasMapIsNotCyclic(
+                data.aliases(),
+                type -> {
+                    Class<?> mergedId = merged.get(type);
+
+                    return mergedId != null ? mergedId : getAliasedId(type);
+                });
 
         aliases.putAll(data.aliases());
         callbacks.putAll(data.callbacks());
@@ -151,7 +159,7 @@ public class Container extends ProvidersAware {
      * {@link #getAliasedId}, because a constructor calls this method, and an overridable method
      * there reaches a subclass before the subclass is initialized.
      *
-     * @param aliases the alias map to validate
+     * @param aliases the aliases that start a walk
      * @param installed the read for a type the map does not hold
      */
     private void validateAliasMapIsNotCyclic(

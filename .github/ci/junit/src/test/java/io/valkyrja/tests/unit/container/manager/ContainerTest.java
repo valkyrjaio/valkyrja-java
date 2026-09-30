@@ -355,4 +355,35 @@ final class ContainerTest {
 
         assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
     }
+
+    @Test
+    void setFromDataWalksAChainOnPastAnAliasTheContainerAlreadyHeld() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(Runnable.class));
+        var data =
+                new ContainerData(
+                        Map.of(ServiceFixture.class, CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        // The walk leaves the incoming map at CharSequence and reads the installed alias
+        container.setFromData(data);
+
+        assertEquals(CharSequence.class, container.getAliasedId(ServiceFixture.class));
+    }
+
+    @Test
+    void setFromDataRejectsAChainThatReturnsThroughAnAliasTheContainerAlreadyHeld() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        var data =
+                new ContainerData(
+                        Map.of(ServiceFixture.class, CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
+    }
 }
