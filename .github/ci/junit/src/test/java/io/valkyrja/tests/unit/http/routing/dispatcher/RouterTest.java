@@ -74,7 +74,7 @@ final class RouterTest {
 
     @Test
     void dispatchUnmatchedReturnsNotFound() {
-        var router = routerFor(new Matcher(new RouteCollection()));
+        var router = routerFor(new Matcher(new RouteCollection(), new Container()));
 
         var response = router.dispatch(request("/missing", RequestMethod.GET));
 
@@ -85,7 +85,7 @@ final class RouterTest {
     void dispatchMatchedRunsHandler() {
         var collection = new RouteCollection();
         collection.add(new Route("/users", "users.index", HANDLER));
-        var router = routerFor(new Matcher(collection));
+        var router = routerFor(new Matcher(collection, new Container()));
 
         var response = router.dispatch(request("/users", RequestMethod.GET));
 
@@ -96,7 +96,7 @@ final class RouterTest {
     void dispatchKnownPathWrongMethodReturnsMethodNotAllowed() {
         var collection = new RouteCollection();
         collection.add(new Route("/users", "users.index", HANDLER));
-        var router = routerFor(new Matcher(collection));
+        var router = routerFor(new Matcher(collection, new Container()));
 
         var response = router.dispatch(request("/users", RequestMethod.POST));
 
@@ -105,7 +105,7 @@ final class RouterTest {
 
     @Test
     void dispatchRouteDirectly() {
-        var router = routerFor(new Matcher(new RouteCollection()));
+        var router = routerFor(new Matcher(new RouteCollection(), new Container()));
 
         var response =
                 router.dispatchRoute(
@@ -126,7 +126,7 @@ final class RouterTest {
         var router =
                 new Router(
                         container,
-                        new Matcher(new RouteCollection()),
+                        new Matcher(new RouteCollection(), new Container()),
                         new ResponseFactory(),
                         new ThrowableCaughtHandler(container),
                         matchedHandler,

@@ -8,10 +8,8 @@
 
 package io.valkyrja.http.routing.matcher;
 
-import io.valkyrja.container.manager.Container;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.http.message.enum_.RequestMethod;
-import io.valkyrja.http.routing.collection.RouteCollection;
 import io.valkyrja.http.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.http.routing.data.contract.DynamicRouteContract;
 import io.valkyrja.http.routing.data.contract.ParameterContract;
@@ -32,14 +30,6 @@ public class Matcher implements MatcherContract {
 
     protected RouteCollectionContract collection;
     protected ContainerContract container;
-
-    public Matcher() {
-        this(new RouteCollection());
-    }
-
-    public Matcher(RouteCollectionContract collection) {
-        this(collection, new Container());
-    }
 
     public Matcher(RouteCollectionContract collection, ContainerContract container) {
         this.collection = collection;
