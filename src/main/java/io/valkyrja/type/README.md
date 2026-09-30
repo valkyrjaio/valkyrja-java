@@ -59,8 +59,8 @@ binds an implementation, and the container builds it. See
 [STATIC_METHODS.md](https://github.com/valkyrjaio/architecture/blob/26.x/STATIC_METHODS.md).
 
 Warning: no framework code calls `asFlatValue()` or `modify()`. The caster and
-the HTTP matcher call `asValue()` only. The contract mirrors PHP's `TypeContract`, which every PHP
-value object implements.
+the HTTP matcher call `asValue()` only. The contract mirrors PHP's
+`TypeContract`, which every PHP value object implements.
 
 This port ships no implementation of the contract. An application supplies its
 own type:
