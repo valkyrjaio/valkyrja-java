@@ -219,8 +219,8 @@ the call site counts as a default, so it suppresses the declared one. Call
 
 `getArgumentValue` reads step 1 and step 2, because an argument declares no
 default. Read `ParameterContract.getValues()` for every raw value of a parameter
-in `ARRAY` value mode, and `Caster.getCastValues()` for every value with the
-cast applied.
+in `ARRAY` value mode, and `CasterContract.getCastValues()` for every value with
+the cast applied. [Value casting](#value-casting) below shows the resolution.
 
 ```java
 boolean isShort = route.hasProvidedOption("short");
@@ -238,7 +238,7 @@ long name only, so pass the long name and not a short name.
 `io.valkyrja.cli.routing.caster.Caster` applies the cast, and the parameter
 applies nothing. The caster holds the container, so the data object needs none.
 The parameter holds the cast and the raw values, and `getValues()` returns those
-raw values. The HTTP matcher holds the same position for a route parameter.
+raw values.
 
 `Caster.getCastValues()` returns the converted value when `isConvert()` is
 `true`, and the type itself when `isConvert()` is `false`. It passes the raw
