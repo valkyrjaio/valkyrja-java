@@ -98,8 +98,10 @@ container.bindAlias(MatcherContract.class, raw(Matcher.class));
 An alias that points at a chain that returns to it has no end, so every entry
 point rejects one with `ContainerCyclicAliasException`: `bindAlias` for the pair
 it is asked to store, and the constructor and `setFromData` for the map they
-receive. A child also follows each chain through its parent. The check runs at
-registration, not at resolution.
+receive. A child also follows each chain through its parent. Each check covers
+the maps that exist when it runs, so a container that binds an alias after a
+child reads through it can still close a chain. A child throws for that chain
+when it walks the parent's aliases to resolve one.
 
 ### setSingleton
 
@@ -390,9 +392,10 @@ itself.
 
 Warning: on that path the parent reads none of the maps of the child. An
 instance that the child holds for the target does not answer the alias. The
-alias returns the copy of the parent, or throws
-`ContainerInvalidReferenceException` when the parent holds none. To reach the
-copy of the child through an alias, declare the alias on the child:
+parent answers from its own maps: it returns the copy that it holds, or it runs
+its own binding, or it throws `ContainerInvalidReferenceException` when it holds
+no registration at all. To reach the copy of the child through an alias, declare
+the alias on the child:
 
 ```java
 // Once, at boot.
@@ -411,9 +414,11 @@ child.get(TimeSourceContract.class); // requestClock
 ```
 
 On the exception path, the factory receiver follows the implementation, as
-[Resolution order](#resolution-order) states, and the instance caches in the
-child. A deferred target is the one case where both give the child, because the
-publish callback runs in the container that publishes it.
+[Resolution order](#resolution-order) states. A singleton that the child builds
+on that path caches in the child. A publisher decides what it registers, so a
+publisher that binds a `bind` factory caches nothing. A deferred target is the
+one case where both give the child, because the publish callback runs in the
+container that publishes it.
 
 ### Using a child container
 
@@ -429,11 +434,11 @@ describes the worker entry classes.
 
 ## Exceptions
 
-| Exception                                  | The container throws it when                             |
-| :----------------------------------------- | :------------------------------------------------------- |
-| `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias |
-| `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback            |
-| `ContainerCyclicAliasException`            | An alias points at a chain that returns to it            |
+| Exception                                  | The container throws it when                                                                          |
+| :----------------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias                                              |
+| `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback                                                         |
+| `ContainerCyclicAliasException`            | An alias points at a chain that returns to it, at registration or on a child's walk of a parent chain |
 
 `ContainerInvalidReferenceException` and `ContainerCyclicAliasException` extend
 `ContainerInvalidArgumentException`, and
