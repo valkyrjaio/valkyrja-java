@@ -31,6 +31,7 @@ import io.valkyrja.tests.fixtures.container.provider.BindingProviderFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.PublishingProviderFixture;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -578,5 +579,41 @@ final class ChildContainerTest {
 
         assertSame(instance, localChild.getSingleton(SingletonFixture.class));
         assertFalse(parent.isSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void setFromDataAcceptsDataWithNoAliasWhenAChainAlreadyReturns() {
+        ChildContainer localChild = createChild();
+        localChild.setFromData(
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of()));
+        // The parent closes the chain after the child was built
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        Map<Class<?>, BiFunction<ContainerContract, Map<String, Object>, Object>> services =
+                Map.of(ServiceFixture.class, ServiceFixture::make);
+
+        // The call carries no alias, so a chain the container already held is no part of it
+        localChild.setFromData(new ContainerData(Map.of(), Map.of(), services, Map.of()));
+
+        assertTrue(localChild.isService(ServiceFixture.class));
+    }
+
+    @Test
+    void aParentFactoryCachesItsSingletonDependencyInTheParent() {
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bind(
+                raw(Runnable.class),
+                (container, arguments) -> {
+                    container.get(SingletonFixture.class, Map.of());
+
+                    return ServiceFixture.make(container, arguments);
+                });
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = createChild();
+
+        localChild.getAliased(CharSequence.class, Map.of());
+
+        // The parent answers the alias, so what its factory resolves caches in the parent
+        assertTrue(parent.isSingletonInstance(SingletonFixture.class));
     }
 }
