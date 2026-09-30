@@ -24,8 +24,8 @@ public Cast(Class<? extends TypeContract> type);
 The one-argument constructor sets `convert` to `true` and `isArray` to `false`.
 Three getters read the state back: `getType()`, `isConvert()`, and `isArray()`.
 
-Warning: no framework code reads `isArray()`. The caster converts each value one
-at a time, whatever the flag holds.
+Warning: no framework code reads `isArray()`. The caster and the HTTP matcher
+convert each value one at a time, whatever the flag holds.
 
 A route parameter holds an optional cast. The CLI parameter and the HTTP
 parameter both read it through `hasCast()` and `getCast()`, and `withCast(Cast)`
@@ -58,8 +58,8 @@ method on a variable class, so this port leaves the method out. The application
 binds an implementation, and the container builds it. See
 [STATIC_METHODS.md](https://github.com/valkyrjaio/architecture/blob/26.x/STATIC_METHODS.md).
 
-Warning: no framework code calls `asFlatValue()` or `modify()`. The caster calls
-`asValue()` only. The contract mirrors PHP's `TypeContract`, which every PHP
+Warning: no framework code calls `asFlatValue()` or `modify()`. The caster and
+the HTTP matcher call `asValue()` only. The contract mirrors PHP's `TypeContract`, which every PHP
 value object implements.
 
 This port ships no implementation of the contract. An application supplies its

@@ -238,7 +238,8 @@ long name only, so pass the long name and not a short name.
 `io.valkyrja.cli.routing.caster.Caster` applies the cast, and the parameter
 applies nothing. The caster holds the container, so the data object needs none.
 The parameter holds the cast and the raw values, and `getValues()` returns those
-raw values.
+raw values. The HTTP matcher holds the container the same way for a route
+parameter.
 
 `Caster.getCastValues()` returns the converted value when `isConvert()` is
 `true`, and the type itself when `isConvert()` is `false`. It passes the raw
