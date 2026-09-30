@@ -24,8 +24,9 @@ public Cast(Class<? extends TypeContract> type);
 The one-argument constructor sets `convert` to `true` and `isArray` to `false`.
 Three getters read the state back: `getType()`, `isConvert()`, and `isArray()`.
 
-Warning: no framework code reads `isArray()`. The caster and the HTTP matcher
-convert each value one at a time, whatever the flag holds.
+Warning: no framework code reads `isArray()`. The caster converts each value one
+at a time, and the HTTP matcher converts one matched value. Each reader ignores
+the flag.
 
 A route parameter holds an optional cast. The CLI parameter and the HTTP
 parameter both read it through `hasCast()` and `getCast()`, and `withCast(Cast)`
