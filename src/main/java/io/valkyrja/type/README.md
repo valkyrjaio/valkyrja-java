@@ -12,8 +12,8 @@ The component publishes no container binding, and it holds no configuration.
 
 ## Cast
 
-`io.valkyrja.type.data.Cast` describes how a route parameter converts. The type
-is a container binding key, so the container builds the type.
+`io.valkyrja.type.data.Cast` describes the conversion that a route parameter
+declares. The type is a container binding key, so the container builds the type.
 
 ```java
 public Cast(Class<? extends TypeContract> type, boolean convert, boolean isArray);
