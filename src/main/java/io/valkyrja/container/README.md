@@ -95,7 +95,7 @@ private static <T> Class<T> raw(Class<?> type) {
 container.bindAlias(MatcherContract.class, raw(Matcher.class));
 ```
 
-An alias that points at a chain that returns to it has no end. Three places
+An alias that points at a chain that returns to it has no end. Four checks
 reject one with `ContainerCyclicAliasException`:
 
 - `bindAlias` checks the pair it is asked to store.
@@ -104,13 +104,13 @@ reject one with `ContainerCyclicAliasException`:
 - A child walking the parent's aliases checks the hops of one walk.
 - A child resolving a parent-declared alias checks the target it returns to.
 
-The first two run at registration, and nothing is installed before a walk ends,
-so a caller that catches the exception keeps the container it had. A container
-that writes an alias after a child reads through it is outside registration, and
-the last two checks cover the shapes a child can then walk into. A chain that
-neither one sees resolves to whatever the first answerable hop gives, or ends
-with a missing reference, which is what `NativeChildContainer` reports for a
-parent that is itself a child, because it reads the parent's own map alone.
+The first two run at registration. A container installs no map before its walk
+ends, so a caller that catches the exception keeps the container it had. A
+container that writes an alias after a child reads through it is outside
+registration. The last two checks cover the shapes a child then walks into. A
+chain that neither one sees resolves through the first answerable hop, or ends
+with a missing reference. `NativeChildContainer` reports that for a parent which
+is itself a child, because it reads the parent's own map alone.
 
 ### setSingleton
 
