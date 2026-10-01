@@ -209,9 +209,9 @@ public class NativeChildContainer extends Container {
             return false;
         }
 
-        // The child reads its own marker here, because the child is the container that
-        // caches what it builds. A marker it does not hold leaves the lookup to the parent.
-        return isSingletonBinding(id);
+        // This class copies no map, so the parent's marker is the child's as well. One read
+        // carries what the portable child needs two for.
+        return parent.singletons.containsKey(id);
     }
 
     /**

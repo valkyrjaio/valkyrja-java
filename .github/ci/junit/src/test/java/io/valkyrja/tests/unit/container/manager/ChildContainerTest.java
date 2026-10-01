@@ -662,4 +662,16 @@ final class ChildContainerTest {
                 localChild.getAliased(CharSequence.class, Map.of()));
         assertTrue(parent.isSingletonInstance(SingletonFixture.class));
     }
+
+    @Test
+    void getAliasedKeepsAParentBindingWhenTheChildShadowsItWithASingleton() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.bindSingleton(raw(ServiceFixture.class), SingletonFixture::make);
+
+        // The parent would build its own binding, so the alias stays with the parent
+        assertInstanceOf(ServiceFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+        assertInstanceOf(SingletonFixture.class, localChild.get(ServiceFixture.class, Map.of()));
+    }
 }
