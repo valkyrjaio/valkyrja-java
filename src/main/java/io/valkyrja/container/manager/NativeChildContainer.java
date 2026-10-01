@@ -17,23 +17,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
-/**
- * A per-request child container that accesses parent state via direct protected field reads.
- *
- * <p>Requires the parent to be a concrete {@link Container} instance (same package). No map copies
- * at construction — parent fields are read directly, giving zero per-request allocation beyond the
- * child's own empty maps.
- *
- * <p>Singleton resolution order:
- *
- * <ol>
- *   <li>Child's own cached instance
- *   <li>Parent's cached instance (direct field read — no method dispatch, no creation)
- *   <li>Child or parent singleton binding → create in child, cache in child only
- * </ol>
- *
- * @see ChildContainer for a contract-only alternative that works across all languages
- */
 public class NativeChildContainer extends Container {
 
     private final Container parent;
