@@ -578,7 +578,7 @@ final class NativeChildContainerTest {
                 throwable
                         .getMessage()
                         .startsWith(
-                                "Alias `java.lang.CharSequence` cannot point at `java.lang.Runnable`"));
+                                "Alias `java.lang.CharSequence` cannot reach `java.lang.Runnable`"));
     }
 
     @Test
