@@ -386,4 +386,20 @@ final class ContainerTest {
 
         assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
     }
+
+    @Test
+    void getSingletonKeepsTheInstanceAFactoryRegisteredForItsOwnId() {
+        var container = new Container();
+        var published = new SingletonFixture();
+        container.bindSingleton(
+                raw(Runnable.class),
+                (c, a) -> {
+                    c.setSingleton(raw(Runnable.class), published);
+
+                    return SingletonFixture.make(c, a);
+                });
+
+        // The factory put one in the map, so that is the one every reader gets
+        assertSame(published, container.getSingleton(Runnable.class));
+    }
 }
