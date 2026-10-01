@@ -34,9 +34,9 @@ returns a copy that holds a new one.
 
 ## CastArgument
 
-`io.valkyrja.type.constant.CastArgument` holds the key that the caster passes to
-the container. `CastArgument.VALUE` names the raw value, so a factory reads the
-same key the framework writes.
+`io.valkyrja.type.constant.CastArgument` holds the key that the caster and the
+HTTP matcher pass to the container. `CastArgument.VALUE` names the raw value, so
+a factory reads the same key the framework writes.
 
 ## TypeContract
 
