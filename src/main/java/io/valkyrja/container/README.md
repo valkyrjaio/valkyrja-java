@@ -106,21 +106,25 @@ reject one with `ContainerCyclicAliasException`:
 - `bindAlias` checks the pair it is asked to store.
 - The constructor and `setFromData` check the aliases they receive, and the
   chain those aliases reach.
-- A child walking the parent's aliases checks the hops of one walk.
+- `ChildContainer` walking the parent's aliases checks the hops of one walk.
+  `NativeChildContainer` reads the parent's own map, which the first two checks
+  keep acyclic, so it carries no such check.
 - A child resolving a parent-declared alias checks the target it returns to. The
   chain returns through an alias the child declares, or through a factory the
   child runs. A factory that registered that id while it ran has broken the
   chain, so the lookup answers with what the factory registered.
 
-The first two run at registration. A container installs no map before its walk
-ends, so a caller that catches the exception keeps the container it had. A
+The first two checks run at registration. A container installs no map before its
+walk ends, so a caller that catches the exception keeps the container it had. A
 container that writes an alias after a child reads through it is outside
-registration. The last two checks cover the shapes a child then walks into. A
-chain that neither one sees ends in one of three ways. It resolves through the
-first hop the parent would answer. It ends with a missing reference, when no hop
-answers. It does not end, when a factory the parent runs asks for its own id
-again. `NativeChildContainer` reports that missing reference for a
-parent which is itself a child, because it reads the parent's own map alone.
+registration. A chain no check sees ends in one of four ways:
+
+- It resolves through the first hop the parent would answer.
+- It ends with a missing reference, when no hop answers. `NativeChildContainer`
+  reports that for a parent which is itself a child.
+- It does not end, when a factory the parent runs asks for its own id again.
+- It does not end, when an alias the child declares closes through a factory the
+  child runs. That path carries no resolution-time check.
 
 ### setSingleton
 
@@ -404,7 +408,7 @@ the first time, when the child holds that registration too. The request must not
 hold one copy for the alias and another for the target. Three cases:
 
 - **A singleton binding the parent never built** — the child resolves it when
-  its own `singletons` map carries the marker.
+  the child reports that binding.
 - **A publisher the parent has not run** — the child resolves it when the child
   reports that callback.
 - **Every other target** — the parent answers the whole lookup, whatever the
