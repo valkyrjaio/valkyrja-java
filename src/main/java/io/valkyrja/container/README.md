@@ -401,9 +401,9 @@ either way. The child reuses anything that the parent already built or
 published.
 
 Warning: that exception also decides which binding the alias reaches. Give the
-parent a singleton binding it never built, and give the child a binding for the
-same id, and the alias reaches the binding of the child, because the child
-resolves the target itself.
+parent a singleton binding it never built, and give the child a factory for the
+same id, and the alias reaches the factory of the child, because the child holds
+the copied marker and resolves the target itself.
 
 Warning: outside that exception, both implementations give the call to the
 parent, so a factory that the parent holds receives the parent. A `bind` service
