@@ -688,15 +688,15 @@ final class ChildContainerTest {
     }
 
     @Test
-    void getAliasedThrowsWhenTheSnapshotOmitsTheParentCallback() {
+    void getAliasedDelegatesWhenTheSnapshotOmitsTheParentCallback() {
         parent.register(new PublishingProviderFixture());
         parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
         var localChild = new ChildContainer(parent, new ContainerData());
 
-        // The child takes the carve-out on the parent's state and cannot publish it
-        assertThrows(
-                ContainerInvalidReferenceException.class,
-                () -> localChild.getAliased(CharSequence.class, Map.of()));
+        // The child holds no callback, so it leaves the publish to the parent
+        assertInstanceOf(
+                ProvidedFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+        assertTrue(parent.isPublished(ProvidedFixture.class));
     }
 
     @Test
