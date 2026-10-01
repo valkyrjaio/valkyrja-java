@@ -631,4 +631,22 @@ final class NativeChildContainerTest {
                 ContainerInvalidReferenceException.class,
                 () -> child.getAliased(CharSequence.class, Map.of()));
     }
+
+    @Test
+    void getAliasedAnswersAFactoryThatRegisteredItsOwnIdWhileItRan() {
+        parent.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    var instance = new SingletonFixture();
+                    // Register first, the way a factory breaks a chain that returns to it
+                    container.setSingleton(raw(SingletonFixture.class), instance);
+                    container.get(CharSequence.class, Map.of());
+
+                    return instance;
+                });
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+
+        // This class runs the parent factory with the child, so the re-entry reaches here
+        assertInstanceOf(SingletonFixture.class, child.getAliased(CharSequence.class, Map.of()));
+    }
 }
