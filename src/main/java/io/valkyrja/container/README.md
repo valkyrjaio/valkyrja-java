@@ -78,10 +78,10 @@ container.bindSingleton(
         (c, arguments) -> new Matcher(c.getSingleton(RouteCollectionContract.class)));
 ```
 
-Warning: the container caches by publishing into its instance map, not by
-writing over it. A factory that registers the id it is building, the way one
-breaks a chain that returns to it, decides what every reader gets. The object
-the factory returns is discarded then.
+Warning: the container keeps the first instance its map holds for an id. A
+factory that registers the id it is building, the way one breaks a chain that
+returns to it, decides what every reader gets. The object that factory returns
+is discarded then.
 
 ### bindAlias
 
@@ -108,17 +108,19 @@ reject one with `ContainerCyclicAliasException`:
   chain those aliases reach.
 - A child walking the parent's aliases checks the hops of one walk.
 - A child resolving a parent-declared alias checks the target it returns to. The
-  chain returns to the child only when the target's factory runs there. A
-  factory that registered that id while it ran has broken the chain, so the
-  lookup answers with what the factory registered.
+  chain returns through an alias the child declares, or through a factory the
+  child runs. A factory that registered that id while it ran has broken the
+  chain, so the lookup answers with what the factory registered.
 
 The first two run at registration. A container installs no map before its walk
 ends, so a caller that catches the exception keeps the container it had. A
 container that writes an alias after a child reads through it is outside
 registration. The last two checks cover the shapes a child then walks into. A
-chain that neither one sees resolves through the first answerable hop, or ends
-with a missing reference. `NativeChildContainer` reports that for a parent which
-is itself a child, because it reads the parent's own map alone.
+A chain that neither one sees ends in one of three ways. It resolves through the
+first hop the parent would answer. It ends with a missing reference, when no hop
+answers. It does not end, when a factory the parent runs asks for its own id
+again. `NativeChildContainer` reports that missing reference for a
+parent which is itself a child, because it reads the parent's own map alone.
 
 ### setSingleton
 
@@ -396,12 +398,18 @@ child.get(NotifierContract.class); // built by the binding of the parent
 ```
 
 There is one exception. The child resolves a target the parent would build for
-the first time, when the child holds that registration too. That is a singleton
-binding the parent never built, or a publisher it has not run. The request must
-not hold one copy for the alias and another for the target. A child that holds
-neither leaves the whole lookup to the parent, and the parent answers it. A
-worker takes one snapshot after boot, so a request holds every registration. The
-child reuses anything that the parent already built or published.
+the first time, when the child holds that registration too. The request must not
+hold one copy for the alias and another for the target. Three cases:
+
+- **A singleton binding the parent never built** — the child resolves it when
+  its own `singletons` map carries the marker.
+- **A publisher the parent has not run** — the child resolves it when its own
+  `callbacks` map carries the callback.
+- **The child carries no registration for the target** — the parent answers the
+  whole lookup.
+
+A worker takes one snapshot after boot, so a request carries every registration.
+The child reuses anything that the parent already built or published.
 
 Warning: that exception also decides which binding the alias reaches. The child
 resolves the target itself, so the factory of the child answers. The child needs
@@ -439,8 +447,9 @@ child.get(TimeSourceContract.class); // requestClock
 ```
 
 On the exception path, the factory receiver follows the implementation, as
-[Resolution order](#resolution-order) states. A singleton that the child builds
-on that path caches in the child. A publisher decides what it registers, so a
+[Resolution order](#resolution-order) states, and the child's own factory runs
+when the child declares one for that id. A singleton that the child builds on
+that path caches in the child. A publisher decides what it registers, so a
 publisher that binds a `bind` factory caches nothing. A deferred target is the
 one case where both give the child, because the publish callback runs in the
 container that publishes it.
