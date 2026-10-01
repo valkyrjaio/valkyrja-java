@@ -387,12 +387,15 @@ child.get(SlackNotifier.class);    // built by the binding of the child
 child.get(NotifierContract.class); // built by the binding of the parent
 ```
 
-There is one exception. When the parent would resolve the target for the first
-time, and the child holds that registration too, the child resolves the target
-itself. That is a singleton binding the parent never built, or a publisher the
-parent has not run. Both hold the same registration, so if the parent resolved
-it, the request would hold one copy for the alias and another for the target. A
-child that holds neither leaves the whole lookup to the parent. The child reuses
+There is one exception. The child resolves a target the parent would build for
+the first time, because the request must not hold one copy for the alias and
+another for the target. The two arms of that rule read different state. For a
+singleton binding the parent never built, the child resolves it only when it
+holds the binding too, and a child without it leaves the whole lookup to the
+parent. For a publisher the parent has not run, the parent's state alone
+decides, so a child whose snapshot omits the callback reports a missing
+reference. A worker takes one snapshot after boot, so a request holds every
+registration either way. The child reuses
 anything that the parent already built or published.
 
 Warning: that exception also decides which binding the alias reaches. When the
