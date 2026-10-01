@@ -246,6 +246,7 @@ value to the container under the key `CastArgument.VALUE`.
 
 ```java
 import io.valkyrja.cli.routing.caster.contract.CasterContract;
+import io.valkyrja.cli.routing.data.ArgumentParameter;
 import io.valkyrja.type.constant.CastArgument;
 import io.valkyrja.type.data.Cast;
 
