@@ -11,6 +11,7 @@ package io.valkyrja.cli.routing.data.contract;
 import io.valkyrja.cli.interaction.argument.contract.ArgumentContract;
 import io.valkyrja.cli.routing.enum_.ArgumentMode;
 import io.valkyrja.cli.routing.enum_.ArgumentValueMode;
+import io.valkyrja.type.data.Cast;
 import java.util.List;
 
 public interface ArgumentParameterContract extends ParameterContract {
@@ -28,6 +29,12 @@ public interface ArgumentParameterContract extends ParameterContract {
     ArgumentParameterContract withArguments(ArgumentContract... arguments);
 
     ArgumentParameterContract withAddedArguments(ArgumentContract... arguments);
+
+    @Override
+    ArgumentParameterContract withCast(Cast cast);
+
+    @Override
+    ArgumentParameterContract withoutCast();
 
     @Override
     ArgumentParameterContract validateValues();
