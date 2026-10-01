@@ -15,8 +15,8 @@ public class ContainerCyclicAliasException extends ContainerInvalidArgumentExcep
     /**
      * Construct a new exception.
      *
-     * @param alias the alias being bound
-     * @param id the type the alias points at
+     * @param alias the type the chain leaves from
+     * @param id the type it points at, which reaches the first again
      */
     public ContainerCyclicAliasException(String alias, String id) {
         super(
@@ -26,7 +26,7 @@ public class ContainerCyclicAliasException extends ContainerInvalidArgumentExcep
                         + id
                         + "`, because `"
                         + id
-                        + "` already resolves to `"
+                        + "` already reaches `"
                         + alias
                         + "`.");
     }
