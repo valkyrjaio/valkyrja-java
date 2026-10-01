@@ -388,11 +388,12 @@ child.get(NotifierContract.class); // built by the binding of the parent
 ```
 
 There is one exception. When the parent would resolve the target for the first
-time, the child resolves the target itself. That is a singleton binding that the
-parent never built, or a publisher that the parent has not run. The child holds
-the same registration, so if the parent resolved it, the request would hold one
-copy for the alias and another for the target. The child reuses anything that
-the parent already built or published.
+time, and the child holds that registration too, the child resolves the target
+itself. That is a singleton binding the parent never built, or a publisher the
+parent has not run. Both hold the same registration, so if the parent resolved
+it, the request would hold one copy for the alias and another for the target. A
+child that holds neither leaves the whole lookup to the parent. The child reuses
+anything that the parent already built or published.
 
 Warning: that exception also decides which binding the alias reaches. When the
 parent never builds a singleton, a child that shadows the target gets its own
