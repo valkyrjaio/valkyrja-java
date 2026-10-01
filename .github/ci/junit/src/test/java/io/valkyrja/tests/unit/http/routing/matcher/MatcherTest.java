@@ -202,7 +202,7 @@ final class MatcherTest {
     }
 
     @Test
-    void noArgConstructorUsesEmptyCollection() {
+    void emptyCollectionMatchesNothing() {
         assertNull(
                 new Matcher(new RouteCollection(), new Container()).match("/x", RequestMethod.GET));
     }
