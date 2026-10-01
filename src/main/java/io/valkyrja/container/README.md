@@ -232,7 +232,7 @@ after the framework providers to replace a framework default.
 
 ### The Provides annotation
 
-`io.valkyrja.container.annotation.Provides` marks a publisher method with the
+`io.valkyrja.container.attribute.Provides` marks a publisher method with the
 key it publishes.
 
 ```java
