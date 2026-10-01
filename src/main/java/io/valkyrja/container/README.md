@@ -79,9 +79,8 @@ container.bindSingleton(
 ```
 
 Warning: a build keeps the first instance the map holds for an id. A
-factory that registers the id it is building, the way one breaks a chain that
-returns to it, decides what every reader gets. The object that factory returns
-is discarded then.
+factory that registers the id it is building decides what every reader gets.
+The object that factory returns is discarded then.
 
 ### bindAlias
 
@@ -110,9 +109,9 @@ reject one with `ContainerCyclicAliasException`:
   `NativeChildContainer` reads the parent's own map, which the first two checks
   keep acyclic, so it carries no such check.
 - A child resolving a parent-declared alias checks the target it returns to. The
-  chain returns through an alias the child declares, or through a factory the
-  child runs. A factory that registered that id while it ran has broken the
-  chain, so the lookup answers with what the factory registered.
+  check sees a chain that leaves the child and comes back to that target. A
+  factory that registered the target while it ran has broken the chain, so the
+  lookup answers with what the factory registered.
 
 The first two checks run at registration. A container installs no map before its
 walk ends, so a caller that catches the exception keeps the container it had. A
@@ -123,8 +122,8 @@ registration. A chain no check sees ends in one of four ways:
 - It ends with a missing reference, when no hop answers. `NativeChildContainer`
   reports that for a parent which is itself a child.
 - It does not end, when a factory asks again for the id that reached it.
-- It does not end, when an alias the child declares closes through a factory the
-  child runs. That path carries no resolution-time check.
+- It does not end, when a chain starts at an alias the child declares. That
+  path resolves without the check above, so nothing bounds it.
 
 ### setSingleton
 
@@ -435,10 +434,14 @@ itself.
 
 Warning: on that path the parent reads none of the maps of the child. An
 instance that the child holds for the target does not answer the alias. The
-parent answers from its own maps: it returns the copy that it holds, or it runs
-its own binding, or it throws `ContainerInvalidReferenceException` when it holds
-no registration at all. To reach the copy of the child through an alias, declare
-the alias on the child:
+parent answers from its own maps in one of three ways:
+
+- It returns the copy that it holds.
+- It runs its own binding.
+- It throws `ContainerInvalidReferenceException`, when it holds no registration
+  for the target.
+
+To reach the copy of the child through an alias, declare the alias on the child:
 
 ```java
 // Once, at boot.

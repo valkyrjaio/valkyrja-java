@@ -13,11 +13,7 @@ import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/**
- * Deferred provider that publishes one instance, and no singleton binding. The container it
- * publishes into holds the instance, so the type reads as a singleton instance and never as a
- * singleton binding.
- */
+/** A provider that publishes one instance, and no singleton binding. */
 public final class PublishingProviderFixture implements ServiceProviderContract {
 
     public static void publishProvided(ContainerContract container) {
