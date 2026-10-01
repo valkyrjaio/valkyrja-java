@@ -9,7 +9,7 @@
 package io.valkyrja.container.provider;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
-import io.valkyrja.container.annotation.Provides;
+import io.valkyrja.container.attribute.Provides;
 import io.valkyrja.container.data.contract.ContainerDataContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.provider.contract.ServiceProviderContract;
