@@ -686,4 +686,16 @@ final class ChildContainerTest {
                 ContainerInvalidReferenceException.class,
                 () -> localChild.getAliased(CharSequence.class, Map.of()));
     }
+
+    @Test
+    void getAliasedThrowsWhenTheSnapshotOmitsTheParentCallback() {
+        parent.register(new PublishingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        var localChild = new ChildContainer(parent, new ContainerData());
+
+        // The child takes the carve-out on the parent's state and cannot publish it
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
 }
