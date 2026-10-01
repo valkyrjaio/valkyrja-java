@@ -107,7 +107,8 @@ reject one with `ContainerCyclicAliasException`:
 - The constructor and `setFromData` check the aliases they receive, and the
   chain those aliases reach.
 - A child walking the parent's aliases checks the hops of one walk.
-- A child resolving a parent-declared alias checks the target it returns to. A
+- A child resolving a parent-declared alias checks the target it returns to. The
+  chain returns to the child only when the target's factory runs there. A
   factory that registered that id while it ran has broken the chain, so the
   lookup answers with what the factory registered.
 
@@ -403,9 +404,10 @@ worker takes one snapshot after boot, so a request holds every registration. The
 child reuses anything that the parent already built or published.
 
 Warning: that exception also decides which binding the alias reaches. The child
-resolves the target itself, so the child's own registration answers. Give the
-parent a singleton binding it never built. Give the child a factory for the same
-id. The alias then reaches the factory of the child.
+resolves the target itself, so the factory of the child answers. The child needs
+the marker for that id, from its snapshot or from its own `bindSingleton`. Give
+the parent a singleton binding it never built, and the alias reaches the child's
+factory.
 
 Warning: outside that exception, both implementations give the call to the
 parent, so a factory that the parent holds receives the parent. A `bind` service
