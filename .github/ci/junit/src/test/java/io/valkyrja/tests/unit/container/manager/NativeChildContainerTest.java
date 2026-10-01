@@ -569,7 +569,57 @@ final class NativeChildContainerTest {
         // The parent closes the chain after the child was built
         parent.bindAlias(CharSequence.class, raw(Runnable.class));
 
+        var throwable =
+                assertThrows(
+                        ContainerCyclicAliasException.class,
+                        () -> child.get(CharSequence.class, Map.of()));
+
+        assertTrue(
+                throwable
+                        .getMessage()
+                        .startsWith(
+                                "Alias `java.lang.CharSequence` cannot point at `java.lang.Runnable`"));
+    }
+
+    @Test
+    void aDeclaredServiceKeepsItsLifetimeAgainstAParentMarker() {
+        child.bind(ServiceFixture.class, ServiceFixture::make);
+        // The parent declares the same type a singleton, after the child bound its own
+        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
+
+        // The child declared a service, so the child's binding governs the lifetime
+        assertFalse(child.isSingletonBinding(ServiceFixture.class));
+        assertNotSame(
+                child.get(ServiceFixture.class, Map.of()),
+                child.get(ServiceFixture.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedReportsAMissingReferenceForACycleANestedParentHolds() {
+        // This class reads the parent's own map, so a grandparent's aliases stay invisible
+        var grandparent = new Container();
+        var middle = new NativeChildContainer(grandparent);
+        middle.bindAlias(Runnable.class, raw(CharSequence.class));
+        grandparent.bindAlias(CharSequence.class, raw(Runnable.class));
+        var localChild = new NativeChildContainer(middle);
+
         assertThrows(
-                ContainerCyclicAliasException.class, () -> child.get(CharSequence.class, Map.of()));
+                ContainerInvalidReferenceException.class,
+                () -> localChild.get(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getSingletonKeepsTheInstanceAFactoryRegisteredForItsOwnId() {
+        var published = new SingletonFixture();
+        child.bindSingleton(
+                raw(Runnable.class),
+                (c, a) -> {
+                    c.setSingleton(raw(Runnable.class), published);
+
+                    return SingletonFixture.make(c, a);
+                });
+
+        // The factory put one in the map, so that is the one every reader gets
+        assertSame(published, child.getSingleton(Runnable.class));
     }
 }

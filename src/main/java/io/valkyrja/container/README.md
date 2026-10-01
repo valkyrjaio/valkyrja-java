@@ -107,7 +107,9 @@ The first two run at registration. Nothing is installed before a walk ends, so a
 caller that catches the exception keeps the container it had. A container that
 writes an alias after a child reads through it is outside registration. The
 third check reports such a chain when resolving it returns to a target the child
-is already resolving. Otherwise the lookup ends with a missing reference.
+is already resolving. Otherwise the lookup ends with a missing reference, which
+is what `NativeChildContainer` reports for a parent that is itself a child,
+because it reads the parent's own map alone.
 
 ### setSingleton
 
