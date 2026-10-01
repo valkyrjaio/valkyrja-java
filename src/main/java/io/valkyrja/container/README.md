@@ -108,22 +108,23 @@ reject one with `ContainerCyclicAliasException`:
 - `ChildContainer` walking the parent's aliases checks the hops of one walk.
   `NativeChildContainer` reads the parent's own map, which the first two checks
   keep acyclic, so it carries no such check.
-- A child resolving a parent-declared alias checks the target it returns to. The
-  check sees a chain that leaves the child and comes back to that target. A
+- A child resolving a parent-declared alias checks the target it returns to. A
   factory that registered the target while it ran has broken the chain, so the
   lookup answers with what the factory registered.
 
 The first two checks run at registration. A container installs no map before its
 walk ends, so a caller that catches the exception keeps the container it had. A
 container that writes an alias after a child reads through it is outside
-registration. A chain no check sees ends in one of four ways:
+registration. A chain no check sees ends in one of five ways:
 
 - It resolves through the first hop the parent would answer.
 - It ends with a missing reference, when no hop answers. `NativeChildContainer`
   reports that for a parent which is itself a child.
 - It does not end, when a factory asks again for the id that reached it.
-- It does not end, when a chain starts at an alias the child declares. That
-  path resolves without the check above, so nothing bounds it.
+- It does not end, when an alias the child declares closes a chain through a
+  factory the child runs. No check sits on that path.
+- It throws, when the parent is itself a child and that parent's own walk sees
+  the whole chain.
 
 ### setSingleton
 
@@ -339,10 +340,11 @@ that point. It still publishes a deferred id, and caches a singleton, when it
 answers a lookup a child handed to it. Each request builds a child, resolves
 through the child, and discards the child. A write of the child reaches the
 child only. An id the child cannot answer goes to the parent, and the parent
-answers it as it would for any caller. `ChildContainer` hands a parent factory
-to the parent, so every singleton that factory resolves caches in the parent.
-`NativeChildContainer` applies the same factory with the child, so those
-dependencies cache in the child.
+answers it as it would for any caller.
+
+`ChildContainer` hands a parent factory to the parent, so every singleton that
+factory resolves caches in the parent. `NativeChildContainer` applies the same
+factory with the child, so those dependencies cache in the child.
 
 ### The two implementations
 
@@ -434,10 +436,12 @@ itself.
 
 Warning: on that path the parent reads none of the maps of the child. An
 instance that the child holds for the target does not answer the alias. The
-parent answers from its own maps in one of three ways:
+parent answers from its own maps in one of four ways:
 
 - It returns the copy that it holds.
 - It runs its own binding.
+- It publishes a provider it holds, and answers with what that publisher
+  registered.
 - It throws `ContainerInvalidReferenceException`, when it holds no registration
   for the target.
 
