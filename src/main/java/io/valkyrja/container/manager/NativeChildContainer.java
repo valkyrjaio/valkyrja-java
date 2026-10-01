@@ -89,7 +89,7 @@ public class NativeChildContainer extends Container {
         // The parent would resolve this target for the first time, and the child holds
         // the same registration, so letting the parent do it would leave the request
         // with one copy for the alias and another for the id.
-        if (isResolvedInChild(target)) {
+        if (resolvesInChild(target)) {
             return getTargetOnce(id, (Class<T>) target, arguments);
         }
 
@@ -199,7 +199,7 @@ public class NativeChildContainer extends Container {
      * @param id the target type
      * @return true if the child resolves it, rather than the parent
      */
-    private boolean isResolvedInChild(Class<?> id) {
+    private boolean resolvesInChild(Class<?> id) {
         // The parent publishes before it reads any map, so this test comes first.
         if (parent.isDeferred(id) && !parent.isPublished(id)) {
             return true;
@@ -224,8 +224,16 @@ public class NativeChildContainer extends Container {
      */
     private <T> T getTargetOnce(Class<?> id, Class<T> target, Map<String, Object> arguments) {
         // A walk ends at the first hop the parent would answer, so a chain that closes
-        // across two of them returns here rather than to one walk. Name the pair.
+        // across two of them returns here rather than to one walk. A factory that
+        // registered its own id while it runs has broken the chain, so read that first,
+        // and name the pair only when nothing can answer.
         if (!targetsInFlight.add(target)) {
+            T registered = getSingletonWithoutChecks(target);
+
+            if (registered != null) {
+                return registered;
+            }
+
             throw new ContainerCyclicAliasException(id.getName(), target.getName());
         }
 

@@ -710,4 +710,25 @@ final class ChildContainerTest {
         assertInstanceOf(
                 SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
     }
+
+    @Test
+    void getAliasedAnswersAFactoryThatRegisteredItsOwnIdWhileItRan() {
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        // This class hands a parent factory to the parent, so the child runs its own
+        localChild.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    var instance = new SingletonFixture();
+                    container.setSingleton(raw(SingletonFixture.class), instance);
+                    container.get(CharSequence.class, Map.of());
+
+                    return instance;
+                });
+
+        // The factory registered the target, so the alias answers rather than throwing
+        assertInstanceOf(
+                SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+    }
 }
