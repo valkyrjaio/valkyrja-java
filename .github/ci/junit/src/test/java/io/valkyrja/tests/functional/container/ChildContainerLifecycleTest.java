@@ -26,10 +26,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/**
- * Proves the container lifecycle a worker runs: one frozen parent, one snapshot, and a child for
- * each request, with no request state reaching the parent or the next request.
- */
 final class ChildContainerLifecycleTest {
 
     @SuppressWarnings("unchecked")
