@@ -395,18 +395,12 @@ child.get(NotifierContract.class); // built by the binding of the parent
 ```
 
 There is one exception. The child resolves a target the parent would build for
-the first time. The request must not hold one copy for the alias and another for
-the target. The two arms of that rule read different state:
-
-- **A singleton binding the parent never built** — the child resolves it when it
-  holds the binding too. A child without it leaves the lookup to the parent.
-- **A publisher the parent has not run** — the parent's state alone decides. A
-  child that holds a registration for the target answers from it. A child that
-  holds none reports a missing reference.
-
-A worker takes one snapshot after boot, so a request holds every registration
-either way. The child reuses anything that the parent already built or
-published.
+the first time, when the child holds that registration too. That is a singleton
+binding the parent never built, or a publisher it has not run. The request must
+not hold one copy for the alias and another for the target. A child that holds
+neither leaves the whole lookup to the parent, and the parent answers it. A
+worker takes one snapshot after boot, so a request holds every registration. The
+child reuses anything that the parent already built or published.
 
 Warning: that exception also decides which binding the alias reaches. The child
 resolves the target itself, so the child's own registration answers. Give the
