@@ -615,6 +615,12 @@ final class ChildContainerTest {
 
         // The parent answers the alias, so what its factory resolves caches in the parent
         assertTrue(parent.isSingletonInstance(SingletonFixture.class));
+
+        // Every later request reads that one instance, whichever thread built it
+        Object dependency = parent.getSingleton(SingletonFixture.class);
+        createChild().getAliased(CharSequence.class, Map.of());
+
+        assertSame(dependency, parent.getSingleton(SingletonFixture.class));
     }
 
     @Test

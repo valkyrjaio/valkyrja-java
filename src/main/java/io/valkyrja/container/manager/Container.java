@@ -337,10 +337,17 @@ public class Container extends ProvidersAware {
         }
 
         T instance = getServiceWithoutChecks(id, Map.of());
-        if (instance != null) {
-            instances.put(id, instance);
+        if (instance == null) {
+            return null;
         }
-        return instance;
+
+        // Two request threads can both reach a parent that has not built this id yet. The
+        // map decides which instance every reader gets, so a lost race builds one object
+        // that nothing keeps. The build stays outside the map, because a factory resolves
+        // its own dependencies through this same map.
+        Object published = instances.putIfAbsent(id, instance);
+
+        return published != null ? (T) published : instance;
     }
 
     /** Resolve a service via its registered callable without ensuring publication. */
