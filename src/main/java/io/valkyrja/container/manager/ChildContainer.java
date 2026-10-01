@@ -72,7 +72,7 @@ public class ChildContainer extends Container {
         // The parent would resolve this target for the first time, and the child holds
         // the same registration, so letting the parent do it would leave the request
         // with one copy for the alias and another for the id.
-        if (isUnbuiltInParent(target)) {
+        if (isResolvedInChild(target)) {
             return getTargetOnce(id, (Class<T>) target, arguments);
         }
 
@@ -148,12 +148,12 @@ public class ChildContainer extends Container {
     }
 
     /**
-     * Check whether the parent would resolve a type for the first time.
+     * Check whether the child resolves the target of a parent-declared alias itself.
      *
      * @param id the target type
-     * @return true if the parent would write while answering it
+     * @return true if the child resolves it, rather than the parent
      */
-    private boolean isUnbuiltInParent(Class<?> id) {
+    private boolean isResolvedInChild(Class<?> id) {
         // The parent publishes before it reads any map, so this test comes first.
         if (parent.isDeferred(id) && !parent.isPublished(id)) {
             return true;
