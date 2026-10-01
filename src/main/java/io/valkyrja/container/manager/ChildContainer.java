@@ -11,11 +11,9 @@ package io.valkyrja.container.manager;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import org.jspecify.annotations.Nullable;
 
 public class ChildContainer extends Container {
@@ -32,9 +30,14 @@ public class ChildContainer extends Container {
         // instances stays empty — child builds its own per request
     }
 
-    /** The alias targets this container is resolving. */
-    private final Set<Class<?>> targetsInFlight =
-            Collections.newSetFromMap(new ConcurrentHashMap<>());
+    /**
+     * The alias targets this container is resolving.
+     *
+     * <p>One resolution reads it, to see a chain that came back to a target it is already
+     * resolving. A set shared between threads would read the first entry of a second thread as that
+     * chain, so this one is not concurrent, unlike the maps a parent shares.
+     */
+    private final Set<Class<?>> targetsInFlight = new HashSet<>();
 
     /**
      * Intercepts only the case where the parent has a cached instance but the child does not. All
