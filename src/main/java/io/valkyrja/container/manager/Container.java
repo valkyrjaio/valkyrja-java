@@ -14,7 +14,6 @@ import io.valkyrja.container.manager.abstract_.ProvidersAware;
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -79,20 +78,11 @@ public class Container extends ProvidersAware {
 
     @Override
     public void setFromData(ContainerDataContract data) {
-        Map<Class<?>, Class<?>> merged = new HashMap<>(aliases);
-        merged.putAll(data.aliases());
-
         // Only the incoming aliases start a walk, so a chain the container already held
-        // is no reason to reject this call. Each walk reads the whole merged map, and
-        // the container past it, so a chain the incoming data closes is still caught.
-        // Nothing is installed before the walks end, so a caught throw leaves all four.
-        validateAliasMapIsNotCyclic(
-                data.aliases(),
-                type -> {
-                    Class<?> mergedId = merged.get(type);
-
-                    return mergedId != null ? mergedId : getAliasedId(type);
-                });
+        // is no reason to reject this call. Each walk reads the container past the map it
+        // is given, so a chain the incoming data closes is still caught. Nothing is
+        // installed before the walks end, so a caught throw leaves all four.
+        validateAliasMapIsNotCyclic(data.aliases(), this::getAliasedId);
 
         aliases.putAll(data.aliases());
         callbacks.putAll(data.callbacks());
