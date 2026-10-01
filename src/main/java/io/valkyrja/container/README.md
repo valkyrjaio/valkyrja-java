@@ -401,16 +401,17 @@ the target. The two arms of that rule read different state:
 - **A singleton binding the parent never built** — the child resolves it when it
   holds the binding too. A child without it leaves the lookup to the parent.
 - **A publisher the parent has not run** — the parent's state alone decides. A
-  child whose snapshot omits the callback reports a missing reference.
+  child that holds a registration for the target answers from it. A child that
+  holds none reports a missing reference.
 
 A worker takes one snapshot after boot, so a request holds every registration
 either way. The child reuses anything that the parent already built or
 published.
 
-Warning: that exception also decides which binding the alias reaches. Give the
-parent a singleton binding it never built, and give the child a factory for the
-same id, and the alias reaches the factory of the child, because the child holds
-the copied marker and resolves the target itself.
+Warning: that exception also decides which binding the alias reaches. The child
+resolves the target itself, so the child's own registration answers. Give the
+parent a singleton binding it never built. Give the child a factory for the same
+id. The alias then reaches the factory of the child.
 
 Warning: outside that exception, both implementations give the call to the
 parent, so a factory that the parent holds receives the parent. A `bind` service
