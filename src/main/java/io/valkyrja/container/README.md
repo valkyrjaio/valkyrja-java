@@ -116,7 +116,7 @@ The first two run at registration. A container installs no map before its walk
 ends, so a caller that catches the exception keeps the container it had. A
 container that writes an alias after a child reads through it is outside
 registration. The last two checks cover the shapes a child then walks into. A
-A chain that neither one sees ends in one of three ways. It resolves through the
+chain that neither one sees ends in one of three ways. It resolves through the
 first hop the parent would answer. It ends with a missing reference, when no hop
 answers. It does not end, when a factory the parent runs asks for its own id
 again. `NativeChildContainer` reports that missing reference for a
@@ -331,13 +331,15 @@ A worker runtime boots the application once, and it serves many requests. A
 request that writes to the container of the worker changes what the next request
 reads. A child container removes that risk.
 
-The parent container is frozen after boot, so no registration changes after that
-point. Each request builds a child, resolves through the child, and discards the
-child. A write of the child reaches the child only. An id the child cannot
-answer goes to the parent, and the parent answers it as it would for any caller.
-`ChildContainer` hands a parent factory to the parent, so every singleton that
-factory resolves caches in the parent. `NativeChildContainer` applies the same
-factory with the child, so those dependencies cache in the child.
+The parent container is frozen after boot, so no registration changes after
+that point. It still publishes a deferred id, and caches a singleton, when it
+answers a lookup a child handed to it. Each request builds a child, resolves
+through the child, and discards the child. A write of the child reaches the
+child only. An id the child cannot answer goes to the parent, and the parent
+answers it as it would for any caller. `ChildContainer` hands a parent factory
+to the parent, so every singleton that factory resolves caches in the parent.
+`NativeChildContainer` applies the same factory with the child, so those
+dependencies cache in the child.
 
 ### The two implementations
 
@@ -403,19 +405,23 @@ hold one copy for the alias and another for the target. Three cases:
 
 - **A singleton binding the parent never built** — the child resolves it when
   its own `singletons` map carries the marker.
-- **A publisher the parent has not run** — the child resolves it when its own
-  `callbacks` map carries the callback.
-- **The child carries no registration for the target** — the parent answers the
-  whole lookup.
+- **A publisher the parent has not run** — the child resolves it when the child
+  reports that callback.
+- **Every other target** — the parent answers the whole lookup, whatever the
+  child carries.
 
 A worker takes one snapshot after boot, so a request carries every registration.
 The child reuses anything that the parent already built or published.
 
-Warning: that exception also decides which binding the alias reaches. The child
-resolves the target itself, so the factory of the child answers. The child needs
-the marker for that id, from its snapshot or from its own `bindSingleton`. Give
-the parent a singleton binding it never built, and the alias reaches the child's
-factory.
+What the child reports differs by implementation. `ChildContainer` answers from
+the maps its snapshot copied. `NativeChildContainer` copies none, so it answers
+from the parent's maps.
+
+Warning: that exception also decides which binding the alias reaches. Give the
+parent a singleton binding it never built. Give the child the marker for that id
+and a factory of its own. The alias then reaches the factory of the child. A
+child that holds the marker and no factory reaches the parent's factory
+instead.
 
 Warning: outside that exception, both implementations give the call to the
 parent, so a factory that the parent holds receives the parent. A `bind` service
