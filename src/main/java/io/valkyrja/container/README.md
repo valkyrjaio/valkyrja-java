@@ -105,8 +105,9 @@ reject one with `ContainerCyclicAliasException`:
 
 The first two run at registration. Nothing is installed before a walk ends, so a
 caller that catches the exception keeps the container it had. A container that
-writes an alias after a child reads through it is outside registration, and the
-third check reports that chain instead.
+writes an alias after a child reads through it is outside registration. The
+third check reports such a chain when resolving it returns to a target the child
+is already resolving. Otherwise the lookup ends with a missing reference.
 
 ### setSingleton
 
