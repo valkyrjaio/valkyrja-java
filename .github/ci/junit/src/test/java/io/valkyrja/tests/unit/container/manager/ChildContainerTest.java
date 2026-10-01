@@ -698,4 +698,16 @@ final class ChildContainerTest {
                 ContainerInvalidReferenceException.class,
                 () -> localChild.getAliased(CharSequence.class, Map.of()));
     }
+
+    @Test
+    void getAliasedReachesTheChildBindingWhenTheParentNeverBuiltTheSingleton() {
+        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.bind(raw(ServiceFixture.class), (c, a) -> new SingletonFixture());
+
+        // The child holds the copied marker, so it resolves the target with its own binding
+        assertInstanceOf(
+                SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+    }
 }
