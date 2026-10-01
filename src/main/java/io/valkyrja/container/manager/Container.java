@@ -164,8 +164,8 @@ public class Container extends ProvidersAware {
      */
     private void validateAliasMapIsNotCyclic(
             Map<Class<?>, Class<?>> aliases, Function<Class<?>, @Nullable Class<?>> installed) {
-        for (var entry : aliases.entrySet()) {
-            validateAliasChainIsNotCyclic(entry.getKey(), aliases, installed);
+        for (var alias : aliases.keySet()) {
+            validateAliasChainIsNotCyclic(alias, aliases, installed);
         }
     }
 
