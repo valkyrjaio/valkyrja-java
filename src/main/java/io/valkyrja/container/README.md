@@ -406,7 +406,7 @@ child.get(SlackNotifier.class);    // built by the binding of the child
 child.get(NotifierContract.class); // built by the binding of the parent
 ```
 
-There is one exception. The child resolves a target the parent would build for
+There is one exception. The child resolves a target the parent would answer for
 the first time, when the child holds that registration too. The request must not
 hold one copy for the alias and another for the target. Three cases:
 
@@ -467,8 +467,8 @@ child.get(TimeSourceContract.class); // requestClock
 ```
 
 On the exception path, the factory receiver follows the implementation, as
-[Resolution order](#resolution-order) states, and the child's own factory runs
-when the child declares one for that id. A singleton that the child builds on
+[Resolution order](#resolution-order) states. The child's own factory runs when
+the child declares one for that id. A singleton that the child builds on
 that path caches in the child. A publisher decides what it registers, so a
 publisher that binds a `bind` factory caches nothing. A deferred target is the
 one case where both give the child, because the publish callback runs in the
