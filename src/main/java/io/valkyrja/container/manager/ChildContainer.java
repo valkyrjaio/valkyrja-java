@@ -154,8 +154,11 @@ public class ChildContainer extends Container {
      * @return true if the child resolves it, rather than the parent
      */
     private boolean resolvesInChild(Class<?> id) {
-        // The parent publishes before it reads any map, so this test comes first.
-        if (parent.isDeferred(id) && !parent.isPublished(id)) {
+        // The parent publishes before it reads any map, so this test comes first. Both
+        // containers answer it: the parent's state is what makes this a target it would
+        // publish for the first time, and the child's callback is what lets the child
+        // publish it instead.
+        if (parent.isDeferred(id) && !parent.isPublished(id) && isDeferred(id)) {
             return true;
         }
 

@@ -200,7 +200,8 @@ public class NativeChildContainer extends Container {
      * @return true if the child resolves it, rather than the parent
      */
     private boolean resolvesInChild(Class<?> id) {
-        // The parent publishes before it reads any map, so this test comes first.
+        // The parent publishes before it reads any map, so this test comes first. This
+        // class copies no callback map, so the parent's callback is the child's as well.
         if (parent.isDeferred(id) && !parent.isPublished(id)) {
             return true;
         }
