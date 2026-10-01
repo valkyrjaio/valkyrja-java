@@ -674,4 +674,16 @@ final class ChildContainerTest {
         assertInstanceOf(ServiceFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
         assertInstanceOf(SingletonFixture.class, localChild.get(ServiceFixture.class, Map.of()));
     }
+
+    @Test
+    void getAliasedThrowsWhenOnlyTheChildBindsTheTarget() {
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+
+        // The parent declares the alias and holds no target, so it has nothing to answer
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
 }
