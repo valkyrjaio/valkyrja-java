@@ -649,4 +649,17 @@ final class ChildContainerTest {
 
         assertEquals(CharSequence.class, localChild.getAliasedId(ServiceFixture.class));
     }
+
+    @Test
+    void getAliasedDelegatesWhenTheSnapshotOmitsTheParentMarker() {
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        var localChild = new ChildContainer(parent, new ContainerData());
+
+        // The child holds no marker, so it leaves the target to the parent
+        assertSame(
+                localChild.getAliased(CharSequence.class, Map.of()),
+                localChild.getAliased(CharSequence.class, Map.of()));
+        assertTrue(parent.isSingletonInstance(SingletonFixture.class));
+    }
 }
