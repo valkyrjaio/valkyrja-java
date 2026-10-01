@@ -59,7 +59,7 @@ second argument holds the arguments that the caller passes to `get` or
 ```java
 container.bind(
         MatcherContract.class,
-        (c, arguments) -> new Matcher(c.getSingleton(RouteCollectionContract.class)));
+        (c, arguments) -> new Matcher(c.getSingleton(RouteCollectionContract.class), c));
 ```
 
 ### bind
@@ -75,7 +75,7 @@ container calls the factory on the first resolution, and it caches the result.
 ```java
 container.bindSingleton(
         MatcherContract.class,
-        (c, arguments) -> new Matcher(c.getSingleton(RouteCollectionContract.class)));
+        (c, arguments) -> new Matcher(c.getSingleton(RouteCollectionContract.class), c));
 ```
 
 ### bindAlias

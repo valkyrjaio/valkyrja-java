@@ -135,7 +135,7 @@ public class HttpRoutingServiceProvider implements ServiceProviderContract {
     public static void publishMatcher(ContainerContract container) {
         container.setSingleton(
                 MatcherContract.class,
-                new Matcher(container.getSingleton(RouteCollectionContract.class)));
+                new Matcher(container.getSingleton(RouteCollectionContract.class), container));
     }
 
     public static void publishUrl(ContainerContract container) {
