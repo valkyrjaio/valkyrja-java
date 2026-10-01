@@ -78,7 +78,7 @@ container.bindSingleton(
         (c, arguments) -> new Matcher(c.getSingleton(RouteCollectionContract.class)));
 ```
 
-Warning: the container keeps the first instance its map holds for an id. A
+Warning: a build keeps the first instance the map holds for an id. A
 factory that registers the id it is building, the way one breaks a chain that
 returns to it, decides what every reader gets. The object that factory returns
 is discarded then.
@@ -122,7 +122,7 @@ registration. A chain no check sees ends in one of four ways:
 - It resolves through the first hop the parent would answer.
 - It ends with a missing reference, when no hop answers. `NativeChildContainer`
   reports that for a parent which is itself a child.
-- It does not end, when a factory the parent runs asks for its own id again.
+- It does not end, when a factory asks again for the id that reached it.
 - It does not end, when an alias the child declares closes through a factory the
   child runs. That path carries no resolution-time check.
 
