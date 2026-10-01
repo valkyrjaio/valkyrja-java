@@ -226,7 +226,9 @@ public class NativeChildContainer extends Container {
             return false;
         }
 
-        return parent.singletons.containsKey(id);
+        // The child reads its own marker here, because the child is the container that
+        // caches what it builds. A marker it does not hold leaves the lookup to the parent.
+        return isSingletonBinding(id);
     }
 
     /**
