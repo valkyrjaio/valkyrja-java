@@ -31,13 +31,14 @@ public class ChildContainer extends Container {
     }
 
     /**
-     * The alias targets this container is resolving.
+     * The alias targets this container is resolving, per thread.
      *
-     * <p>One resolution reads it, to see a chain that came back to a target it is already
-     * resolving. A set shared between threads would read the first entry of a second thread as that
-     * chain, so this one is not concurrent, unlike the maps a parent shares.
+     * <p>The read asks whether a chain came back to a target this resolution is already on, so the
+     * state belongs to one call stack. A set shared between threads would read the first entry of a
+     * second thread as that chain, and a plain set would race, so each thread holds its own.
      */
-    private final Set<Class<?>> targetsInFlight = new HashSet<>();
+    private final ThreadLocal<Set<Class<?>>> targetsInFlight =
+            ThreadLocal.withInitial(HashSet::new);
 
     /**
      * Intercepts only the case where the parent has a cached instance but the child does not. All
@@ -192,7 +193,9 @@ public class ChildContainer extends Container {
         // across two of them returns here rather than to one walk. A factory that
         // registered its own id while it runs has broken the chain, so read that first,
         // and name the pair only when nothing can answer.
-        if (!targetsInFlight.add(target)) {
+        Set<Class<?>> inFlight = targetsInFlight.get();
+
+        if (!inFlight.add(target)) {
             Object registered = instances.get(target);
 
             if (registered != null) {
@@ -205,7 +208,7 @@ public class ChildContainer extends Container {
         try {
             return get(target, arguments);
         } finally {
-            targetsInFlight.remove(target);
+            inFlight.remove(target);
         }
     }
 }
