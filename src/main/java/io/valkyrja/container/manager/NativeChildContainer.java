@@ -61,16 +61,21 @@ public class NativeChildContainer extends Container {
         }
 
         // 3. No binding in child or parent → nothing to create
-        if (!singletons.containsKey(id) && !parent.singletons.containsKey(id)) {
+        if (!isSingletonBinding(id)) {
             return null;
         }
 
-        // Create in child, cache in child only — parent never touched
+        // Create in child, cache in child only — parent never touched. A factory can
+        // register this id itself while it runs, so the map decides which instance every
+        // reader gets.
         T instance = getServiceWithoutChecks(id, Map.of());
-        if (instance != null) {
-            instances.put(id, instance);
+        if (instance == null) {
+            return null;
         }
-        return instance;
+
+        Object published = instances.putIfAbsent(id, instance);
+
+        return published != null ? (T) published : instance;
     }
 
     @Override
@@ -168,7 +173,10 @@ public class NativeChildContainer extends Container {
     @Override
     public boolean isSingletonBinding(Class<?> id) {
         // singletons is in Container (same package) — direct field access works
-        return singletons.containsKey(id) || parent.singletons.containsKey(id);
+        // The container that declares a binding governs its lifetime, so a marker in the
+        // parent does not make a singleton of a service the child itself bound.
+        return singletons.containsKey(id)
+                || (!services.containsKey(id) && parent.singletons.containsKey(id));
     }
 
     @Override

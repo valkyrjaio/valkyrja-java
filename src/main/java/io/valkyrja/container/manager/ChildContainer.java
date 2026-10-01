@@ -103,7 +103,10 @@ public class ChildContainer extends Container {
 
     @Override
     public boolean isSingletonBinding(Class<?> id) {
-        return super.isSingletonBinding(id) || parent.isSingletonBinding(id);
+        // The container that declares a binding governs its lifetime, so a marker in the
+        // parent does not make a singleton of a service the child itself bound.
+        return super.isSingletonBinding(id)
+                || (!super.isService(id) && parent.isSingletonBinding(id));
     }
 
     /**
