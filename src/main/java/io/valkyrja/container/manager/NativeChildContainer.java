@@ -173,10 +173,7 @@ public class NativeChildContainer extends Container {
     @Override
     public boolean isSingletonBinding(Class<?> id) {
         // singletons is in Container (same package) — direct field access works
-        // The container that declares a binding governs its lifetime, so a marker in the
-        // parent does not make a singleton of a service the child itself bound.
-        return singletons.containsKey(id)
-                || (!services.containsKey(id) && parent.singletons.containsKey(id));
+        return singletons.containsKey(id) || parent.singletons.containsKey(id);
     }
 
     @Override

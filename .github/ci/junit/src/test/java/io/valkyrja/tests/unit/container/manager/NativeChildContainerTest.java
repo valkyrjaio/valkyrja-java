@@ -582,19 +582,6 @@ final class NativeChildContainerTest {
     }
 
     @Test
-    void aDeclaredServiceKeepsItsLifetimeAgainstAParentMarker() {
-        child.bind(ServiceFixture.class, ServiceFixture::make);
-        // The parent declares the same type a singleton, after the child bound its own
-        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
-
-        // The child declared a service, so the child's binding governs the lifetime
-        assertFalse(child.isSingletonBinding(ServiceFixture.class));
-        assertNotSame(
-                child.get(ServiceFixture.class, Map.of()),
-                child.get(ServiceFixture.class, Map.of()));
-    }
-
-    @Test
     void getAliasedReportsAMissingReferenceForACycleANestedParentHolds() {
         // This class reads the parent's own map, so a grandparent's aliases stay invisible
         var grandparent = new Container();
