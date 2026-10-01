@@ -649,4 +649,21 @@ final class NativeChildContainerTest {
         // This class runs the parent factory with the child, so the re-entry reaches here
         assertInstanceOf(SingletonFixture.class, child.getAliased(CharSequence.class, Map.of()));
     }
+
+    @Test
+    void getAliasedThrowsForAChainAFactoryCloses() {
+        // The factory registers nothing for its own id, so the chain returns to it
+        parent.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    container.get(CharSequence.class, Map.of());
+
+                    return new SingletonFixture();
+                });
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> child.getAliased(CharSequence.class, Map.of()));
+    }
 }

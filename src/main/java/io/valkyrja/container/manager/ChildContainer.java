@@ -177,16 +177,17 @@ public class ChildContainer extends Container {
      * @param arguments the arguments
      * @return the instance the target resolves to
      */
+    @SuppressWarnings("unchecked")
     private <T> T getTargetOnce(Class<?> id, Class<T> target, Map<String, Object> arguments) {
         // A walk ends at the first hop the parent would answer, so a chain that closes
         // across two of them returns here rather than to one walk. A factory that
         // registered its own id while it runs has broken the chain, so read that first,
         // and name the pair only when nothing can answer.
         if (!targetsInFlight.add(target)) {
-            T registered = getSingletonWithoutChecks(target);
+            Object registered = instances.get(target);
 
             if (registered != null) {
-                return registered;
+                return (T) registered;
             }
 
             throw new ContainerCyclicAliasException(id.getName(), target.getName());
