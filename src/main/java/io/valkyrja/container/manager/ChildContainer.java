@@ -35,7 +35,7 @@ public class ChildContainer extends Container {
      *
      * <p>The read asks whether a chain came back to a target this resolution is already on, so the
      * state belongs to one call stack. A set shared between threads would read the first entry of a
-     * second thread as that chain, and a plain set would race, so each thread holds its own.
+     * second thread as that chain. A plain set would also race, so each thread holds its own.
      */
     private final ThreadLocal<Set<Class<?>>> targetsInFlight =
             ThreadLocal.withInitial(HashSet::new);
@@ -209,6 +209,12 @@ public class ChildContainer extends Container {
             return get(target, arguments);
         } finally {
             inFlight.remove(target);
+
+            if (inFlight.isEmpty()) {
+                // The outermost resolution has returned, so the thread holds no state for a
+                // container a request discards.
+                targetsInFlight.remove();
+            }
         }
     }
 }

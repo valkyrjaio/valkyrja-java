@@ -668,6 +668,24 @@ final class NativeChildContainerTest {
     }
 
     @Test
+    void getAliasedHoldsTheOuterTargetWhileANestedAliasResolves() {
+        // The second alias resolves inside the first, so the guard holds two targets
+        parent.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    container.get(Runnable.class, Map.of());
+
+                    return new SingletonFixture();
+                });
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        parent.bindSingleton(raw(ServiceFixture.class), ServiceFixture::make);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+
+        // The nested target leaves the outer one in flight, so neither chain reads the other
+        assertInstanceOf(SingletonFixture.class, child.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
     void getAliasedReachesTheChildBindingWhenTheParentNeverBuiltTheSingleton() {
         parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
         parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));

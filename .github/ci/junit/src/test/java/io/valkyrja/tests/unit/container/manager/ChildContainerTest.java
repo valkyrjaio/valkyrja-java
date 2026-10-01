@@ -750,4 +750,25 @@ final class ChildContainerTest {
                 ContainerCyclicAliasException.class,
                 () -> localChild.getAliased(CharSequence.class, Map.of()));
     }
+
+    @Test
+    void getAliasedHoldsTheOuterTargetWhileANestedAliasResolves() {
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        parent.bindSingleton(raw(ServiceFixture.class), ServiceFixture::make);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+        // The second alias resolves inside the first, so the guard holds two targets
+        localChild.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    container.get(Runnable.class, Map.of());
+
+                    return new SingletonFixture();
+                });
+
+        // The nested target leaves the outer one in flight, so neither chain reads the other
+        assertInstanceOf(
+                SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+    }
 }
