@@ -10,9 +10,10 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.manager.contract.ContainerContract;
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
@@ -26,7 +27,8 @@ public class NativeChildContainer extends Container {
     }
 
     /** The alias targets this container is resolving. */
-    private final Set<Class<?>> targetsInFlight = new HashSet<>();
+    private final Set<Class<?>> targetsInFlight =
+            Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     @Override
     @SuppressWarnings("unchecked")
