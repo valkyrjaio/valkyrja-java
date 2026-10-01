@@ -731,4 +731,23 @@ final class ChildContainerTest {
         assertInstanceOf(
                 SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
     }
+
+    @Test
+    void getAliasedThrowsForAChainAFactoryCloses() {
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        // The factory registers nothing for its own id, so the chain returns to it
+        localChild.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    container.get(CharSequence.class, Map.of());
+
+                    return new SingletonFixture();
+                });
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
 }
