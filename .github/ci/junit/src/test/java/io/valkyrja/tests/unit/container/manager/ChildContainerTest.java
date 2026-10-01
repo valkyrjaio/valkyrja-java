@@ -570,9 +570,10 @@ final class ChildContainerTest {
     }
 
     @Test
-    void getSingletonBuildsAParentBindingTakenAfterTheSnapshot() {
+    void getSingletonBuildsWhatIsSingletonBindingReports() {
         ChildContainer localChild = createChild();
-        // A snapshot copies the parent's bindings, so only a later one reaches the fallback
+        // The snapshot copies the parent's bindings, so a marker it missed is the only way
+        // to reach the parent read. A worker takes no binding after the snapshot.
         parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
 
         var instance = localChild.getSingleton(SingletonFixture.class);
