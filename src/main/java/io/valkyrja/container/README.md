@@ -116,7 +116,8 @@ reject one with `ContainerCyclicAliasException`:
 The first two checks run at registration. A container installs no map before its
 walk ends, so a caller that catches the exception keeps the container it had. A
 container that writes an alias after a child reads through it is outside
-registration. A chain no check sees ends in one of four ways:
+registration, and a chain that closes through a factory is outside every alias
+walk. A chain no check sees ends in one of four ways:
 
 - It resolves through the first hop the parent would answer.
 - It ends with a missing reference, when no hop answers. `NativeChildContainer`
