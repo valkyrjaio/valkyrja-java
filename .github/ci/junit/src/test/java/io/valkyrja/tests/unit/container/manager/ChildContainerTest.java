@@ -434,18 +434,6 @@ final class ChildContainerTest {
     }
 
     @Test
-    void isSingletonBindingReadsTheChildThenTheParent() {
-        ChildContainer localChild = createChild();
-        localChild.bindSingleton(ServiceFixture.class, ServiceFixture::make);
-        // A snapshot copies the parent's bindings, so only a later one reaches the fallback
-        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
-
-        assertTrue(localChild.isSingletonBinding(ServiceFixture.class));
-        assertTrue(localChild.isSingletonBinding(SingletonFixture.class));
-        assertFalse(localChild.isSingletonBinding(Runnable.class));
-    }
-
-    @Test
     void getAliasedStopsAtADeferredHopInTheChain() {
         // The parent publishes before it reads any map, so it stops at the deferred hop
         parent.register(new PublishingProviderFixture());
@@ -570,19 +558,6 @@ final class ChildContainerTest {
     }
 
     @Test
-    void getSingletonBuildsWhatIsSingletonBindingReports() {
-        ChildContainer localChild = createChild();
-        // The snapshot copies the parent's bindings, so a marker it missed is the only way
-        // to reach the parent read. A worker takes no binding after the snapshot.
-        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
-
-        var instance = localChild.getSingleton(SingletonFixture.class);
-
-        assertSame(instance, localChild.getSingleton(SingletonFixture.class));
-        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
-    }
-
-    @Test
     void setFromDataAcceptsDataWithNoAliasWhenAChainAlreadyReturns() {
         ChildContainer localChild = createChild();
         localChild.setFromData(
@@ -673,19 +648,5 @@ final class ChildContainerTest {
                         Map.of()));
 
         assertEquals(CharSequence.class, localChild.getAliasedId(ServiceFixture.class));
-    }
-
-    @Test
-    void aDeclaredServiceKeepsItsLifetimeAgainstAParentMarker() {
-        ChildContainer localChild = createChild();
-        localChild.bind(ServiceFixture.class, ServiceFixture::make);
-        // The parent declares the same type a singleton, after the child bound its own
-        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
-
-        // The child declared a service, so the child's binding governs the lifetime
-        assertFalse(localChild.isSingletonBinding(ServiceFixture.class));
-        assertNotSame(
-                localChild.get(ServiceFixture.class, Map.of()),
-                localChild.get(ServiceFixture.class, Map.of()));
     }
 }

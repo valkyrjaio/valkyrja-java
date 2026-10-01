@@ -101,14 +101,6 @@ public class ChildContainer extends Container {
         return super.isSingletonInstance(id) || parent.isSingletonInstance(id);
     }
 
-    @Override
-    public boolean isSingletonBinding(Class<?> id) {
-        // The container that declares a binding governs its lifetime, so a marker in the
-        // parent does not make a singleton of a service the child itself bound.
-        return super.isSingletonBinding(id)
-                || (!super.isService(id) && parent.isSingletonBinding(id));
-    }
-
     /**
      * Parent check must come first. If the parent already published a provider at bootstrap, the
      * child must not republish it — doing so would re-run the callback and re-register bindings.
