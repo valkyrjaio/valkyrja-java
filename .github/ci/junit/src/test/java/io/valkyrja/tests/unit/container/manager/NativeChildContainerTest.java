@@ -666,4 +666,14 @@ final class NativeChildContainerTest {
                 ContainerCyclicAliasException.class,
                 () -> child.getAliased(CharSequence.class, Map.of()));
     }
+
+    @Test
+    void getAliasedReachesTheChildBindingWhenTheParentNeverBuiltTheSingleton() {
+        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        child.bind(raw(ServiceFixture.class), (c, a) -> new SingletonFixture());
+
+        // The parent's marker is the child's too, so the child's own binding answers
+        assertInstanceOf(SingletonFixture.class, child.getAliased(CharSequence.class, Map.of()));
+    }
 }
