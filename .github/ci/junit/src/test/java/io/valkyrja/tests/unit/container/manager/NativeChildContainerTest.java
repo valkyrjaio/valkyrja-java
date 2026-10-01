@@ -609,4 +609,15 @@ final class NativeChildContainerTest {
         // The factory put one in the map, so that is the one every reader gets
         assertSame(published, child.getSingleton(Runnable.class));
     }
+
+    @Test
+    void getAliasedKeepsAParentBindingWhenTheChildShadowsItWithASingleton() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        child.bindSingleton(raw(ServiceFixture.class), SingletonFixture::make);
+
+        // The parent would build its own binding, so the alias stays with the parent
+        assertInstanceOf(ServiceFixture.class, child.getAliased(CharSequence.class, Map.of()));
+        assertInstanceOf(SingletonFixture.class, child.get(ServiceFixture.class, Map.of()));
+    }
 }
