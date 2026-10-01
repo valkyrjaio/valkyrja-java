@@ -230,8 +230,8 @@ public class NativeChildContainer extends Container {
         // registered its own id while it runs has broken the chain, so read that first,
         // and name the pair only when nothing can answer.
         if (!targetsInFlight.add(target)) {
-            // The factory receives the child, so only the child's map can hold what it
-            // registered. A target the parent built never reaches the carve-out.
+            // The factory receives the child, so the child's map is where a registration
+            // made during this resolution lands.
             Object registered = instances.get(target);
 
             if (registered != null) {
