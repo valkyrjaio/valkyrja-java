@@ -96,9 +96,9 @@ matcher holds the container, so no data object reaches it. The
 
 Warning: `getService()` reads only a service binding, and it skips the singleton
 cache. An alias, and an instance that `setSingleton` holds, raise
-`ContainerInvalidReferenceException`, which escapes `match()`. A type that
-`bindSingleton` registers is built for each match, and not once for the
-application. Register a cast type with `bind`.
+`ContainerInvalidReferenceException`, which escapes `match()`. The container
+builds a type that `bindSingleton` registers for each match, and not once for
+the application. Register a cast type with `bind`.
 
 ## The processor
 
