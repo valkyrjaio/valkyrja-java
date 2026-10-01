@@ -497,7 +497,7 @@ final class ChildContainerTest {
                         .startsWith(
                                 "Alias `"
                                         + Runnable.class.getName()
-                                        + "` cannot point at `"
+                                        + "` cannot reach `"
                                         + CharSequence.class.getName()
                                         + "`"));
     }
@@ -627,7 +627,7 @@ final class ChildContainerTest {
                 throwable
                         .getMessage()
                         .startsWith(
-                                "Alias `java.lang.CharSequence` cannot point at `java.lang.Runnable`"));
+                                "Alias `java.lang.CharSequence` cannot reach `java.lang.Runnable`"));
     }
 
     @Test

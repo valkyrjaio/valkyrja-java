@@ -22,7 +22,7 @@ public class ContainerCyclicAliasException extends ContainerInvalidArgumentExcep
         super(
                 "Alias `"
                         + alias
-                        + "` cannot point at `"
+                        + "` cannot reach `"
                         + id
                         + "`, because `"
                         + id
