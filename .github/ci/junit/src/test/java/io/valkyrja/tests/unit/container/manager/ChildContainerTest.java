@@ -752,6 +752,29 @@ final class ChildContainerTest {
     }
 
     @Test
+    void getAliasedThrowsForAChainAFactoryClosesAfterANestedAliasReturned() {
+        parent.bindSingleton(raw(ServiceFixture.class), ServiceFixture::make);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        // The nested alias returns first, so only a release that waits for the outer
+        // resolution leaves the target in flight for the re-entry
+        localChild.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    container.get(Runnable.class, Map.of());
+                    container.get(CharSequence.class, Map.of());
+
+                    return new SingletonFixture();
+                });
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
     void getAliasedHoldsTheOuterTargetWhileANestedAliasResolves() {
         parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
         parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
