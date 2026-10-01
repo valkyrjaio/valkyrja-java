@@ -388,19 +388,22 @@ child.get(NotifierContract.class); // built by the binding of the parent
 ```
 
 There is one exception. The child resolves a target the parent would build for
-the first time, because the request must not hold one copy for the alias and
-another for the target. The two arms of that rule read different state. For a
-singleton binding the parent never built, the child resolves it only when it
-holds the binding too, and a child without it leaves the whole lookup to the
-parent. For a publisher the parent has not run, the parent's state alone
-decides, so a child whose snapshot omits the callback reports a missing
-reference. A worker takes one snapshot after boot, so a request holds every
-registration either way. The child reuses
-anything that the parent already built or published.
+the first time. The request must not hold one copy for the alias and another for
+the target. The two arms of that rule read different state:
 
-Warning: that exception also decides which binding the alias reaches. When the
-parent never builds a singleton, a child that shadows the target gets its own
-binding through the alias, because the child resolves the target itself.
+- **A singleton binding the parent never built** — the child resolves it when it
+  holds the binding too. A child without it leaves the lookup to the parent.
+- **A publisher the parent has not run** — the parent's state alone decides. A
+  child whose snapshot omits the callback reports a missing reference.
+
+A worker takes one snapshot after boot, so a request holds every registration
+either way. The child reuses anything that the parent already built or
+published.
+
+Warning: that exception also decides which binding the alias reaches. Give the
+parent a singleton binding it never built, and give the child a binding for the
+same id, and the alias reaches the binding of the child, because the child
+resolves the target itself.
 
 Warning: outside that exception, both implementations give the call to the
 parent, so a factory that the parent holds receives the parent. A `bind` service
