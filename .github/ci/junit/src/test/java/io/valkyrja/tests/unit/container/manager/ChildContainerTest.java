@@ -643,9 +643,16 @@ final class ChildContainerTest {
         parent.bindAlias(CharSequence.class, raw(Runnable.class));
         var localChild = new ChildContainer(middle, new ContainerData());
 
-        assertThrows(
-                ContainerCyclicAliasException.class,
-                () -> localChild.get(CharSequence.class, Map.of()));
+        var throwable =
+                assertThrows(
+                        ContainerCyclicAliasException.class,
+                        () -> localChild.get(CharSequence.class, Map.of()));
+
+        assertTrue(
+                throwable
+                        .getMessage()
+                        .startsWith(
+                                "Alias `java.lang.CharSequence` cannot point at `java.lang.Runnable`"));
     }
 
     @Test
@@ -666,5 +673,19 @@ final class ChildContainerTest {
                         Map.of()));
 
         assertEquals(CharSequence.class, localChild.getAliasedId(ServiceFixture.class));
+    }
+
+    @Test
+    void aDeclaredServiceKeepsItsLifetimeAgainstAParentMarker() {
+        ChildContainer localChild = createChild();
+        localChild.bind(ServiceFixture.class, ServiceFixture::make);
+        // The parent declares the same type a singleton, after the child bound its own
+        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
+
+        // The child declared a service, so the child's binding governs the lifetime
+        assertFalse(localChild.isSingletonBinding(ServiceFixture.class));
+        assertNotSame(
+                localChild.get(ServiceFixture.class, Map.of()),
+                localChild.get(ServiceFixture.class, Map.of()));
     }
 }
