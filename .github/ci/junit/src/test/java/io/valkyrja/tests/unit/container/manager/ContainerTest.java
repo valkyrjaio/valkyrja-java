@@ -27,6 +27,7 @@ import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProviderFixture;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -337,7 +338,7 @@ final class ContainerTest {
     @Test
     void constructorRejectsACyclicAliasMapAnAliasIsNoPartOf() {
         // ServiceFixture sits outside the cycle, so its walk needs a bound
-        var aliases = new java.util.LinkedHashMap<Class<?>, Class<?>>();
+        var aliases = new LinkedHashMap<Class<?>, Class<?>>();
         aliases.put(ServiceFixture.class, CharSequence.class);
         aliases.put(CharSequence.class, Runnable.class);
         aliases.put(Runnable.class, CharSequence.class);
