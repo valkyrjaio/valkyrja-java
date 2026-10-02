@@ -124,7 +124,7 @@ reaches neither is unchecked. It has one of four outcomes:
   reports that for a parent which is itself a child.
 - It does not end, when a factory or a publish callback runs in a container that
   carries no such check. A plain `Container` carries none. A child gives the
-  lookup to the parent for a target the exception does not cover.
+  lookup to the parent for a target the child does not resolve itself.
   `ChildContainer` also gives the parent a factory the child does not hold.
 - It does not end, when an alias the child declares closes a chain through a
   factory or a publish callback the child runs. No check sits on that path.
@@ -347,9 +347,8 @@ answers it as it would for any caller.
 
 `ChildContainer` hands a parent factory to the parent, so every singleton that
 factory resolves caches in the parent. `NativeChildContainer` applies the same
-factory with the child, so those dependencies cache in the child. On the alias
-path both give the call to the parent, as
-[The two implementations](#the-two-implementations) states.
+factory with the child, so those dependencies cache in the child. A lookup that
+neither child resolves itself goes to the parent, which runs the factory there.
 
 ### The two implementations
 
