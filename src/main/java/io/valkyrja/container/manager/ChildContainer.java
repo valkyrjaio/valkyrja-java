@@ -190,7 +190,7 @@ public class ChildContainer extends Container {
 
         if (!inFlight.add(target)) {
             // A target the child does not bind runs in the parent, which never returns
-            // here, so only a factory this container ran can have registered one.
+            // here, so only a write this container made can be in that map.
             Object registered = instances.get(target);
 
             if (registered != null) {
