@@ -497,5 +497,5 @@ describes the worker entry classes.
 `ContainerInvalidReferenceException` and `ContainerCyclicAliasException` extend
 `ContainerInvalidArgumentException`, and
 `ContainerInvalidPublishCallbackException` extends `ContainerRuntimeException`.
-All three are unchecked. The [throwable component](../throwable/README.md) describes
-the hierarchy.
+All three are unchecked. The [throwable component](../throwable/README.md)
+describes the hierarchy.
