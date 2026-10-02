@@ -78,10 +78,8 @@ public class Container extends ProvidersAware {
 
     @Override
     public void setFromData(ContainerDataContract data) {
-        // Only the incoming aliases start a walk, so a chain the container already held
-        // is no reason to reject this call. Each walk reads the container past the map it
-        // is given, so a chain the incoming data closes is still caught. Nothing is
-        // installed before the walks end, so a caught throw leaves all four.
+        // Only the incoming aliases start a walk, and each walk reads the container past
+        // the map it is given. Nothing is installed before the walks end.
         validateAliasMapIsNotCyclic(data.aliases(), this::getAliasedId);
 
         aliases.putAll(data.aliases());
@@ -132,8 +130,8 @@ public class Container extends ProvidersAware {
                 throw new ContainerCyclicAliasException(alias.getName(), id.getName());
             }
 
-            // A parent that binds an alias after a child is built checks only its own map,
-            // so the two can hold a cycle this alias is no part of. End the walk there.
+            // A parent that binds an alias after a child is built checks only its own map.
+            // The two can then hold a cycle this alias is no part of, so end the walk.
             if (!seen.add(aliasedId)) {
                 return;
             }
@@ -146,8 +144,8 @@ public class Container extends ProvidersAware {
      * Validate that no alias in a map points at a chain that returns to it.
      *
      * <p>Past the map, the walk reads {@code installed}. It is a parameter rather than a call to
-     * {@link #getAliasedId}, because a constructor calls this method, and an overridable method
-     * there reaches a subclass before the subclass is initialized.
+     * {@link #getAliasedId}, because an overridable method reaches a subclass that a constructor
+     * has not initialized.
      *
      * @param aliases the aliases that start a walk
      * @param installed the read for a type the map does not hold
@@ -331,10 +329,8 @@ public class Container extends ProvidersAware {
             return null;
         }
 
-        // Two request threads can both reach a parent that has not built this id yet. The
-        // map decides which instance every reader gets, so a lost race builds one object
-        // that nothing keeps. The build stays outside the map, because a factory resolves
-        // its own dependencies through this same map.
+        // Two request threads can both reach a parent that has not built this id yet, so
+        // the map decides which instance every reader gets.
         Object published = instances.putIfAbsent(id, instance);
 
         return published != null ? (T) published : instance;
