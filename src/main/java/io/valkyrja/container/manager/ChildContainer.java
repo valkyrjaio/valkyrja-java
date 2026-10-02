@@ -20,16 +20,6 @@ public class ChildContainer extends Container {
 
     private final ContainerContract parent;
 
-    public ChildContainer(ContainerContract parent, ContainerData parentData) {
-        this.parent = parent;
-        // Copy only the two maps the child needs for self-sufficient singleton resolution.
-        // All other resolution delegates to the parent via contract.
-        // parentData is immutable (record with Map.copyOf) — safe to reuse across requests.
-        this.singletons.putAll(parentData.singletons());
-        this.callbacks.putAll(parentData.callbacks());
-        // instances stays empty — child builds its own per request
-    }
-
     /**
      * The alias targets this container is resolving, per thread.
      *
@@ -39,6 +29,16 @@ public class ChildContainer extends Container {
      */
     private final ThreadLocal<Set<Class<?>>> targetsInFlight =
             ThreadLocal.withInitial(HashSet::new);
+
+    public ChildContainer(ContainerContract parent, ContainerData parentData) {
+        this.parent = parent;
+        // Copy only the two maps the child needs for self-sufficient singleton resolution.
+        // All other resolution delegates to the parent via contract.
+        // parentData is immutable (record with Map.copyOf) — safe to reuse across requests.
+        this.singletons.putAll(parentData.singletons());
+        this.callbacks.putAll(parentData.callbacks());
+        // instances stays empty — child builds its own per request
+    }
 
     /**
      * Intercepts only the case where the parent has a cached instance but the child does not. All
