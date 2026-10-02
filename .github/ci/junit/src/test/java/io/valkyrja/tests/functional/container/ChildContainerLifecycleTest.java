@@ -49,15 +49,17 @@ final class ChildContainerLifecycleTest {
         ContainerDataContract data = parent.getData();
         ContainerDataContract registrations = parent.getData();
 
-        List<Object> scoped = new ArrayList<>();
         List<Object> unbuilt = new ArrayList<>();
         List<Object> provided = new ArrayList<>();
 
         for (var request = 0; request < 3; request++) {
             var child = new ChildContainer(parent, (ContainerData) data);
+
+            // A fresh child carries nothing the last request registered
+            assertFalse(child.isSingletonInstance(raw(Comparable.class)));
+
             var requestScoped = new SingletonFixture();
             child.setSingleton(raw(Comparable.class), requestScoped);
-            scoped.add(requestScoped);
 
             // The parent built this one before the loop, so every request shares it
             assertSame(shared, child.getSingleton(SingletonFixture.class));
@@ -91,7 +93,6 @@ final class ChildContainerLifecycleTest {
         assertNotSame(unbuilt.get(1), unbuilt.get(2));
         assertNotSame(provided.get(0), provided.get(1));
         assertNotSame(provided.get(1), provided.get(2));
-        assertNotSame(scoped.get(0), scoped.get(1));
 
         // The parent still holds the registrations it booted with
         assertEquals(registrations.aliases(), parent.getData().aliases());
