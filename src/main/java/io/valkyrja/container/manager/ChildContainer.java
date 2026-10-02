@@ -175,7 +175,7 @@ public class ChildContainer extends Container {
     }
 
     /**
-     * Resolve an alias target, and reject a chain that returns to one already in flight.
+     * Resolve an alias target, and check a chain that returns to one already in flight.
      *
      * @param id the alias
      * @param target the target type
