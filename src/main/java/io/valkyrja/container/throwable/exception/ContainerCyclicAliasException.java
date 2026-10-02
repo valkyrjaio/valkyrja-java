@@ -19,15 +19,22 @@ public class ContainerCyclicAliasException extends ContainerInvalidArgumentExcep
      * @param id the type it points at, from which the chain returns
      */
     public ContainerCyclicAliasException(String alias, String id) {
-        super(
-                "Alias `"
-                        + alias
-                        + "` cannot reach `"
-                        + id
-                        + "`, because the chain from `"
-                        + id
-                        + "` returns to `"
-                        + alias
-                        + "`.");
+        super(message(alias, id));
+    }
+
+    private static String message(String alias, String id) {
+        if (alias.equals(id)) {
+            return "Alias `" + alias + "` cannot point at itself.";
+        }
+
+        return "Alias `"
+                + alias
+                + "` cannot reach `"
+                + id
+                + "`, because the chain from `"
+                + id
+                + "` returns to `"
+                + alias
+                + "`.";
     }
 }
