@@ -15,8 +15,8 @@ public class ContainerCyclicAliasException extends ContainerInvalidArgumentExcep
     /**
      * Construct a new exception.
      *
-     * @param alias the type the message names first
-     * @param id the type the chain returns from. The message names one type when the two are equal.
+     * @param alias the type the chain returns to
+     * @param id the type the chain runs from. The message names one type when the two are equal.
      */
     public ContainerCyclicAliasException(String alias, String id) {
         super(message(alias, id));

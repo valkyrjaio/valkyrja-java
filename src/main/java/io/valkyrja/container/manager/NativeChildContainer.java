@@ -162,7 +162,8 @@ public class NativeChildContainer extends Container {
     }
 
     /**
-     * Walk the parent's chain of aliases to the first type the parent could answer.
+     * Walk the parent's chain of aliases to the first type the parent could answer, or to the last
+     * hop when the chain ends first.
      *
      * @param id the alias type
      * @return the type the parent answers, or null when the type is not an alias
@@ -192,23 +193,23 @@ public class NativeChildContainer extends Container {
     /**
      * Check whether the child resolves the target of a parent-declared alias itself.
      *
-     * @param id the target type
+     * @param target the target type
      * @return true if the child resolves it, rather than the parent
      */
-    private boolean resolvesInChild(Class<?> id) {
+    private boolean resolvesInChild(Class<?> target) {
         // The parent publishes before it reads any map, so this test comes first. This
         // class copies no callback map, so the parent's callback is the child's as well.
-        if (parent.isDeferred(id) && !parent.isPublished(id)) {
+        if (parent.isDeferred(target) && !parent.isPublished(target)) {
             return true;
         }
 
-        if (parent.instances.containsKey(id)) {
+        if (parent.instances.containsKey(target)) {
             return false;
         }
 
         // This class copies no map, so the parent's marker is the child's as well. One read
         // carries what the portable child needs two for.
-        return parent.singletons.containsKey(id);
+        return parent.singletons.containsKey(target);
     }
 
     /**
