@@ -101,7 +101,6 @@ public class NativeChildContainer extends Container {
         return parent.getAliased(id, arguments);
     }
 
-    /** Read a publish callback from the child, then the parent. */
     @Override
     @Nullable Consumer<ContainerContract> getCallback(Class<?> id) {
         Consumer<ContainerContract> callback = callbacks.get(id);
@@ -114,7 +113,6 @@ public class NativeChildContainer extends Container {
         return getCallback(id) != null;
     }
 
-    /** Run the callback with the child as the container, so its bindings land in the child. */
     @Override
     public void publish(Class<?> id) {
         Consumer<ContainerContract> callback = getCallback(id);
