@@ -390,7 +390,22 @@ final class ContainerTest {
                         Map.of(),
                         Map.of());
 
-        assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
+        var throwable =
+                assertThrows(
+                        ContainerCyclicAliasException.class, () -> container.setFromData(data));
+
+        // This site names the edge that closed the chain, not the pair the caller supplied
+        assertEquals(
+                "Alias `"
+                        + CharSequence.class.getName()
+                        + "` cannot reach `"
+                        + ServiceFixture.class.getName()
+                        + "`, because the chain from `"
+                        + ServiceFixture.class.getName()
+                        + "` returns to `"
+                        + CharSequence.class.getName()
+                        + "`.",
+                throwable.getMessage());
     }
 
     @Test
