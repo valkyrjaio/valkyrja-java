@@ -77,7 +77,7 @@ public class ChildContainer extends Container {
         }
 
         // The child holds the same registration. One request must not hold one copy
-        // for the alias and another for the id.
+        // for the alias and another for the target.
         if (resolvesInChild(target)) {
             return getTargetOnce(id, (Class<T>) target, arguments);
         }
