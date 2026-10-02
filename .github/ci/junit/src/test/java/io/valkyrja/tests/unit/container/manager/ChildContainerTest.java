@@ -534,6 +534,20 @@ final class ChildContainerTest {
     }
 
     @Test
+    void getAliasedAnswersFromTheParentWhenBothHoldAnInstance() {
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        Object shared = parent.getSingleton(raw(SingletonFixture.class));
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        var scoped = new SingletonFixture();
+        localChild.setSingleton(raw(SingletonFixture.class), scoped);
+
+        // The child copied the marker, so only the parent's instance keeps the alias there
+        assertSame(shared, localChild.getAliased(CharSequence.class, Map.of()));
+        assertNotSame(scoped, localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
     void getAliasedAnswersFromTheParentWhenTheChildHoldsTheTarget() {
         var shared = new SingletonFixture();
         var scoped = new SingletonFixture();
