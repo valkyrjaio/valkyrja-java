@@ -10,43 +10,25 @@ package io.valkyrja.container.manager;
 
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
-/**
- * A per-request child container that interacts with the parent exclusively through {@link
- * ContainerContract} — no direct field access required.
- *
- * <p>Works across all languages regardless of whether they support class inheritance with protected
- * field access (Java, PHP, Python, C++, C#) or not (Go, Rust, C). This is the portable, universally
- * compatible implementation.
- *
- * <p>The constructor copies two maps from the parent's {@link ContainerData}:
- *
- * <ul>
- *   <li>{@code singletons} — singleton registrations. Used to create singleton instances in the
- *       child's own context when the parent has a binding but no cached instance yet.
- *   <li>{@code callbacks} — lazy provider callbacks. Enables the child to publish deferred
- *       providers into its own context on first access, independently of the parent.
- * </ul>
- *
- * <p>The same {@link ContainerData} reference can be stored once after bootstrap and reused across
- * all requests. Each child copies from it at construction, so the source is never mutated.
- *
- * <p>Singleton resolution order (in {@link #getSingletonWithoutChecks}):
- *
- * <ol>
- *   <li>Child's own cached instance
- *   <li>Parent's cached instance ({@code isSingletonInstance} via contract — safe reuse, frozen)
- *   <li>Child's copied singleton binding → create in child via base class logic
- * </ol>
- *
- * @see NativeChildContainer for a direct field-access alternative requiring a concrete parent type
- */
 public class ChildContainer extends Container {
 
     private final ContainerContract parent;
+
+    /**
+     * The alias targets this container is resolving, per thread.
+     *
+     * <p>The read asks whether a chain came back to a target this resolution is already on, so the
+     * state belongs to one call stack. A set shared between threads would read the first entry of a
+     * second thread as that chain. A plain set would also race, so each thread holds its own.
+     */
+    private final ThreadLocal<Set<Class<?>>> targetsInFlight =
+            ThreadLocal.withInitial(HashSet::new);
 
     public ChildContainer(ContainerContract parent, ContainerData parentData) {
         this.parent = parent;
@@ -83,26 +65,31 @@ public class ChildContainer extends Container {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected @Nullable <T> T getAliasedWithoutChecks(Class<T> id, Map<String, Object> arguments) {
-        if (!super.isAlias(id) && parent.isAlias(id)) {
-            return parent.getAliased(id, arguments);
+        if (super.isAlias(id)) {
+            return super.getAliasedWithoutChecks(id, arguments);
         }
-        return super.getAliasedWithoutChecks(id, arguments);
+
+        Class<?> target = getParentAliasTarget(id);
+        if (target == null) {
+            return null;
+        }
+
+        // The child holds the same registration. One request must not hold one copy
+        // for the alias and another for the target.
+        if (resolvesInChild(target)) {
+            return getTargetOnce(id, (Class<T>) target, arguments);
+        }
+
+        return parent.getAliased(id, arguments);
     }
 
-    /**
-     * Publish a deferred service using the child's copied callbacks. The callback's presence is
-     * sufficient guard. Runs with the child as the container so bindings register into the child's
-     * own maps.
-     */
     @Override
-    public void publish(Class<?> id) {
-        Consumer<ContainerContract> callback = callbacks.get(id);
-        if (callback == null) {
-            return;
-        }
-        callback.accept(this);
-        published.put(id, true);
+    public @Nullable Class<?> getAliasedId(Class<?> alias) {
+        Class<?> aliased = super.getAliasedId(alias);
+
+        return aliased != null ? aliased : parent.getAliasedId(alias);
     }
 
     @Override
@@ -120,9 +107,6 @@ public class ChildContainer extends Container {
         return super.isSingletonInstance(id) || parent.isSingletonInstance(id);
     }
 
-    // isSingletonBinding is NOT overridden — child's copied singletons map is checked by
-    // Container.isSingletonBinding (super) via this.singletons, which is sufficient.
-
     /**
      * Parent check must come first. If the parent already published a provider at bootstrap, the
      * child must not republish it — doing so would re-run the callback and re-register bindings.
@@ -132,5 +116,100 @@ public class ChildContainer extends Container {
     @Override
     public boolean isPublished(Class<?> id) {
         return super.isPublished(id) || parent.isPublished(id);
+    }
+
+    /**
+     * Walk the parent's chain of aliases, and return the last hop it reaches.
+     *
+     * @param id the alias type
+     * @return the last hop, or null when the type is not an alias
+     */
+    private @Nullable Class<?> getParentAliasTarget(Class<?> id) {
+        Class<?> current = id;
+        Class<?> target = null;
+        Class<?> aliasedId;
+        Set<Class<?>> seen = new HashSet<>();
+        seen.add(id);
+
+        while ((aliasedId = parent.getAliasedId(current)) != null) {
+            // A parent that is itself a child reads its own map and its parent's. A binding
+            // made on either after it was built can close a chain between them.
+            if (!seen.add(aliasedId)) {
+                throw new ContainerCyclicAliasException(current.getName(), aliasedId.getName());
+            }
+
+            target = aliasedId;
+            current = aliasedId;
+
+            // The parent reads these before it follows an alias, so it can answer at this
+            // hop rather than continue the chain.
+            if ((parent.isDeferred(current) && !parent.isPublished(current))
+                    || parent.isSingleton(current)
+                    || parent.isService(current)) {
+                break;
+            }
+        }
+
+        return target;
+    }
+
+    /**
+     * Check whether the child resolves the target of a parent-declared alias itself.
+     *
+     * @param target the target type
+     * @return true if the child resolves it, rather than the parent
+     */
+    private boolean resolvesInChild(Class<?> target) {
+        // The parent publishes before it reads any map, so this test comes first. The
+        // parent's state and the child's callback each decide one half.
+        if (parent.isDeferred(target) && !parent.isPublished(target) && isDeferred(target)) {
+            return true;
+        }
+
+        if (parent.isSingletonInstance(target)) {
+            return false;
+        }
+
+        // Both containers answer here, and each marker decides one half.
+        return parent.isSingletonBinding(target) && isSingletonBinding(target);
+    }
+
+    /**
+     * Resolve an alias target, and check a chain that returns to one already in flight.
+     *
+     * @param id the alias
+     * @param target the target type
+     * @param arguments the arguments
+     * @return the instance the target resolves to
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T getTargetOnce(Class<?> id, Class<T> target, Map<String, Object> arguments) {
+        // A chain that closes across two walks returns here rather than to one walk. An
+        // instance cached for the target has broken the chain, so read that first.
+        Set<Class<?>> inFlight = targetsInFlight.get();
+
+        if (!inFlight.add(target)) {
+            // The parent never returns to this guard, so the child's own map is where a
+            // write made during this resolution lands.
+            Object registered = instances.get(target);
+
+            if (registered != null) {
+                return (T) registered;
+            }
+
+            throw new ContainerCyclicAliasException(id.getName(), target.getName());
+        }
+
+        try {
+            return get(target, arguments);
+        } finally {
+            inFlight.remove(target);
+
+            if (inFlight.isEmpty()) {
+                // The outermost resolution has returned, so the thread holds no state for a
+                // container a request discards.
+                targetsInFlight.remove();
+            }
+        }
     }
 }

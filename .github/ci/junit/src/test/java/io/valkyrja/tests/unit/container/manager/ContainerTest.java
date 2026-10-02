@@ -8,21 +8,26 @@
 
 package io.valkyrja.tests.unit.container.manager;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.application.kernel.contract.ApplicationContract;
+import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProviderFixture;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -210,5 +215,213 @@ final class ContainerTest {
         assertThrows(
                 ContainerInvalidArgumentException.class,
                 () -> container.getSingleton(SingletonFixture.class));
+    }
+
+    @Test
+    void bindAliasRejectsAChainThatReturnsToTheAlias() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(Runnable.class));
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> container.bindAlias(Runnable.class, raw(CharSequence.class)));
+    }
+
+    @Test
+    void bindAliasRejectsALongerChainThatReturnsToTheAlias() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(Runnable.class));
+        container.bindAlias(Runnable.class, raw(ServiceFixture.class));
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> container.bindAlias(ServiceFixture.class, raw(CharSequence.class)));
+    }
+
+    @Test
+    void bindAliasAllowsAChainThatDoesNotReturn() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(Runnable.class));
+        container.bindAlias(Runnable.class, raw(ServiceFixture.class));
+
+        assertEquals(Runnable.class, container.getAliasedId(CharSequence.class));
+        assertEquals(ServiceFixture.class, container.getAliasedId(Runnable.class));
+        assertNull(container.getAliasedId(SingletonFixture.class));
+    }
+
+    @Test
+    void bindAliasRejectsAnAliasOfItself() {
+        var container = new Container();
+
+        var exception =
+                assertThrows(
+                        ContainerCyclicAliasException.class,
+                        () -> container.bindAlias(ServiceFixture.class, raw(ServiceFixture.class)));
+
+        // No chain exists at this throw, so the message states the pair instead
+        assertEquals(
+                "Alias `" + ServiceFixture.class.getName() + "` cannot point at itself.",
+                exception.getMessage());
+    }
+
+    @Test
+    void setFromDataRejectsACyclicAliasMap() {
+        var container = new Container();
+        // setFromData is an entry point for aliases, so it validates them too
+        var data =
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
+    }
+
+    @Test
+    void constructorRejectsAnAliasOfItselfInTheMap() {
+        var data =
+                new ContainerData(
+                        Map.of(ServiceFixture.class, ServiceFixture.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
+    }
+
+    @Test
+    void constructorAcceptsAMapOfAliasesThatDoNotReturn() {
+        var data =
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                ServiceFixture.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        var container = new Container(data);
+
+        assertEquals(Runnable.class, container.getAliasedId(CharSequence.class));
+        assertEquals(ServiceFixture.class, container.getAliasedId(Runnable.class));
+    }
+
+    @Test
+    void setFromDataLeavesTheAliasMapAloneWhenItIsCyclic() {
+        var container = new Container();
+        container.bindAlias(SingletonFixture.class, raw(ServiceFixture.class));
+        var data =
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
+
+        // The container a caller keeps holds no part of the rejected map
+        assertEquals(ServiceFixture.class, container.getAliasedId(SingletonFixture.class));
+        assertNull(container.getAliasedId(CharSequence.class));
+    }
+
+    @Test
+    void constructorRejectsACyclicAliasMapAnAliasIsNoPartOf() {
+        // ServiceFixture sits outside the cycle, so its walk needs a bound
+        var aliases = new LinkedHashMap<Class<?>, Class<?>>();
+        aliases.put(ServiceFixture.class, CharSequence.class);
+        aliases.put(CharSequence.class, Runnable.class);
+        aliases.put(Runnable.class, CharSequence.class);
+        var data = new ContainerData(aliases, Map.of(), Map.of(), Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
+    }
+
+    @Test
+    void constructorRejectsACyclicAliasMap() {
+        var data =
+                new ContainerData(
+                        Map.of(
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
+    }
+
+    @Test
+    void setFromDataWalksAChainOnPastAnAliasTheContainerAlreadyHeld() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(Runnable.class));
+        var data =
+                new ContainerData(
+                        Map.of(ServiceFixture.class, CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        // The walk leaves the incoming map at CharSequence and reads the installed alias
+        container.setFromData(data);
+
+        assertEquals(CharSequence.class, container.getAliasedId(ServiceFixture.class));
+    }
+
+    @Test
+    void setFromDataRejectsAChainThatReturnsThroughAnAliasTheContainerAlreadyHeld() {
+        var container = new Container();
+        container.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        var data =
+                new ContainerData(
+                        Map.of(ServiceFixture.class, CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
+
+        var throwable =
+                assertThrows(
+                        ContainerCyclicAliasException.class, () -> container.setFromData(data));
+
+        // This site names the edge that closed the chain, not the pair the caller supplied
+        assertEquals(
+                "Alias `"
+                        + CharSequence.class.getName()
+                        + "` cannot reach `"
+                        + ServiceFixture.class.getName()
+                        + "`, because the chain from `"
+                        + ServiceFixture.class.getName()
+                        + "` returns to `"
+                        + CharSequence.class.getName()
+                        + "`.",
+                throwable.getMessage());
+    }
+
+    @Test
+    void getSingletonKeepsTheInstanceAFactoryRegisteredForItsOwnId() {
+        var container = new Container();
+        var published = new SingletonFixture();
+        container.bindSingleton(
+                raw(Runnable.class),
+                (c, a) -> {
+                    c.setSingleton(raw(Runnable.class), published);
+
+                    return SingletonFixture.make(c, a);
+                });
+
+        // The factory put one in the map, so that is the one every reader gets
+        assertSame(published, container.getSingleton(Runnable.class));
     }
 }
