@@ -489,11 +489,11 @@ describes the worker entry classes.
 
 ## Exceptions
 
-| Exception                                  | The container throws it when                                                                          |
-| :----------------------------------------- | :---------------------------------------------------------------------------------------------------- |
-| `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias                                              |
-| `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback                                                         |
-| `ContainerCyclicAliasException`            | An alias reaches a chain that returns to it, at any of the four checks                                |
+| Exception                                  | The container throws it when                                           |
+| :----------------------------------------- | :--------------------------------------------------------------------- |
+| `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias               |
+| `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback                          |
+| `ContainerCyclicAliasException`            | An alias reaches a chain that returns to it, at any of the four checks |
 
 `ContainerInvalidReferenceException` and `ContainerCyclicAliasException` extend
 `ContainerInvalidArgumentException`, and
