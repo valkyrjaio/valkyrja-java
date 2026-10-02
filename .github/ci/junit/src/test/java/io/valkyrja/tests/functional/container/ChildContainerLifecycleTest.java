@@ -56,7 +56,7 @@ final class ChildContainerLifecycleTest {
             var child = new ChildContainer(parent, (ContainerData) data);
 
             // A fresh child carries nothing the last request registered
-            assertFalse(child.isSingletonInstance(raw(Comparable.class)));
+            assertFalse(child.isSingletonInstance(Comparable.class));
 
             var requestScoped = new SingletonFixture();
             child.setSingleton(raw(Comparable.class), requestScoped);
