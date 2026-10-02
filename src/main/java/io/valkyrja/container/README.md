@@ -78,10 +78,9 @@ container.bindSingleton(
         (c, arguments) -> new Matcher(c.getSingleton(RouteCollectionContract.class)));
 ```
 
-Warning: a build keeps the first instance the map holds for an id. A
-factory that caches an instance for the id it is building decides what every
-reader gets.
-The object that factory returns is discarded then.
+Warning: a build keeps the first instance the map holds for an id. A factory
+that caches an instance for the id it is building decides what every reader
+gets. The object that factory returns is discarded then.
 
 ### bindAlias
 

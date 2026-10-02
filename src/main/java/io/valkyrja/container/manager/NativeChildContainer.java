@@ -164,9 +164,6 @@ public class NativeChildContainer extends Container {
     /**
      * Walk the parent's chain of aliases, and return the last hop it reaches.
      *
-     * <p>The walk stops at a hop the parent's own resolution would stop at, or at the end of the
-     * chain.
-     *
      * @param id the alias type
      * @return the last hop, or null when the type is not an alias
      */
@@ -229,8 +226,8 @@ public class NativeChildContainer extends Container {
         Set<Class<?>> inFlight = targetsInFlight.get();
 
         if (!inFlight.add(target)) {
-            // The factory receives the child, so the child's map is where a registration
-            // made during this resolution lands.
+            // This class runs the parent's callable itself, so the child's map is where a
+            // write made during this resolution lands.
             Object registered = instances.get(target);
 
             if (registered != null) {
