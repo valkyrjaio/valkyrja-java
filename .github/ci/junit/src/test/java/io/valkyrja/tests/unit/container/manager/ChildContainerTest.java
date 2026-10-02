@@ -625,11 +625,10 @@ final class ChildContainerTest {
                         ContainerCyclicAliasException.class,
                         () -> localChild.get(CharSequence.class, Map.of()));
 
-        assertTrue(
-                throwable
-                        .getMessage()
-                        .startsWith(
-                                "Alias `java.lang.CharSequence` cannot reach `java.lang.Runnable`"));
+        assertEquals(
+                "Alias `java.lang.CharSequence` cannot reach `java.lang.Runnable`, because the"
+                        + " chain from `java.lang.Runnable` returns to `java.lang.CharSequence`.",
+                throwable.getMessage());
     }
 
     @Test
