@@ -21,10 +21,6 @@ public class NativeChildContainer extends Container {
 
     private final Container parent;
 
-    public NativeChildContainer(Container parent) {
-        this.parent = parent;
-    }
-
     /**
      * The alias targets this container is resolving, per thread.
      *
@@ -34,6 +30,10 @@ public class NativeChildContainer extends Container {
      */
     private final ThreadLocal<Set<Class<?>>> targetsInFlight =
             ThreadLocal.withInitial(HashSet::new);
+
+    public NativeChildContainer(Container parent) {
+        this.parent = parent;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -55,8 +55,8 @@ public class NativeChildContainer extends Container {
             return null;
         }
 
-        // The child caches what it builds, and the parent stays untouched. A factory can
-        // register this id while it runs, so the map decides what a reader gets.
+        // The child caches what it builds, and the map decides what a reader gets. The
+        // build stays outside it, because a factory resolves its own dependencies through it.
         T instance = getServiceWithoutChecks(id, Map.of());
         if (instance == null) {
             return null;
