@@ -119,7 +119,8 @@ public class ChildContainer extends Container {
     }
 
     /**
-     * Walk the parent's chain of aliases to the first type the parent could answer.
+     * Walk the parent's chain of aliases to the first type the parent could answer, or to the last
+     * hop when the chain ends first.
      *
      * @param id the alias type
      * @return the type the parent answers, or null when the type is not an alias
@@ -156,22 +157,22 @@ public class ChildContainer extends Container {
     /**
      * Check whether the child resolves the target of a parent-declared alias itself.
      *
-     * @param id the target type
+     * @param target the target type
      * @return true if the child resolves it, rather than the parent
      */
-    private boolean resolvesInChild(Class<?> id) {
+    private boolean resolvesInChild(Class<?> target) {
         // The parent publishes before it reads any map, so this test comes first. The
         // parent's state and the child's callback each decide one half.
-        if (parent.isDeferred(id) && !parent.isPublished(id) && isDeferred(id)) {
+        if (parent.isDeferred(target) && !parent.isPublished(target) && isDeferred(target)) {
             return true;
         }
 
-        if (parent.isSingletonInstance(id)) {
+        if (parent.isSingletonInstance(target)) {
             return false;
         }
 
         // Both containers answer here, and each marker decides one half.
-        return parent.isSingletonBinding(id) && isSingletonBinding(id);
+        return parent.isSingletonBinding(target) && isSingletonBinding(target);
     }
 
     /**
