@@ -119,7 +119,7 @@ public class ChildContainer extends Container {
     }
 
     /**
-     * Walk the parent's chain of aliases to the type the parent would answer.
+     * Walk the parent's chain of aliases to the first type the parent could answer.
      *
      * @param id the alias type
      * @return the type the parent answers, or null when the type is not an alias
@@ -141,8 +141,8 @@ public class ChildContainer extends Container {
             target = aliasedId;
             current = aliasedId;
 
-            // The parent publishes, then reads its maps, and only then follows an alias.
-            // It never reaches the rest of the chain from any of these.
+            // The parent reads these before it follows an alias, so it can answer at this
+            // hop rather than continue the chain.
             if ((parent.isDeferred(current) && !parent.isPublished(current))
                     || parent.isSingleton(current)
                     || parent.isService(current)) {
@@ -189,6 +189,8 @@ public class ChildContainer extends Container {
         Set<Class<?>> inFlight = targetsInFlight.get();
 
         if (!inFlight.add(target)) {
+            // A target the child does not bind runs in the parent, which never returns
+            // here, so only a factory this container ran can have registered one.
             Object registered = instances.get(target);
 
             if (registered != null) {

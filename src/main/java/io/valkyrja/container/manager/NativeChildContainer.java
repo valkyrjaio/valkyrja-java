@@ -171,7 +171,7 @@ public class NativeChildContainer extends Container {
     }
 
     /**
-     * Walk the parent's chain of aliases to the type the parent would answer.
+     * Walk the parent's chain of aliases to the first type the parent could answer.
      *
      * @param id the alias type
      * @return the type the parent answers, or null when the type is not an alias
@@ -185,8 +185,8 @@ public class NativeChildContainer extends Container {
             target = aliasedId;
             current = aliasedId;
 
-            // The parent publishes, then reads its maps, and only then follows an alias.
-            // It never reaches the rest of the chain from any of these.
+            // The parent reads these before it follows an alias, so it can answer at this
+            // hop rather than continue the chain.
             if ((parent.getCallback(current) != null && !parent.isPublished(current))
                     || parent.singletons.containsKey(current)
                     || parent.instances.containsKey(current)
