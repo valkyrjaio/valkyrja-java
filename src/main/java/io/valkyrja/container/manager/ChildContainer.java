@@ -121,9 +121,6 @@ public class ChildContainer extends Container {
     /**
      * Walk the parent's chain of aliases, and return the last hop it reaches.
      *
-     * <p>The walk stops at a hop the parent's own resolution would stop at, or at the end of the
-     * chain.
-     *
      * @param id the alias type
      * @return the last hop, or null when the type is not an alias
      */
