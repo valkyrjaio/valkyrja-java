@@ -164,6 +164,9 @@ public class NativeChildContainer extends Container {
     /**
      * Walk the parent's chain of aliases, and return the last hop it reaches.
      *
+     * <p>The walk stops at a hop the parent's own resolution would stop at, or at the end of the
+     * chain.
+     *
      * @param id the alias type
      * @return the last hop, or null when the type is not an alias
      */
@@ -221,8 +224,8 @@ public class NativeChildContainer extends Container {
      */
     @SuppressWarnings("unchecked")
     private <T> T getTargetOnce(Class<?> id, Class<T> target, Map<String, Object> arguments) {
-        // A chain that closes across two walks returns here rather than to one walk. A
-        // factory that registered its own id has broken the chain, so read that first.
+        // A chain that closes across two walks returns here rather than to one walk. An
+        // instance cached for the target has broken the chain, so read that first.
         Set<Class<?>> inFlight = targetsInFlight.get();
 
         if (!inFlight.add(target)) {
