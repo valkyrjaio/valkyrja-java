@@ -162,11 +162,10 @@ public class NativeChildContainer extends Container {
     }
 
     /**
-     * Walk the parent's chain of aliases to the first type the parent could answer, or to the last
-     * hop when the chain ends first.
+     * Walk the parent's chain of aliases, and return the last hop it reaches.
      *
      * @param id the alias type
-     * @return the type the parent answers, or null when the type is not an alias
+     * @return the last hop, or null when the type is not an alias
      */
     private @Nullable Class<?> getParentAliasTarget(Class<?> id) {
         Class<?> current = id;
