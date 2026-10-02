@@ -347,8 +347,9 @@ answers it as it would for any caller.
 
 `ChildContainer` hands a parent factory to the parent, so every singleton that
 factory resolves caches in the parent. `NativeChildContainer` applies the same
-factory with the child, so those dependencies cache in the child. A lookup that
-neither child resolves itself goes to the parent, which runs the factory there.
+factory with the child, so those dependencies cache in the child. An alias takes
+a different path, which [Where an alias resolves](#where-an-alias-resolves)
+states.
 
 ### The two implementations
 
