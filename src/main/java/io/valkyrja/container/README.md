@@ -392,10 +392,10 @@ requests.
 
 ### Where an alias resolves
 
-An alias resolves in the container that declares it, so where you declare an
-alias selects the resolution scope. A child lookup of an alias that only the
-parent declares goes to the parent, and the parent answers it as it would for
-any caller:
+An alias resolves in the container that declares it, so where a developer
+declares an alias selects the resolution scope. A child lookup of an alias that
+only the parent declares goes to the parent. The parent answers it as it would
+for any caller:
 
 ```java
 // Once, at boot. The child never declares this alias.
