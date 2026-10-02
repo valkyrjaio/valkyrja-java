@@ -101,14 +101,7 @@ public class NativeChildContainer extends Container {
         return parent.getAliased(id, arguments);
     }
 
-    /**
-     * Read a publish callback from the child, then the parent.
-     *
-     * <p>PHP reads the parent's callbacks through this one accessor, and the base publish follows
-     * it. Java cannot: callbacks lives in a different sub-package, so a protected accessor is
-     * unreachable on a sibling instance, and publish reads the map itself. The two overrides below
-     * carry what the accessor carries in PHP.
-     */
+    /** Read a publish callback from the child, then the parent. */
     @Override
     @Nullable Consumer<ContainerContract> getCallback(Class<?> id) {
         Consumer<ContainerContract> callback = callbacks.get(id);
