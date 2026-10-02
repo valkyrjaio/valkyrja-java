@@ -491,15 +491,17 @@ final class ChildContainerTest {
                         ContainerCyclicAliasException.class,
                         () -> localChild.get(CharSequence.class));
 
-        assertTrue(
-                exception
-                        .getMessage()
-                        .startsWith(
-                                "Alias `"
-                                        + Runnable.class.getName()
-                                        + "` cannot reach `"
-                                        + CharSequence.class.getName()
-                                        + "`"));
+        assertEquals(
+                "Alias `"
+                        + Runnable.class.getName()
+                        + "` cannot reach `"
+                        + CharSequence.class.getName()
+                        + "`, because the chain from `"
+                        + CharSequence.class.getName()
+                        + "` returns to `"
+                        + Runnable.class.getName()
+                        + "`.",
+                exception.getMessage());
     }
 
     @Test

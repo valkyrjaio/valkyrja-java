@@ -252,9 +252,15 @@ final class ContainerTest {
     void bindAliasRejectsAnAliasOfItself() {
         var container = new Container();
 
-        assertThrows(
-                ContainerCyclicAliasException.class,
-                () -> container.bindAlias(ServiceFixture.class, raw(ServiceFixture.class)));
+        var exception =
+                assertThrows(
+                        ContainerCyclicAliasException.class,
+                        () -> container.bindAlias(ServiceFixture.class, raw(ServiceFixture.class)));
+
+        // No chain exists at this throw, so the message states the pair instead
+        assertEquals(
+                "Alias `" + ServiceFixture.class.getName() + "` cannot point at itself.",
+                exception.getMessage());
     }
 
     @Test
