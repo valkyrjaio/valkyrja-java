@@ -189,8 +189,8 @@ public class ChildContainer extends Container {
         Set<Class<?>> inFlight = targetsInFlight.get();
 
         if (!inFlight.add(target)) {
-            // A target the child does not bind runs in the parent, which never returns
-            // here, so only a write this container made can be in that map.
+            // The parent never returns to this guard, so the child's own map is where a
+            // write made during this resolution lands.
             Object registered = instances.get(target);
 
             if (registered != null) {
