@@ -76,9 +76,8 @@ public class ChildContainer extends Container {
             return null;
         }
 
-        // The parent would resolve this target for the first time, and the child holds
-        // the same registration, so letting the parent do it would leave the request
-        // with one copy for the alias and another for the id.
+        // The child holds the same registration. One request must not hold one copy
+        // for the alias and another for the id.
         if (resolvesInChild(target)) {
             return getTargetOnce(id, (Class<T>) target, arguments);
         }
@@ -133,8 +132,8 @@ public class ChildContainer extends Container {
         seen.add(id);
 
         while ((aliasedId = parent.getAliasedId(current)) != null) {
-            // A parent that is itself a child reads its own map and its parent's, and a
-            // binding made on either after it was built can close a chain between them.
+            // A parent that is itself a child reads its own map and its parent's. A binding
+            // made on either after it was built can close a chain between them.
             if (!seen.add(aliasedId)) {
                 throw new ContainerCyclicAliasException(current.getName(), aliasedId.getName());
             }
@@ -142,8 +141,8 @@ public class ChildContainer extends Container {
             target = aliasedId;
             current = aliasedId;
 
-            // The parent publishes, then reads its maps, and only then follows an
-            // alias, so it never reaches the rest of the chain from any of these.
+            // The parent publishes, then reads its maps, and only then follows an alias.
+            // It never reaches the rest of the chain from any of these.
             if ((parent.isDeferred(current) && !parent.isPublished(current))
                     || parent.isSingleton(current)
                     || parent.isService(current)) {
@@ -161,10 +160,8 @@ public class ChildContainer extends Container {
      * @return true if the child resolves it, rather than the parent
      */
     private boolean resolvesInChild(Class<?> id) {
-        // The parent publishes before it reads any map, so this test comes first. Both
-        // containers answer it: the parent's state is what makes this a target it would
-        // publish for the first time, and the child's callback is what lets the child
-        // publish it instead.
+        // The parent publishes before it reads any map, so this test comes first. The
+        // parent's state and the child's callback each decide one half.
         if (parent.isDeferred(id) && !parent.isPublished(id) && isDeferred(id)) {
             return true;
         }
@@ -173,9 +170,7 @@ public class ChildContainer extends Container {
             return false;
         }
 
-        // Both containers answer here. The parent's marker is what makes this a target the
-        // parent would build for the first time, and the child's is what lets the child
-        // cache what it builds instead.
+        // Both containers answer here, and each marker decides one half.
         return parent.isSingletonBinding(id) && isSingletonBinding(id);
     }
 
@@ -189,10 +184,8 @@ public class ChildContainer extends Container {
      */
     @SuppressWarnings("unchecked")
     private <T> T getTargetOnce(Class<?> id, Class<T> target, Map<String, Object> arguments) {
-        // A walk ends at the first hop the parent would answer, so a chain that closes
-        // across two of them returns here rather than to one walk. A factory that
-        // registered its own id while it runs has broken the chain, so read that first,
-        // and name the pair only when nothing can answer.
+        // A chain that closes across two walks returns here rather than to one walk. A
+        // factory that registered its own id has broken the chain, so read that first.
         Set<Class<?>> inFlight = targetsInFlight.get();
 
         if (!inFlight.add(target)) {
