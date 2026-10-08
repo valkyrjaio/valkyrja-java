@@ -361,9 +361,10 @@ A worker runtime boots the application once, and it serves many requests. A
 request that writes to the container of the worker changes what the next request
 reads. A child container removes that risk.
 
-The parent container is frozen after boot, so no registration changes after
-that point. It still publishes a deferred id, and caches a singleton, when it
-answers a lookup a child handed to it. Each request builds a child, resolves
+The parent container is frozen after boot, so a request writes nothing into it
+directly. A lookup it answers for a child is the one path that still changes it.
+On that path it publishes a deferred id, caches a singleton, and registers
+whatever a publisher it runs binds. Each request builds a child, resolves
 through the child, and discards the child. A write of the child reaches the
 child only. An id the child cannot answer goes to the parent, and the parent
 answers it as it would for any caller.
