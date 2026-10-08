@@ -106,8 +106,8 @@ container.bindAlias(MatcherContract.class, raw(Matcher.class));
 ```
 
 `bindAlias` stores the mapping only. The target needs its own binding, and the
-container checks that target when the alias resolves, rather than when you bind
-the alias.
+container checks that target when the alias resolves, rather than at the bind
+call.
 
 The alias itself is checked at once. `bindAlias` throws
 `ContainerCyclicAliasException` when the target already resolves back to the
@@ -123,7 +123,7 @@ container.bindAlias(SlackNotifier.class, raw(NotifierContract.class));
 container.bindAlias(SlackNotifier.class, raw(SlackNotifier.class));
 ```
 
-Four checks reject such a chain with `ContainerCyclicAliasException`:
+Four checks reject a chain that returns to its own alias:
 
 - `bindAlias` checks the pair it is asked to store.
 - The constructor and `setFromData` check the aliases they receive, and the
@@ -379,18 +379,19 @@ states.
 `io.valkyrja.container.manager.ChildContainer` is the default. It takes the
 parent as a `ContainerContract`, and a `ContainerData` snapshot of the parent,
 so any contract implementation can be the parent. This is the portable,
-cross-language implementation. It copies the `singletons`
-map and the `callbacks` map from the snapshot, and it reaches every other
-binding through the contract.
+cross-language implementation. It copies the `singletons` map and the
+`callbacks` map from the snapshot, and it reaches every other binding through
+the contract.
 
 `io.valkyrja.container.manager.NativeChildContainer` takes the parent as a
 concrete `Container`. It copies no map, and it reads the fields of the parent
 directly, which a language with field access can do and one without cannot.
 
 Both extend `Container`, so both hold the full contract. Choose the
-implementation whose factory receiver your services need, which
-[Resolution order](#resolution-order) states. The direct map access also removes
-the method-call overhead on the fallback path.
+implementation whose factory receiver the services need, as
+[Resolution order](#resolution-order) states. `NativeChildContainer` also
+removes the method-call overhead on the fallback path, because it reads the
+maps directly.
 
 ### Resolution order
 
