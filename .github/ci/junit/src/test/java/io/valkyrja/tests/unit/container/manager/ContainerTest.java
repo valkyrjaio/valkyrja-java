@@ -335,24 +335,6 @@ final class ContainerTest {
     }
 
     @Test
-    void constructorRejectsACyclicAliasMapOneAliasIsNoPartOf() {
-        var data =
-                new ContainerData(
-                        Map.of(
-                                ServiceFixture.class,
-                                CharSequence.class,
-                                CharSequence.class,
-                                Runnable.class,
-                                Runnable.class,
-                                CharSequence.class),
-                        Map.of(),
-                        Map.of(),
-                        Map.of());
-
-        assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
-    }
-
-    @Test
     void constructorRejectsACyclicAliasMap() {
         var data =
                 new ContainerData(

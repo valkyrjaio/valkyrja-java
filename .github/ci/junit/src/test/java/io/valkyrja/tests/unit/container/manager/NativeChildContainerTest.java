@@ -515,7 +515,7 @@ final class NativeChildContainerTest {
     }
 
     @Test
-    void getAliasedAnswersFromTheParentWhenBothHoldAnInstance() {
+    void getAliasedTakesTheParentInstanceExitBeforeTheMarkerRead() {
         parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
         Object shared = parent.getSingleton(raw(SingletonFixture.class));
         parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
