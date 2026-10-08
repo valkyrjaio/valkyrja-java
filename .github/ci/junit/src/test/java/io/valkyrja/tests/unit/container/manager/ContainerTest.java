@@ -27,7 +27,6 @@ import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProviderFixture;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -337,11 +336,18 @@ final class ContainerTest {
 
     @Test
     void constructorRejectsACyclicAliasMapOneAliasIsNoPartOf() {
-        var aliases = new LinkedHashMap<Class<?>, Class<?>>();
-        aliases.put(ServiceFixture.class, CharSequence.class);
-        aliases.put(CharSequence.class, Runnable.class);
-        aliases.put(Runnable.class, CharSequence.class);
-        var data = new ContainerData(aliases, Map.of(), Map.of(), Map.of());
+        var data =
+                new ContainerData(
+                        Map.of(
+                                ServiceFixture.class,
+                                CharSequence.class,
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class,
+                                CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of());
 
         assertThrows(ContainerCyclicAliasException.class, () -> new Container(data));
     }
