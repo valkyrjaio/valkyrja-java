@@ -47,7 +47,6 @@ final class ChildContainerLifecycleTest {
 
         // One snapshot, taken once, read by every request.
         ContainerDataContract data = parent.getData();
-        ContainerDataContract registrations = parent.getData();
 
         List<Object> unbuilt = new ArrayList<>();
         List<Object> provided = new ArrayList<>();
@@ -95,9 +94,9 @@ final class ChildContainerLifecycleTest {
         assertNotSame(provided.get(1), provided.get(2));
 
         // The parent still holds the registrations it booted with
-        assertEquals(registrations.aliases(), parent.getData().aliases());
-        assertEquals(registrations.singletons(), parent.getData().singletons());
-        assertEquals(registrations.services().keySet(), parent.getData().services().keySet());
-        assertEquals(registrations.callbacks().keySet(), parent.getData().callbacks().keySet());
+        assertEquals(data.aliases(), parent.getData().aliases());
+        assertEquals(data.singletons(), parent.getData().singletons());
+        assertEquals(data.services(), parent.getData().services());
+        assertEquals(data.callbacks(), parent.getData().callbacks());
     }
 }
