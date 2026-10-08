@@ -260,9 +260,10 @@ A worker runtime boots once, and it serves many requests.
 `io.valkyrja.application.entry.abstract_.WorkerHttp` and
 `io.valkyrja.application.entry.abstract_.WorkerGrpc` hold that lifecycle.
 
-`bootstrap(config)` starts the application, and it returns the kernel. The
-container of the kernel is frozen after that call, and nothing writes to it
-again.
+`bootstrap(config)` starts the application, and it returns the kernel. A request
+writes nothing into the container of the kernel directly after that call. A
+lookup that container answers for a child still changes it, and the
+[container component](../container/README.md) states what it changes there.
 
 `dispatch(app, data, request, emitter)` handles one request. It builds a
 `ChildContainer` from the frozen parent and the snapshot, wraps the kernel in a
