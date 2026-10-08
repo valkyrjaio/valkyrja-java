@@ -170,6 +170,24 @@ final class ChildContainerTest {
     }
 
     @Test
+    void getSingletonSplitsTheInstanceWhenAParentFactoryRegistersItsOwnId() {
+        var registered = new SingletonFixture();
+        parent.bindSingleton(
+                raw(Runnable.class),
+                (c, a) -> {
+                    c.setSingleton(raw(Runnable.class), registered);
+
+                    return SingletonFixture.make(c, a);
+                });
+        var freshChild = createChild();
+
+        // The parent runs its own factory, so the registration lands in the parent and
+        // the child caches what the factory returned
+        assertNotSame(registered, freshChild.getSingleton(Runnable.class));
+        assertSame(registered, parent.getSingleton(Runnable.class));
+    }
+
+    @Test
     void getSingletonFromParentInstance() {
         var parentInstance = new SingletonFixture();
         parent.setSingleton(SingletonFixture.class, parentInstance);
