@@ -336,8 +336,7 @@ final class ContainerTest {
     }
 
     @Test
-    void constructorRejectsACyclicAliasMapAnAliasIsNoPartOf() {
-        // ServiceFixture sits outside the cycle, so its walk needs a bound
+    void constructorRejectsACyclicAliasMapOneAliasIsNoPartOf() {
         var aliases = new LinkedHashMap<Class<?>, Class<?>>();
         aliases.put(ServiceFixture.class, CharSequence.class);
         aliases.put(CharSequence.class, Runnable.class);
