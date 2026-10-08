@@ -388,9 +388,9 @@ concrete `Container`. It copies no map, and it reads the fields of the parent
 directly, which a language with field access can do and one without cannot.
 
 Both extend `Container`, so both hold the full contract. Choose the
-implementation whose factory receiver the services need, as
+implementation by the container a parent-held factory must receive, as
 [Resolution order](#resolution-order) states. `NativeChildContainer` also
-removes the method-call overhead on the fallback path, because it reads the
+removes the method-call overhead when it reads the parent, because it reads the
 maps directly.
 
 ### Resolution order
