@@ -170,7 +170,7 @@ final class ChildContainerTest {
     }
 
     @Test
-    void getSingletonSplitsTheInstanceWhenAParentFactoryRegistersItsOwnId() {
+    void getSingletonLeavesTheTwoContainersHoldingDifferentObjects() {
         var registered = new SingletonFixture();
         parent.bindSingleton(
                 raw(Runnable.class),

@@ -624,7 +624,7 @@ final class NativeChildContainerTest {
     }
 
     @Test
-    void getSingletonKeepsTheInstanceAParentFactoryRegisteredInTheChild() {
+    void getSingletonLeavesOneObjectForTheTwoContainers() {
         var registered = new SingletonFixture();
         parent.bindSingleton(
                 raw(Runnable.class),
