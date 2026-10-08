@@ -175,8 +175,8 @@ public class NativeChildContainer extends Container {
         seen.add(id);
 
         while ((aliasedId = parent.aliases.get(current)) != null) {
-            // bindAlias validates the map and then writes to it as two steps, so two
-            // concurrent calls can each pass and leave a cycle in the map this walk reads.
+            // Each write to the alias map validates and then puts as two steps, so two
+            // concurrent writes can each pass and leave a cycle in the map this walk reads.
             if (!seen.add(aliasedId)) {
                 throw new ContainerCyclicAliasException(current.getName(), aliasedId.getName());
             }
