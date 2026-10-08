@@ -12,9 +12,9 @@ public class ApplicationInfo {
 
     private ApplicationInfo() {}
 
-    public static final String VERSION = "26.10.12";
+    public static final String VERSION = "26.10.13";
 
-    public static final String VERSION_BUILD_DATE_TIME = "October 7 2026 11:46:28 MST";
+    public static final String VERSION_BUILD_DATE_TIME = "October 8 2026 11:44:31 MST";
 
     public static final String ASCII =
             """
