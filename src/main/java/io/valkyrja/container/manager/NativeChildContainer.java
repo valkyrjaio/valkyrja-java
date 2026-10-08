@@ -172,13 +172,15 @@ public class NativeChildContainer extends Container {
         Class<?> target = null;
         Class<?> aliasedId;
 
+        // Every write to a container's own alias map validates first, so the parent's map
+        // holds no cycle and this walk needs no bound.
         while ((aliasedId = parent.aliases.get(current)) != null) {
             target = aliasedId;
             current = aliasedId;
 
             // The parent reads these before it follows an alias, so it can answer at this
             // hop rather than continue the chain.
-            if ((parent.getCallback(current) != null && !parent.isPublished(current))
+            if ((parent.isDeferred(current) && !parent.isPublished(current))
                     || parent.singletons.containsKey(current)
                     || parent.instances.containsKey(current)
                     || parent.services.containsKey(current)) {
