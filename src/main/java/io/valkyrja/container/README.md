@@ -109,7 +109,7 @@ container.bindAlias(MatcherContract.class, raw(Matcher.class));
 container checks that target when the alias resolves, rather than at the bind
 call.
 
-The alias itself is checked at once. `bindAlias` throws
+`bindAlias` checks the alias itself at once. It throws
 `ContainerCyclicAliasException` when the target already resolves back to the
 alias, and when the two are the same type, because such a chain has no end:
 
@@ -120,7 +120,7 @@ container.bindAlias(NotifierContract.class, raw(SlackNotifier.class));
 container.bindAlias(SlackNotifier.class, raw(NotifierContract.class));
 
 // Throws: SlackNotifier cannot point at itself.
-container.bindAlias(SlackNotifier.class, raw(SlackNotifier.class));
+container.bindAlias(SlackNotifier.class, SlackNotifier.class);
 ```
 
 Four checks reject a chain that returns to its own alias:
@@ -384,14 +384,13 @@ cross-language implementation. It copies the `singletons` map and the
 the contract.
 
 `io.valkyrja.container.manager.NativeChildContainer` takes the parent as a
-concrete `Container`. It copies no map, and it reads the fields of the parent
-directly, which a language with field access can do and one without cannot.
+concrete `Container`. It copies no map, and a read that falls back to the parent
+reaches the parent's fields directly rather than its methods.
 
-Both extend `Container`, so both hold the full contract. Choose the
-implementation by the container a parent-held factory must receive, as
-[Resolution order](#resolution-order) states. `NativeChildContainer` also
-removes the method-call overhead when it reads the parent, because it reads the
-maps directly.
+Both extend `Container`, so both hold the full contract. Choose
+`NativeChildContainer` when a parent-held factory must receive the child, as
+[Resolution order](#resolution-order) states, or when profiling confirms a
+bottleneck at very high child construction rates.
 
 ### Resolution order
 
