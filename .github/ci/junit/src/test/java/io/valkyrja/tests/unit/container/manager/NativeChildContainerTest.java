@@ -627,17 +627,20 @@ final class NativeChildContainerTest {
     void getSingletonLeavesOneObjectForTheTwoContainers() {
         var registered = new SingletonFixture();
         parent.bindSingleton(
-                raw(Runnable.class),
+                SingletonFixture.class,
                 (c, a) -> {
-                    c.setSingleton(raw(Runnable.class), registered);
+                    c.setSingleton(SingletonFixture.class, registered);
 
-                    return SingletonFixture.make(c, a);
+                    return new SingletonFixture();
                 });
 
         // This class runs the parent's factory with the child, so the registration
         // lands in the child and the parent holds no instance
-        assertSame(registered, child.getSingleton(Runnable.class));
-        assertFalse(parent.isSingletonInstance(Runnable.class));
+        var fromChild = child.getSingleton(SingletonFixture.class);
+
+        assertSame(registered, fromChild);
+        assertSame(fromChild, child.getSingleton(SingletonFixture.class));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
     }
 
     @Test

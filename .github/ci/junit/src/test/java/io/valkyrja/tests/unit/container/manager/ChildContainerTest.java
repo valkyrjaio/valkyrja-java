@@ -173,18 +173,21 @@ final class ChildContainerTest {
     void getSingletonLeavesTheTwoContainersHoldingDifferentObjects() {
         var registered = new SingletonFixture();
         parent.bindSingleton(
-                raw(Runnable.class),
+                SingletonFixture.class,
                 (c, a) -> {
-                    c.setSingleton(raw(Runnable.class), registered);
+                    c.setSingleton(SingletonFixture.class, registered);
 
-                    return SingletonFixture.make(c, a);
+                    return new SingletonFixture();
                 });
         var freshChild = createChild();
 
         // The parent runs its own factory, so the registration lands in the parent and
         // the child caches what the factory returned
-        assertNotSame(registered, freshChild.getSingleton(Runnable.class));
-        assertSame(registered, parent.getSingleton(Runnable.class));
+        var fromChild = freshChild.getSingleton(SingletonFixture.class);
+
+        assertSame(registered, parent.getSingleton(SingletonFixture.class));
+        assertNotSame(registered, fromChild);
+        assertSame(fromChild, freshChild.getSingleton(SingletonFixture.class));
     }
 
     @Test
