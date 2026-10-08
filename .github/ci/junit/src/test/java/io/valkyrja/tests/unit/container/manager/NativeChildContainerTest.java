@@ -635,7 +635,7 @@ final class NativeChildContainerTest {
                 });
 
         // This class runs the parent's factory with the child, so the registration
-        // lands in the child and the parent holds nothing
+        // lands in the child and the parent holds no instance
         assertSame(registered, child.getSingleton(Runnable.class));
         assertFalse(parent.isSingletonInstance(Runnable.class));
     }
