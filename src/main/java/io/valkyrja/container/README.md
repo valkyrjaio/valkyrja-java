@@ -385,7 +385,7 @@ the contract.
 
 `io.valkyrja.container.manager.NativeChildContainer` takes the parent as a
 concrete `Container`. It copies no map, and a read that falls back to the parent
-reaches the parent's fields directly rather than its methods.
+reaches the parent's binding maps directly rather than its methods.
 
 Both extend `Container`, so both hold the full contract. Choose
 `NativeChildContainer` when a parent-held factory must receive the child, as
