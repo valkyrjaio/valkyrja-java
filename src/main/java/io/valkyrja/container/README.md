@@ -216,10 +216,6 @@ Warning: `getService` does not throw for a key that `bindSingleton` holds.
 runs that factory and returns a second instance while the cached one stands. The
 call defeats the singleton, and nothing reports it.
 
-`getAliasedId(Class<?> alias)` returns the key the alias maps to, and it returns
-`null` for a key that is no alias. It reads the mapping only, so it resolves
-nothing and it throws nothing.
-
 ## Inspecting the container
 
 | Method                    | Returns `true` when                                           |
@@ -230,11 +226,15 @@ nothing and it throws nothing.
 | `isSingleton(id)`         | A singleton binding or a cached instance holds the key        |
 | `isSingletonInstance(id)` | A cached instance holds the key                               |
 | `isSingletonBinding(id)`  | A singleton binding holds the key                             |
-| `isDeferred(id)`          | A publisher holds the key                                     |
+| `isDeferred(id)`          | A callback holds the key                                      |
 
 `isSingletonInstance` reports a built instance, and `isSingletonBinding` reports
 a registration. Read `isSingletonInstance` to find what the container built
 already, and never to find what it can build.
+
+`getAliasedId(Class<?> alias)` returns the key the alias maps to, and it returns
+`null` for a key that is no alias. It reads the mapping only, so it resolves
+nothing and it throws nothing.
 
 Warning: the two are not exclusive. `bindSingleton` writes the key into the
 registration map, and the first resolution adds the instance without removing
