@@ -147,13 +147,13 @@ public class Container extends ProvidersAware {
      * {@link #getAliasedId}, because an overridable method reaches a subclass that a constructor
      * has not initialized.
      *
-     * @param aliases the aliases that start a walk
+     * @param supplied the aliases that start a walk
      * @param installed the read for a type the map does not hold
      */
     private void validateAliasMapIsNotCyclic(
-            Map<Class<?>, Class<?>> aliases, Function<Class<?>, @Nullable Class<?>> installed) {
-        for (var alias : aliases.keySet()) {
-            validateAliasChainIsNotCyclic(alias, aliases, installed);
+            Map<Class<?>, Class<?>> supplied, Function<Class<?>, @Nullable Class<?>> installed) {
+        for (var alias : supplied.keySet()) {
+            validateAliasChainIsNotCyclic(alias, supplied, installed);
         }
     }
 
@@ -161,12 +161,12 @@ public class Container extends ProvidersAware {
      * Validate that the chain one alias starts does not return to it.
      *
      * @param alias the alias the walk starts from
-     * @param aliases the aliases that start a walk
+     * @param supplied the aliases that start a walk
      * @param installed the read for a type the map does not hold
      */
     private void validateAliasChainIsNotCyclic(
             Class<?> alias,
-            Map<Class<?>, Class<?>> aliases,
+            Map<Class<?>, Class<?>> supplied,
             Function<Class<?>, @Nullable Class<?>> installed) {
         Set<Class<?>> seen = new HashSet<>();
         seen.add(alias);
@@ -176,8 +176,8 @@ public class Container extends ProvidersAware {
         // Past the supplied aliases, the walk reads what the container answers already,
         // so it follows a chain the supplied map only reaches into.
         while ((aliasedId =
-                        aliases.containsKey(current)
-                                ? aliases.get(current)
+                        supplied.containsKey(current)
+                                ? supplied.get(current)
                                 : installed.apply(current))
                 != null) {
             // The chain returns to the alias this walk started from, so the map the
