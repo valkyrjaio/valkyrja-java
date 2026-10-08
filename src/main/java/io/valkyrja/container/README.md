@@ -218,6 +218,10 @@ Warning: `getService` does not throw for a key that `bindSingleton` holds.
 runs that factory and returns a second instance while the cached one stands. The
 call defeats the singleton, and nothing reports it.
 
+`getAliasedId(Class<?> alias)` returns the key the alias maps to, and it returns
+`null` for a key that is no alias. It reads the mapping only, so it resolves
+nothing and it throws nothing.
+
 ## Inspecting the container
 
 | Method                    | Returns `true` when                                           |
@@ -228,6 +232,7 @@ call defeats the singleton, and nothing reports it.
 | `isSingleton(id)`         | A singleton binding or a cached instance holds the key        |
 | `isSingletonInstance(id)` | A cached instance holds the key                               |
 | `isSingletonBinding(id)`  | A singleton binding holds the key                             |
+| `isDeferred(id)`          | A publisher holds the key                                     |
 
 `isSingletonInstance` reports a built instance, and `isSingletonBinding` reports
 a registration. Read `isSingletonInstance` to find what the container built
@@ -365,10 +370,12 @@ The parent container is frozen after boot, so a request writes nothing into it
 directly. A lookup the parent answers for a child is the one path that still
 changes the parent. On that path the parent publishes a deferred id and caches
 a singleton. Where the parent runs a publisher, whatever that publisher
-registers lands in the parent. Each request builds a child, resolves through
-the child, and discards the child. A write of the child reaches the child only.
-An id the child cannot answer goes to the parent, and the parent answers it as
-it would for any caller.
+registers lands in the parent.
+
+Each request builds a child, resolves through the child, and discards the
+child. A write of the child reaches the child only. An id the child cannot
+answer goes to the parent, and the parent answers it as it would for any
+caller.
 
 `ChildContainer` hands a parent factory to the parent, so every singleton that
 factory resolves caches in the parent. `NativeChildContainer` applies the same
