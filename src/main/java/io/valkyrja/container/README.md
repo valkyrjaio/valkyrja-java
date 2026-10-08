@@ -128,9 +128,7 @@ Four checks reject a chain that returns to its own alias:
 - `bindAlias` checks the pair it is asked to store.
 - The constructor and `setFromData` check the aliases they receive, and the
   chain those aliases reach.
-- `ChildContainer` walking the parent's aliases checks the hops of one walk.
-  `NativeChildContainer` reads the parent's own map, which the first two checks
-  keep acyclic, so it carries no such check.
+- A child walking the parent's aliases checks the hops of one walk.
 - A child resolving a parent-declared alias checks the target it returns to. The
   check sits on the container that resolves, so a parent which is itself a child
   throws from its own. An instance cached for the target while the lookup ran
