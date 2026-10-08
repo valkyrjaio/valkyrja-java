@@ -624,6 +624,23 @@ final class NativeChildContainerTest {
     }
 
     @Test
+    void getSingletonKeepsTheInstanceAParentFactoryRegisteredInTheChild() {
+        var registered = new SingletonFixture();
+        parent.bindSingleton(
+                raw(Runnable.class),
+                (c, a) -> {
+                    c.setSingleton(raw(Runnable.class), registered);
+
+                    return SingletonFixture.make(c, a);
+                });
+
+        // This class runs the parent's factory with the child, so the registration
+        // lands in the child and the parent holds nothing
+        assertSame(registered, child.getSingleton(Runnable.class));
+        assertFalse(parent.isSingletonInstance(Runnable.class));
+    }
+
+    @Test
     void getAliasedKeepsAParentBindingWhenTheChildShadowsItWithASingleton() {
         parent.bind(ServiceFixture.class, ServiceFixture::make);
         parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
