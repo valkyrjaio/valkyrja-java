@@ -85,8 +85,8 @@ gets. The object that factory returns is discarded then.
 Warning: that rule holds inside one container. A `ChildContainer` hands a
 parent-owned factory to the parent, so the registration lands in the parent and
 the child caches the object the factory returned
-([The two implementations](#the-two-implementations)). The two containers then
-hold different objects for that id.
+([Resolution order](#resolution-order)). The two containers then hold different
+objects for that id.
 
 ### bindAlias
 
@@ -105,6 +105,10 @@ private static <T> Class<T> raw(Class<?> type) {
 container.bindAlias(MatcherContract.class, raw(Matcher.class));
 ```
 
+`bindAlias` stores the mapping only. The target needs its own binding, and the
+container checks that target when the alias resolves, rather than when you bind
+the alias.
+
 The alias itself is checked at once. `bindAlias` throws
 `ContainerCyclicAliasException` when the target already resolves back to the
 alias, and when the two are the same type, because such a chain has no end:
@@ -119,8 +123,7 @@ container.bindAlias(SlackNotifier.class, raw(NotifierContract.class));
 container.bindAlias(SlackNotifier.class, raw(SlackNotifier.class));
 ```
 
-An alias that points at a chain that returns to it has no end. Four checks
-reject one with `ContainerCyclicAliasException`:
+Four checks reject such a chain with `ContainerCyclicAliasException`:
 
 - `bindAlias` checks the pair it is asked to store.
 - The constructor and `setFromData` check the aliases they receive, and the
@@ -375,8 +378,8 @@ states.
 
 `io.valkyrja.container.manager.ChildContainer` is the default. It takes the
 parent as a `ContainerContract`, and a `ContainerData` snapshot of the parent,
-so any contract implementation can be the parent. This is the portable
-implementation, and every language port carries it. It copies the `singletons`
+so any contract implementation can be the parent. This is the portable,
+cross-language implementation. It copies the `singletons`
 map and the `callbacks` map from the snapshot, and it reaches every other
 binding through the contract.
 
@@ -386,8 +389,8 @@ directly, which a language with field access can do and one without cannot.
 
 Both extend `Container`, so both hold the full contract. Choose the
 implementation whose factory receiver your services need, which
-[Resolution order](#resolution-order) states, rather than the construction cost
-alone.
+[Resolution order](#resolution-order) states. The direct map access also removes
+the method-call overhead on the fallback path.
 
 ### Resolution order
 
