@@ -116,7 +116,7 @@ public class Container extends ProvidersAware {
      * @param alias the alias being bound
      * @param id the type the alias points at
      */
-    protected void validateAliasIsNotCyclic(Class<?> alias, Class<?> id) {
+    private void validateAliasIsNotCyclic(Class<?> alias, Class<?> id) {
         if (alias.equals(id)) {
             throw new ContainerCyclicAliasException(alias.getName(), id.getName());
         }
