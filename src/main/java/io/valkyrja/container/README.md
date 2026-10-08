@@ -363,11 +363,12 @@ reads. A child container removes that risk.
 
 The parent container is frozen after boot, so a request writes nothing into it
 directly. A lookup the parent answers for a child is the one path that still
-changes the parent. On that path the parent publishes a deferred id, caches a
-singleton, and takes whatever a publisher the parent runs registers. Each
-request builds a child, resolves through the child, and discards the child. A
-write of the child reaches the child only. An id the child cannot answer goes
-to the parent, and the parent answers it as it would for any caller.
+changes the parent. On that path the parent publishes a deferred id and caches
+a singleton. Where the parent runs a publisher, whatever that publisher
+registers lands in the parent. Each request builds a child, resolves through
+the child, and discards the child. A write of the child reaches the child only.
+An id the child cannot answer goes to the parent, and the parent answers it as
+it would for any caller.
 
 `ChildContainer` hands a parent factory to the parent, so every singleton that
 factory resolves caches in the parent. `NativeChildContainer` applies the same
