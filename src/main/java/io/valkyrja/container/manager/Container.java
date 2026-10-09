@@ -23,21 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Default dependency injection container implementation.
- *
- * <p>Resolution priority:
- *
- * <ol>
- *   <li>Cached singleton instance
- *   <li>Service callable factory (covers both regular and singleton bindings)
- *   <li>Alias (redirects to another service type)
- * </ol>
- *
- * <p>A service type that none of the three resolves raises {@link
- * ContainerInvalidReferenceException}. The container builds nothing that a binding does not
- * describe.
- */
 public class Container extends ProvidersAware {
 
     /** alias type → target type */
