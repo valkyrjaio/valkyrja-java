@@ -23,6 +23,8 @@ import io.valkyrja.cli.middleware.handler.contract.RouteDispatchedHandlerContrac
 import io.valkyrja.cli.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.RouteNotMatchedHandlerContract;
 import io.valkyrja.cli.middleware.handler.contract.ThrowableCaughtHandlerContract;
+import io.valkyrja.cli.routing.caster.Caster;
+import io.valkyrja.cli.routing.caster.contract.CasterContract;
 import io.valkyrja.cli.routing.collection.RouteCollection;
 import io.valkyrja.cli.routing.collection.contract.RouteCollectionContract;
 import io.valkyrja.cli.routing.collector.contract.RouteCollectorContract;
@@ -43,8 +45,17 @@ final class CliRoutingServiceProviderTest {
     }
 
     @Test
-    void publishersExposesRouterAndRouteCollection() {
-        assertEquals(2, new CliRoutingServiceProvider().publishers().size());
+    void publishersExposesRouterRouteCollectionAndCaster() {
+        assertEquals(3, new CliRoutingServiceProvider().publishers().size());
+    }
+
+    @Test
+    void publishCasterBindsCaster() {
+        var container = new Container();
+
+        CliRoutingServiceProvider.publishCaster(container);
+
+        assertInstanceOf(Caster.class, container.getSingleton(CasterContract.class));
     }
 
     @Test

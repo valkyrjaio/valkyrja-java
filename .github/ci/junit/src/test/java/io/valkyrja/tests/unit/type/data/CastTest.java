@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.valkyrja.tests.fixtures.type.TypeFixture;
 import io.valkyrja.type.data.Cast;
 import org.junit.jupiter.api.Test;
 
@@ -20,18 +21,18 @@ final class CastTest {
 
     @Test
     void fullConstructor() {
-        var cast = new Cast("int", false, true);
+        var cast = new Cast(TypeFixture.class, false, true);
 
-        assertEquals("int", cast.getType());
+        assertEquals(TypeFixture.class, cast.getType());
         assertFalse(cast.isConvert());
         assertTrue(cast.isArray());
     }
 
     @Test
     void typeOnlyConstructorDefaultsToConvertingNonArray() {
-        var cast = new Cast("string");
+        var cast = new Cast(TypeFixture.class);
 
-        assertEquals("string", cast.getType());
+        assertEquals(TypeFixture.class, cast.getType());
         assertTrue(cast.isConvert());
         assertFalse(cast.isArray());
     }

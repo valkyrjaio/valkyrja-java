@@ -35,6 +35,7 @@ import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.http.routing.matcher.Matcher;
 import io.valkyrja.http.routing.processor.Processor;
 import io.valkyrja.http.routing.throwable.exception.HttpRoutingInvalidRoutePathException;
+import io.valkyrja.tests.fixtures.type.TypeFixture;
 import io.valkyrja.type.data.Cast;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +77,8 @@ final class MatcherTest {
                         "/users/(?<id>\\d+)",
                         List.of(
                                 (io.valkyrja.http.routing.data.contract.ParameterContract)
-                                        new Parameter("id", "\\d+").withCast(new Cast("int"))),
+                                        new Parameter("id", "\\d+")
+                                                .withCast(new Cast(TypeFixture.class))),
                         HANDLER);
         var matcher = new Matcher(collectionWith(dynamic));
 
