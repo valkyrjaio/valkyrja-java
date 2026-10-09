@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,12 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.valkyrja.container.data.ContainerData;
 import io.valkyrja.container.manager.ChildContainer;
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.container.throwable.exception.abstract_.ContainerInvalidArgumentException;
 import io.valkyrja.tests.fixtures.container.ServiceFixture;
 import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.BindingProviderFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
+import io.valkyrja.tests.fixtures.container.provider.PublishingProviderFixture;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -160,6 +167,27 @@ final class ChildContainerTest {
         assertInstanceOf(SingletonFixture.class, instance);
         assertSame(instance, freshChild.getSingleton(SingletonFixture.class));
         assertFalse(parent.isSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void getSingletonLeavesTheTwoContainersHoldingDifferentObjects() {
+        var registered = new SingletonFixture();
+        parent.bindSingleton(
+                SingletonFixture.class,
+                (c, a) -> {
+                    c.setSingleton(SingletonFixture.class, registered);
+
+                    return new SingletonFixture();
+                });
+        var freshChild = createChild();
+
+        // The parent runs its own factory, so the registration lands in the parent and
+        // the child caches what the factory returned
+        var fromChild = freshChild.getSingleton(SingletonFixture.class);
+
+        assertSame(registered, parent.getSingleton(SingletonFixture.class));
+        assertNotSame(registered, fromChild);
+        assertSame(fromChild, freshChild.getSingleton(SingletonFixture.class));
     }
 
     @Test
@@ -308,5 +336,498 @@ final class ChildContainerTest {
         assertThrows(
                 ContainerInvalidArgumentException.class,
                 () -> child.getAliased(Runnable.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedIdReadsTheChildThenTheParent() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+
+        assertEquals(ServiceFixture.class, localChild.getAliasedId(CharSequence.class));
+        assertNull(localChild.getAliasedId(Runnable.class));
+
+        localChild.bindAlias(Runnable.class, raw(SingletonFixture.class));
+
+        assertEquals(SingletonFixture.class, localChild.getAliasedId(Runnable.class));
+    }
+
+    @Test
+    void snapshotChildResolvesAnUnbuiltParentSingletonItself() {
+        // Boot: two singletons on the parent, one resolved before any child exists
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        Object shared = parent.getSingleton(SingletonFixture.class);
+
+        // The request loop begins from one snapshot
+        ChildContainer localChild = createChild();
+
+        // The resolved one is shared, and the unresolved one is the child's own
+        assertSame(shared, localChild.get(SingletonFixture.class, Map.of()));
+        assertInstanceOf(ServiceFixture.class, localChild.get(ServiceFixture.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(ServiceFixture.class));
+
+        // The alias reaches the same copy, so the request holds one instance of it
+        assertSame(
+                localChild.get(ServiceFixture.class, Map.of()),
+                localChild.get(CharSequence.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(ServiceFixture.class));
+    }
+
+    @Test
+    void getAliasedReusesAParentSingletonTheParentAlreadyBuilt() {
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindAlias(Runnable.class, raw(SingletonFixture.class));
+        Object shared = parent.getSingleton(SingletonFixture.class);
+        ChildContainer localChild = createChild();
+
+        // The parent holds the instance, so the alias reaches it rather than rebuilding
+        assertSame(shared, localChild.get(Runnable.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedPublishesADeferredParentTargetInTheChild() {
+        parent.register(new PublishingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        ChildContainer localChild = createChild();
+
+        // The child holds the same callback, so it publishes into itself
+        Object fromId = localChild.get(ProvidedFixture.class, Map.of());
+        Object fromAlias = localChild.get(CharSequence.class, Map.of());
+
+        assertSame(fromId, fromAlias);
+        assertFalse(parent.isPublished(ProvidedFixture.class));
+        assertFalse(parent.isSingletonInstance(ProvidedFixture.class));
+    }
+
+    @Test
+    void getAliasedStopsWhereTheParentStops() {
+        // The parent answers Runnable as a singleton, so it never reaches the rest
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        parent.bindSingleton(raw(Runnable.class), SingletonFixture::make);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        ChildContainer localChild = createChild();
+
+        assertInstanceOf(
+                SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(Runnable.class));
+    }
+
+    @Test
+    void aChainOntoAnUnbuiltParentSingletonResolvesInTheChild() {
+        // outer → middle → the singleton, none of it built in the parent
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindAlias(Runnable.class, raw(SingletonFixture.class));
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = createChild();
+
+        Object instance = localChild.get(CharSequence.class, Map.of());
+
+        assertInstanceOf(SingletonFixture.class, instance);
+        assertSame(instance, localChild.get(SingletonFixture.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void getAliasedReusesAParentTargetTheParentAlreadyPublished() {
+        parent.register(new PublishingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        // The parent publishes at boot, so the request reuses what it holds
+        Object shared = parent.get(ProvidedFixture.class, Map.of());
+        ChildContainer localChild = createChild();
+
+        assertSame(shared, localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedStopsAtAParentServiceInTheChain() {
+        // The parent answers Runnable as a service, so it never reaches the rest
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        parent.bind(raw(Runnable.class), ServiceFixture::make);
+        parent.bindAlias(Runnable.class, raw(SingletonFixture.class));
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        ChildContainer localChild = createChild();
+
+        assertInstanceOf(ServiceFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void getAliasedStopsAtADeferredHopInTheChain() {
+        // The parent publishes before it reads any map, so it stops at the deferred hop
+        parent.register(new PublishingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        parent.bindAlias(ProvidedFixture.class, raw(ServiceFixture.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        ChildContainer localChild = createChild();
+
+        // The child holds the same callback, so it publishes into itself
+        Object fromId = localChild.get(ProvidedFixture.class, Map.of());
+
+        assertSame(fromId, localChild.getAliased(CharSequence.class, Map.of()));
+        assertFalse(parent.isPublished(ProvidedFixture.class));
+        assertFalse(parent.isSingletonInstance(ProvidedFixture.class));
+    }
+
+    @Test
+    void getAliasedStopsAtAParentInstanceInTheChain() {
+        // The parent holds Runnable as an instance, so it never reaches the rest
+        var shared = new SingletonFixture();
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        parent.setSingleton(raw(Runnable.class), shared);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        ChildContainer localChild = createChild();
+
+        assertSame(shared, localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void bindAliasEndsTheWalkOnACycleAcrossTheTwoContainers() {
+        ChildContainer localChild = createChild();
+        localChild.setFromData(
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of()));
+        // The parent checks only its own map, so a later binding can still close a chain
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+
+        // The pair is no part of that chain, so the walk ends rather than spinning
+        localChild.bindAlias(ServiceFixture.class, raw(CharSequence.class));
+
+        assertEquals(CharSequence.class, localChild.getAliasedId(ServiceFixture.class));
+    }
+
+    @Test
+    void getAliasedThrowsForACycleANestedParentHolds() {
+        ChildContainer middle = createChild();
+        middle.bindAlias(Runnable.class, raw(CharSequence.class));
+        // The grandparent checks only its own map, so a later binding closes a chain
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = new ChildContainer(middle, new ContainerData());
+
+        var exception =
+                assertThrows(
+                        ContainerCyclicAliasException.class,
+                        () -> localChild.get(CharSequence.class));
+
+        assertEquals(
+                "Alias `"
+                        + Runnable.class.getName()
+                        + "` cannot reach `"
+                        + CharSequence.class.getName()
+                        + "`, because the chain from `"
+                        + CharSequence.class.getName()
+                        + "` returns to `"
+                        + Runnable.class.getName()
+                        + "`.",
+                exception.getMessage());
+    }
+
+    @Test
+    void getAliasedWalksPastAHopTheParentPublishedWithoutBindingIt() {
+        // The publisher binds nothing for its own type, so the parent reads on past it
+        Map<Class<?>, Consumer<ContainerContract>> callbacks =
+                Map.of(ProvidedFixture.class, container -> {});
+        parent.setFromData(new ContainerData(Map.of(), callbacks, Map.of(), Map.of()));
+        parent.publish(ProvidedFixture.class);
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        parent.bindAlias(ProvidedFixture.class, raw(SingletonFixture.class));
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        ChildContainer localChild = createChild();
+
+        assertInstanceOf(
+                SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+        // The walk reaches the unbuilt singleton, so the child builds it
+        assertFalse(parent.isSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void setFromDataRejectsAChainThatReturnsThroughTheParent() {
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = createChild();
+        var data =
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of());
+
+        assertThrows(ContainerCyclicAliasException.class, () -> localChild.setFromData(data));
+    }
+
+    @Test
+    void getAliasedTakesTheParentInstanceExitBeforeTheMarkerRead() {
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        Object shared = parent.getSingleton(raw(SingletonFixture.class));
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        var scoped = new SingletonFixture();
+        localChild.setSingleton(raw(SingletonFixture.class), scoped);
+
+        // The child copied the marker, so only the parent's instance keeps the alias there
+        assertSame(shared, localChild.getAliased(CharSequence.class, Map.of()));
+        assertNotSame(scoped, localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedAnswersFromTheParentWhenTheChildHoldsTheTarget() {
+        var shared = new SingletonFixture();
+        var scoped = new SingletonFixture();
+        parent.setSingleton(SingletonFixture.class, shared);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.setSingleton(SingletonFixture.class, scoped);
+
+        // The alias belongs to the parent, so the parent answers it from its own maps
+        assertSame(shared, localChild.getAliased(CharSequence.class, Map.of()));
+        assertSame(scoped, localChild.get(SingletonFixture.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsWhenOnlyTheChildHoldsTheTarget() {
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.setSingleton(SingletonFixture.class, new SingletonFixture());
+
+        // The parent reads none of the child's maps, so it has nothing to answer with
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void setFromDataAcceptsDataWithNoAliasWhenAChainAlreadyReturns() {
+        ChildContainer localChild = createChild();
+        localChild.setFromData(
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of()));
+        // The parent closes the chain after the child was built
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        Map<Class<?>, BiFunction<ContainerContract, Map<String, Object>, Object>> services =
+                Map.of(ServiceFixture.class, ServiceFixture::make);
+
+        // The call carries no alias, so a chain the container already held is no part of it
+        localChild.setFromData(new ContainerData(Map.of(), Map.of(), services, Map.of()));
+
+        assertTrue(localChild.isService(ServiceFixture.class));
+    }
+
+    @Test
+    void aParentFactoryCachesItsSingletonDependencyInTheParent() {
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bind(
+                raw(Runnable.class),
+                (container, arguments) -> {
+                    container.get(SingletonFixture.class, Map.of());
+
+                    return ServiceFixture.make(container, arguments);
+                });
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        ChildContainer localChild = createChild();
+
+        localChild.getAliased(CharSequence.class, Map.of());
+
+        // The parent answers the alias, so what its factory resolves caches in the parent
+        assertTrue(parent.isSingletonInstance(SingletonFixture.class));
+
+        // Every later request reads that one instance, whichever thread built it
+        Object dependency = parent.getSingleton(SingletonFixture.class);
+        createChild().getAliased(CharSequence.class, Map.of());
+
+        assertSame(dependency, parent.getSingleton(SingletonFixture.class));
+    }
+
+    @Test
+    void getAliasedThrowsForACycleTwoWalksCross() {
+        // Markers with no service entry, so each walk stops at the hop it reaches
+        parent.setFromData(
+                new ContainerData(
+                        Map.of(),
+                        Map.of(),
+                        Map.of(),
+                        Map.of(
+                                CharSequence.class,
+                                CharSequence.class,
+                                Runnable.class,
+                                Runnable.class)));
+        ChildContainer middle = createChild();
+        middle.bindAlias(Runnable.class, raw(CharSequence.class));
+        // The parent closes the chain after the middle container was built
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+        var localChild = new ChildContainer(middle, new ContainerData());
+
+        var throwable =
+                assertThrows(
+                        ContainerCyclicAliasException.class,
+                        () -> localChild.get(CharSequence.class, Map.of()));
+
+        assertEquals(
+                "Alias `java.lang.CharSequence` cannot reach `java.lang.Runnable`, because the"
+                        + " chain from `java.lang.Runnable` returns to `java.lang.CharSequence`.",
+                throwable.getMessage());
+    }
+
+    @Test
+    void setFromDataAcceptsAnAliasThatOnlyReachesAChainItIsNoPartOf() {
+        ChildContainer localChild = createChild();
+        localChild.setFromData(
+                new ContainerData(
+                        Map.of(Runnable.class, CharSequence.class), Map.of(), Map.of(), Map.of()));
+        // The parent closes the chain after the child was built
+        parent.bindAlias(CharSequence.class, raw(Runnable.class));
+
+        // bindAlias accepts the same pair, so this entry point accepts it too
+        localChild.setFromData(
+                new ContainerData(
+                        Map.of(ServiceFixture.class, CharSequence.class),
+                        Map.of(),
+                        Map.of(),
+                        Map.of()));
+
+        assertEquals(CharSequence.class, localChild.getAliasedId(ServiceFixture.class));
+    }
+
+    @Test
+    void getAliasedDelegatesWhenTheSnapshotOmitsTheParentMarker() {
+        parent.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        var localChild = new ChildContainer(parent, new ContainerData());
+
+        // The child holds no marker, so it leaves the target to the parent
+        assertSame(
+                localChild.getAliased(CharSequence.class, Map.of()),
+                localChild.getAliased(CharSequence.class, Map.of()));
+        assertTrue(parent.isSingletonInstance(SingletonFixture.class));
+    }
+
+    @Test
+    void getAliasedKeepsAParentBindingWhenTheChildShadowsItWithASingleton() {
+        parent.bind(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.bindSingleton(raw(ServiceFixture.class), SingletonFixture::make);
+
+        // The parent would build its own binding, so the alias stays with the parent
+        assertInstanceOf(ServiceFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+        assertInstanceOf(SingletonFixture.class, localChild.get(ServiceFixture.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsWhenOnlyTheChildBindsTheTarget() {
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.bindSingleton(SingletonFixture.class, SingletonFixture::make);
+
+        // The parent declares the alias and holds no target, so it has nothing to answer
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedDelegatesWhenTheSnapshotOmitsTheParentCallback() {
+        parent.register(new PublishingProviderFixture());
+        parent.bindAlias(CharSequence.class, raw(ProvidedFixture.class));
+        var localChild = new ChildContainer(parent, new ContainerData());
+
+        // The child holds no callback, so it leaves the publish to the parent
+        assertInstanceOf(
+                ProvidedFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+        assertTrue(parent.isPublished(ProvidedFixture.class));
+    }
+
+    @Test
+    void getAliasedReachesTheChildBindingWhenTheParentNeverBuiltTheSingleton() {
+        parent.bindSingleton(ServiceFixture.class, ServiceFixture::make);
+        parent.bindAlias(CharSequence.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+        localChild.bind(raw(ServiceFixture.class), (c, a) -> new SingletonFixture());
+
+        // The child holds the copied marker, so it resolves the target with its own binding
+        assertInstanceOf(
+                SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedAnswersAFactoryThatRegisteredItsOwnIdWhileItRan() {
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        // This class hands a parent factory to the parent, so the child runs its own
+        localChild.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    var instance = new SingletonFixture();
+                    container.setSingleton(raw(SingletonFixture.class), instance);
+                    container.get(CharSequence.class, Map.of());
+
+                    return instance;
+                });
+
+        // The factory registered the target, so the alias answers rather than throwing
+        assertInstanceOf(
+                SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsForAChainAFactoryCloses() {
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        // The factory registers nothing for its own id, so the chain returns to it
+        localChild.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    container.get(CharSequence.class, Map.of());
+
+                    return new SingletonFixture();
+                });
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedThrowsForAChainAFactoryClosesAfterANestedAliasReturned() {
+        parent.bindSingleton(raw(ServiceFixture.class), ServiceFixture::make);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        ChildContainer localChild = createChild();
+        // The nested alias returns first, so only a release that waits for the outer
+        // resolution leaves the target in flight for the re-entry
+        localChild.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    container.get(Runnable.class, Map.of());
+                    container.get(CharSequence.class, Map.of());
+
+                    return new SingletonFixture();
+                });
+
+        assertThrows(
+                ContainerCyclicAliasException.class,
+                () -> localChild.getAliased(CharSequence.class, Map.of()));
+    }
+
+    @Test
+    void getAliasedHoldsTheOuterTargetWhileANestedAliasResolves() {
+        parent.bindSingleton(raw(SingletonFixture.class), SingletonFixture::make);
+        parent.bindAlias(CharSequence.class, raw(SingletonFixture.class));
+        parent.bindSingleton(raw(ServiceFixture.class), ServiceFixture::make);
+        parent.bindAlias(Runnable.class, raw(ServiceFixture.class));
+        ChildContainer localChild = createChild();
+        // The second alias resolves inside the first, so the guard holds two targets
+        localChild.bindSingleton(
+                raw(SingletonFixture.class),
+                (container, arguments) -> {
+                    container.get(Runnable.class, Map.of());
+
+                    return new SingletonFixture();
+                });
+
+        // The nested target leaves the outer one in flight, so neither chain reads the other
+        assertInstanceOf(
+                SingletonFixture.class, localChild.getAliased(CharSequence.class, Map.of()));
     }
 }

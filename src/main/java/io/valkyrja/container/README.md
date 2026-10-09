@@ -78,6 +78,16 @@ container.bindSingleton(
         (c, arguments) -> new Matcher(c.getSingleton(RouteCollectionContract.class)));
 ```
 
+Warning: a build keeps the first instance the map holds for an id. A factory
+that caches an instance for the id it is building decides what every reader
+gets. The object that factory returns is discarded then.
+
+Warning: that rule holds inside one container. A `ChildContainer` hands a
+parent-owned factory to the parent, so the registration lands in the parent and
+the child caches the object the factory returned
+([Resolution order](#resolution-order)). The two containers then hold different
+objects for that id.
+
 ### bindAlias
 
 `bindAlias` maps one key to another.
@@ -94,6 +104,51 @@ private static <T> Class<T> raw(Class<?> type) {
 
 container.bindAlias(MatcherContract.class, raw(Matcher.class));
 ```
+
+`bindAlias` stores the mapping only. The target needs its own binding, and the
+container checks that target when the alias resolves, rather than at the bind
+call.
+
+`bindAlias` checks the alias itself at once. It throws
+`ContainerCyclicAliasException` when the target already resolves back to the
+alias, and when the two are the same type, because such a chain has no end:
+
+```java
+container.bindAlias(NotifierContract.class, raw(SlackNotifier.class));
+
+// Throws: the chain from NotifierContract returns to SlackNotifier.
+container.bindAlias(SlackNotifier.class, raw(NotifierContract.class));
+
+// Throws: SlackNotifier cannot point at itself.
+container.bindAlias(SlackNotifier.class, SlackNotifier.class);
+```
+
+Four checks reject a chain that returns to its own alias:
+
+- `bindAlias` checks the pair it is asked to store.
+- The constructor and `setFromData` check the aliases they receive, and the
+  chain those aliases reach.
+- A child walking the parent's aliases checks the hops of one walk.
+- A child resolving a parent-declared alias checks the target it returns to. The
+  check sits on the container that resolves, so a parent which is itself a child
+  throws from its own. An instance cached for the target while the lookup ran
+  has broken the chain, so the lookup answers with that instance.
+
+The first two checks run at registration. A container installs no map before its
+walk ends, so a caller that catches the exception keeps the container it had. A
+container that writes an alias after a child reads through it is outside
+registration. The last two checks see one walk and one return, so a chain that
+reaches neither is unchecked. It has one of four outcomes:
+
+- It resolves through the first hop the parent would answer.
+- It ends with a missing reference, when no hop answers. `NativeChildContainer`
+  reports that for a parent which is itself a child.
+- It does not end, when a factory or a publish callback runs in a container that
+  carries no such check. A plain `Container` carries none. A child gives the
+  lookup to the parent for a target the child does not resolve itself.
+  `ChildContainer` also gives the parent a factory the child does not hold.
+- It does not end, when an alias the child declares closes a chain through a
+  factory or a publish callback the child runs. No check sits on that path.
 
 ### setSingleton
 
@@ -171,10 +226,15 @@ call defeats the singleton, and nothing reports it.
 | `isSingleton(id)`         | A singleton binding or a cached instance holds the key        |
 | `isSingletonInstance(id)` | A cached instance holds the key                               |
 | `isSingletonBinding(id)`  | A singleton binding holds the key                             |
+| `isDeferred(id)`          | A callback holds the key                                      |
 
 `isSingletonInstance` reports a built instance, and `isSingletonBinding` reports
 a registration. Read `isSingletonInstance` to find what the container built
 already, and never to find what it can build.
+
+`getAliasedId(Class<?> alias)` returns the key the alias maps to, and it returns
+`null` for a key that is no alias. It reads the mapping only, so it resolves
+nothing and it throws nothing.
 
 Warning: the two are not exclusive. `bindSingleton` writes the key into the
 registration map, and the first resolution adds the instance without removing
@@ -304,21 +364,40 @@ A worker runtime boots the application once, and it serves many requests. A
 request that writes to the container of the worker changes what the next request
 reads. A child container removes that risk.
 
-The parent container is frozen after boot. Each request builds a child, resolves
-through the child, and discards the child. Every write reaches the child only.
+The parent container is frozen after boot, so a request writes nothing into it
+directly. A lookup the parent answers for a child is the one path that still
+changes the parent. On that path the parent publishes a deferred id and caches
+a singleton. Where the parent runs a publisher, whatever that publisher
+registers lands in the parent.
+
+Each request builds a child, resolves through the child, and discards the
+child. A write of the child reaches the child only. An id the child cannot
+answer goes to the parent, and the parent answers it as it would for any
+caller.
+
+`ChildContainer` hands a parent factory to the parent, so every singleton that
+factory resolves caches in the parent. `NativeChildContainer` applies the same
+factory with the child, so those dependencies cache in the child. An alias takes
+a different path, which [Where an alias resolves](#where-an-alias-resolves)
+states.
 
 ### The two implementations
 
-`io.valkyrja.container.manager.ChildContainer` takes the parent as a
-`ContainerContract`, and a `ContainerData` snapshot of the parent. It copies the
-`singletons` map and the `callbacks` map from the snapshot, and it reaches every
-other binding through the contract.
+`io.valkyrja.container.manager.ChildContainer` is the default. It takes the
+parent as a `ContainerContract`, and a `ContainerData` snapshot of the parent,
+so any contract implementation can be the parent. This is the portable,
+cross-language implementation. It copies the `singletons` map and the
+`callbacks` map from the snapshot, and it reaches every other binding through
+the contract.
 
 `io.valkyrja.container.manager.NativeChildContainer` takes the parent as a
-concrete `Container`. It copies no map, and it reads the fields of the parent
-directly.
+concrete `Container`. It copies no map, and a read that falls back to the parent
+reaches the parent's binding maps directly rather than its methods.
 
-Both extend `Container`, so both hold the full contract.
+Both extend `Container`, so both hold the full contract. Choose
+`NativeChildContainer` when a parent-held factory must receive the child, as
+[Resolution order](#resolution-order) states, or when profiling confirms a
+bottleneck at very high child construction rates.
 
 ### Resolution order
 
@@ -328,8 +407,9 @@ A child resolves a singleton in three steps.
 2. The cached instance of the parent.
 3. The singleton binding, which the child builds and caches in the child.
 
-A child resolves a service, and an alias, from its own maps first, and from the
-parent second.
+A child resolves a service, and an alias that the child declares, from its own
+maps first, and from the parent second. An alias that only the parent declares
+follows [Where an alias resolves](#where-an-alias-resolves).
 
 A factory that the child itself publishes runs with the child as its argument,
 so the dependencies it resolves come from the child and the instance it builds
@@ -345,6 +425,93 @@ The factory still runs for each call, so each request gets its own instance.
 Only a key that the parent resolved into its instance cache is shared across
 requests.
 
+### Where an alias resolves
+
+An alias resolves in the container that declares it, so where a developer
+declares an alias selects the resolution scope. A child lookup of an alias that
+only the parent declares goes to the parent. The parent answers it as it would
+for any caller:
+
+```java
+// Once, at boot. The child never declares this alias.
+parent.bind(SlackNotifier.class, SlackNotifier::make);
+parent.bindAlias(NotifierContract.class, raw(SlackNotifier.class));
+
+// For each request, the child binds its own.
+child.bind(SlackNotifier.class, SlackNotifier::make);
+
+child.get(SlackNotifier.class);    // built by the binding of the child
+child.get(NotifierContract.class); // built by the binding of the parent
+```
+
+There is one exception. The child resolves a target the parent would answer for
+the first time, when the child holds that registration too. The request must not
+hold one copy for the alias and another for the target. Three cases:
+
+- **A singleton binding the parent never built** — the child resolves it when
+  the child reports that binding.
+- **A publisher the parent has not run** — the child resolves it when the child
+  reports that callback.
+- **Every other target** — the parent answers the whole lookup, whatever the
+  child carries.
+
+A worker takes one snapshot after boot, so a request carries every registration.
+The child reuses anything that the parent already built or published.
+
+What the child reports differs by implementation. `ChildContainer` answers from
+the maps its snapshot copied. `NativeChildContainer` copies none, so it answers
+from the parent's maps.
+
+Warning: that exception also decides which binding the alias reaches. Give the
+parent a singleton binding it never built. Give the child the marker for that id
+and a factory of its own. The alias then reaches the factory of the child. A
+child that holds the marker and no factory reaches the parent's factory
+instead.
+
+Warning: outside that exception, both implementations give the call to the
+parent, so a factory that the parent holds receives the parent. A `bind` service
+is outside it, whether the parent built one or not. This is the one path where
+`NativeChildContainer` gives the parent for a lookup that it could answer
+itself.
+
+Warning: on that path the parent reads none of the maps of the child. An
+instance that the child holds for the target does not answer the alias. The
+parent answers from its own maps in one of four ways:
+
+- It returns the copy that it holds.
+- It runs its own binding.
+- It publishes a provider it holds, and answers with what that publisher
+  registered. Only `ChildContainer` hands that lookup over, because
+  `NativeChildContainer` resolves every unrun publisher in the child.
+- It throws `ContainerInvalidReferenceException`, when it holds no registration
+  for the target.
+
+To reach the copy of the child through an alias, declare the alias on the child:
+
+```java
+// Once, at boot.
+parent.setSingleton(ClockContract.class, bootClock);
+parent.bindAlias(TimeSourceContract.class, raw(ClockContract.class));
+
+// For each request.
+child.setSingleton(ClockContract.class, requestClock);
+
+child.get(ClockContract.class);      // requestClock
+child.get(TimeSourceContract.class); // bootClock, answered by the parent
+
+child.bindAlias(TimeSourceContract.class, raw(ClockContract.class));
+
+child.get(TimeSourceContract.class); // requestClock
+```
+
+On the exception path, the factory receiver follows the implementation, as
+[Resolution order](#resolution-order) states. The child's own factory runs when
+the child declares one for that id. A singleton that the child builds on
+that path caches in the child. A publisher decides what it registers, so a
+publisher that binds a `bind` factory caches nothing. A deferred target is the
+one case where both give the child, because the publish callback runs in the
+container that publishes it.
+
 ### Using a child container
 
 `WorkerHttp.dispatch` builds one child for each request.
@@ -359,13 +526,14 @@ describes the worker entry classes.
 
 ## Exceptions
 
-| Exception                                  | The container throws it when                             |
-| :----------------------------------------- | :------------------------------------------------------- |
-| `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias |
-| `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback            |
+| Exception                                  | The container throws it when                                           |
+| :----------------------------------------- | :--------------------------------------------------------------------- |
+| `ContainerInvalidReferenceException`       | A resolution finds no instance, no factory, and no alias               |
+| `ContainerInvalidPublishCallbackException` | A publishers map holds a key with no callback                          |
+| `ContainerCyclicAliasException`            | An alias reaches a chain that returns to it, at any of the four checks |
 
-`ContainerInvalidReferenceException` extends
+`ContainerInvalidReferenceException` and `ContainerCyclicAliasException` extend
 `ContainerInvalidArgumentException`, and
 `ContainerInvalidPublishCallbackException` extends `ContainerRuntimeException`.
-Both are unchecked. The [throwable component](../throwable/README.md) describes
-the hierarchy.
+All three are unchecked. The [throwable component](../throwable/README.md)
+describes the hierarchy.
