@@ -12,15 +12,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.valkyrja.container.throwable.exception.ContainerCyclicAliasException;
+import io.valkyrja.tests.fixtures.container.ServiceFixture;
+import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 final class NativeChildContainerTest {
-
-    public static class Service {}
-
-    public interface Greeter {}
 
     @Test
     @Timeout(5)
@@ -28,22 +26,25 @@ final class NativeChildContainerTest {
         var parent = new Container();
         // Two concurrent writes can leave this cycle, but no single-threaded sequence
         // can, so a direct write is what reaches the bound deterministically
-        parent.aliases.put(Greeter.class, Service.class);
-        parent.aliases.put(Service.class, Greeter.class);
+        parent.aliases.put(SingletonFixture.class, ServiceFixture.class);
+        parent.aliases.put(ServiceFixture.class, SingletonFixture.class);
         var child = new NativeChildContainer(parent);
 
         ContainerCyclicAliasException throwable =
                 assertThrows(
                         ContainerCyclicAliasException.class,
-                        () -> child.getAliased(Greeter.class, Map.of()));
+                        () -> child.getAliased(SingletonFixture.class, Map.of()));
 
         assertEquals(
-                "Alias `io.valkyrja.container.manager.NativeChildContainerTest$Service` cannot"
-                        + " reach `io.valkyrja.container.manager.NativeChildContainerTest$Greeter`,"
-                        + " because the chain from"
-                        + " `io.valkyrja.container.manager.NativeChildContainerTest$Greeter`"
-                        + " returns to"
-                        + " `io.valkyrja.container.manager.NativeChildContainerTest$Service`.",
+                "Alias `"
+                        + ServiceFixture.class.getName()
+                        + "` cannot reach `"
+                        + SingletonFixture.class.getName()
+                        + "`, because the chain from `"
+                        + SingletonFixture.class.getName()
+                        + "` returns to `"
+                        + ServiceFixture.class.getName()
+                        + "`.",
                 throwable.getMessage());
     }
 }
