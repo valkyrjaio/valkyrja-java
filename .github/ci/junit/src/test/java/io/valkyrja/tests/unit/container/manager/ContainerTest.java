@@ -324,14 +324,16 @@ final class ContainerTest {
                                 Runnable.class,
                                 CharSequence.class),
                         Map.of(),
-                        Map.of(),
-                        Map.of());
+                        Map.of(ServiceFixture.class, ServiceFixture::make),
+                        Map.of(SingletonFixture.class, SingletonFixture.class));
 
         assertThrows(ContainerCyclicAliasException.class, () -> container.setFromData(data));
 
         // The container a caller keeps holds no part of the rejected map
         assertEquals(ServiceFixture.class, container.getAliasedId(SingletonFixture.class));
         assertNull(container.getAliasedId(CharSequence.class));
+        assertFalse(container.isService(ServiceFixture.class));
+        assertFalse(container.isSingletonBinding(SingletonFixture.class));
     }
 
     @Test
