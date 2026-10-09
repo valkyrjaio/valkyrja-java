@@ -27,6 +27,7 @@ import io.valkyrja.tests.fixtures.container.SingletonFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProvidedSecondaryFixture;
 import io.valkyrja.tests.fixtures.container.provider.ProviderFixture;
+import io.valkyrja.tests.fixtures.container.provider.PublishingProviderFixture;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -323,7 +324,7 @@ final class ContainerTest {
                                 Runnable.class,
                                 Runnable.class,
                                 CharSequence.class),
-                        Map.of(),
+                        Map.of(ProvidedFixture.class, PublishingProviderFixture::publishProvided),
                         Map.of(ServiceFixture.class, ServiceFixture::make),
                         Map.of(SingletonFixture.class, SingletonFixture.class));
 
@@ -334,6 +335,7 @@ final class ContainerTest {
         assertNull(container.getAliasedId(CharSequence.class));
         assertFalse(container.isService(ServiceFixture.class));
         assertFalse(container.isSingletonBinding(SingletonFixture.class));
+        assertFalse(container.isDeferred(ProvidedFixture.class));
     }
 
     @Test
