@@ -63,12 +63,15 @@ Warning: no framework code calls `asFlatValue()` or `modify()`. The caster calls
 value object implements.
 
 This port ships no implementation of the contract. An application supplies its
-own type:
+own type, and `Cast` takes a `Class<? extends TypeContract>`, so that type
+implements the contract:
 
 ```java
 import io.valkyrja.cli.routing.data.ArgumentParameter;
 import io.valkyrja.type.constant.CastArgument;
 import io.valkyrja.type.data.Cast;
+
+class Slug implements TypeContract { /* asValue, asFlatValue, modify */ }
 
 container.bind(Slug.class, (c, arguments) -> new Slug(String.valueOf(arguments.get(CastArgument.VALUE))));
 
@@ -78,7 +81,7 @@ var parameter = new ArgumentParameter("target", "The target").withCast(new Cast(
 ### Where the framework applies a cast
 
 `io.valkyrja.cli.routing.caster.Caster` applies the cast, and the parameter
-applies nothing. The container publishes it under
+applies nothing. `CliRoutingServiceProvider` publishes it under
 `io.valkyrja.cli.routing.caster.contract.CasterContract`. The caster holds the
 container, so the data object needs none.
 `getCastValues()` on the caster asks the container for the type that `getType()`

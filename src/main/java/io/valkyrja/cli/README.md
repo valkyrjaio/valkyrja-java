@@ -248,7 +248,10 @@ value to the container under the key `CastArgument.VALUE`.
 import io.valkyrja.cli.routing.caster.contract.CasterContract;
 import io.valkyrja.cli.routing.data.ArgumentParameter;
 import io.valkyrja.type.constant.CastArgument;
+import io.valkyrja.type.contract.TypeContract;
 import io.valkyrja.type.data.Cast;
+
+class Slug implements TypeContract { /* asValue, asFlatValue, modify */ }
 
 container.bind(Slug.class, (c, arguments) -> new Slug(String.valueOf(arguments.get(CastArgument.VALUE))));
 
@@ -256,11 +259,11 @@ var parameter = new ArgumentParameter("target", "The target").withCast(new Cast(
 var values = container.getSingleton(CasterContract.class).getCastValues(parameter);
 ```
 
-Warning: `getService()` reads only a service binding, and it skips the singleton
-cache. An alias, and an instance that `setSingleton` holds, raise
-`ContainerInvalidReferenceException`. A type that `bindSingleton` registers is
-built for each value, and not once for the application. Register a cast type
-with `bind`. See [the type component](../type/README.md).
+Warning: the caster calls `getService()`, which reads only a service binding and
+skips the singleton cache. An alias, and an instance that `setSingleton` holds,
+raise `ContainerInvalidReferenceException`. The container builds a type that
+`bindSingleton` registers for each value, and not once for the application.
+Register a cast type with `bind`. See [the type component](../type/README.md).
 
 ## Middleware
 
