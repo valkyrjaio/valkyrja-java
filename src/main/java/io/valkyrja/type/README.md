@@ -25,7 +25,8 @@ The one-argument constructor sets `convert` to `true` and `isArray` to `false`.
 Three getters read the state back: `getType()`, `isConvert()`, and `isArray()`.
 
 Warning: no framework code reads `isArray()`. The caster converts each value one
-at a time, whatever the flag holds.
+at a time, and the HTTP matcher converts one matched value. Each reader ignores
+the flag.
 
 A route parameter holds an optional cast. The CLI parameter and the HTTP
 parameter both read it through `hasCast()` and `getCast()`, and `withCast(Cast)`
@@ -33,9 +34,9 @@ returns a copy that holds a new one.
 
 ## CastArgument
 
-`io.valkyrja.type.constant.CastArgument` holds the key that the caster passes to
-the container. `CastArgument.VALUE` names the raw value, so a factory reads the
-same key the framework writes.
+`io.valkyrja.type.constant.CastArgument` holds the key that the caster and the
+HTTP matcher pass to the container. `CastArgument.VALUE` names the raw value, so
+a factory reads the same key the framework writes.
 
 ## TypeContract
 
@@ -58,9 +59,9 @@ method on a variable class, so this port leaves the method out. The application
 binds an implementation, and the container builds it. See
 [STATIC_METHODS.md](https://github.com/valkyrjaio/architecture/blob/26.x/STATIC_METHODS.md).
 
-Warning: no framework code calls `asFlatValue()` or `modify()`. The caster calls
-`asValue()` only. The contract mirrors PHP's `TypeContract`, which every PHP
-value object implements.
+Warning: no framework code calls `asFlatValue()` or `modify()`. The caster and
+the HTTP matcher call `asValue()` only. The contract mirrors PHP's
+`TypeContract`, which every PHP value object implements.
 
 This port ships no implementation of the contract. An application supplies its
 own type, and `Cast` takes a `Class<? extends TypeContract>`, so that type
@@ -99,10 +100,11 @@ registers still resolves. `getService()` skips the singleton cache, so the
 caster builds one instance for each value. That is not the lifetime that
 `bindSingleton` states, which is the second reason a cast type takes `bind`.
 
-Warning: `Matcher.castMatchValue` returns the matched value without a change, so
-the HTTP matcher applies no conversion. `Cast` carries the intent of the route,
-and a subclass of `Matcher` performs the conversion. The
-[http component](../http/README.md) describes the matcher.
+The HTTP matcher applies the cast the same way. `Matcher.castMatchValue` asks
+`getService()` for the type that `getType()` names, and it passes the matched
+text under the key `CastArgument.VALUE`. The matcher holds the container, so no
+data object reaches it. The [http component](../http/README.md) describes the
+matcher.
 
 ## ArrayableContract
 
