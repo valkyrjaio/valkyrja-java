@@ -6,7 +6,7 @@
  * Released under the MIT License. See LICENSE.md for details.
  */
 
-package io.valkyrja.container.annotation;
+package io.valkyrja.container.attribute;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
