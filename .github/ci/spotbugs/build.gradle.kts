@@ -12,8 +12,8 @@ import com.github.spotbugs.snom.SpotBugsTask
 
 plugins {
     java
-    id("com.github.spotbugs") version "6.5.12"
-    id("com.github.ben-manes.versions") version "0.65.0"
+    id("com.github.spotbugs") version "6.5.13"
+    id("com.github.ben-manes.versions") version "0.66.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
@@ -48,32 +48,32 @@ dependencies {
     // The SpotBugs tool version is declared here rather than via `spotbugs { toolVersion }` so it
     // is a real dependency notation. useLatestVersions only rewrites dependency notations, so a
     // toolVersion string is reported as outdated every run but never updated — it drifts forever.
-    spotbugs("com.github.spotbugs:spotbugs:4.10.4")
+    spotbugs("com.github.spotbugs:spotbugs:4.10.5")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.3")
     compileOnly("org.jspecify:jspecify:1.0.1")
-    compileOnly("io.grpc:grpc-api:1.84.2")
+    compileOnly("io.grpc:grpc-api:1.85.0")
 
     // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
     compileOnly("org.eclipse.jetty:jetty-server:12.1.14")
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.14")
     compileOnly("io.netty:netty-codec-http:4.2.19.Final")
-    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.26")
-    compileOnly("io.grpc:grpc-servlet-jakarta:1.84.2")
-    compileOnly("io.grpc:grpc-netty-shaded:1.84.2")
+    compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.27")
+    compileOnly("io.grpc:grpc-servlet-jakarta:1.85.0")
+    compileOnly("io.grpc:grpc-netty-shaded:1.85.0")
 
     // Mirrors the JUnit build's test classpath — needed only so the tests compile here.
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testImplementation("org.mockito:mockito-core:5.24.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.24.0")
     testImplementation("org.jspecify:jspecify:1.0.1")
-    testImplementation("io.grpc:grpc-api:1.84.2")
-    testImplementation("io.grpc:grpc-netty-shaded:1.84.2")
-    testImplementation("io.grpc:grpc-servlet-jakarta:1.84.2")
+    testImplementation("io.grpc:grpc-api:1.85.0")
+    testImplementation("io.grpc:grpc-netty-shaded:1.85.0")
+    testImplementation("io.grpc:grpc-servlet-jakarta:1.85.0")
     testImplementation("org.eclipse.jetty:jetty-server:12.1.14")
     testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.14")
     testImplementation("io.netty:netty-codec-http:4.2.19.Final")
-    testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.26")
+    testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.27")
 }
 
 // Analyzing the tests is the point — running them is the JUnit build's job, so `check` still runs
