@@ -103,9 +103,10 @@
     </Match>
 
     <!--
-        Intentional design: overridable methods called in constructors below are safe
-        because they only read already-assigned fields, matching a pattern used throughout
-        the framework.
+        Intentional design: each class below calls an overridable method from its
+        constructor, so that a subclass can change what the constructor does with its
+        input. Each method reads only its arguments and the fields that are already
+        assigned.
     -->
     <Match>
         <Class name="io.valkyrja.cli.middleware.handler.abstract_.Handler" />
@@ -125,6 +126,30 @@
     </Match>
     <Match>
         <Class name="io.valkyrja.http.message.request.Request" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.message.header.collection.HeaderCollection" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.message.header.value.Value" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.message.header.value.component.Component" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.message.param.abstract_.ParamCollection" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.message.response.Response" />
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    </Match>
+    <Match>
+        <Class name="io.valkyrja.http.message.uri.Uri" />
         <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
     </Match>
 
