@@ -130,12 +130,12 @@ public ServiceResponseContract sayHello(ContainerContract container, RouteContra
 }
 
 @Route(
-        name = "SayHello",
+        name = "Greet",
         handler =
                 @RouteHandler(
                         handlerClass = AppGrpcRouteProvider.class,
-                        handlerMethod = "sayHelloHandler"))
-public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
+                        handlerMethod = "greetHandler"))
+public ServiceResponseContract greet(ContainerContract container, RouteContract route) {
     return ServiceResponse.ok(new byte[0]);
 }
 ```
@@ -144,13 +144,18 @@ Warning: the annotated method does not run when the route names a handler. The
 handler runs in its place.
 
 The two spellings name the same two values, because a Java annotation member
-holds a constant and so holds no callable. The `handler` member names the absent
-type, `Void.class`, when the route names no handler.
+holds a constant and so holds no callable. Either spelling names the absent
+type, `Void.class`, when the route names no handler, and the collector then runs
+the annotated method.
 
 Each one names a static method that takes a `ContainerContract` and a
-`RouteContract` and returns a `ServiceResponseContract`. The collector holds the
-method to that signature when it collects the route, so a handler that does not
-meet it fails at bootstrap rather than on a call.
+`RouteContract` and returns a `ServiceResponseContract`. The annotated method
+takes the same parameters and returns the same response.
+
+The collector holds a handler to that signature when it collects the route, so a
+handler of the wrong signature fails at bootstrap rather than on a call. The
+build tool emits a call of the handler, where the compiler holds it to the same
+signature, so the two paths reject the same declaration.
 
 ### The middleware and the message types
 
@@ -388,7 +393,7 @@ contract extends it: `GrpcRoutingThrowable`, `GrpcMiddlewareThrowable`, and
 | `MetadataInvalidKeyException`       | A metadata key breaks the naming rule                                                         |
 | `MetadataInvalidValueException`     | A metadata value does not match the type of its key                                           |
 | `GrpcRoutingInvalidMethodException` | The `Route(method, handler)` constructor reads a method that is not `/package.Service/Method` |
-| `GrpcRoutingInvalidHandlerException` | A route names a handler that does not exist, is not static, or returns no response |
+| `GrpcRoutingInvalidHandlerException` | A route names a handler that does not exist, is not static, or does not take the handler's signature |
 
 A route provider that returns a prebuilt route with a malformed method therefore
 fails at boot, inside `GrpcRoutingServiceProvider.publishRouteCollection`.
