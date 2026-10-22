@@ -21,8 +21,10 @@ import io.valkyrja.grpc.routing.attribute.route.Middleware;
 import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
 import io.valkyrja.grpc.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
+import io.valkyrja.grpc.routing.throwable.exception.GrpcRoutingInvalidHandlerException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -108,8 +110,9 @@ public class AttributeRouteCollector implements RouteCollectorContract {
         RouteHandler annotation = method.getAnnotation(RouteHandler.class);
 
         // The convenience attribute is a second spelling of the one field, and a single-valued
-        // field takes the convenience attribute's value, so it wins over the element.
-        if (annotation != null) {
+        // field takes the convenience attribute's value, so it wins over the element. Either
+        // spelling names no handler when it names the absent type.
+        if (annotation != null && annotation.handlerClass() != Void.class) {
             return namedHandler(annotation.handlerClass(), annotation.handlerMethod());
         }
 
@@ -133,24 +136,54 @@ public class AttributeRouteCollector implements RouteCollectorContract {
      */
     protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract> namedHandler(
             Class<?> handlerClass, String handlerMethod) {
-        return (container, route) -> {
-            Method handler;
+        Method handler = resolveHandler(handlerClass, handlerMethod);
 
-            try {
-                handler =
-                        handlerClass.getMethod(
-                                handlerMethod, ContainerContract.class, RouteContract.class);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(
-                        "Failed to resolve route handler: "
-                                + handlerClass.getName()
-                                + "#"
-                                + handlerMethod,
-                        e);
-            }
+        return (container, route) -> invoke(handler, null, container, route);
+    }
 
-            return invoke(handler, null, container, route);
-        };
+    /**
+     * Resolve the method a {@link RouteHandler} names, and hold it to the signature a handler has.
+     * Java cannot check the signature where the attribute names it, so the collector is the only
+     * place left that can, and it runs once at bootstrap rather than once for each call.
+     *
+     * @param handlerClass the class declaring the handler
+     * @param handlerMethod the handler's method name
+     * @return the handler method
+     */
+    protected Method resolveHandler(Class<?> handlerClass, String handlerMethod) {
+        String named = handlerClass.getName() + "#" + handlerMethod;
+        Method handler;
+
+        try {
+            handler =
+                    handlerClass.getMethod(
+                            handlerMethod, ContainerContract.class, RouteContract.class);
+        } catch (NoSuchMethodException e) {
+            throw new GrpcRoutingInvalidHandlerException(
+                    "The route handler `"
+                            + named
+                            + "` does not exist. A handler takes a ContainerContract and a"
+                            + " RouteContract.",
+                    e);
+        }
+
+        if (!Modifier.isStatic(handler.getModifiers())) {
+            throw new GrpcRoutingInvalidHandlerException(
+                    "The route handler `" + named + "` is not static.");
+        }
+
+        // An unchecked return type reaches the router as a null response, which every stage past
+        // the dispatch reads as non-null.
+        if (!ServiceResponseContract.class.isAssignableFrom(handler.getReturnType())) {
+            throw new GrpcRoutingInvalidHandlerException(
+                    "The route handler `"
+                            + named
+                            + "` returns "
+                            + handler.getReturnType().getName()
+                            + " rather than a ServiceResponseContract.");
+        }
+
+        return handler;
     }
 
     /**

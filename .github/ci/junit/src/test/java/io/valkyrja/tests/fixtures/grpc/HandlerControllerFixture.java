@@ -51,10 +51,10 @@ public final class HandlerControllerFixture {
         return ServiceResponse.ok("method");
     }
 
-    /** The named handler does not exist, so the dispatch reports it. */
-    @Route(name = "Absent")
-    @RouteHandler(handlerClass = RouteHandlerFixture.class, handlerMethod = "absentHandler")
-    public ServiceResponseContract absent(ContainerContract container, RouteContract route) {
+    /** A convenience attribute naming the absent type names no handler. */
+    @Route(name = "VoidHandler")
+    @RouteHandler(handlerClass = Void.class, handlerMethod = "")
+    public ServiceResponseContract voidHandler(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("method");
     }
 

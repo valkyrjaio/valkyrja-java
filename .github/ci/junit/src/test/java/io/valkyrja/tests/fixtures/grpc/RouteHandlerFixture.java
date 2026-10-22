@@ -28,4 +28,15 @@ public final class RouteHandlerFixture {
             ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("annotation");
     }
+
+    /** Takes the handler signature, but an instance method cannot be invoked without one. */
+    public ServiceResponseContract instanceHandler(
+            ContainerContract container, RouteContract route) {
+        return ServiceResponse.ok("instance");
+    }
+
+    /** Takes the handler parameters, and returns something no stage past the dispatch can read. */
+    public static String wrongReturnHandler(ContainerContract container, RouteContract route) {
+        return "not a response";
+    }
 }

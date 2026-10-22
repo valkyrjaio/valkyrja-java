@@ -21,10 +21,14 @@ import io.valkyrja.grpc.message.enum_.CancellationReason;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.collector.AttributeRouteCollector;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
+import io.valkyrja.grpc.routing.throwable.exception.GrpcRoutingInvalidHandlerException;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
+import io.valkyrja.tests.fixtures.grpc.AbsentHandlerControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.GreeterControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.HandlerControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.NoDefaultConstructorControllerFixture;
+import io.valkyrja.tests.fixtures.grpc.NonStaticHandlerControllerFixture;
+import io.valkyrja.tests.fixtures.grpc.WrongReturnHandlerControllerFixture;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -260,11 +264,52 @@ final class AttributeRouteCollectorTest {
     }
 
     @Test
-    void reportsAHandlerMethodThatDoesNotExist() {
-        RuntimeException thrown =
-                assertThrows(RuntimeException.class, () -> dispatch("/pkg.Handler/Absent"));
+    void reportsAHandlerMethodThatDoesNotExistWhenItCollects() {
+        // The collection runs once at bootstrap, so a mis-named handler fails there rather than
+        // on the first call that reaches the route.
+        GrpcRoutingInvalidHandlerException thrown =
+                assertThrows(
+                        GrpcRoutingInvalidHandlerException.class,
+                        () -> collect(AbsentHandlerControllerFixture.class));
         assertTrue(thrown.getMessage().contains("absentHandler"));
         assertInstanceOf(NoSuchMethodException.class, thrown.getCause());
+    }
+
+    @Test
+    void reportsAHandlerThatIsNotStatic() {
+        // A named handler is invoked with no instance, so a non-static one would reach the call
+        // only to throw a NullPointerException that names neither the class nor the method.
+        GrpcRoutingInvalidHandlerException thrown =
+                assertThrows(
+                        GrpcRoutingInvalidHandlerException.class,
+                        () -> collect(NonStaticHandlerControllerFixture.class));
+        assertTrue(thrown.getMessage().contains("instanceHandler"));
+        assertTrue(thrown.getMessage().contains("not static"));
+    }
+
+    @Test
+    void reportsAHandlerThatReturnsNoResponse() {
+        // Reflection matches a method on its parameters alone, so an unchecked return type would
+        // hand the router a null response that every stage past the dispatch reads as non-null.
+        GrpcRoutingInvalidHandlerException thrown =
+                assertThrows(
+                        GrpcRoutingInvalidHandlerException.class,
+                        () -> collect(WrongReturnHandlerControllerFixture.class));
+        assertTrue(thrown.getMessage().contains("wrongReturnHandler"));
+        assertTrue(thrown.getMessage().contains("ServiceResponseContract"));
+    }
+
+    @Test
+    void aConvenienceAttributeNamingTheAbsentTypeNamesNoHandler() {
+        RouteContract route =
+                collect(HandlerControllerFixture.class).get("/pkg.Handler/VoidHandler");
+        Container container = new Container();
+        container.setSingleton(HandlerControllerFixture.class, new HandlerControllerFixture());
+
+        // Both spellings mean the same thing, so the annotated method runs.
+        assertEquals(
+                "method",
+                route.getHandler().apply(container, route).getMessages().iterator().next());
     }
 
     @Test
