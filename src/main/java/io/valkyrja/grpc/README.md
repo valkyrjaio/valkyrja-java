@@ -82,7 +82,6 @@ public final class AppGreeterController {
 
     @Route(name = "SayHello", requestType = HelloRequest.class, responseType = HelloReply.class)
     @Middleware(name = AppAuthMiddleware.class)
-    @RouteHandler(handlerClass = AppGrpcRouteProvider.class, handlerMethod = "sayHelloHandler")
     public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok(new byte[0]);
     }
@@ -100,12 +99,12 @@ public final class AppGreeterController {
 }
 ```
 
-| Annotation      | On       | States                                                                            |
-| :-------------- | :------- | :-------------------------------------------------------------------------------- |
-| `@Service`      | A class  | The full service name, such as `example.Greeter`                                  |
-| `@Route`        | A method | The RPC name, the handler, the message types, which side streams, and the middleware |
-| `@RouteHandler` | A method | The class and the method that run the route                                       |
-| `@Middleware`   | A method | One middleware class of the route                                                 |
+| Annotation      | On       | States                                                              |
+| :-------------- | :------- | :------------------------------------------------------------------ |
+| `@Service`      | A class  | The full service name, such as `example.Greeter`                    |
+| `@Route`        | A method | Every field of the route, which the members below hold              |
+| `@RouteHandler` | A method | The class and the method that run the route                         |
+| `@Middleware`   | A method | One middleware class of the route                                   |
 
 `@Middleware` is repeatable.
 
@@ -113,15 +112,55 @@ public final class AppGreeterController {
 that carries `@Service`, and each method of that class that carries `@Route`. It
 builds the key from the two names.
 
-The `handler` member of `@Route` names the class and the method, because a Java
-annotation member holds a constant and no callable. `@RouteHandler` names the
-same two values, and the collector reads the annotation ahead of the member.
-Both name a static method that takes a `ContainerContract` and a `RouteContract`
-and returns a `ServiceResponseContract`.
+### The handler
 
-A route that names no handler runs the annotated method itself. The collector
-resolves the controller from the container, so a controller with constructor
-dependencies reaches them. Bind the controller in a service provider.
+A route that names no handler runs the annotated method itself, which is what
+the example above does. The collector resolves the controller from the
+container, so a controller with constructor dependencies reaches them. Bind the
+controller in a service provider.
+
+A route names a handler of its own in one of two ways, and the collector reads
+the annotation ahead of the member:
+
+```java
+@Route(name = "SayHello")
+@RouteHandler(handlerClass = AppGrpcRouteProvider.class, handlerMethod = "sayHelloHandler")
+public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
+    return ServiceResponse.ok(new byte[0]);
+}
+
+@Route(
+        name = "SayHello",
+        handler =
+                @RouteHandler(
+                        handlerClass = AppGrpcRouteProvider.class,
+                        handlerMethod = "sayHelloHandler"))
+public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
+    return ServiceResponse.ok(new byte[0]);
+}
+```
+
+Warning: the annotated method does not run when the route names a handler. The
+handler runs in its place.
+
+The two spellings name the same two values, because a Java annotation member
+holds a constant and so holds no callable. The `handler` member names the absent
+type, `Void.class`, when the route names no handler.
+
+Each one names a static method that takes a `ContainerContract` and a
+`RouteContract` and returns a `ServiceResponseContract`. The collector holds the
+method to that signature when it collects the route, so a handler that does not
+meet it fails at bootstrap rather than on a call.
+
+### The middleware and the message types
+
+`@Route` holds one member for each middleware stage:
+`routeMatchedMiddleware`, `routeDispatchedMiddleware`,
+`throwableCaughtMiddleware`, `sendingResponseMiddleware` and
+`responseSentMiddleware`. Each one names the middleware classes of that stage.
+
+`@Middleware` adds to those members rather than replacing them, and it names no
+stage. The stages come from the middleware class.
 
 The `requestType` and `responseType` members name the generated protobuf message
 types, and each one defaults to `Void.class`, which the collector reads as no
@@ -349,6 +388,7 @@ contract extends it: `GrpcRoutingThrowable`, `GrpcMiddlewareThrowable`, and
 | `MetadataInvalidKeyException`       | A metadata key breaks the naming rule                                                         |
 | `MetadataInvalidValueException`     | A metadata value does not match the type of its key                                           |
 | `GrpcRoutingInvalidMethodException` | The `Route(method, handler)` constructor reads a method that is not `/package.Service/Method` |
+| `GrpcRoutingInvalidHandlerException` | A route names a handler that does not exist, is not static, or returns no response |
 
 A route provider that returns a prebuilt route with a malformed method therefore
 fails at boot, inside `GrpcRoutingServiceProvider.publishRouteCollection`.
