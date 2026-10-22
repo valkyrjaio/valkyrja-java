@@ -14,13 +14,20 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Fixture service provider registering the {@link GreeterControllerFixture} per-route middleware.
+ * Fixture service provider registering the {@link GreeterControllerFixture} and its per-route
+ * middleware. The controller is bound because the collector resolves a handler's controller from
+ * the container.
  */
 public final class GreeterServiceProviderFixture implements ServiceProviderContract {
 
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
+                GreeterControllerFixture.class,
+                        c ->
+                                c.setSingleton(
+                                        GreeterControllerFixture.class,
+                                        new GreeterControllerFixture()),
                 GreeterControllerFixture.MatchedMiddleware.class,
                         c ->
                                 c.setSingleton(

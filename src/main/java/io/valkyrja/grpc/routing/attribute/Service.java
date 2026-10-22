@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a class as a gRPC service controller. The scan populates the service map from its {@link
- * Method}-annotated methods, keyed by {@code /service/methodName}.
+ * Route}-annotated methods, keyed by {@code /service/name}.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

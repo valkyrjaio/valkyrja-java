@@ -1,0 +1,25 @@
+/*
+ * This file is part of the Valkyrja Framework package.
+ *
+ * Copyright (c) 2016-present Melech Mizrachi
+ *
+ * Released under the MIT License. See LICENSE.md for details.
+ */
+
+package io.valkyrja.tests.fixtures.grpc;
+
+import io.valkyrja.container.manager.contract.ContainerContract;
+import io.valkyrja.grpc.message.response.ServiceResponse;
+import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
+import io.valkyrja.grpc.routing.data.contract.RouteContract;
+
+/**
+ * A handler class the collector's package cannot read. The method is public and the class is not,
+ * so reflection finds the method and the invocation then fails the access check.
+ */
+final class InaccessibleHandlerFixture {
+
+    public static ServiceResponseContract handle(ContainerContract container, RouteContract route) {
+        return ServiceResponse.ok();
+    }
+}

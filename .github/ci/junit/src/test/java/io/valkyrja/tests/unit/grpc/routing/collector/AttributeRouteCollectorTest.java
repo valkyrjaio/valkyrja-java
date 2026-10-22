@@ -11,16 +11,19 @@ package io.valkyrja.tests.unit.grpc.routing.collector;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.valkyrja.container.manager.Container;
+import io.valkyrja.container.throwable.exception.ContainerInvalidReferenceException;
 import io.valkyrja.grpc.message.enum_.CancellationReason;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.collector.AttributeRouteCollector;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
 import io.valkyrja.tests.fixtures.grpc.GreeterControllerFixture;
+import io.valkyrja.tests.fixtures.grpc.HandlerControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.NoDefaultConstructorControllerFixture;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +40,22 @@ final class AttributeRouteCollectorTest {
                         .collect(Collectors.toMap(RouteContract::getMethod, Function.identity()));
     }
 
+    /**
+     * A container holding the greeter controller, which the collector resolves its handler from.
+     */
+    private Container container() {
+        Container container = new Container();
+        container.setSingleton(GreeterControllerFixture.class, new GreeterControllerFixture());
+
+        return container;
+    }
+
+    private ServiceResponseContract dispatch(String method) {
+        RouteContract route = collect(HandlerControllerFixture.class).get(method);
+
+        return route.getHandler().apply(new Container(), route);
+    }
+
     @Test
     void buildsRoutesKeyedByFullyQualifiedMethod() {
         Map<String, RouteContract> routes = collect(GreeterControllerFixture.class);
@@ -46,9 +65,9 @@ final class AttributeRouteCollectorTest {
     }
 
     @Test
-    void skipsMethodsWithoutGrpcMethod() {
+    void skipsMethodsWithoutARouteAttribute() {
         Map<String, RouteContract> routes = collect(GreeterControllerFixture.class);
-        // Six annotated methods; notAnRpc() is excluded.
+        // Ten annotated methods; notAnRpc() is excluded.
         assertEquals(10, routes.size());
     }
 
@@ -99,38 +118,116 @@ final class AttributeRouteCollectorTest {
     }
 
     @Test
-    void reflectiveHandlerInvokesTheAnnotatedMethod() {
+    void routeNamesNoMessageTypesByDefault() {
         RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/SayHello");
-        ServiceResponseContract response = route.getHandler().apply(new Container(), route);
+        assertNull(route.getRequestType());
+        assertNull(route.getResponseType());
+    }
+
+    @Test
+    void carriesTheMessageTypesTheRouteNames() {
+        RouteContract route = collect(HandlerControllerFixture.class).get("/pkg.Handler/Typed");
+        assertEquals(String.class, route.getRequestType());
+        assertEquals(Integer.class, route.getResponseType());
+    }
+
+    @Test
+    void carriesTheMiddlewareTheRouteAttributeNames() {
+        RouteContract route = collect(HandlerControllerFixture.class).get("/pkg.Handler/Typed");
+        assertEquals(
+                List.of(GreeterControllerFixture.DispatchedMiddleware.class),
+                route.getRouteDispatchedMiddleware());
+        assertEquals(
+                List.of(GreeterControllerFixture.CaughtMiddleware.class),
+                route.getThrowableCaughtMiddleware());
+        assertEquals(
+                List.of(GreeterControllerFixture.SendingMiddleware.class),
+                route.getSendingResponseMiddleware());
+        assertEquals(
+                List.of(GreeterControllerFixture.ResponseSentMiddleware.class),
+                route.getResponseSentMiddleware());
+    }
+
+    @Test
+    void theMiddlewareAttributeAddsToTheListTheRouteAttributeNames() {
+        RouteContract route = collect(HandlerControllerFixture.class).get("/pkg.Handler/Typed");
+        // The route attribute names the matched stage once, and the convenience attribute names it
+        // again, so the stage holds both — a list field adds the convenience attribute's value.
+        assertEquals(
+                List.of(
+                        GreeterControllerFixture.MatchedMiddleware.class,
+                        GreeterControllerFixture.MatchedMiddleware.class),
+                route.getRouteMatchedMiddleware());
+    }
+
+    @Test
+    void handlerResolvesTheControllerFromTheContainer() {
+        RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/SayHello");
+        ServiceResponseContract response = route.getHandler().apply(container(), route);
         assertTrue(response.getStatus().isOk());
         assertEquals("hello", response.getMessages().iterator().next());
     }
 
     @Test
-    void reflectiveHandlerWrapsThrownExceptions() {
-        RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/Boom");
+    void handlerReachesAControllerThatTakesAConstructorDependency() {
+        RouteContract route =
+                collect(NoDefaultConstructorControllerFixture.class).get("/pkg.NoCtor/Ping");
         Container container = new Container();
-        assertThrows(RuntimeException.class, () -> route.getHandler().apply(container, route));
+        container.setSingleton(
+                NoDefaultConstructorControllerFixture.class,
+                new NoDefaultConstructorControllerFixture("injected"));
+
+        // Regression: the collector built the controller with its no-argument constructor, so a
+        // controller with a dependency could not be reached at all.
+        ServiceResponseContract response = route.getHandler().apply(container, route);
+        assertEquals("injected", response.getMessages().iterator().next());
     }
 
     @Test
-    void reflectiveHandlerPropagatesTheHandlersOwnThrowable() {
-        RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/Boom");
+    void handlerReportsAnUnboundController() {
+        RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/SayHello");
         Container container = new Container();
+        assertThrows(
+                ContainerInvalidReferenceException.class,
+                () -> route.getHandler().apply(container, route));
+    }
+
+    @Test
+    void handlerPropagatesTheHandlersOwnThrowable() {
+        RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/Boom");
+        Container container = container();
         // The handler's IllegalStateException must not be buried under a reflection wrapper.
         assertThrows(IllegalStateException.class, () -> route.getHandler().apply(container, route));
     }
 
     @Test
-    void reflectiveHandlerPropagatesCancelledExceptionUnwrapped() {
+    void handlerPropagatesCancelledExceptionUnwrapped() {
         RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/Cancelled");
-        Container container = new Container();
+        Container container = container();
         // Regression: rewrapping in RuntimeException made ServiceHandler report INTERNAL instead
         // of CANCELLED, silently defeating cooperative cancellation.
         CancelledException thrown =
                 assertThrows(
                         CancelledException.class, () -> route.getHandler().apply(container, route));
         assertEquals(CancellationReason.DEADLINE_EXCEEDED, thrown.getReason());
+    }
+
+    @Test
+    void handlerRethrowsErrorsUnwrapped() {
+        RouteContract route =
+                collect(GreeterControllerFixture.class).get("/pkg.Greeter/ThrowsError");
+        Container container = container();
+        assertThrows(AssertionError.class, () -> route.getHandler().apply(container, route));
+    }
+
+    @Test
+    void handlerWrapsCheckedCauses() {
+        RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/Sneaky");
+        Container container = container();
+        RuntimeException thrown =
+                assertThrows(
+                        RuntimeException.class, () -> route.getHandler().apply(container, route));
+        assertInstanceOf(java.io.IOException.class, thrown.getCause());
     }
 
     @Test
@@ -145,28 +242,35 @@ final class AttributeRouteCollectorTest {
     }
 
     @Test
-    void reflectiveHandlerRethrowsErrorsUnwrapped() {
-        RouteContract route =
-                collect(GreeterControllerFixture.class).get("/pkg.Greeter/ThrowsError");
-        Container container = new Container();
-        assertThrows(AssertionError.class, () -> route.getHandler().apply(container, route));
+    void runsTheHandlerTheRouteMemberNames() {
+        assertEquals("element", dispatch("/pkg.Handler/Element").getMessages().iterator().next());
     }
 
     @Test
-    void reflectiveHandlerWrapsCheckedCauses() {
-        RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/Sneaky");
-        Container container = new Container();
+    void runsTheHandlerTheConvenienceAttributeNames() {
+        assertEquals(
+                "annotation", dispatch("/pkg.Handler/Annotation").getMessages().iterator().next());
+    }
+
+    @Test
+    void theConvenienceAttributeWinsOverTheRouteMember() {
+        // The member names a handler that does not exist, so a dispatch that reads it would throw.
+        assertEquals(
+                "annotation", dispatch("/pkg.Handler/Precedence").getMessages().iterator().next());
+    }
+
+    @Test
+    void reportsAHandlerMethodThatDoesNotExist() {
         RuntimeException thrown =
-                assertThrows(
-                        RuntimeException.class, () -> route.getHandler().apply(container, route));
-        assertInstanceOf(java.io.IOException.class, thrown.getCause());
+                assertThrows(RuntimeException.class, () -> dispatch("/pkg.Handler/Absent"));
+        assertTrue(thrown.getMessage().contains("absentHandler"));
+        assertInstanceOf(NoSuchMethodException.class, thrown.getCause());
     }
 
     @Test
-    void reflectiveHandlerWrapsInstantiationFailure() {
-        RouteContract route =
-                collect(NoDefaultConstructorControllerFixture.class).get("/pkg.NoCtor/Ping");
-        Container container = new Container();
-        assertThrows(RuntimeException.class, () -> route.getHandler().apply(container, route));
+    void reportsAHandlerClassItCannotRead() {
+        RuntimeException thrown =
+                assertThrows(RuntimeException.class, () -> dispatch("/pkg.Handler/Inaccessible"));
+        assertInstanceOf(IllegalAccessException.class, thrown.getCause());
     }
 }

@@ -15,21 +15,23 @@ import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
-import io.valkyrja.grpc.routing.attribute.Middleware;
+import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
+import io.valkyrja.grpc.routing.attribute.route.Middleware;
+import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
 import io.valkyrja.grpc.routing.collector.contract.RouteCollectorContract;
-import io.valkyrja.grpc.routing.data.Route;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Builds the service map by reflecting over {@link Service}-annotated controller classes: each
- * {@link Method} method becomes a {@code Route} keyed by {@code /service/name}, with the method
- * itself wired as the reflective handler and any {@link Middleware} dispatched to its stage.
+ * {@link Route} method becomes a {@code Route} keyed by {@code /service/name}, with its handler
+ * resolved through the container and any {@link Middleware} dispatched to its stage.
  */
 public class AttributeRouteCollector implements RouteCollectorContract {
 
@@ -44,13 +46,12 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             }
 
             for (Method method : clazz.getMethods()) {
-                io.valkyrja.grpc.routing.attribute.Method methodAttribute =
-                        method.getAnnotation(io.valkyrja.grpc.routing.attribute.Method.class);
-                if (methodAttribute == null) {
+                Route routeAttribute = method.getAnnotation(Route.class);
+                if (routeAttribute == null) {
                     continue;
                 }
 
-                routes.add(buildRoute(service, methodAttribute, clazz, method));
+                routes.add(buildRoute(service, routeAttribute, clazz, method));
             }
         }
 
@@ -58,44 +59,147 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     protected RouteContract buildRoute(
-            Service service,
-            io.valkyrja.grpc.routing.attribute.Method methodAttribute,
-            Class<?> clazz,
-            Method method) {
-        String fullMethod = "/" + service.service() + "/" + methodAttribute.name();
+            Service service, Route routeAttribute, Class<?> clazz, Method method) {
+        String fullMethod = "/" + service.service() + "/" + routeAttribute.name();
 
         RouteContract route =
-                new Route(fullMethod, handlerFor(clazz, method))
-                        .withClientStreaming(methodAttribute.clientStreaming())
-                        .withServerStreaming(methodAttribute.serverStreaming());
+                new io.valkyrja.grpc.routing.data.Route(
+                                fullMethod, buildHandler(routeAttribute, clazz, method))
+                        .withRequestType(messageType(routeAttribute.requestType()))
+                        .withResponseType(messageType(routeAttribute.responseType()))
+                        .withClientStreaming(routeAttribute.clientStreaming())
+                        .withServerStreaming(routeAttribute.serverStreaming())
+                        .withRouteMatchedMiddleware(
+                                List.of(routeAttribute.routeMatchedMiddleware()))
+                        .withRouteDispatchedMiddleware(
+                                List.of(routeAttribute.routeDispatchedMiddleware()))
+                        .withThrowableCaughtMiddleware(
+                                List.of(routeAttribute.throwableCaughtMiddleware()))
+                        .withSendingResponseMiddleware(
+                                List.of(routeAttribute.sendingResponseMiddleware()))
+                        .withResponseSentMiddleware(
+                                List.of(routeAttribute.responseSentMiddleware()));
 
         return applyMiddleware(route, method);
     }
 
-    protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract> handlerFor(
-            Class<?> clazz, Method method) {
+    /**
+     * Resolve a message type element to the type it names, where {@code Void.class} means the
+     * element was left at its default and the route holds no type.
+     *
+     * @param type the type the element names
+     * @return the type, or null where the element names none
+     */
+    protected @Nullable Class<?> messageType(Class<?> type) {
+        return type == Void.class ? null : type;
+    }
+
+    /**
+     * Resolve the route's handler from the method-level {@link RouteHandler}, the {@link
+     * Route#handler()} element, or the annotated method itself.
+     *
+     * @param routeAttribute the route attribute
+     * @param clazz the controller class
+     * @param method the annotated method
+     * @return the handler
+     */
+    protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract> buildHandler(
+            Route routeAttribute, Class<?> clazz, Method method) {
+        RouteHandler annotation = method.getAnnotation(RouteHandler.class);
+
+        // The convenience attribute is a second spelling of the one field, and a single-valued
+        // field takes the convenience attribute's value, so it wins over the element.
+        if (annotation != null) {
+            return namedHandler(annotation.handlerClass(), annotation.handlerMethod());
+        }
+
+        RouteHandler element = routeAttribute.handler();
+
+        if (element.handlerClass() != Void.class) {
+            return namedHandler(element.handlerClass(), element.handlerMethod());
+        }
+
+        return controllerHandler(clazz, method);
+    }
+
+    /**
+     * Build the handler a {@link RouteHandler} names — a static {@code (ContainerContract,
+     * RouteContract)} method, typically on the route provider, which is how a controller with
+     * constructor dependencies is reached: the handler resolves it from the container.
+     *
+     * @param handlerClass the class declaring the handler
+     * @param handlerMethod the handler's method name
+     * @return the handler
+     */
+    protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract> namedHandler(
+            Class<?> handlerClass, String handlerMethod) {
         return (container, route) -> {
+            Method handler;
+
             try {
-                Object instance = clazz.getDeclaredConstructor().newInstance();
-                return (ServiceResponseContract) method.invoke(instance, container, route);
-            } catch (InvocationTargetException e) {
-                // Surface the handler's own throwable (e.g. a framework-thrown CancelledException)
-                // rather than the reflection wrapper, so ServiceHandler can map it to the correct
-                // status instead of a blanket INTERNAL.
-                // getCause() is the handler's own throwable — always present on an
-                // InvocationTargetException — so there is no null case to defend against.
-                Throwable cause = e.getCause();
-                if (cause instanceof RuntimeException runtimeException) {
-                    throw runtimeException;
-                }
-                if (cause instanceof Error error) {
-                    throw error;
-                }
-                throw new RuntimeException(cause);
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e);
+                handler =
+                        handlerClass.getMethod(
+                                handlerMethod, ContainerContract.class, RouteContract.class);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(
+                        "Failed to resolve route handler: "
+                                + handlerClass.getName()
+                                + "#"
+                                + handlerMethod,
+                        e);
             }
+
+            return invoke(handler, null, container, route);
         };
+    }
+
+    /**
+     * Build the handler for an annotated controller method. The controller is resolved from the
+     * container rather than built with its no-argument constructor: the container knows how to
+     * build it, and a controller with dependencies has no such constructor.
+     *
+     * @param clazz the controller class
+     * @param method the annotated method
+     * @return the handler
+     */
+    protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract>
+            controllerHandler(Class<?> clazz, Method method) {
+        return (container, route) -> invoke(method, container.get(clazz), container, route);
+    }
+
+    /**
+     * Invoke a handler method with the container and the route.
+     *
+     * @param handler the handler method
+     * @param instance the instance to invoke it on, or null for a static handler
+     * @param container the container
+     * @param route the matched route
+     * @return the handler's response
+     */
+    protected ServiceResponseContract invoke(
+            Method handler,
+            @Nullable Object instance,
+            ContainerContract container,
+            RouteContract route) {
+        try {
+            return (ServiceResponseContract) handler.invoke(instance, container, route);
+        } catch (InvocationTargetException e) {
+            // Surface the handler's own throwable (e.g. a framework-thrown CancelledException)
+            // rather than the reflection wrapper, so ServiceHandler can map it to the correct
+            // status instead of a blanket INTERNAL.
+            // getCause() is the handler's own throwable — always present on an
+            // InvocationTargetException — so there is no null case to defend against.
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            if (cause instanceof Error error) {
+                throw error;
+            }
+            throw new RuntimeException(cause);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")

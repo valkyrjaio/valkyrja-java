@@ -71,20 +71,23 @@ The handler is a
 
 ## Defining a service
 
-A service is a class, and each RPC is a method of that class. The annotations
-live in `io.valkyrja.grpc.routing.attribute`.
+A service is a class, and each RPC is a method of that class.
+`io.valkyrja.grpc.routing.attribute` holds `@Service` and `@Route`.
+`io.valkyrja.grpc.routing.attribute.route` holds `@RouteHandler` and
+`@Middleware`.
 
 ```java
 @Service(service = "example.Greeter")
 public final class AppGreeterController {
 
-    @Method(name = "SayHello")
+    @Route(name = "SayHello", requestType = HelloRequest.class, responseType = HelloReply.class)
     @Middleware(name = AppAuthMiddleware.class)
+    @RouteHandler(handlerClass = AppGrpcRouteProvider.class, handlerMethod = "sayHelloHandler")
     public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok(new byte[0]);
     }
 
-    @Method(name = "Chat", clientStreaming = true, serverStreaming = true)
+    @Route(name = "Chat", clientStreaming = true, serverStreaming = true)
     public ServiceResponseContract chat(ContainerContract container, RouteContract route) {
         ServiceCallContract call = container.getSingleton(ServiceCallContract.class);
 
@@ -97,22 +100,32 @@ public final class AppGreeterController {
 }
 ```
 
-| Annotation    | On       | States                                           |
-| :------------ | :------- | :----------------------------------------------- |
-| `@Service`    | A class  | The full service name, such as `example.Greeter` |
-| `@Method`     | A method | The RPC name, and which side streams             |
-| `@Middleware` | A method | One middleware class of the route                |
+| Annotation      | On       | States                                                                            |
+| :-------------- | :------- | :-------------------------------------------------------------------------------- |
+| `@Service`      | A class  | The full service name, such as `example.Greeter`                                  |
+| `@Route`        | A method | The RPC name, the handler, the message types, which side streams, and the middleware |
+| `@RouteHandler` | A method | The class and the method that run the route                                       |
+| `@Middleware`   | A method | One middleware class of the route                                                 |
 
 `@Middleware` is repeatable.
 
 `io.valkyrja.grpc.routing.collector.AttributeRouteCollector` reads each class
-that carries `@Service`, and each method of that class that carries `@Method`.
-It builds the key from the two names, and it wires the method as the handler.
+that carries `@Service`, and each method of that class that carries `@Route`. It
+builds the key from the two names.
 
-Warning: the collector constructs the controller with its no-argument
-constructor, and it calls the method through reflection. The method takes a
-`ContainerContract` and a `RouteContract`, and it returns a
-`ServiceResponseContract`.
+The `handler` member of `@Route` names the class and the method, because a Java
+annotation member holds a constant and no callable. `@RouteHandler` names the
+same two values, and the collector reads the annotation ahead of the member.
+Both name a static method that takes a `ContainerContract` and a `RouteContract`
+and returns a `ServiceResponseContract`.
+
+A route that names no handler runs the annotated method itself. The collector
+resolves the controller from the container, so a controller with constructor
+dependencies reaches them. Bind the controller in a service provider.
+
+The `requestType` and `responseType` members name the generated protobuf message
+types, and each one defaults to `Void.class`, which the collector reads as no
+type.
 
 A route provider returns the controller classes and any prebuilt route.
 `io.valkyrja.grpc.routing.provider.contract.GrpcRouteProviderContract` declares

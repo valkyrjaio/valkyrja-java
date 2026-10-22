@@ -24,9 +24,9 @@ import io.valkyrja.grpc.middleware.handler.contract.RouteDispatchedHandlerContra
 import io.valkyrja.grpc.middleware.handler.contract.RouteMatchedHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.SendingResponseHandlerContract;
 import io.valkyrja.grpc.middleware.handler.contract.ThrowableCaughtHandlerContract;
-import io.valkyrja.grpc.routing.attribute.Method;
-import io.valkyrja.grpc.routing.attribute.Middleware;
+import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
+import io.valkyrja.grpc.routing.attribute.route.Middleware;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.throwable.exception.CancelledException;
 import java.nio.charset.StandardCharsets;
@@ -37,19 +37,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service(service = "pkg.Greeter")
 public final class GreeterControllerFixture {
 
-    @Method(name = "SayHello")
+    @Route(name = "SayHello")
     public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("hello");
     }
 
     /** Unary (1 → 1): returns a single byte[] message, for the end-to-end unary verification. */
-    @Method(name = "Ping")
+    @Route(name = "Ping")
     public ServiceResponseContract ping(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("pong".getBytes(StandardCharsets.UTF_8));
     }
 
     /** Server-streaming (1 → N): buffered path returns several byte[] messages for one request. */
-    @Method(name = "Fanout", serverStreaming = true)
+    @Route(name = "Fanout", serverStreaming = true)
     public ServiceResponseContract fanout(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok()
                 .withMessages(
@@ -59,7 +59,7 @@ public final class GreeterControllerFixture {
                                 "z".getBytes(StandardCharsets.UTF_8)));
     }
 
-    @Method(name = "StreamHellos", clientStreaming = true, serverStreaming = true)
+    @Route(name = "StreamHellos", clientStreaming = true, serverStreaming = true)
     @Middleware(name = MatchedMiddleware.class)
     @Middleware(name = DispatchedMiddleware.class)
     @Middleware(name = CaughtMiddleware.class)
@@ -74,7 +74,7 @@ public final class GreeterControllerFixture {
      * straight back through the outbound sink, then returns a terminal OK. Exercises the streaming
      * dispatch model.
      */
-    @Method(name = "Echo", clientStreaming = true, serverStreaming = true)
+    @Route(name = "Echo", clientStreaming = true, serverStreaming = true)
     @Middleware(name = SendingMiddleware.class)
     @Middleware(name = ResponseSentMiddleware.class)
     public ServiceResponseContract echo(ContainerContract container, RouteContract route) {
@@ -86,12 +86,12 @@ public final class GreeterControllerFixture {
     }
 
     /** Client-streaming (not bidirectional): buffered like unary, so it takes the buffered path. */
-    @Method(name = "Collect", clientStreaming = true)
+    @Route(name = "Collect", clientStreaming = true)
     public ServiceResponseContract collect(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("collected".getBytes(StandardCharsets.UTF_8));
     }
 
-    @Method(name = "Boom")
+    @Route(name = "Boom")
     public ServiceResponseContract boom(ContainerContract container, RouteContract route) {
         throw new IllegalStateException("handler failure");
     }
@@ -101,7 +101,7 @@ public final class GreeterControllerFixture {
      * would. The collector must surface it unwrapped so it maps to {@code CANCELLED} rather than
      * {@code INTERNAL}.
      */
-    @Method(name = "Cancelled")
+    @Route(name = "Cancelled")
     public ServiceResponseContract cancelled(ContainerContract container, RouteContract route) {
         throw new CancelledException("cancelled by test", CancellationReason.DEADLINE_EXCEEDED);
     }
@@ -109,7 +109,7 @@ public final class GreeterControllerFixture {
     /**
      * Throws an {@link Error}; the collector must rethrow it unwrapped, not as a RuntimeException.
      */
-    @Method(name = "ThrowsError")
+    @Route(name = "ThrowsError")
     public ServiceResponseContract throwsError(ContainerContract container, RouteContract route) {
         throw new AssertionError("error from handler");
     }
@@ -118,7 +118,7 @@ public final class GreeterControllerFixture {
      * Throws a checked exception (via a sneaky throw, since the handler signature declares none);
      * the collector wraps such a cause in a RuntimeException.
      */
-    @Method(name = "Sneaky")
+    @Route(name = "Sneaky")
     public ServiceResponseContract sneaky(ContainerContract container, RouteContract route) {
         sneakyThrow(new java.io.IOException("checked from handler"));
         return ServiceResponse.ok();
@@ -129,7 +129,7 @@ public final class GreeterControllerFixture {
         throw (E) throwable;
     }
 
-    /** Not annotated with {@link Method}; must be skipped by the collector. */
+    /** Not annotated with {@link Route}; must be skipped by the collector. */
     public ServiceResponseContract notAnRpc(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok();
     }
