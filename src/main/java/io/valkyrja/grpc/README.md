@@ -393,7 +393,7 @@ contract extends it: `GrpcRoutingThrowable`, `GrpcMiddlewareThrowable`, and
 | `MetadataInvalidKeyException`       | A metadata key breaks the naming rule                                                         |
 | `MetadataInvalidValueException`     | A metadata value does not match the type of its key                                           |
 | `GrpcRoutingInvalidMethodException` | The `Route(method, handler)` constructor reads a method that is not `/package.Service/Method` |
-| `GrpcRoutingInvalidHandlerException` | A route names a handler that does not exist, is not static, or does not take the handler's signature |
+| `GrpcRoutingInvalidHandlerException` | A route's handler does not exist, is not static, is not accessible, or does not take the handler's signature, whether a convenience attribute, the `handler` member, or the annotated method named it |
 
 A route provider that returns a prebuilt route with a malformed method therefore
 fails at boot, inside `GrpcRoutingServiceProvider.publishRouteCollection`.
