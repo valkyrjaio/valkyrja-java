@@ -293,8 +293,8 @@ final class AttributeRouteCollectorTest {
 
     @Test
     void reportsAHandlerThatReturnsNoResponse() {
-        // Reflection matches a method on its parameters alone, so an unchecked return type would
-        // hand the router a null response that every stage past the dispatch reads as non-null.
+        // Reflection matches a method on its parameters alone, so an unchecked return type
+        // would reach the call as a ClassCastException.
         GrpcRoutingInvalidHandlerException thrown =
                 assertThrows(
                         GrpcRoutingInvalidHandlerException.class,

@@ -108,9 +108,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             Route routeAttribute, Class<?> clazz, Method method) {
         RouteHandler annotation = method.getAnnotation(RouteHandler.class);
 
-        // The convenience attribute is a second spelling of the one field, and a single-valued
-        // field takes the convenience attribute's value, so it wins over the element. Either
-        // spelling names no handler when it names the absent type.
+        // A single-valued field takes the convenience attribute's value, so the attribute wins
+        // over the element. Either spelling names no handler when it names the absent type.
         if (annotation != null && annotation.handlerClass() != Void.class) {
             return namedHandler(annotation.handlerClass(), annotation.handlerMethod());
         }
@@ -133,9 +132,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
      */
     protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract> namedHandler(
             Class<?> handlerClass, String handlerMethod) {
-        // A named handler is static, typically on the route provider, and that is how a
-        // controller with constructor dependencies is reached: the handler resolves it from the
-        // container.
+        // A named handler is static, so a controller with constructor dependencies is reached
+        // by the handler resolving it from the container.
         Method handler = resolveHandler(handlerClass, handlerMethod);
 
         return (container, route) -> invoke(handler, null, container, route);
@@ -202,8 +200,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                             + "` does not take a ContainerContract and a RouteContract.");
         }
 
-        // An unchecked return type reaches the router as a null response, which every stage past
-        // the dispatch reads as non-null.
+        // An unchecked return type reaches the call as a ClassCastException, and a void one as
+        // a null response that every stage past the dispatch reads as non-null.
         if (!ServiceResponseContract.class.isAssignableFrom(handler.getReturnType())) {
             throw new GrpcRoutingInvalidHandlerException(
                     "The route handler `"
@@ -227,9 +225,8 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             controllerHandler(Class<?> clazz, Method method) {
         Method handler = validateHandler(method);
 
-        // The controller comes from the container rather than from its no-argument constructor:
-        // the container knows how to build it, and a controller with dependencies has no such
-        // constructor.
+        // The controller comes from the container rather than from a no-argument constructor,
+        // which a controller with dependencies does not have.
         return (container, route) -> invoke(handler, container.get(clazz), container, route);
     }
 

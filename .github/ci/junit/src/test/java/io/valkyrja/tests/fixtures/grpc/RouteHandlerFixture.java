@@ -32,7 +32,7 @@ public final class RouteHandlerFixture {
         return ServiceResponse.ok("instance");
     }
 
-    /** Takes the handler parameters, and returns something no stage past the dispatch can read. */
+    /** Takes the handler parameters, and returns a response the invocation cannot cast. */
     public static String wrongReturnHandler(ContainerContract container, RouteContract route) {
         return "not a response";
     }
