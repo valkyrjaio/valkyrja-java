@@ -13,10 +13,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Marks a class as a gRPC service controller. The scan populates the service map from its {@link
- * Route}-annotated methods, keyed by {@code /service/name}.
- */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Service {

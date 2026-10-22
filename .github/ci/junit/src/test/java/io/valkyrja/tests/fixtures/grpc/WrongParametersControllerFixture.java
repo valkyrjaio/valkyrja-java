@@ -13,10 +13,7 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
 
-/**
- * A route whose own method takes neither the container nor the route. The cached route passes it
- * both, where this cannot compile, so the collection rejects it.
- */
+/** A route whose own method takes neither the container nor the route. */
 @Service(service = "pkg.WrongParameters")
 public final class WrongParametersControllerFixture {
 

@@ -15,10 +15,7 @@ import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
-/**
- * A controller with no no-argument constructor, so it is reachable only through the container.
- * Constructing it with {@code new} is what the collector must never do.
- */
+/** A controller reachable only through the container. */
 @Service(service = "pkg.NoCtor")
 public final class NoDefaultConstructorControllerFixture {
 

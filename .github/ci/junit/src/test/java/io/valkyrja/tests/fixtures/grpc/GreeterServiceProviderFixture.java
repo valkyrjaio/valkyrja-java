@@ -13,11 +13,7 @@ import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/**
- * Fixture service provider registering the {@link GreeterControllerFixture} and its per-route
- * middleware. The controller is bound because the collector resolves a handler's controller from
- * the container.
- */
+/** Fixture service provider for the {@link GreeterControllerFixture} and its middleware. */
 public final class GreeterServiceProviderFixture implements ServiceProviderContract {
 
     @Override

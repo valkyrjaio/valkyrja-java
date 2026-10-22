@@ -16,7 +16,7 @@ import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
-/** A route naming a handler that is not static. Its own class, because the collection throws. */
+/** A route naming a handler that is not static. */
 @Service(service = "pkg.NonStatic")
 public final class NonStaticHandlerControllerFixture {
 

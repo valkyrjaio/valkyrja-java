@@ -13,10 +13,7 @@ import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
-/**
- * A route whose own method returns no response. The cached route calls the method directly, where
- * this cannot compile, so the collection rejects it rather than handing the router a null.
- */
+/** A route whose own method returns no response. */
 @Service(service = "pkg.VoidReturn")
 public final class VoidReturnControllerFixture {
 

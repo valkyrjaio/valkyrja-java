@@ -13,10 +13,7 @@ import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
-/**
- * A handler class the collector's package cannot read. The method is public and the class is not,
- * so reflection finds the method and the invocation then fails the access check.
- */
+/** A handler class the collector's package cannot read. */
 final class InaccessibleHandlerFixture {
 
     public static ServiceResponseContract handle(ContainerContract container, RouteContract route) {

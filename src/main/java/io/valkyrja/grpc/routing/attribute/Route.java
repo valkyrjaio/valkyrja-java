@@ -19,10 +19,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Declares a {@code Route} on a method. The collector keys it by {@code /service/name}, where the
- * service comes from the enclosing {@link Service}.
- */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Route {

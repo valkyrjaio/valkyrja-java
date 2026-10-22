@@ -16,9 +16,7 @@ import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
-/**
- * A route naming a handler that returns no response. Its own class, because the collection throws.
- */
+/** A route naming a handler that returns no response. */
 @Service(service = "pkg.WrongReturn")
 public final class WrongReturnHandlerControllerFixture {
 
