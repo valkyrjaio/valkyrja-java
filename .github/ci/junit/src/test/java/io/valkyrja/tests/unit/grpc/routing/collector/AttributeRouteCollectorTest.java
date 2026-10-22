@@ -28,6 +28,8 @@ import io.valkyrja.tests.fixtures.grpc.GreeterControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.HandlerControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.NoDefaultConstructorControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.NonStaticHandlerControllerFixture;
+import io.valkyrja.tests.fixtures.grpc.VoidReturnControllerFixture;
+import io.valkyrja.tests.fixtures.grpc.WrongParametersControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.WrongReturnHandlerControllerFixture;
 import java.util.List;
 import java.util.Map;
@@ -296,7 +298,9 @@ final class AttributeRouteCollectorTest {
                         GrpcRoutingInvalidHandlerException.class,
                         () -> collect(WrongReturnHandlerControllerFixture.class));
         assertTrue(thrown.getMessage().contains("wrongReturnHandler"));
-        assertTrue(thrown.getMessage().contains("ServiceResponseContract"));
+        assertTrue(
+                thrown.getMessage()
+                        .contains("java.lang.String rather than a ServiceResponseContract"));
     }
 
     @Test
@@ -317,5 +321,29 @@ final class AttributeRouteCollectorTest {
         RuntimeException thrown =
                 assertThrows(RuntimeException.class, () -> dispatch("/pkg.Handler/Inaccessible"));
         assertInstanceOf(IllegalAccessException.class, thrown.getCause());
+    }
+
+    @Test
+    void reportsAControllerMethodThatReturnsNoResponse() {
+        // The cached route calls the controller method directly, where a void method cannot
+        // compile, so the collected route must reject it rather than hand the router a null.
+        GrpcRoutingInvalidHandlerException thrown =
+                assertThrows(
+                        GrpcRoutingInvalidHandlerException.class,
+                        () -> collect(VoidReturnControllerFixture.class));
+        assertTrue(thrown.getMessage().contains("voidReturn"));
+        assertTrue(thrown.getMessage().contains("void rather than a ServiceResponseContract"));
+    }
+
+    @Test
+    void reportsAControllerMethodThatTakesTheWrongParameters() {
+        GrpcRoutingInvalidHandlerException thrown =
+                assertThrows(
+                        GrpcRoutingInvalidHandlerException.class,
+                        () -> collect(WrongParametersControllerFixture.class));
+        assertTrue(thrown.getMessage().contains("wrongParameters"));
+        assertTrue(
+                thrown.getMessage()
+                        .contains("does not take a ContainerContract and a RouteContract"));
     }
 }

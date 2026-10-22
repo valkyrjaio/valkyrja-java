@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import org.jspecify.annotations.Nullable;
@@ -36,6 +37,11 @@ import org.jspecify.annotations.Nullable;
  * resolved through the container and any {@link Middleware} dispatched to its stage.
  */
 public class AttributeRouteCollector implements RouteCollectorContract {
+
+    /** The parameters every handler takes, whichever spelling of the handler named it. */
+    private static final Class<?>[] HANDLER_PARAMETERS = {
+        ContainerContract.class, RouteContract.class
+    };
 
     @Override
     public List<RouteContract> getRoutes(Class<?>... controllerClasses) {
@@ -172,6 +178,29 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                     "The route handler `" + named + "` is not static.");
         }
 
+        return validateHandler(handler);
+    }
+
+    /**
+     * Hold a handler to the parameters it takes and the response it returns, whichever spelling
+     * named it. The cached route calls the handler directly, where a wrong signature is a compile
+     * error, so the collected route rejects the same signature rather than reaching a call.
+     *
+     * @param handler the handler method
+     * @return the handler method
+     */
+    protected Method validateHandler(Method handler) {
+        String named = handler.getDeclaringClass().getName() + "#" + handler.getName();
+
+        // Wrong parameters reach the invocation as an IllegalArgumentException, which names
+        // neither the class nor the method.
+        if (!Arrays.equals(handler.getParameterTypes(), HANDLER_PARAMETERS)) {
+            throw new GrpcRoutingInvalidHandlerException(
+                    "The route handler `"
+                            + named
+                            + "` does not take a ContainerContract and a RouteContract.");
+        }
+
         // An unchecked return type reaches the router as a null response, which every stage past
         // the dispatch reads as non-null.
         if (!ServiceResponseContract.class.isAssignableFrom(handler.getReturnType())) {
@@ -197,7 +226,9 @@ public class AttributeRouteCollector implements RouteCollectorContract {
      */
     protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract>
             controllerHandler(Class<?> clazz, Method method) {
-        return (container, route) -> invoke(method, container.get(clazz), container, route);
+        Method handler = validateHandler(method);
+
+        return (container, route) -> invoke(handler, container.get(clazz), container, route);
     }
 
     /**
