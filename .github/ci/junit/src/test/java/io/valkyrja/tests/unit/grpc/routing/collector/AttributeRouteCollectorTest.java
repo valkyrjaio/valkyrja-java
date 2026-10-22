@@ -26,6 +26,8 @@ import io.valkyrja.grpc.throwable.exception.CancelledException;
 import io.valkyrja.tests.fixtures.grpc.AbsentHandlerControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.GreeterControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.HandlerControllerFixture;
+import io.valkyrja.tests.fixtures.grpc.HiddenControllerAccessFixture;
+import io.valkyrja.tests.fixtures.grpc.InaccessibleHandlerControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.NoDefaultConstructorControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.NonStaticHandlerControllerFixture;
 import io.valkyrja.tests.fixtures.grpc.VoidReturnControllerFixture;
@@ -317,9 +319,28 @@ final class AttributeRouteCollectorTest {
     }
 
     @Test
-    void reportsAHandlerClassItCannotRead() {
+    void reportsANamedHandlerClassItCannotReadWhenItCollects() {
+        // A route provider is under no rule to be public, so a handler on a package-private class
+        // is a plausible mistake, and the invocation reads the declaring class.
+        GrpcRoutingInvalidHandlerException thrown =
+                assertThrows(
+                        GrpcRoutingInvalidHandlerException.class,
+                        () -> collect(InaccessibleHandlerControllerFixture.class));
+        assertTrue(thrown.getMessage().contains("not accessible"));
+    }
+
+    @Test
+    void reportsAControllerItCannotReadOnTheCall() {
+        // A controller is resolved per call, so the collection cannot read its accessibility and
+        // the invocation reports it instead.
+        RouteContract route =
+                collect(HiddenControllerAccessFixture.controllerClass()).get("/pkg.Hidden/Hidden");
+        Container container = new Container();
+        HiddenControllerAccessFixture.bind(container);
+
         RuntimeException thrown =
-                assertThrows(RuntimeException.class, () -> dispatch("/pkg.Handler/Inaccessible"));
+                assertThrows(
+                        RuntimeException.class, () -> route.getHandler().apply(container, route));
         assertInstanceOf(IllegalAccessException.class, thrown.getCause());
     }
 

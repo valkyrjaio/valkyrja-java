@@ -31,11 +31,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Builds the service map by reflecting over {@link Service}-annotated controller classes: each
- * {@link Route} method becomes a {@code Route} keyed by {@code /service/name}, with its handler
- * resolved through the container and any {@link Middleware} dispatched to its stage.
- */
 public class AttributeRouteCollector implements RouteCollectorContract {
 
     /** The parameters every handler takes, whichever spelling of the handler named it. */
@@ -92,8 +87,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     /**
-     * Resolve a message type element to the type it names, where {@code Void.class} means the
-     * element was left at its default and the route holds no type.
+     * Get the message type an element names, or null where it names the absent type.
      *
      * @param type the type the element names
      * @return the type, or null where the element names none
@@ -103,8 +97,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     /**
-     * Resolve the route's handler from the method-level {@link RouteHandler}, the {@link
-     * Route#handler()} element, or the annotated method itself.
+     * Get the route's handler.
      *
      * @param routeAttribute the route attribute
      * @param clazz the controller class
@@ -132,9 +125,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     /**
-     * Build the handler a {@link RouteHandler} names — a static {@code (ContainerContract,
-     * RouteContract)} method, typically on the route provider, which is how a controller with
-     * constructor dependencies is reached: the handler resolves it from the container.
+     * Get the handler a {@link RouteHandler} names.
      *
      * @param handlerClass the class declaring the handler
      * @param handlerMethod the handler's method name
@@ -142,21 +133,24 @@ public class AttributeRouteCollector implements RouteCollectorContract {
      */
     protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract> namedHandler(
             Class<?> handlerClass, String handlerMethod) {
+        // A named handler is static, typically on the route provider, and that is how a
+        // controller with constructor dependencies is reached: the handler resolves it from the
+        // container.
         Method handler = resolveHandler(handlerClass, handlerMethod);
 
         return (container, route) -> invoke(handler, null, container, route);
     }
 
     /**
-     * Resolve the method a {@link RouteHandler} names, and hold it to the signature a handler has.
-     * Java cannot check the signature where the attribute names it, so the collector is the only
-     * place left that can, and it runs once at bootstrap rather than once for each call.
+     * Get the method a {@link RouteHandler} names.
      *
      * @param handlerClass the class declaring the handler
      * @param handlerMethod the handler's method name
      * @return the handler method
      */
     protected Method resolveHandler(Class<?> handlerClass, String handlerMethod) {
+        // Java holds no annotation member to a signature, so the collection is the only place
+        // left that can, and it runs once rather than once for each call.
         String named = handlerClass.getName() + "#" + handlerMethod;
         Method handler;
 
@@ -178,18 +172,25 @@ public class AttributeRouteCollector implements RouteCollectorContract {
                     "The route handler `" + named + "` is not static.");
         }
 
+        // The invocation reads the declaring class, and a route provider is under no rule to be
+        // public.
+        if (!handler.canAccess(null)) {
+            throw new GrpcRoutingInvalidHandlerException(
+                    "The route handler `" + named + "` is not accessible.");
+        }
+
         return validateHandler(handler);
     }
 
     /**
-     * Hold a handler to the parameters it takes and the response it returns, whichever spelling
-     * named it. The cached route calls the handler directly, where a wrong signature is a compile
-     * error, so the collected route rejects the same signature rather than reaching a call.
+     * Get the handler, held to the parameters it takes and the response it returns.
      *
      * @param handler the handler method
      * @return the handler method
      */
     protected Method validateHandler(Method handler) {
+        // A route that names no handler runs the annotated method, and a cached route answers a
+        // call alike, so the collection rejects a signature that cannot answer one.
         String named = handler.getDeclaringClass().getName() + "#" + handler.getName();
 
         // Wrong parameters reach the invocation as an IllegalArgumentException, which names
@@ -216,9 +217,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     /**
-     * Build the handler for an annotated controller method. The controller is resolved from the
-     * container rather than built with its no-argument constructor: the container knows how to
-     * build it, and a controller with dependencies has no such constructor.
+     * Get the handler for an annotated controller method.
      *
      * @param clazz the controller class
      * @param method the annotated method
@@ -228,6 +227,9 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             controllerHandler(Class<?> clazz, Method method) {
         Method handler = validateHandler(method);
 
+        // The controller comes from the container rather than from its no-argument constructor:
+        // the container knows how to build it, and a controller with dependencies has no such
+        // constructor.
         return (container, route) -> invoke(handler, container.get(clazz), container, route);
     }
 

@@ -51,13 +51,6 @@ public final class HandlerControllerFixture {
         return ServiceResponse.ok("method");
     }
 
-    /** The handler class is not readable from the collector's package. */
-    @Route(name = "Inaccessible")
-    @RouteHandler(handlerClass = InaccessibleHandlerFixture.class, handlerMethod = "handle")
-    public ServiceResponseContract inaccessible(ContainerContract container, RouteContract route) {
-        return ServiceResponse.ok("method");
-    }
-
     /** A convenience attribute naming the absent type names no handler. */
     @Route(name = "VoidHandler")
     @RouteHandler(handlerClass = Void.class, handlerMethod = "")
