@@ -153,9 +153,9 @@ Each one names a static method that takes a `ContainerContract` and a
 takes the same parameters and returns the same response.
 
 The collector holds a handler to that signature when it collects the route, so a
-handler of the wrong signature fails at bootstrap rather than on a call. The
-build tool emits a call of the handler, where the compiler holds it to the same
-signature, so the two paths reject the same declaration.
+handler of the wrong signature fails at bootstrap rather than on a call. A
+cached route holds the handler to the same signature, because a cached route and
+a collected route answer a call alike.
 
 ### The middleware and the message types
 
