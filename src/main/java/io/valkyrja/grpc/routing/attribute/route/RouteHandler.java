@@ -6,17 +6,18 @@
  * Released under the MIT License. See LICENSE.md for details.
  */
 
-package io.valkyrja.grpc.routing.attribute;
+package io.valkyrja.grpc.routing.attribute.route;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Container annotation for repeatable {@link Middleware}. */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Middlewares {
+public @interface RouteHandler {
 
-    Middleware[] value();
+    Class<?> handlerClass();
+
+    String handlerMethod();
 }

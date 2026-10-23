@@ -13,14 +13,17 @@ import io.valkyrja.container.provider.contract.ServiceProviderContract;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/**
- * Fixture service provider registering the {@link GreeterControllerFixture} per-route middleware.
- */
+/** Fixture service provider for the {@link GreeterControllerFixture} and its middleware. */
 public final class GreeterServiceProviderFixture implements ServiceProviderContract {
 
     @Override
     public Map<Class<?>, Consumer<ContainerContract>> publishers() {
         return Map.of(
+                GreeterControllerFixture.class,
+                        c ->
+                                c.setSingleton(
+                                        GreeterControllerFixture.class,
+                                        new GreeterControllerFixture()),
                 GreeterControllerFixture.MatchedMiddleware.class,
                         c ->
                                 c.setSingleton(
