@@ -195,9 +195,9 @@ final class AttributeRouteCollectorTest {
     void handlerReportsAnUnboundController() {
         RouteContract route = collect(GreeterControllerFixture.class).get("/pkg.Greeter/SayHello");
         Container container = new Container();
+        var handler = route.getHandler();
         assertThrows(
-                ContainerInvalidReferenceException.class,
-                () -> route.getHandler().apply(container, route));
+                ContainerInvalidReferenceException.class, () -> handler.apply(container, route));
     }
 
     @Test
@@ -338,9 +338,9 @@ final class AttributeRouteCollectorTest {
         Container container = new Container();
         HiddenControllerAccessFixture.bind(container);
 
+        var handler = route.getHandler();
         RuntimeException thrown =
-                assertThrows(
-                        RuntimeException.class, () -> route.getHandler().apply(container, route));
+                assertThrows(RuntimeException.class, () -> handler.apply(container, route));
         assertInstanceOf(IllegalAccessException.class, thrown.getCause());
     }
 

@@ -16,6 +16,7 @@ import io.valkyrja.grpc.routing.data.contract.RouteContract;
 /** A handler class the collector's package cannot read. */
 final class InaccessibleHandlerFixture {
 
+    @SuppressWarnings("unused")
     public static ServiceResponseContract handle(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok();
     }

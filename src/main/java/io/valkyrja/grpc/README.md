@@ -99,12 +99,12 @@ public final class AppGreeterController {
 }
 ```
 
-| Annotation      | On       | States                                                              |
-| :-------------- | :------- | :------------------------------------------------------------------ |
-| `@Service`      | A class  | The full service name, such as `example.Greeter`                    |
-| `@Route`        | A method | Every field of the route, which the members below hold              |
-| `@RouteHandler` | A method | The class and the method that run the route                         |
-| `@Middleware`   | A method | One middleware class of the route                                   |
+| Annotation      | On       | States                                                 |
+| :-------------- | :------- | :----------------------------------------------------- |
+| `@Service`      | A class  | The full service name, such as `example.Greeter`       |
+| `@Route`        | A method | Every field of the route, which the members below hold |
+| `@RouteHandler` | A method | The class and the method that run the route            |
+| `@Middleware`   | A method | One middleware class of the route                      |
 
 `@Middleware` is repeatable.
 
@@ -384,15 +384,15 @@ entry class of the runtime, and the entry class holds the handler.
 contract extends it: `GrpcRoutingThrowable`, `GrpcMiddlewareThrowable`, and
 `GrpcServerThrowable`.
 
-| Exception                           | The component throws it when                                                                  |
-| :---------------------------------- | :-------------------------------------------------------------------------------------------- |
-| `CancelledException`                | `throwIfCancelled` runs on a cancelled token                                                  |
-| `GrpcNonStreamingSendException`     | `send` runs on a buffered call                                                                |
-| `GrpcConcurrentSendException`       | A second `send` starts while the first one runs                                               |
-| `GrpcInvalidStatusCodeException`    | A number matches no gRPC status code                                                          |
-| `MetadataInvalidKeyException`       | A metadata key breaks the naming rule                                                         |
-| `MetadataInvalidValueException`     | A metadata value does not match the type of its key                                           |
-| `GrpcRoutingInvalidMethodException` | The `Route(method, handler)` constructor reads a method that is not `/package.Service/Method` |
+| Exception                            | The component throws it when                                                                                                                                                                          |
+| :----------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CancelledException`                 | `throwIfCancelled` runs on a cancelled token                                                                                                                                                          |
+| `GrpcNonStreamingSendException`      | `send` runs on a buffered call                                                                                                                                                                        |
+| `GrpcConcurrentSendException`        | A second `send` starts while the first one runs                                                                                                                                                       |
+| `GrpcInvalidStatusCodeException`     | A number matches no gRPC status code                                                                                                                                                                  |
+| `MetadataInvalidKeyException`        | A metadata key breaks the naming rule                                                                                                                                                                 |
+| `MetadataInvalidValueException`      | A metadata value does not match the type of its key                                                                                                                                                   |
+| `GrpcRoutingInvalidMethodException`  | The `Route(method, handler)` constructor reads a method that is not `/package.Service/Method`                                                                                                         |
 | `GrpcRoutingInvalidHandlerException` | A route's handler does not exist, is not static, is not accessible, or does not take the handler's signature, whether a convenience attribute, the `handler` member, or the annotated method named it |
 
 A route provider that returns a prebuilt route with a malformed method therefore
