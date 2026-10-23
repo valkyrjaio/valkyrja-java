@@ -1,6 +1,12 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.11.2...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.0...26.x)
+
+## [v26.12.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.11.2...v26.12.0) - 2026-10-22
+
+* [Dependency] build: Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/253
+* [Grpc] feat!: Name the route attribute after the Route it builds, and declare every field of the route on it by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/252
+* [Dependency] build: Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/254
 
 ## [v26.11.2](https://github.com/valkyrjaio/valkyrja-java/compare/v26.11.1...v26.11.2) - 2026-10-20
 
