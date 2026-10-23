@@ -48,7 +48,7 @@ dependencies {
     compileOnly("org.jspecify:jspecify:1.0.1")
     compileOnly("io.grpc:grpc-api:1.85.1")
     errorprone("com.google.errorprone:error_prone_core:2.51.0")
-    errorprone("com.uber.nullaway:nullaway:0.14.2")
+    errorprone("com.uber.nullaway:nullaway:0.14.3")
 
     // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
     compileOnly("org.eclipse.jetty:jetty-server:12.1.14")
