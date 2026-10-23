@@ -14,7 +14,7 @@ import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
 import io.valkyrja.grpc.routing.attribute.route.Middleware;
-import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
+import io.valkyrja.grpc.routing.attribute.route.Handler;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
 /** Fixture controller covering each way a route names its handler, and the route's own members. */
@@ -25,7 +25,7 @@ public final class HandlerControllerFixture {
     @Route(
             name = "Element",
             handler =
-                    @RouteHandler(
+                    @Handler(
                             handlerClass = RouteHandlerFixture.class,
                             handlerMethod = "elementHandler"))
     public ServiceResponseContract element(ContainerContract container, RouteContract route) {
@@ -34,7 +34,7 @@ public final class HandlerControllerFixture {
 
     /** The convenience attribute names the handler. */
     @Route(name = "Annotation")
-    @RouteHandler(handlerClass = RouteHandlerFixture.class, handlerMethod = "annotationHandler")
+    @Handler(handlerClass = RouteHandlerFixture.class, handlerMethod = "annotationHandler")
     public ServiceResponseContract annotation(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("method");
     }
@@ -43,17 +43,17 @@ public final class HandlerControllerFixture {
     @Route(
             name = "Precedence",
             handler =
-                    @RouteHandler(
+                    @Handler(
                             handlerClass = RouteHandlerFixture.class,
                             handlerMethod = "absentHandler"))
-    @RouteHandler(handlerClass = RouteHandlerFixture.class, handlerMethod = "annotationHandler")
+    @Handler(handlerClass = RouteHandlerFixture.class, handlerMethod = "annotationHandler")
     public ServiceResponseContract precedence(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("method");
     }
 
     /** A convenience attribute naming the absent type names no handler. */
     @Route(name = "VoidHandler")
-    @RouteHandler(handlerClass = Void.class, handlerMethod = "")
+    @Handler(handlerClass = Void.class, handlerMethod = "")
     public ServiceResponseContract voidHandler(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("method");
     }

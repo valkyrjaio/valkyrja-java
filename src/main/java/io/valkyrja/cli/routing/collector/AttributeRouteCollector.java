@@ -18,7 +18,7 @@ import io.valkyrja.cli.routing.attribute.OptionParameter;
 import io.valkyrja.cli.routing.attribute.Route;
 import io.valkyrja.cli.routing.attribute.route.Middleware;
 import io.valkyrja.cli.routing.attribute.route.Name;
-import io.valkyrja.cli.routing.attribute.route.RouteHandler;
+import io.valkyrja.cli.routing.attribute.route.Handler;
 import io.valkyrja.cli.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.cli.routing.data.contract.ArgumentParameterContract;
 import io.valkyrja.cli.routing.data.contract.OptionParameterContract;
@@ -56,7 +56,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
 
     protected io.valkyrja.cli.routing.data.Route convertAnnotationToData(
             Route annotation, Class<?> clazz, Method method) {
-        RouteHandler handlerAnnotation = method.getAnnotation(RouteHandler.class);
+        Handler handlerAnnotation = method.getAnnotation(Handler.class);
         BiFunction<ContainerContract, RouteContract, OutputContract> handler;
 
         if (handlerAnnotation != null) {

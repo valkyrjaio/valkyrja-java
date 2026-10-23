@@ -73,7 +73,7 @@ The handler is a
 
 A service is a class, and each RPC is a method of that class.
 `io.valkyrja.grpc.routing.attribute` holds `@Service` and `@Route`.
-`io.valkyrja.grpc.routing.attribute.route` holds `@RouteHandler` and
+`io.valkyrja.grpc.routing.attribute.route` holds `@Handler` and
 `@Middleware`.
 
 ```java
@@ -103,7 +103,7 @@ public final class AppGreeterController {
 | :-------------- | :------- | :----------------------------------------------------- |
 | `@Service`      | A class  | The full service name, such as `example.Greeter`       |
 | `@Route`        | A method | Every field of the route, which the members below hold |
-| `@RouteHandler` | A method | The class and the method that run the route            |
+| `@Handler` | A method | The class and the method that run the route            |
 | `@Middleware`   | A method | One middleware class of the route                      |
 
 `@Middleware` is repeatable.
@@ -124,7 +124,7 @@ the annotation ahead of the member:
 
 ```java
 @Route(name = "SayHello")
-@RouteHandler(handlerClass = AppGrpcRouteProvider.class, handlerMethod = "sayHelloHandler")
+@Handler(handlerClass = AppGrpcRouteProvider.class, handlerMethod = "sayHelloHandler")
 public ServiceResponseContract sayHello(ContainerContract container, RouteContract route) {
     return ServiceResponse.ok(new byte[0]);
 }
@@ -132,7 +132,7 @@ public ServiceResponseContract sayHello(ContainerContract container, RouteContra
 @Route(
         name = "Greet",
         handler =
-                @RouteHandler(
+                @Handler(
                         handlerClass = AppGrpcRouteProvider.class,
                         handlerMethod = "greetHandler"))
 public ServiceResponseContract greet(ContainerContract container, RouteContract route) {

@@ -13,7 +13,7 @@ import io.valkyrja.cli.routing.attribute.OptionParameter;
 import io.valkyrja.cli.routing.attribute.Route;
 import io.valkyrja.cli.routing.attribute.route.Middleware;
 import io.valkyrja.cli.routing.attribute.route.Name;
-import io.valkyrja.cli.routing.attribute.route.RouteHandler;
+import io.valkyrja.cli.routing.attribute.route.Handler;
 import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddlewareFixture;
 
 /** Fully-annotated controller exercising every branch of the attribute route collector. */
@@ -25,13 +25,13 @@ public final class AnnotatedControllerFixture {
     @Middleware(name = PassThroughMiddlewareFixture.class)
     @ArgumentParameter(name = "target", description = "Target")
     @OptionParameter(name = "verbose", description = "Verbose", shortNames = "v")
-    @RouteHandler(handlerClass = RouteHandlerFixture.class, handlerMethod = "handle")
+    @Handler(handlerClass = RouteHandlerFixture.class, handlerMethod = "handle")
     public void withHandler() {}
 
     @Route(name = "plain", description = "Plain command")
     public void defaultHandler() {}
 
     @Route(name = "fail", description = "Failing handler")
-    @RouteHandler(handlerClass = RouteHandlerFixture.class, handlerMethod = "missingMethod")
+    @Handler(handlerClass = RouteHandlerFixture.class, handlerMethod = "missingMethod")
     public void failingHandler() {}
 }

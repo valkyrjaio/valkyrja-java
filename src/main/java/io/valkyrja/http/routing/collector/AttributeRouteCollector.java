@@ -26,7 +26,7 @@ import io.valkyrja.http.routing.attribute.route.Middlewares;
 import io.valkyrja.http.routing.attribute.route.Name;
 import io.valkyrja.http.routing.attribute.route.Path;
 import io.valkyrja.http.routing.attribute.route.RequestMethod;
-import io.valkyrja.http.routing.attribute.route.RouteHandler;
+import io.valkyrja.http.routing.attribute.route.Handler;
 import io.valkyrja.http.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.http.routing.data.contract.ParameterContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
@@ -172,9 +172,9 @@ public class AttributeRouteCollector implements RouteCollectorContract {
 
     protected BiFunction<ContainerContract, RouteContract, ResponseContract> buildHandler(
             Class<?> clazz, Method method) {
-        RouteHandler routeHandler = method.getAnnotation(RouteHandler.class);
+        Handler routeHandler = method.getAnnotation(Handler.class);
 
-        // A @RouteHandler names the handler explicitly — a static
+        // A @Handler names the handler explicitly — a static
         // (ContainerContract, RouteContract) method, typically on the route provider — which is how
         // a controller with constructor dependencies is reached: the handler resolves it from the
         // container. This mirrors the PHP collector, which takes the handler straight off the
@@ -202,13 +202,13 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     /**
-     * Build the handler named by a {@link RouteHandler} annotation.
+     * Build the handler named by a {@link Handler} annotation.
      *
      * @param routeHandler the annotation naming the handler class and method
      * @return a handler invoking that static method with the container and route
      */
     protected BiFunction<ContainerContract, RouteContract, ResponseContract> buildAnnotatedHandler(
-            RouteHandler routeHandler) {
+            Handler routeHandler) {
         Class<?> handlerClass = routeHandler.handlerClass();
         String handlerMethod = routeHandler.handlerMethod();
 

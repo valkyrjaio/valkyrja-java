@@ -68,7 +68,7 @@ input without a write.
 A command is a method of a controller class. `io.valkyrja.cli.routing.attribute`
 holds `@Route`, `@ArgumentParameter`, and `@OptionParameter`.
 `io.valkyrja.cli.routing.attribute.route` holds `@Name`, `@Middleware`, and
-`@RouteHandler`.
+`@Handler`.
 
 ```java
 @Name("app")
@@ -79,7 +79,7 @@ public final class AppListController {
     @Middleware(name = AppAuthMiddleware.class)
     @ArgumentParameter(name = "target", description = "The record type")
     @OptionParameter(name = "limit", description = "The record count", shortNames = "l")
-    @RouteHandler(handlerClass = AppListHandler.class, handlerMethod = "handle")
+    @Handler(handlerClass = AppListHandler.class, handlerMethod = "handle")
     public void list() {}
 }
 ```
@@ -88,7 +88,7 @@ public final class AppListController {
 | :------------------- | :-------------------- | :-------------------------------------------------- |
 | `@Route`             | A method              | The name and the description of the command         |
 | `@Name`              | A class, a method     | A prefix, and a suffix, for the name of the command |
-| `@RouteHandler`      | A method              | The class and the method that run the command       |
+| `@Handler`      | A method              | The class and the method that run the command       |
 | `@Middleware`        | A method              | One middleware class of the command                 |
 | `@ArgumentParameter` | A method, a parameter | One argument of the command                         |
 | `@OptionParameter`   | A method, a parameter | One option of the command                           |
@@ -101,9 +101,9 @@ annotations. It builds the name from the `@Name` of the class, the `name` of the
 `@Route`, and the `@Name` of the method, and it joins the three with a period.
 The example above names the command `app.list.list`.
 
-`@RouteHandler` names a class with a no-argument constructor, and a method that
+`@Handler` names a class with a no-argument constructor, and a method that
 takes a `ContainerContract` and a `RouteContract` and returns an
-`OutputContract`. A command with no `@RouteHandler` returns a new `Output` that
+`OutputContract`. A command with no `@Handler` returns a new `Output` that
 holds no message.
 
 Warning: the collector reads the `@Middleware` annotation for the middleware of
