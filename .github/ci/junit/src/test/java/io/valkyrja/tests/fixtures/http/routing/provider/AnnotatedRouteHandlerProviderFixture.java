@@ -13,7 +13,7 @@ import io.valkyrja.http.message.response.EmptyResponse;
 import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 
-/** Route-handler provider named by a {@code @RouteHandler} annotation. */
+/** Route-handler provider named by a {@code @Handler} annotation. */
 public final class AnnotatedRouteHandlerProviderFixture {
 
     private AnnotatedRouteHandlerProviderFixture() {}

@@ -130,7 +130,7 @@ An optional parameter takes the slash before it into the group, so
 A route is a method of a controller class. `io.valkyrja.http.routing.attribute`
 holds `@Route`, `@DynamicRoute`, and `@Parameter`.
 `io.valkyrja.http.routing.attribute.route` holds `@Path`, `@Name`,
-`@Middleware`, `@RouteHandler`, `@RequestMethod`, `@RequestStruct`, and
+`@Middleware`, `@Handler`, `@RequestMethod`, `@RequestStruct`, and
 `@ResponseStruct`.
 
 ```java
@@ -168,7 +168,7 @@ public final class AppUserController {
 | `@Path`           | A class, a method     | A prefix, and a suffix, for the path                                     |
 | `@Name`           | A class, a method     | A prefix, and a suffix, for the name                                     |
 | `@Middleware`     | A method              | One middleware class of the route                                        |
-| `@RouteHandler`   | A method              | The class and the method that run the route                              |
+| `@Handler`        | A method              | The class and the method that run the route                              |
 | `@RequestMethod`  | A method              | The request methods of the route                                         |
 | `@RequestStruct`  | A method              | The request struct of the route                                          |
 | `@ResponseStruct` | A method              | The response struct of the route                                         |
