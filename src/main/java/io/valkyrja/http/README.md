@@ -168,7 +168,7 @@ public final class AppUserController {
 | `@Path`           | A class, a method     | A prefix, and a suffix, for the path                                     |
 | `@Name`           | A class, a method     | A prefix, and a suffix, for the name                                     |
 | `@Middleware`     | A method              | One middleware class of the route                                        |
-| `@Handler`   | A method              | The class and the method that run the route                              |
+| `@Handler`        | A method              | The class and the method that run the route                              |
 | `@RequestMethod`  | A method              | The request methods of the route                                         |
 | `@RequestStruct`  | A method              | The request struct of the route                                          |
 | `@ResponseStruct` | A method              | The response struct of the route                                         |

@@ -99,12 +99,12 @@ public final class AppGreeterController {
 }
 ```
 
-| Annotation      | On       | States                                                 |
-| :-------------- | :------- | :----------------------------------------------------- |
-| `@Service`      | A class  | The full service name, such as `example.Greeter`       |
-| `@Route`        | A method | Every field of the route, which the members below hold |
-| `@Handler` | A method | The class and the method that run the route            |
-| `@Middleware`   | A method | One middleware class of the route                      |
+| Annotation    | On       | States                                                 |
+| :------------ | :------- | :----------------------------------------------------- |
+| `@Service`    | A class  | The full service name, such as `example.Greeter`       |
+| `@Route`      | A method | Every field of the route, which the members below hold |
+| `@Handler`    | A method | The class and the method that run the route            |
+| `@Middleware` | A method | One middleware class of the route                      |
 
 `@Middleware` is repeatable.
 

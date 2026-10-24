@@ -88,7 +88,7 @@ public final class AppListController {
 | :------------------- | :-------------------- | :-------------------------------------------------- |
 | `@Route`             | A method              | The name and the description of the command         |
 | `@Name`              | A class, a method     | A prefix, and a suffix, for the name of the command |
-| `@Handler`      | A method              | The class and the method that run the command       |
+| `@Handler`           | A method              | The class and the method that run the command       |
 | `@Middleware`        | A method              | One middleware class of the command                 |
 | `@ArgumentParameter` | A method, a parameter | One argument of the command                         |
 | `@OptionParameter`   | A method, a parameter | One option of the command                           |
