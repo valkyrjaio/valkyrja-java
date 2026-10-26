@@ -39,8 +39,8 @@ dependencies {
     // `jacoco { toolVersion }`) so it is a real dependency notation. useLatestVersions only
     // rewrites dependency notations, so an implicit or toolVersion-pinned tool is reported as
     // outdated every run but never updated — it drifts forever.
-    jacocoAgent("org.jacoco:org.jacoco.agent:0.8.15")
-    jacocoAnt("org.jacoco:org.jacoco.ant:0.8.15")
+    jacocoAgent("org.jacoco:org.jacoco.agent:0.8.16")
+    jacocoAnt("org.jacoco:org.jacoco.ant:0.8.16")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
     compileOnly("org.jspecify:jspecify:1.0.1")
