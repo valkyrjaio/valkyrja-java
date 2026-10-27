@@ -1,6 +1,11 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.2...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.3...26.x)
+
+## [v26.12.3](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.2...v26.12.3) - 2026-10-27
+
+* [Dependency] build: Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/260
+* [Dependency] build: Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/261
 
 ## [v26.12.2](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.1...v26.12.2) - 2026-10-24
 
