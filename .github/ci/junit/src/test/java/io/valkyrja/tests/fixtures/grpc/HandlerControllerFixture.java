@@ -13,8 +13,8 @@ import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
-import io.valkyrja.grpc.routing.attribute.route.Middleware;
 import io.valkyrja.grpc.routing.attribute.route.Handler;
+import io.valkyrja.grpc.routing.attribute.route.Middleware;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
 /** Fixture controller covering each way a route names its handler, and the route's own members. */

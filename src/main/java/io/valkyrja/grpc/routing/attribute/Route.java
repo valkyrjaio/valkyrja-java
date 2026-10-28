@@ -28,8 +28,8 @@ public @interface Route {
 
     /**
      * The handler, as the class and the method name. {@code Void.class} means the route names no
-     * handler here, so the method-level {@link Handler} or the annotated method itself
-     * supplies one.
+     * handler here, so the method-level {@link Handler} or the annotated method itself supplies
+     * one.
      */
     Handler handler() default @Handler(handlerClass = Void.class, handlerMethod = "");
 

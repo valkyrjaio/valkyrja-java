@@ -11,9 +11,9 @@ package io.valkyrja.tests.fixtures.cli.routing;
 import io.valkyrja.cli.routing.attribute.ArgumentParameter;
 import io.valkyrja.cli.routing.attribute.OptionParameter;
 import io.valkyrja.cli.routing.attribute.Route;
+import io.valkyrja.cli.routing.attribute.route.Handler;
 import io.valkyrja.cli.routing.attribute.route.Middleware;
 import io.valkyrja.cli.routing.attribute.route.Name;
-import io.valkyrja.cli.routing.attribute.route.Handler;
 import io.valkyrja.tests.fixtures.cli.middleware.PassThroughMiddlewareFixture;
 
 /** Fully-annotated controller exercising every branch of the attribute route collector. */
