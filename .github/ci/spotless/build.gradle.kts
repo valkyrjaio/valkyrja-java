@@ -14,13 +14,13 @@ buildscript {
     }
 
     dependencies {
-        classpath("io.valkyrja:ci-spotless:26.1.39")
+        classpath("io.valkyrja:ci-spotless:26.1.40")
     }
 }
 
 plugins {
     id("com.diffplug.spotless") version "8.10.4"
-    id("com.github.ben-manes.versions") version "0.66.0"
+    id("com.github.ben-manes.versions") version "0.67.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.19"
 }
 
