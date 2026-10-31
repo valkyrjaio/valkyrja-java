@@ -100,7 +100,7 @@ final class AttributeRouteCollectorTest {
     @Test
     void handlerNamedByAnnotationIsInvokedInsteadOfTheControllerMethod() {
         // The controller method takes no arguments, so it could not be invoked as a handler at all;
-        // the @RouteHandler names the real handler, mirroring the generated routing data.
+        // the @Handler names the real handler, mirroring the generated routing data.
         var route = routes.get("api.handled");
         var container = containerWithController();
 
