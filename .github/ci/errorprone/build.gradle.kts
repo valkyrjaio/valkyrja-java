@@ -47,13 +47,13 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
     compileOnly("org.jspecify:jspecify:1.0.1")
     compileOnly("io.grpc:grpc-api:1.85.1")
-    errorprone("com.google.errorprone:error_prone_core:2.51.0")
+    errorprone("com.google.errorprone:error_prone_core:2.52.0")
     errorprone("com.uber.nullaway:nullaway:0.14.3")
 
     // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
     compileOnly("org.eclipse.jetty:jetty-server:12.1.14")
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.14")
-    compileOnly("io.netty:netty-codec-http:4.2.19.Final")
+    compileOnly("io.netty:netty-codec-http:4.2.20.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.27")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.85.1")
     compileOnly("io.grpc:grpc-netty-shaded:1.85.1")
@@ -68,7 +68,7 @@ dependencies {
     testImplementation("io.grpc:grpc-servlet-jakarta:1.85.1")
     testImplementation("org.eclipse.jetty:jetty-server:12.1.14")
     testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.14")
-    testImplementation("io.netty:netty-codec-http:4.2.19.Final")
+    testImplementation("io.netty:netty-codec-http:4.2.20.Final")
     testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.27")
 }
 

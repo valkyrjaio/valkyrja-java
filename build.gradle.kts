@@ -46,7 +46,7 @@ dependencies {
     // runtime classpath — a consumer that picks a runtime adds that runtime's dependency itself.
     compileOnly("org.eclipse.jetty:jetty-server:12.1.14")
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.14")
-    compileOnly("io.netty:netty-codec-http:4.2.19.Final")
+    compileOnly("io.netty:netty-codec-http:4.2.20.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.27")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.85.1")
     compileOnly("io.grpc:grpc-netty-shaded:1.85.1")
