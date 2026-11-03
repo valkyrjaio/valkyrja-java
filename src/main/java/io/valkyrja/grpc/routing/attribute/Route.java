@@ -13,7 +13,7 @@ import io.valkyrja.grpc.middleware.contract.RouteDispatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.RouteMatchedMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
-import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
+import io.valkyrja.grpc.routing.attribute.route.Handler;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,10 +28,10 @@ public @interface Route {
 
     /**
      * The handler, as the class and the method name. {@code Void.class} means the route names no
-     * handler here, so the method-level {@link RouteHandler} or the annotated method itself
-     * supplies one.
+     * handler here, so the method-level {@link Handler} or the annotated method itself supplies
+     * one.
      */
-    RouteHandler handler() default @RouteHandler(handlerClass = Void.class, handlerMethod = "");
+    Handler handler() default @Handler(handlerClass = Void.class, handlerMethod = "");
 
     /** The generated protobuf request message type. {@code Void.class} means unspecified. */
     Class<?> requestType() default Void.class;

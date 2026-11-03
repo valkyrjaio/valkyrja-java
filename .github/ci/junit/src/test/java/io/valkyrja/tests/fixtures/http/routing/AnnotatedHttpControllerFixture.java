@@ -15,10 +15,10 @@ import io.valkyrja.http.message.response.contract.ResponseContract;
 import io.valkyrja.http.routing.attribute.DynamicRoute;
 import io.valkyrja.http.routing.attribute.Parameter;
 import io.valkyrja.http.routing.attribute.Route;
+import io.valkyrja.http.routing.attribute.route.Handler;
 import io.valkyrja.http.routing.attribute.route.Middleware;
 import io.valkyrja.http.routing.attribute.route.Name;
 import io.valkyrja.http.routing.attribute.route.Path;
-import io.valkyrja.http.routing.attribute.route.RouteHandler;
 import io.valkyrja.http.routing.data.contract.RouteContract;
 import io.valkyrja.tests.fixtures.http.middleware.PassThroughHttpMiddlewareFixture;
 import io.valkyrja.tests.fixtures.http.routing.provider.AnnotatedRouteHandlerProviderFixture;
@@ -110,17 +110,15 @@ public final class AnnotatedHttpControllerFixture {
     }
 
     @Route(path = "/handled", name = "handled")
-    @RouteHandler(
-            handlerClass = AnnotatedRouteHandlerProviderFixture.class,
-            handlerMethod = "handle")
+    @Handler(handlerClass = AnnotatedRouteHandlerProviderFixture.class, handlerMethod = "handle")
     public ResponseContract handlerAnnotated() {
-        // Deliberately parameterless: the @RouteHandler names the handler, so the collector must
+        // Deliberately parameterless: the @Handler names the handler, so the collector must
         // never try to invoke this method — a controller method may take no arguments at all.
         return new EmptyResponse();
     }
 
     @Route(path = "/handled-missing", name = "handled.missing")
-    @RouteHandler(
+    @Handler(
             handlerClass = AnnotatedRouteHandlerProviderFixture.class,
             handlerMethod = "doesNotExist")
     public ResponseContract handlerAnnotatedMissing() {
