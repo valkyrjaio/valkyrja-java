@@ -44,7 +44,7 @@ sourceSets {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.23.0")
     compileOnly("org.jspecify:jspecify:1.0.1")
     compileOnly("io.grpc:grpc-api:1.85.1")
     errorprone("com.google.errorprone:error_prone_core:2.52.0")
