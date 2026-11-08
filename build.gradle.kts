@@ -39,7 +39,7 @@ repositories {
 dependencies {
     compileOnly("org.jspecify:jspecify:1.0.1")
     compileOnly("io.grpc:grpc-api:1.85.1")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.23.0")
 
     // Runtime-entry SDKs for the optional worker adapters in application.entry.{jetty,netty,tomcat}.
     // compileOnly (non-transitive) so core still builds and is consumable with none of them on the

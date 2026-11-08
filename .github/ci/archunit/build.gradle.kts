@@ -44,7 +44,7 @@ sourceSets {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.23.0")
     compileOnly("org.jspecify:jspecify:1.0.1")
     compileOnly("io.grpc:grpc-api:1.85.1")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.5.1")
@@ -60,7 +60,7 @@ dependencies {
     compileOnly("io.grpc:grpc-netty-shaded:1.85.1")
 
     // Mirrors the JUnit build's test classpath — needed only so the tests compile here.
-    "testTreeImplementation"("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    "testTreeImplementation"("com.fasterxml.jackson.core:jackson-databind:2.23.0")
     "testTreeImplementation"("org.junit.jupiter:junit-jupiter:6.1.3")
     "testTreeImplementation"("org.mockito:mockito-core:5.24.0")
     "testTreeImplementation"("org.mockito:mockito-junit-jupiter:5.24.0")
