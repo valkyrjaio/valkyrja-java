@@ -51,8 +51,8 @@ dependencies {
     errorprone("com.uber.nullaway:nullaway:0.14.3")
 
     // Compile the optional worker adapters in application.entry.{jetty,netty,tomcat}.
-    compileOnly("org.eclipse.jetty:jetty-server:12.1.14")
-    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.14")
+    compileOnly("org.eclipse.jetty:jetty-server:12.1.15")
+    compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.15")
     compileOnly("io.netty:netty-codec-http:4.2.20.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.27")
     compileOnly("io.grpc:grpc-servlet-jakarta:1.85.1")
@@ -66,8 +66,8 @@ dependencies {
     testImplementation("io.grpc:grpc-api:1.85.1")
     testImplementation("io.grpc:grpc-netty-shaded:1.85.1")
     testImplementation("io.grpc:grpc-servlet-jakarta:1.85.1")
-    testImplementation("org.eclipse.jetty:jetty-server:12.1.14")
-    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.14")
+    testImplementation("org.eclipse.jetty:jetty-server:12.1.15")
+    testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.15")
     testImplementation("io.netty:netty-codec-http:4.2.20.Final")
     testImplementation("org.apache.tomcat.embed:tomcat-embed-core:11.0.27")
 }
