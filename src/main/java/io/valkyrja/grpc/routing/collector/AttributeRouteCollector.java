@@ -17,8 +17,8 @@ import io.valkyrja.grpc.middleware.contract.SendingResponseMiddlewareContract;
 import io.valkyrja.grpc.middleware.contract.ThrowableCaughtMiddlewareContract;
 import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
+import io.valkyrja.grpc.routing.attribute.route.Handler;
 import io.valkyrja.grpc.routing.attribute.route.Middleware;
-import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
 import io.valkyrja.grpc.routing.collector.contract.RouteCollectorContract;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 import io.valkyrja.grpc.routing.throwable.exception.GrpcRoutingInvalidHandlerException;
@@ -106,7 +106,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
      */
     protected BiFunction<ContainerContract, RouteContract, ServiceResponseContract> buildHandler(
             Route routeAttribute, Class<?> clazz, Method method) {
-        RouteHandler annotation = method.getAnnotation(RouteHandler.class);
+        Handler annotation = method.getAnnotation(Handler.class);
 
         // A single-valued field takes the convenience attribute's value, so the attribute wins
         // over the element. Either spelling names no handler when it names the absent type.
@@ -114,7 +114,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
             return namedHandler(annotation.handlerClass(), annotation.handlerMethod());
         }
 
-        RouteHandler element = routeAttribute.handler();
+        Handler element = routeAttribute.handler();
 
         if (element.handlerClass() != Void.class) {
             return namedHandler(element.handlerClass(), element.handlerMethod());
@@ -124,7 +124,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     /**
-     * Get the handler a {@link RouteHandler} names.
+     * Get the handler a {@link Handler} names.
      *
      * @param handlerClass the class declaring the handler
      * @param handlerMethod the handler's method name
@@ -140,7 +140,7 @@ public class AttributeRouteCollector implements RouteCollectorContract {
     }
 
     /**
-     * Get the method a {@link RouteHandler} names.
+     * Get the method a {@link Handler} names.
      *
      * @param handlerClass the class declaring the handler
      * @param handlerMethod the handler's method name
