@@ -1,6 +1,10 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.13.0...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.13.1...26.x)
+
+## [v26.13.1](https://github.com/valkyrjaio/valkyrja-java/compare/v26.13.0...v26.13.1) - 2026-11-17
+
+* [Workflow] ci: Update .github workflow refs to v26.26.6 by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/275
 
 ## [v26.13.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.9...v26.13.0) - 2026-11-16
 
