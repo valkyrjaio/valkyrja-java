@@ -80,7 +80,7 @@ final class AttributeRouteCollectorTest {
     }
 
     @Test
-    void defaultHandlerProducesOutputWhenNoRouteHandlerAnnotation() {
+    void defaultHandlerProducesOutputWhenNoHandlerAnnotation() {
         var route = routes.get("ctrl.plain");
         var container = mock(ContainerContract.class);
 

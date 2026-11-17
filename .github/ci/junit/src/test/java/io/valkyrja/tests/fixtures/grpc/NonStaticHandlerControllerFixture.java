@@ -13,7 +13,7 @@ import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
-import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
+import io.valkyrja.grpc.routing.attribute.route.Handler;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
 /** A route naming a handler that is not static. */
@@ -21,7 +21,7 @@ import io.valkyrja.grpc.routing.data.contract.RouteContract;
 public final class NonStaticHandlerControllerFixture {
 
     @Route(name = "NonStatic")
-    @RouteHandler(handlerClass = RouteHandlerFixture.class, handlerMethod = "instanceHandler")
+    @Handler(handlerClass = RouteHandlerFixture.class, handlerMethod = "instanceHandler")
     public ServiceResponseContract nonStatic(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("method");
     }

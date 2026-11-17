@@ -13,7 +13,7 @@ import io.valkyrja.cli.interaction.output.contract.OutputContract;
 import io.valkyrja.cli.routing.data.contract.RouteContract;
 import io.valkyrja.container.manager.contract.ContainerContract;
 
-/** A route handler resolved reflectively by {@code @RouteHandler} in attribute routing tests. */
+/** A route handler resolved reflectively by {@code @Handler} in attribute routing tests. */
 public final class RouteHandlerFixture {
 
     public OutputContract handle(ContainerContract container, RouteContract route) {

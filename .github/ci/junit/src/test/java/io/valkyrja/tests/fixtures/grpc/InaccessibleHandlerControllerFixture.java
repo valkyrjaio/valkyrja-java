@@ -13,7 +13,7 @@ import io.valkyrja.grpc.message.response.ServiceResponse;
 import io.valkyrja.grpc.message.response.contract.ServiceResponseContract;
 import io.valkyrja.grpc.routing.attribute.Route;
 import io.valkyrja.grpc.routing.attribute.Service;
-import io.valkyrja.grpc.routing.attribute.route.RouteHandler;
+import io.valkyrja.grpc.routing.attribute.route.Handler;
 import io.valkyrja.grpc.routing.data.contract.RouteContract;
 
 /** A route naming a handler on a class the collector's package cannot read. */
@@ -21,7 +21,7 @@ import io.valkyrja.grpc.routing.data.contract.RouteContract;
 public final class InaccessibleHandlerControllerFixture {
 
     @Route(name = "Inaccessible")
-    @RouteHandler(handlerClass = InaccessibleHandlerFixture.class, handlerMethod = "handle")
+    @Handler(handlerClass = InaccessibleHandlerFixture.class, handlerMethod = "handle")
     public ServiceResponseContract inaccessible(ContainerContract container, RouteContract route) {
         return ServiceResponse.ok("method");
     }
