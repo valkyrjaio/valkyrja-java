@@ -1,6 +1,12 @@
 # Release Notes for 26.x
 
-## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.9...26.x)
+## [Unreleased](https://github.com/valkyrjaio/valkyrja-java/compare/v26.13.0...26.x)
+
+## [v26.13.0](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.9...v26.13.0) - 2026-11-16
+
+* [Dependency] build: Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/273
+* [Attribute] feat!: Name the handler annotation Handler by [@MelechMizrachi](https://github.com/MelechMizrachi) in https://github.com/valkyrjaio/valkyrja-java/pull/257
+* [Dependency] build: Update Gradle dependencies by [@valkyrja-volundr](https://github.com/valkyrja-volundr)[bot] in https://github.com/valkyrjaio/valkyrja-java/pull/274
 
 ## [v26.12.9](https://github.com/valkyrjaio/valkyrja-java/compare/v26.12.8...v26.12.9) - 2026-11-13
 
