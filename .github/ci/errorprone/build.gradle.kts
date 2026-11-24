@@ -46,7 +46,7 @@ sourceSets {
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.23.0")
     compileOnly("org.jspecify:jspecify:1.0.1")
-    compileOnly("io.grpc:grpc-api:1.85.1")
+    compileOnly("io.grpc:grpc-api:1.86.0")
     errorprone("com.google.errorprone:error_prone_core:2.53.0")
     errorprone("com.uber.nullaway:nullaway:0.14.4")
 
@@ -55,17 +55,17 @@ dependencies {
     compileOnly("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.15")
     compileOnly("io.netty:netty-codec-http:4.2.21.Final")
     compileOnly("org.apache.tomcat.embed:tomcat-embed-core:11.0.29")
-    compileOnly("io.grpc:grpc-servlet-jakarta:1.85.1")
-    compileOnly("io.grpc:grpc-netty-shaded:1.85.1")
+    compileOnly("io.grpc:grpc-servlet-jakarta:1.86.0")
+    compileOnly("io.grpc:grpc-netty-shaded:1.86.0")
 
     // Mirrors the JUnit build's test classpath — needed only so the tests compile here.
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testImplementation("org.mockito:mockito-core:5.24.0")
     testImplementation("org.mockito:mockito-junit-jupiter:5.24.0")
     testImplementation("org.jspecify:jspecify:1.0.1")
-    testImplementation("io.grpc:grpc-api:1.85.1")
-    testImplementation("io.grpc:grpc-netty-shaded:1.85.1")
-    testImplementation("io.grpc:grpc-servlet-jakarta:1.85.1")
+    testImplementation("io.grpc:grpc-api:1.86.0")
+    testImplementation("io.grpc:grpc-netty-shaded:1.86.0")
+    testImplementation("io.grpc:grpc-servlet-jakarta:1.86.0")
     testImplementation("org.eclipse.jetty:jetty-server:12.1.15")
     testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.1.15")
     testImplementation("io.netty:netty-codec-http:4.2.21.Final")
